@@ -15,11 +15,9 @@
 !! along with BSA Library.  If not, see <https://www.gnu.org/licenses/>.
 module BsaLib_MZone
 
-#include "../../../precisions"
-
-   use BsaLib_MPolicy
-   use BsaLib_IO, only: unit_dump_bfm_, unit_debug_, undebug_fname_
    use BsaLib_CONSTANTS
+   use BsaLib_MPolicy
+   use BsaLib_IO,   only: unit_dump_bfm_, unit_debug_, undebug_fname_
    use BsaLib_Data, only: bsa_Abort, test_no_bfm_mlr_
    implicit none
    private
@@ -35,13 +33,13 @@ module BsaLib_MZone
 
 
    !> Tracks zone with max N. of points
-   integer(kind = 4), public :: msh_max_zone_NPts = 0
+   integer(int32), public :: msh_max_zone_NPts = 0
 
    type, public :: MZoneEnum_t
-      integer(kind = 4) :: NULL      = 0
-      integer(kind = 4) :: RECTANGLE = 1
-      integer(kind = 4) :: TRIANGLE  = 2
-      integer(kind = 4) :: LINE      = 3
+      integer(int32) :: NULL      = 0
+      integer(int32) :: RECTANGLE = 1
+      integer(int32) :: TRIANGLE  = 2
+      integer(int32) :: LINE      = 3
    end type MZoneEnum_t
    type(MZoneEnum_t), public, parameter :: MZone_ID = MZoneEnum_t()
    ! integer, public, parameter :: MZone_RECTANGLE = 1
@@ -55,7 +53,7 @@ module BsaLib_MZone
       type(MPolicy_t)     :: policy_
 
       !> Pointer to index of zone's interest modes
-      integer(kind = 4), public :: id_im_
+      integer(bsa_int_t), public :: id_im_
    
    contains
       procedure, pass :: zoneName
@@ -94,9 +92,9 @@ module BsaLib_MZone
 
 #ifdef __BSA_OMP
       subroutine intf_MZoneInterpOMP_(this, bfm, pdata)
-         import MZone_t, RDP
+         import MZone_t, bsa_real_t
          class(MZone_t), intent(inout) :: this
-         real(RDP), intent(in)         :: bfm(:, :)
+         real(bsa_real_t), intent(in)  :: bfm(:, :)
          class(*), pointer, intent(in) :: pdata
       end subroutine
 #endif
@@ -126,8 +124,8 @@ contains
 
 
    subroutine setInterestModeIndexPtr(this, id)
-      class(MZone_t), intent(inout) :: this
-      integer(kind = 4), intent(in) :: id
+      class(MZone_t), intent(inout)  :: this
+      integer(bsa_int_t), intent(in) :: id
 
       this%id_im_ = id
    end subroutine
@@ -162,8 +160,8 @@ contains
 
    
    subroutine DumpZone(z, data)
-      class(MZone_t), intent(in) :: z
-      real(RDP), intent(in)      :: data(:, :)
+      class(MZone_t), intent(in)   :: z
+      real(bsa_real_t), intent(in) :: data(:, :)
       ! integer             :: tot
 
       ! dump specific zone data
@@ -197,17 +195,21 @@ contains
 
 
 
+   subroutine UndumpZone(z &
 #ifdef __BSA_OMP
-   subroutine UndumpZone(z, bfm_undump)
-      use BsaLib_Data, only: dimM_bisp_
-      real(RDP), allocatable, intent(inout) :: bfm_undump(:, :)
+      & , bfm_undump &
+#endif
+      & )
+      use BsaLib_Data, &
+#ifdef __BSA_OMP
+         & only: dimM_bisp_
+      real(bsa_real_t), allocatable, intent(inout) :: bfm_undump(:, :)
 #else
-   subroutine UndumpZone(z)
-      use BsaLib_Data, only: bfm_undump
+         & only: bfm_undump
 #endif
       class(MZone_t), intent(inout) :: z
       character(len = 64) :: name_hdr
-      integer             :: zNp
+      integer(int32)      :: zNp
 
       call z%undump()  ! read zone's specific data first
 

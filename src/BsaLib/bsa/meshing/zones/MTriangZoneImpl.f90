@@ -15,8 +15,6 @@
 !! along with BSA Library.  If not, see <https://www.gnu.org/licenses/>.
 submodule(BsaLib_MTriangZone) BsaLib_MTriangZoneImpl
 
-#include "../../../precisions"
-
 ! #ifndef BSA_M3MF_ONLY_PREMESH_
 ! # define BSA_M3MF_ONLY_PREMESH_ 0
 ! #else
@@ -49,7 +47,7 @@ contains
    !> Gets rect base along I-dir
    module elemental function baseI_triang(this) result(res)
       class(MTriangZone_t), intent(in) :: this
-      real(RDP) :: res
+      real(bsa_real_t) :: res
 
       res = getPointsDistance(this%Cpt_, this%Bpt_)
    end function
@@ -58,7 +56,7 @@ contains
    !> Gets rect base along J-dir
    module elemental function baseJ_triang(this) result(res)
       class(MTriangZone_t), intent(in) :: this
-      real(RDP) :: res
+      real(bsa_real_t) :: res
 
       res = getPointsDistance(this%Cpt_, this%Apt_)
    end function
@@ -70,7 +68,7 @@ contains
       class(MTriangZone_t), intent(inout) :: this
 
       ! NOTE: do nothing
-      !       DON JUST BECAUSE WE NEED TO IMPLEMENT THIS
+      !       DONE JUST BECAUSE WE NEED TO IMPLEMENT THIS
       !       METHOD SINCE IT IS AN ABSTRACT COMING FROM 
       !       PARENT CLASS.
    end subroutine
@@ -102,13 +100,13 @@ contains
    module subroutine setPABangle(this)
       class(MTriangZone_t), intent(inout) :: this
 
-      real(RDP) :: CA, AB, CB, cang
+      real(bsa_real_t) :: CA, AB, CB, cang
 
       CA = getPointsDistance(this%Cpt_, this%Apt_)
       AB = getPointsDistance(this%Apt_, this%Bpt_)
       CB = getPointsDistance(this%Cpt_, this%Bpt_)
 
-      cang = (CA*CA + AB*AB - CB*CB) / (2 * CA * AB)
+      cang = (CA*CA + AB*AB - CB*CB) / (2._bsa_real_t * CA * AB)
       this%PABang_ = acos(cang)
    end subroutine
 
@@ -119,9 +117,9 @@ contains
    !> along I and J directions
    module subroutine adaptToDeltas(this, dfi, dfj)
       class(MTriangZone_t), intent(inout) :: this
-      real(RDP), value :: dfi, dfj
+      real(bsa_real_t), value :: dfi, dfj
 
-      real(RDP) :: CA, CB
+      real(bsa_real_t) :: CA, CB
       integer   :: ni, nj
 
       CA = this%baseJ()
@@ -156,7 +154,7 @@ contains
    module subroutine deduceRotation(this)
       class(MTriangZone_t), intent(inout) :: this
 
-      real(RDP) :: dx, dy, ang
+      real(bsa_real_t) :: dx, dy, ang
 
       ! BUG: not always 0 when supposed to.
       !      machine precision + finite floating point repr instabilities
@@ -167,11 +165,11 @@ contains
 
       ang = atan(abs(dx) / abs(dy))
 
-      if (.not. (dx >= 0._RDP .and. dy >= 0._RDP)) then ! NOT 1st quadrant
+      if (.not. (dx >= 0._bsa_real_t .and. dy >= 0._bsa_real_t)) then ! NOT 1st quadrant
 
-         if (dy < 0._RDP) then
+         if (dy < 0._bsa_real_t) then
 
-            if (dx >= 0._RDP) then ! 2nd quadrant
+            if (dx >= 0._bsa_real_t) then ! 2nd quadrant
 
                ang = CST_PIGREC - ang
             else ! 3rd quadrant
@@ -183,12 +181,12 @@ contains
 
             ! BUG: precision instability.
             !      Tru to mitigate it, vary bad!!
-            if (ang > 1e-14_RDP) then ! fixed tolerance acceptance
+            if (ang > 1e-14_bsa_real_t) then ! fixed tolerance acceptance
 
                ang = CST_PIt2 - ang
             else ! assume it 0
 
-               ang = 0._RDP
+               ang = 0._bsa_real_t
             endif
          endif
       endif
@@ -207,13 +205,12 @@ contains
    !>   - df_cst : total delta along CB side (I-dir in LRS)
    module subroutine getRotatedUnaryDF(this, df_I_var, df_J_var, df_I_cst, df_J_cst)
       class(MTriangZone_t), intent(inout) :: this
-      real(RDP), intent(out) :: df_I_var, df_J_var
+      real(bsa_real_t), intent(out) :: df_I_var, df_J_var
       ! logical, intent(in), optional    :: invert
-      real(RDP), intent(out), optional :: df_I_cst, df_J_cst
+      real(bsa_real_t), intent(out), optional :: df_I_cst, df_J_cst
 
       logical :: do_invert = .false.
-
-      real(RDP) :: ang
+      real(bsa_real_t) :: ang
 
       
       if (present(df_I_cst) .and. present(df_J_cst)) do_invert = .true.
@@ -227,7 +224,7 @@ contains
       elseif (this%rot_ <= CST_PIGREC) then ! 2nd quadrant
 
          ang = this%rot_ - CST_PId2
-         df_I_var = cos(ang)
+         df_I_var =   cos(ang)
          df_J_var = - sin(ang)
 
       elseif (this%rot_ <= CST_PIt3d2) then ! 3rd quadrant
@@ -240,23 +237,23 @@ contains
 
          ang = this%rot_ - CST_PIt3d2
          df_I_var = - cos(ang)
-         df_J_var = sin(ang)
+         df_J_var =   sin(ang)
 
       endif
 
       ! BUG: needed to avoid machine rounding precision
-      if (abs(df_I_var) < MACHINE_PRECISION) df_I_var = 0._RDP
-      if (abs(df_J_var) < MACHINE_PRECISION) df_J_var = 0._RDP
+      if (abs(df_I_var) < MACHINE_PRECISION) df_I_var = 0._bsa_real_t
+      if (abs(df_J_var) < MACHINE_PRECISION) df_J_var = 0._bsa_real_t
 
 
       if (do_invert) then ! BUG: ?????????
 
-         df_I_cst = df_J_var
+         df_I_cst =   df_J_var
          df_J_cst = - df_I_var
 
          ! BUG: needed to avoid machine rounding precision
-         if (abs(df_I_cst) < MACHINE_PRECISION) df_I_cst = 0._RDP
-         if (abs(df_J_cst) < MACHINE_PRECISION) df_J_cst = 0._RDP
+         if (abs(df_I_cst) < MACHINE_PRECISION) df_I_cst = 0._bsa_real_t
+         if (abs(df_J_cst) < MACHINE_PRECISION) df_J_cst = 0._bsa_real_t
       endif
 
    end subroutine getRotatedUnaryDF
@@ -282,7 +279,7 @@ contains
 
 
       block
-         integer   :: ni, nj
+         integer(int32) :: ni, nj
          character(len = *), parameter :: msg_segm = &
             ERRMSG//'Triangle collapsed into a segment. Aborting.'
 
@@ -369,10 +366,10 @@ contains
       class(MPoint_t), intent(in)    :: Cp, P1, P2
       logical, intent(in)            :: is_refinement
       character(len = *), intent(in), optional :: val_types
-      real(RDP), intent(in), optional          :: val1, val2
+      real(bsa_real_t), intent(in), optional   :: val1, val2
 
-      integer   :: ni, nj
-      real(RDP) :: dfi, dfj
+      integer(int32)   :: ni, nj
+      real(bsa_real_t) :: dfi, dfj
 
 
       if (is_refinement) then
@@ -490,7 +487,7 @@ contains
    module subroutine compute(this)
       class(MTriangZone_t), intent(inout) :: this
 
-      real(RDP) :: df_CA, df_CB
+      real(bsa_real_t) :: df_CA, df_CB
 
 
       ! get (full) deltas in straight directions
@@ -523,18 +520,18 @@ contains
          call bsa_Abort('Different sides'' refinements not yet allowed. Aborting.')
 
       block
-         integer   :: Np, Np_m1, Nj_m1
-         real(RDP) :: df_CA, df_CST, dfMAJi, dfMAJj, dfMINi, dfMINj
+         integer(int32)   :: Np, Np_m1, Nj_m1
+         real(bsa_real_t) :: df_CA, df_CST, dfMAJi, dfMAJj, dfMINi, dfMINj
 
-         integer   :: id, i, j
-         real(RDP) :: base_fi, base_fj, fi, fj
+         integer(int32)   :: id, i, j
+         real(bsa_real_t) :: base_fi, base_fj, fi, fj
 
-         integer :: tot
-         real(RDP), allocatable :: bfm(:, :)
+         integer(int32) :: tot
+         real(bsa_real_t), allocatable :: bfm(:, :)
 
 #ifdef BSA_M3MF_ONLY_PREMESH_
-         real(RDP) :: dw, ctr_infl, brd_infl, vtx_infl_rect, vtx_infl_triang
-         real(RDP), allocatable :: intg(:)
+         real(bsa_real_t) :: dw, ctr_infl, brd_infl, vtx_infl_rect, vtx_infl_triang
+         real(bsa_real_t), allocatable :: intg(:)
 #endif
 
          type(MPoint_t) :: pt
@@ -567,9 +564,9 @@ contains
          ! influences for integration
          dw = df_CST * CST_PIt2
          ctr_infl = dw * dw
-         brd_infl = ctr_infl / 2._RDP
-         vtx_infl_rect   = brd_infl / 2._RDP
-         vtx_infl_triang = vtx_infl_rect / 2._RDP
+         brd_infl = ctr_infl / 2._bsa_real_t
+         vtx_infl_rect   = brd_infl / 2._bsa_real_t
+         vtx_infl_triang = vtx_infl_rect / 2._bsa_real_t
          
          allocate(intg(dimM_bisp_))
 #endif
@@ -744,7 +741,7 @@ contains
    !> Undumps a triang zone data for later reconstruction
    module subroutine undumpTZ(this)
       class(MTriangZone_t), intent(inout) :: this
-      real(RDP) :: rval1, rval2
+      real(bsa_real_t) :: rval1, rval2
 
       ! 3 pts
       read(unit_dump_bfm_) rval1, rval2
@@ -772,7 +769,7 @@ contains
       & )
       class(MTriangZone_t), intent(inout) :: this
 #ifdef __BSA_OMP
-      real(RDP), intent(in) :: bfm(:, :)
+      real(bsa_real_t), intent(in)  :: bfm(:, :)
       class(*), pointer, intent(in) :: pdata
 
       ! NOTE: for the moment only supporting HTPC method
@@ -788,14 +785,14 @@ contains
 
    !> Queries Triang zone n of points if it had ni/nj refinements
    elemental function getTriangZoneEquivNPts(ni, nj) result(npt)
-      integer, intent(in) :: ni, nj
-      integer :: npt
+      integer(int32), intent(in) :: ni, nj
+      integer(int32) :: npt
 
       ! NOTE: for the moment ni==nj
       npt = ni * nj
 
-      ! BUG: might cast to real and back to int ??
-      npt = (npt + ni) / 2._RDP
+      ! BUG: do we really need to divide by integer??
+      npt = int((npt + ni) / 2._real32, kind=int32)
    end function
 
 
@@ -818,51 +815,51 @@ contains
 
       class(MTriangZone_t), intent(inout) :: this
 #ifdef __BSA_OMP
-      real(RDP), intent(in) :: bfm_undump(:, :)
+      real(bsa_real_t), intent(in)  :: bfm_undump(:, :)
       class(*), pointer, intent(in) :: pdata
 #endif
 
-      integer   :: interp_fact, njOld, njNew_piprev, njNew_picurr, njNew_tmp, njtmp
-      integer   :: ni, nj, ni_bfm_ref_, nj_bfm_ref_
-      integer   :: nipI, nipJ, ipos, nPtsPost
-      integer   :: i, ist, n_segs_bfm_ref_i_, n_segs_bfm_ref_j_
-      integer   :: n_pts_bfm_ref_i_, n_pts_bfm_ref_j_
-      real(RDP) :: dfIi_bfm_lv0_, dfIj_bfm_lv0_, dfJi_bfm_lv0_, dfJj_bfm_lv0_
-      real(RDP) :: dfIi_bfm_ref_, dfIj_bfm_ref_, dfJi_bfm_ref_, dfJj_bfm_ref_
-      real(RDP) :: dfI_bfm_lv0_, dfJ_bfm_lv0_, dfI_bfm_ref_, dfJ_bfm_ref_, df_cst
-      real(RDP) :: dfIi_brm_interp, dfIj_brm_interp, dfJi_brm_interp, dfJj_brm_interp
-      real(RDP) :: dfI_brm_interp_, dfJ_brm_interp_, dw_cst, df_diag_old, df_diag_bfm_ref, df_diag_brm_interp
-      real(RDP) :: vtx_infl_r, brd_infl_r, ctr_infl_r, brd_infl_t, vtx_infl_t
+      integer(int32)   :: interp_fact, njOld, njNew_piprev, njNew_picurr, njNew_tmp, njtmp
+      integer(int32)   :: ni, nj, ni_bfm_ref_, nj_bfm_ref_
+      integer(int32)   :: nipI, nipJ, ipos, nPtsPost
+      integer(int32)   :: i, ist, n_segs_bfm_ref_i_, n_segs_bfm_ref_j_
+      integer(int32)   :: n_pts_bfm_ref_i_, n_pts_bfm_ref_j_
+      real(bsa_real_t) :: dfIi_bfm_lv0_, dfIj_bfm_lv0_, dfJi_bfm_lv0_, dfJj_bfm_lv0_
+      real(bsa_real_t) :: dfIi_bfm_ref_, dfIj_bfm_ref_, dfJi_bfm_ref_, dfJj_bfm_ref_
+      real(bsa_real_t) :: dfI_bfm_lv0_, dfJ_bfm_lv0_, dfI_bfm_ref_, dfJ_bfm_ref_, df_cst
+      real(bsa_real_t) :: dfIi_brm_interp, dfIj_brm_interp, dfJi_brm_interp, dfJj_brm_interp
+      real(bsa_real_t) :: dfI_brm_interp_, dfJ_brm_interp_, dw_cst, df_diag_old, df_diag_bfm_ref, df_diag_brm_interp
+      real(bsa_real_t) :: vtx_infl_r, brd_infl_r, ctr_infl_r, brd_infl_t, vtx_infl_t
 
       ! HTPC indexes
-      integer :: pIcurr, pIprev, pJhead, pJtail
+      integer(int32) :: pIcurr, pIprev, pJhead, pJtail
 
       ! Pos in general BFM undumped data
-      integer :: i_bfm_old, i_bfm_ref_i, i_bfm_ref_j
-      integer :: i_brm, i_brm_shift, i_brm_offsetJ
+      integer(int32) :: i_bfm_old, i_bfm_ref_i, i_bfm_ref_j
+      integer(int32) :: i_brm, i_brm_shift, i_brm_offsetJ
 #ifndef __BSA_OMP
-      integer :: i_brm_write_
+      integer(int32) :: i_brm_write_
 #endif
-      integer :: i_bfm_interpJ
+      integer(int32) :: i_bfm_interpJ
 
       ! freqs
-      real(RDP) :: fi_baseptI, fj_baseptI, fi, fj, fi_baseptJ, fj_baseptJ
+      real(bsa_real_t) :: fi_baseptI, fj_baseptI, fi, fj, fi_baseptJ, fj_baseptJ
 #ifdef __BSA_OMP
-      real(RDP), allocatable, dimension(:) :: fi_v_, fj_v_
+      real(bsa_real_t), allocatable, dimension(:) :: fi_v_, fj_v_
 #endif
 
-      real(RDP), allocatable :: bfm_new_left(:, :), bfm_new_right(:, :)
-      real(RDP), allocatable :: bfm_interp(:, :)
+      real(bsa_real_t), allocatable :: bfm_new_left(:, :), bfm_new_right(:, :)
+      real(bsa_real_t), allocatable :: bfm_interp(:, :)
 
-      real(RDP) :: dfJtail, dfJhead, dfIcurr, dfIprev, dfJ_oldtmp
-      real(RDP) :: bfmtail(dimM_bisp_), bfmhead(dimM_bisp_)
+      real(bsa_real_t) :: dfJtail, dfJhead, dfIcurr, dfIprev, dfJ_oldtmp
+      real(bsa_real_t) :: bfmtail(dimM_bisp_), bfmhead(dimM_bisp_)
 
-      real(RDP), allocatable :: brm(:, :)
+      real(bsa_real_t), allocatable :: brm(:, :)
 #ifndef BSA_M3MF_ONLY_PREMESH_
-      real(RDP) :: vtx_infl_r_bfm, brd_infl_r_bfm, ctr_infl_r_bfm, brd_infl_t_bfm, vtx_infl_t_bfm
-      real(RDP) :: intg_bfm(dimM_bisp_)
+      real(bsa_real_t) :: vtx_infl_r_bfm, brd_infl_r_bfm, ctr_infl_r_bfm, brd_infl_t_bfm, vtx_infl_t_bfm
+      real(bsa_real_t) :: intg_bfm(dimM_bisp_)
 #endif
-      real(RDP) :: intg(dimM_bisp_)
+      real(bsa_real_t) :: intg(dimM_bisp_)
 
 
       ! BUG: for the moment, we take the max
@@ -924,19 +921,19 @@ contains
       ! influence areas for BRM integration
       dw_cst         = dfI_bfm_ref_ * CST_PIt2
       ctr_infl_r_bfm = dw_cst * dw_cst
-      brd_infl_r_bfm = ctr_infl_r_bfm / 2._RDP
-      vtx_infl_r_bfm = brd_infl_r_bfm / 2._RDP
+      brd_infl_r_bfm = ctr_infl_r_bfm / 2._bsa_real_t
+      vtx_infl_r_bfm = brd_infl_r_bfm / 2._bsa_real_t
       brd_infl_t_bfm = brd_infl_r_bfm
-      vtx_infl_t_bfm = vtx_infl_r_bfm / 2._RDP
+      vtx_infl_t_bfm = vtx_infl_r_bfm / 2._bsa_real_t
 #endif
 
       ! influence areas for BRM integration
       dw_cst     = dfI_brm_interp_ * CST_PIt2
       ctr_infl_r = dw_cst * dw_cst
-      brd_infl_r = ctr_infl_r / 2._RDP
-      vtx_infl_r = brd_infl_r / 2._RDP
+      brd_infl_r = ctr_infl_r / 2._bsa_real_t
+      vtx_infl_r = brd_infl_r / 2._bsa_real_t
       brd_infl_t = brd_infl_r
-      vtx_infl_t = vtx_infl_r / 2._RDP
+      vtx_infl_t = vtx_infl_r / 2._bsa_real_t
 
       ! get actualised BFM-refined and BRM-interp  refinements (along borders)
       ni_bfm_ref_ = (this%ni_ - 1)
@@ -969,29 +966,29 @@ contains
       nPtsPost = getTriangZoneEquivNPts(ni, nj)
       allocate(brm(dimM_bisp_, nPtsPost), stat=ist)
       if (ist /= 0) call bsa_Abort("Error allocating ""brm"" in interpolating RZ.")
-      brm = 0._RDP
+      brm = 0._bsa_real_t
 
       allocate(bfm_new_left(dimM_bisp_, nj), stat=ist)
       if (ist /= 0) call bsa_Abort("Error allocating ""bfm_new_left"" in interpolating RZ.")
-      bfm_new_left  = 0._RDP
+      bfm_new_left  = 0._bsa_real_t
 
       allocate(bfm_new_right(dimM_bisp_, nj - nipJ - 1), stat=ist)
       if (ist /= 0) call bsa_Abort("Error allocating ""bfm_new_right"" in interpolating RZ.")
-      bfm_new_right = 0._RDP
+      bfm_new_right = 0._bsa_real_t
       
       allocate(bfm_interp(dimM_bisp_, nj), stat=ist)
       if (ist /= 0) call bsa_Abort("Error allocating ""bfm_interp"" in interpolating RZ.")
-      bfm_interp = 0._RDP
+      bfm_interp = 0._bsa_real_t
 
 
 #ifdef __BSA_OMP
       allocate(fi_v_(nPtsPost), stat=ist)
       if (ist /= 0) call bsa_Abort("Error allocating ""fi"" in interpolating RZ.")
-      fi = 0._RDP
+      fi = 0._bsa_real_t
 
       allocate(fj_v_(nPtsPost), stat=ist)
       if (ist /= 0) call bsa_Abort("Error allocating ""fj"" in interpolating RZ.")
-      fj = 0._RDP
+      fj = 0._bsa_real_t
 
 # define __FREQ_I_  fi_v_(i_brm) = fi
 # define __FREQ_J_  fj_v_(i_brm) = fj
@@ -1060,7 +1057,7 @@ contains
 #endif
 
             dfJhead = dfJ_bfm_ref_
-            dfJtail = 0._RDP
+            dfJtail = 0._bsa_real_t
             do pJtail = 1, nipJ ! interp (J-dir) between tail-head
 
                fi = fi + dfJi_brm_interp
@@ -1130,7 +1127,7 @@ contains
 #endif
          
          dfJhead = dfJ_bfm_ref_
-         dfJtail = 0._RDP
+         dfJtail = 0._bsa_real_t
          do pJtail = 1, nipJ ! interp (J-dir) between tail-head
 
             fi = fi + dfJi_brm_interp
@@ -1250,7 +1247,7 @@ contains
          
                   ! once we moved head, restore init, distances from head/tail
                   dfJhead = dfJ_bfm_ref_
-                  dfJtail = 0._RDP
+                  dfJtail = 0._bsa_real_t
                   do pJtail = 1, nipJ ! interp (J-dir) between tail-head
          
                      fi = fi + dfJi_brm_interp
@@ -1313,7 +1310,7 @@ contains
 
                ! once we moved head, restore init, distances from head/tail
                dfJhead = dfJ_bfm_ref_
-               dfJtail = 0._RDP
+               dfJtail = 0._bsa_real_t
                do pJtail = 1, nipJ
       
                   fi = fi + dfJi_brm_interp
@@ -1369,7 +1366,7 @@ contains
 #endif
 
                dfJhead = dfJ_bfm_ref_
-               dfJtail = 0._RDP
+               dfJtail = 0._bsa_real_t
                do pJtail = 1, nipJ
 
                   fi = fi + dfJi_brm_interp
@@ -1428,7 +1425,7 @@ contains
             ! Now INTERPOLATE along I-dir between left and right BFM infl lines.
             !
             dfIcurr = dfI_bfm_ref_ ! reset I-dir CURR-PREV distances
-            dfIprev = 0._RDP
+            dfIprev = 0._bsa_real_t
 
             dfJ_oldtmp = dfJ_bfm_lv0_
             njtmp      = nipJ
@@ -1486,7 +1483,7 @@ contains
                njtmp      = njtmp - 1
                dfJ_oldtmp = dfJ_oldtmp - dfJ_brm_interp_
                dfJhead    = dfJ_oldtmp
-               dfJtail    = 0._RDP
+               dfJtail    = 0._bsa_real_t
                ipos       = njNew_picurr ! tail index position
                do pJtail = 1, njtmp
 
@@ -1612,7 +1609,7 @@ contains
       
                ! once we moved head, restore init, distances from head/tail
                dfJhead = dfJ_bfm_ref_
-               dfJtail = 0._RDP
+               dfJtail = 0._bsa_real_t
                do pJtail = 1, nipJ
       
                   fi = fi + dfJi_brm_interp
@@ -1670,7 +1667,7 @@ contains
    
             ! once we moved head, restore init distances from head/tail
             dfJhead = dfJ_bfm_ref_
-            dfJtail = 0._RDP
+            dfJtail = 0._bsa_real_t
             do pJtail = 1, nipJ
    
                fi = fi + dfJi_brm_interp
@@ -1740,7 +1737,7 @@ contains
          ! prev has to start moving toward CURR.
 
          dfIcurr    = dfI_bfm_ref_ ! reset I-dir CURR-PREV distances
-         dfIprev    = 0._RDP
+         dfIprev    = 0._bsa_real_t
          dfJ_oldtmp = dfJ_bfm_ref_
          njtmp      = nipJ
          do pIprev = 1, nipI ! interpolate along I
@@ -1798,7 +1795,7 @@ contains
             njtmp      = njtmp - 1
             dfJ_oldtmp = dfJ_oldtmp - dfJ_brm_interp_
             dfJhead    = dfJ_oldtmp
-            dfJtail    = 0._RDP
+            dfJtail    = 0._bsa_real_t
             ipos       = njNew_picurr ! tail index position
             do pJtail = 1, njtmp
 
@@ -1930,12 +1927,12 @@ contains
 
 !       integer   :: interp_fact, ni, nj, njOld, njNew_piprev, njNew_picurr, njNew_tmp, njtmp
 !       integer   :: nipI, nipJ, zNintrpPts, ipos
-!       real(RDP) :: df_cst, dfIi_old, dfIj_old, dfJi_old, dfJj_old
-!       real(RDP) :: dfIi_interp, dfIj_interp, dfJi_interp, dfJj_interp
-!       real(RDP) :: dfI_old, dfJ_old, dfI_interp, dfJ_interp
-!       real(RDP) :: df_diag_old, df_diag_interp
-!       real(RDP) :: dw_cst
-!       real(RDP) :: vtx_infl_r, brd_infl_r, ctr_infl_r, brd_infl_t, vtx_infl_t
+!       real(bsa_real_t) :: df_cst, dfIi_old, dfIj_old, dfJi_old, dfJj_old
+!       real(bsa_real_t) :: dfIi_interp, dfIj_interp, dfJi_interp, dfJj_interp
+!       real(bsa_real_t) :: dfI_old, dfJ_old, dfI_interp, dfJ_interp
+!       real(bsa_real_t) :: df_diag_old, df_diag_interp
+!       real(bsa_real_t) :: dw_cst
+!       real(bsa_real_t) :: vtx_infl_r, brd_infl_r, ctr_infl_r, brd_infl_t, vtx_infl_t
 
 !       ! HTPC indexes
 !       integer :: picurr, piprev, pjhead, pjtail
@@ -1950,18 +1947,18 @@ contains
 
 
 !       ! freqs
-!       real(RDP) :: base_fi, base_fj, fi, fj
+!       real(bsa_real_t) :: base_fi, base_fj, fi, fj
 
 
-!       real(RDP), allocatable :: bfm_new_left(:, :), bfm_new_right(:, :)
-!       real(RDP), allocatable :: bfm_interp(:, :)
+!       real(bsa_real_t), allocatable :: bfm_new_left(:, :), bfm_new_right(:, :)
+!       real(bsa_real_t), allocatable :: bfm_interp(:, :)
 
-!       real(RDP) :: dfJtail, dfJhead, dfIcurr, dfIprev, dfJ_oldtmp
-!       real(RDP) :: bfmtail(dimM_bisp_), bfmhead(dimM_bisp_)
+!       real(bsa_real_t) :: dfJtail, dfJhead, dfIcurr, dfIprev, dfJ_oldtmp
+!       real(bsa_real_t) :: bfmtail(dimM_bisp_), bfmhead(dimM_bisp_)
 
 
-!       real(RDP), allocatable :: brm(:, :)
-!       real(RDP) :: intg(dimM_bisp_)
+!       real(bsa_real_t), allocatable :: brm(:, :)
+!       real(bsa_real_t) :: intg(dimM_bisp_)
 
 
 !       ! BUG: for the moment, we take the max

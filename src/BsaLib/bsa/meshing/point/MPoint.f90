@@ -15,8 +15,6 @@
 !! along with BSA Library.  If not, see <https://www.gnu.org/licenses/>.
 module BsaLib_MPoint
 
-#include "../../../precisions"
-
    use BsaLib_CONSTANTS
    implicit none
    private
@@ -25,8 +23,8 @@ module BsaLib_MPoint
 
    type, public :: MPoint_t
    
-      real(RDP), private :: fi_ = 0._RDP
-      real(RDP), private :: fj_ = 0._RDP
+      real(bsa_real_t), private :: fi_ = 0._bsa_real_t
+      real(bsa_real_t), private :: fj_ = 0._bsa_real_t
    
    contains
 
@@ -80,7 +78,7 @@ contains
 
 
    pure function MPoint_as_compiler(fi, fj) result(this)
-      real(RDP), intent(in) :: fi, fj
+      real(bsa_real_t), intent(in) :: fi, fj
       type(MPoint_t) :: this
 
       ! BUG: maybe here needed to use rounding precision
@@ -93,7 +91,7 @@ contains
       integer, intent(in) :: fi, fj
       type(MPoint_t) :: this
 
-      this = MPoint_as_compiler(real(fi, RDP), real(fj, RDP))
+      this = MPoint_as_compiler(real(fi, bsa_real_t), real(fj, bsa_real_t))
    end function 
 
 
@@ -114,7 +112,7 @@ contains
 
    elemental function freqI(this) result(val)
       class(MPoint_t), intent(in) :: this
-      real(RDP) :: val
+      real(bsa_real_t) :: val
 
       val = this%fi_
    end function
@@ -122,7 +120,7 @@ contains
 
    elemental function freqJ(this) result(val)
       class(MPoint_t), intent(in) :: this
-      real(RDP) :: val
+      real(bsa_real_t) :: val
 
       val = this%fj_
    end function
@@ -131,7 +129,7 @@ contains
 
    subroutine setFreqs(this, fi, fj)
       class(MPoint_t), intent(inout) :: this
-      real(RDP), intent(in) :: fi, fj
+      real(bsa_real_t), intent(in) :: fi, fj
 
       this%fi_ = fi
       this%fj_ = fj
@@ -142,9 +140,9 @@ contains
 
    elemental function getPointsDistance(p1, p2) result(dist)
       class(MPoint_t), intent(in) :: p1, p2
-      real(RDP) :: dist
+      real(bsa_real_t) :: dist
 
-      real(RDP) :: dx, dy
+      real(bsa_real_t) :: dx, dy
 
       dx = abs(p1%fi_ - p2%fi_)
       dy = abs(p1%fj_ - p2%fj_)
@@ -159,7 +157,7 @@ contains
    !> Moves a point by specified x-y deltas.
    subroutine move(this, di, dj)
       class(MPoint_t), intent(inout) :: this
-      real(RDP), intent(in) :: di, dj
+      real(bsa_real_t), intent(in) :: di, dj
 
       this%fi_ = this%fi_ + di
       this%fj_ = this%fj_ + dj
@@ -169,8 +167,8 @@ contains
 
    elemental function getDistanceIfromCoord(this, i_coord) result(dist)
       class(MPoint_t), intent(in) :: this
-      real(RDP), intent(in) :: i_coord
-      real(RDP) :: dist
+      real(bsa_real_t), intent(in) :: i_coord
+      real(bsa_real_t) :: dist
 
       dist = abs(this%fi_ - i_coord)
    end function getDistanceIfromCoord
@@ -178,7 +176,7 @@ contains
    elemental function getDistanceIfromPt(this, p) result(dist)
       class(MPoint_t), intent(in) :: this
       class(MPoint_t), intent(in) :: p
-      real(RDP) :: dist
+      real(bsa_real_t) :: dist
 
       dist = abs(this%fi_ - p%fi_)
    end function getDistanceIfromPt
@@ -186,8 +184,8 @@ contains
 
    elemental function getDistanceJfromCoord(this, j_coord) result(dist)
       class(MPoint_t), intent(in) :: this
-      real(RDP), intent(in) :: j_coord
-      real(RDP) :: dist
+      real(bsa_real_t), intent(in) :: j_coord
+      real(bsa_real_t) :: dist
 
       dist = abs(this%fj_ - j_coord)
    end function getDistanceJfromCoord
@@ -195,7 +193,7 @@ contains
    elemental function getDistanceJfromPt(this, p) result(dist)
       class(MPoint_t), intent(in) :: this
       class(MPoint_t), intent(in) :: p
-      real(RDP) :: dist
+      real(bsa_real_t) :: dist
 
       dist = abs(this%fj_ - p%fj_)
    end function getDistanceJfromPt
@@ -206,7 +204,7 @@ contains
       !! Returns a new Point located by distance and rotation 
       !! from current Point.
       class(MPoint_t), intent(in) :: this
-      real(RDP), intent(in) :: dist, rot
+      real(bsa_real_t), intent(in) :: dist, rot
       type(MPoint_t) :: P
 
       ! BUG: change??
@@ -269,7 +267,7 @@ contains
 
    subroutine scaleReal(this, i)
       class(MPoint_t), intent(inout) :: this
-      real(RDP), intent(in) :: i
+      real(bsa_real_t), intent(in) :: i
 
       this%fi_ = this%fi_ * i
       this%fj_ = this%fj_ * i
@@ -284,7 +282,7 @@ contains
       class(MPoint_t), intent(in) :: p1, p2
       logical :: eq
 
-      real(RDP) :: dfi, dfj
+      real(bsa_real_t) :: dfi, dfj
 
       dfi = abs(p1%fi_ - p2%fi_)
       dfj = abs(p1%fj_ - p2%fj_)
@@ -313,7 +311,7 @@ contains
 
    pure function ScaleByReal(p, i) result(res)
       class(MPoint_t), intent(in) :: p
-      real(RDP), intent(in) :: i
+      real(bsa_real_t), intent(in) :: i
       type(MPoint_t) :: res
 
       res = MPoint_t(p%fi_ * i, p%fj_ * i)
@@ -336,16 +334,16 @@ contains
    pure subroutine assignFromInt(lhs, rhs)
       type(MPoint_t), intent(out)  :: lhs
       integer, intent(in)          :: rhs
-      real(RDP) :: rval
+      real(bsa_real_t) :: rval
 
-      rval = real(rhs, RDP)
+      rval = real(rhs, bsa_real_t)
       lhs  = MPoint_t(rval, rval)
    end subroutine
 
 
    pure subroutine assignFromReal(lhs, rhs)
       type(MPoint_t), intent(out)  :: lhs
-      real(RDP), intent(in)        :: rhs
+      real(bsa_real_t), intent(in)        :: rhs
 
       lhs = MPoint_t(rhs, rhs)
 end subroutine

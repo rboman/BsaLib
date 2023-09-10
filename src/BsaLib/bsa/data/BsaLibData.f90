@@ -15,8 +15,6 @@
 !! along with BSA Library.  If not, see <https://www.gnu.org/licenses/>.
 module BsaLib_Data
    
-#include "../../precisions"
-   
    use Logging
    use BsaLib_Timing
    use BsaLib_CONSTANTS
@@ -41,22 +39,21 @@ module BsaLib_Data
    type(timer_t),         allocatable, target :: timer
    type(logger_t),        allocatable, target :: logger_debug
 
-   logical :: is_data_cleaned_ = .false.
-   logical :: close_deb_unit_  = .true.
-
+   logical :: is_data_cleaned_   = .false.
+   logical :: close_deb_unit_    = .true.
    logical :: do_validate_modal_ = .true.
 
-   integer(kind = 4) :: dimNf_psd_ = 0, dimNf_bisp_ = 0
-   integer(kind = 4) :: dimNr_psd_ = 0, dimNr_bisp_ = 0
-   integer(kind = 4) :: dimM_psd_  = 0, dimM_bisp_  = 0
+   integer(bsa_int_t) :: dimNf_psd_ = 0, dimNf_bisp_ = 0
+   integer(bsa_int_t) :: dimNr_psd_ = 0, dimNr_bisp_ = 0
+   integer(bsa_int_t) :: dimM_psd_  = 0, dimM_bisp_  = 0
    
-   real(RDP), allocatable, target :: PHItimesC_local_(:, :, :)
+   real(bsa_real_t), allocatable, target :: PHItimesC_local_(:, :, :)
 
-   real(RDP), allocatable :: peak_exts_(:)
+   real(bsa_real_t), allocatable :: peak_exts_(:)
    logical :: do_restrict_bkgpeak_ = .false.
 
    logical :: do_export_brm_ = .false.
-   integer(kind = 4) :: i_brmexport_mode_ = BSA_EXPORT_BRM_MODE_BASE
+   integer(bsa_int_t) :: i_brmexport_mode_ = BSA_EXPORT_BRM_MODE_BASE
    character(len = *), parameter :: brm_export_file_name_ = 'bsaexport.brm'
 #ifdef __BSA_OMP
    procedure(exportBRMinterf_vect_all_), pointer :: write_brm_fptr_  => null()
@@ -65,17 +62,17 @@ module BsaLib_Data
 #endif
    type, public :: BrmExportBaseData_t
       
-      integer(kind = 4) :: i_doNotPrintGenHeader_ = 0   ! == 0  means DO PRINT !!
-      integer(kind = 4) :: nm_     = 0
-      integer(kind = 4) :: ncomb_  = 0
-      integer(kind = 4) :: ispsym_ = 0
-      integer(kind = 4) :: nzones_ = 0
-      integer(kind = 4), pointer :: modes_(:) => null()
+      integer(bsa_int_t) :: i_doNotPrintGenHeader_ = 0   ! == 0  means DO PRINT !!
+      integer(bsa_int_t) :: nm_     = 0
+      integer(bsa_int_t) :: ncomb_  = 0
+      integer(bsa_int_t) :: ispsym_ = 0
+      integer(bsa_int_t) :: nzones_ = 0
+      integer(bsa_int_t), pointer :: modes_(:) => null()
 
-      integer(kind = 4) :: i_doNotPrintZonHeader_ = 0
-      integer(kind = 4) :: idZone_ = 0
-      integer(kind = 4) :: nI_     = 0
-      integer(kind = 4) :: nJ_     = 0
+      integer(bsa_int_t) :: i_doNotPrintZonHeader_ = 0
+      integer(bsa_int_t) :: idZone_ = 0
+      integer(bsa_int_t) :: nI_     = 0
+      integer(bsa_int_t) :: nJ_     = 0
    end type
 
 
@@ -85,8 +82,8 @@ module BsaLib_Data
 
 
 #ifdef __BSA_CHECK_NOD_COH_SVD
-   real(RDP), allocatable :: nod_corr_full_(:, :)
-   real(RDP), allocatable :: nod_corr_EVLs_(:), nod_corr_EVTs_(:, :)
+   real(bsa_real_t), allocatable :: nod_corr_full_(:, :)
+   real(bsa_real_t), allocatable :: nod_corr_EVLs_(:), nod_corr_EVTs_(:, :)
 #endif
 
 
@@ -94,8 +91,8 @@ module BsaLib_Data
    ! ==== classic related
    !
    logical :: force_cls_execution_ = .false.
-   integer(kind = 4), parameter :: MAX_VECT_ALLOC_ELEMS = 1000000000 ! 1B -> almost 8Gb
-   integer(kind = 4) :: ifr = 0, jfr = 0
+   integer(int64), parameter :: MAX_VECT_ALLOC_ELEMS = 1000000000 ! 1B -> almost 8Gb
+   integer(bsa_int_t) :: ifr = 0, jfr = 0
    ! real(RDP), pointer :: m2mf_cls_ptr_(:), m2mr_cls_ptr_(:)   ! 2nd order moments
    ! real(RDP), pointer :: m3mf_cls_ptr_(:), m3mr_cls_ptr_(:)   ! 3rd order moments
    
@@ -103,18 +100,18 @@ module BsaLib_Data
    procedure(getBRMClsVect), pointer :: getBRM_vect_cls => null()
    abstract interface
       subroutine getBFMClsVect(f, Suvw, psd, bisp)
-         import :: RDP
+         import :: bsa_real_t
          import :: settings, struct_data, wd
-         real(RDP), intent(in) :: f(settings%nfreqs_)
-         real(RDP), intent(in) :: Suvw(settings%nfreqs_, struct_data%nn_load_ * wd%i_ndirs_ * wd%i_ntc_)
-         real(RDP), allocatable, intent(inout) :: psd(:, :), bisp(:, :, :)
+         real(bsa_real_t), intent(in) :: f(settings%nfreqs_)
+         real(bsa_real_t), intent(in) :: Suvw(settings%nfreqs_, struct_data%nn_load_ * wd%i_ndirs_ * wd%i_ntc_)
+         real(bsa_real_t), allocatable, intent(inout) :: psd(:, :), bisp(:, :, :)
       end subroutine
 
       subroutine getBRMClsVect(f, psd, bisp)
-         import :: RDP
+         import :: bsa_real_t
          import :: settings
-         real(RDP), intent(in)                 :: f(settings%nfreqs_)
-         real(RDP), allocatable, intent(inout) :: psd(:, :), bisp(:, :, :)
+         real(bsa_real_t), intent(in)                 :: f(settings%nfreqs_)
+         real(bsa_real_t), allocatable, intent(inout) :: psd(:, :), bisp(:, :, :)
       end subroutine
    end interface
 
@@ -123,21 +120,21 @@ module BsaLib_Data
    procedure(getBRMClsScalar), pointer :: getBRM_scalar_cls => null()
    abstract interface
       pure subroutine getBFMClsScalar(ii, ij, fi, fj, Suvw, Suvw_pad, psd, bisp)
-         import :: RDP, dimM_psd_, dimM_bisp_
+         import :: bsa_real_t, dimM_psd_, dimM_bisp_
          import :: settings, struct_data, wd
          integer, intent(in)   :: ii, ij
-         real(RDP), intent(in) :: fi, fj
-         real(RDP), intent(in) :: Suvw(settings%nfreqs_, struct_data%nn_load_ * wd%i_ndirs_ * wd%i_ntc_)
-         real(RDP), intent(in)    :: Suvw_pad(struct_data%nn_load_ * wd%i_ndirs_ * wd%i_ntc_)
-         real(RDP), intent(inout) :: psd(dimM_psd_), bisp(dimM_bisp_)
+         real(bsa_real_t), intent(in) :: fi, fj
+         real(bsa_real_t), intent(in) :: Suvw(settings%nfreqs_, struct_data%nn_load_ * wd%i_ndirs_ * wd%i_ntc_)
+         real(bsa_real_t), intent(in)    :: Suvw_pad(struct_data%nn_load_ * wd%i_ndirs_ * wd%i_ntc_)
+         real(bsa_real_t), intent(inout) :: psd(dimM_psd_), bisp(dimM_bisp_)
       end subroutine
 
       subroutine getBRMClsScalar(ii, ij, fi, fj, psdin, psdout, bispin, bispout)
-         import :: RDP, dimM_psd_, dimM_bisp_
+         import :: bsa_real_t, dimM_psd_, dimM_bisp_
          integer, intent(in)    :: ii, ij  ! freqs indexes
-         real(RDP), intent(in)  :: fi, fj
-         real(RDP), intent(in)  :: psdin(dimM_psd_), bispin(dimM_bisp_)
-         real(RDP), intent(out) :: psdout(dimM_psd_), bispout(dimM_bisp_)
+         real(bsa_real_t), intent(in)  :: fi, fj
+         real(bsa_real_t), intent(in)  :: psdin(dimM_psd_), bispin(dimM_bisp_)
+         real(bsa_real_t), intent(out) :: psdout(dimM_psd_), bispout(dimM_bisp_)
       end subroutine
    end interface
 
@@ -147,32 +144,32 @@ module BsaLib_Data
    ! =========================
    ! ==== mesher related
    !
-   real(RDP), pointer :: m3mf_msh_ptr_(:) => null(), m3mr_msh_ptr_(:) => null()
+   real(bsa_real_t), pointer :: m3mf_msh_ptr_(:) => null(), m3mr_msh_ptr_(:) => null()
 
 #ifndef __BSA_OMP
    !> Shared instance of undumped BFM.
    !> It holds the max N. of points of all the dumped zones, so that no overflows occur.
-   real(RDP), allocatable :: bfm_undump(:, :)
+   real(bsa_real_t), allocatable :: bfm_undump(:, :)
 #endif
 
-   integer(kind = 4), public :: ipre_mesh_type = BSA_PREMESH_TYPE_DIAG_CREST_NO
-   integer(kind = 4), public :: ipre_mesh_mode = BSA_PREMESH_MODE_ZONE_REFINED
-   integer(kind = 4), public :: msh_iZone
+   integer(bsa_int_t), public :: ipre_mesh_type = BSA_PREMESH_TYPE_DIAG_CREST_NO
+   integer(bsa_int_t), public :: ipre_mesh_mode = BSA_PREMESH_MODE_ZONE_REFINED
+   integer(bsa_int_t), public :: msh_iZone
 
    !> Controls if checking zone's deltas or not.
    logical :: do_validate_deltas_ = .true.
    
-   integer(kind = 4), public :: I_BKG_PEAK_DELTAF_BFM_REFMT_FCT_ = 2
-   integer(kind = 4), public :: I_RES_PEAK_DELTAF_BFM_REFMT_FCT_ = 3
+   integer(bsa_int_t), public :: I_BKG_PEAK_DELTAF_BFM_REFMT_FCT_ = 2
+   integer(bsa_int_t), public :: I_RES_PEAK_DELTAF_BFM_REFMT_FCT_ = 3
    
    ! Total pre-mesh/post-mesh phase points
-   integer(kind = 4), public :: msh_bfmpts_pre_
-   integer(kind = 4), public :: msh_bfmpts_post_
-   integer(kind = 4), public :: msh_brmpts_post_
+   integer(bsa_int_t), public :: msh_bfmpts_pre_
+   integer(bsa_int_t), public :: msh_bfmpts_post_
+   integer(bsa_int_t), public :: msh_brmpts_post_
 
    !> Code "-1" means that interest modes have to be read from the NEXT (right)
    !> limit only, since this is the first limit in the list
-   integer(kind = 4), public, parameter :: CODE_PRE_PEAK_OK = -1
+   integer(bsa_int_t), public, parameter :: CODE_PRE_PEAK_OK = -1_bsa_int_t
    
    !> Code "-2" means that interest modes have to be read from 
    !> NEXT (right) limit only, since this is the first limit in the list.
@@ -181,48 +178,49 @@ module BsaLib_Data
    !> one is close to this zone's limit, in order to determine if
    !> to be added to its interest modes.
    !> Hence, it is a sort of "ALARM". Info will not be accurate in this case.
-   integer(kind = 4), public, parameter :: CODE_PRE_PEAK_KO = -2
+   integer(bsa_int_t), public, parameter :: CODE_PRE_PEAK_KO = -2_bsa_int_t
 
    !> Limit zones interest modes indexes
-   integer(kind = 4), public, allocatable :: msh_ZoneLimsInterestModes(:)
+   integer(bsa_int_t), public, allocatable :: msh_ZoneLimsInterestModes(:)
    
    !> Tot n. of zones counter.
-   integer(kind = 4), public, target :: msh_NZones = 0
+   integer(bsa_int_t), public, target :: msh_NZones = 0
 
    !> Controls whether employing new BFM MLR method or not
    logical :: test_no_bfm_mlr_ = .false.
 
    !> Controls whether to perform modal truncation or not
    logical        :: do_trunc_POD_  = .false.
-   real(kind = 8) :: POD_trunc_lim_ = 0.d0
+   real(real64)   :: POD_trunc_lim_ = 0.0_real64
 
    !> Stores width of background peak
-   real(RDP) :: bkg_peakw_ = 0._RDP
+   real(bsa_real_t) :: bkg_peakw_ = 0._bsa_real_t
 
    ! Mesher function pointer (pre/post meshing)
    procedure(getMshBFM), pointer :: getBFM_msh => null()
    procedure(getMshBRM), pointer :: getBRM_msh => null()
    abstract interface
       function getMshBFM(fi, fj) result(vals)
-         import RDP, dimM_bisp_
-         real(RDP), intent(in) :: fi, fj
-         real(RDP) :: vals(dimM_bisp_)
+         import bsa_real_t, dimM_bisp_
+         real(bsa_real_t), intent(in) :: fi, fj
+         real(bsa_real_t) :: vals(dimM_bisp_)
       end function
 
       function getMshBRM(bfm, fi, fj) result(vals)
-         import RDP, dimM_bisp_
-         real(RDP), intent(in) :: bfm(dimM_bisp_)
-         real(RDP), intent(in) :: fi, fj
-         real(RDP) :: vals(dimM_bisp_)
+         import bsa_real_t, dimM_bisp_
+         real(bsa_real_t), intent(in) :: bfm(dimM_bisp_)
+         real(bsa_real_t), intent(in) :: fi, fj
+         real(bsa_real_t) :: vals(dimM_bisp_)
       end function
    end interface
 
 
    interface
       module function evaluatePSD(f, nf, itc) result(PSD)
-         integer(kind = 4), intent(in) :: nf, itc
-         real(kind = 8), intent(in)  :: f(nf)
-         real(kind = 8), allocatable, target :: PSD(:, :)
+         import bsa_int_t, bsa_real_t
+         integer(bsa_int_t), intent(in) :: nf, itc
+         real(bsa_real_t), intent(in)   :: f(nf)
+         real(bsa_real_t), allocatable, target :: PSD(:, :)
       end function
 
       module subroutine cleanBSAData_()

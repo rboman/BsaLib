@@ -14,8 +14,6 @@
 !! You should have received a copy of the GNU General Public License
 !! along with BSA Library.  If not, see <https://www.gnu.org/licenses/>.
 module BsaLib_MTriangZone
-
-#include "../../../precisions"
    
    use BsaLib_CONSTANTS
    use BsaLib_MPoint
@@ -48,7 +46,7 @@ module BsaLib_MTriangZone
 
 
       !> PAB abgle
-      real(RDP) :: PABang_
+      real(bsa_real_t) :: PABang_
 
    contains
 
@@ -118,14 +116,14 @@ module BsaLib_MTriangZone
       !> Gets rect base along I-dir
       module elemental function baseI_triang(this) result(res)
          class(MTriangZone_t), intent(in) :: this
-         real(RDP) :: res
+         real(bsa_real_t) :: res
       end function
 
 
       !> Gets rect base along J-dir
       module elemental function baseJ_triang(this) result(res)
          class(MTriangZone_t), intent(in) :: this
-         real(RDP) :: res
+         real(bsa_real_t) :: res
       end function
 
 
@@ -140,7 +138,7 @@ module BsaLib_MTriangZone
       !> NOTE: for the moment, ONLY triangles rectangles supported
       module pure function zoneTotNPts_triang(this) result(npt)
          class(MTriangZone_t), intent(in) :: this
-         integer :: npt
+         integer(bsa_int_t) :: npt
       end function
 
 
@@ -157,7 +155,7 @@ module BsaLib_MTriangZone
       !> along I and J directions
       module subroutine adaptToDeltas(this, dfi, dfj)
          class(MTriangZone_t), intent(inout) :: this
-         real(RDP), value :: dfi, dfj
+         real(bsa_real_t), value :: dfi, dfj
       end subroutine
 
 
@@ -184,9 +182,9 @@ module BsaLib_MTriangZone
       !>   - df_cst : total delta along CB side (I-dir in LRS)
       module subroutine getRotatedUnaryDF(this, df_I_var, df_J_var, df_I_cst, df_J_cst)
          class(MTriangZone_t), intent(inout) :: this
-         real(RDP), intent(out) :: df_I_var, df_J_var
+         real(bsa_real_t), intent(out) :: df_I_var, df_J_var
          ! logical, intent(in), optional :: invert
-         real(RDP), intent(out), optional :: df_I_cst, df_J_cst
+         real(bsa_real_t), intent(out), optional :: df_I_cst, df_J_cst
       end subroutine
 
 
@@ -214,9 +212,9 @@ module BsaLib_MTriangZone
       module subroutine defineFromPts_refmtsORdeltas(this, Cp, P1, P2, is_refinement, val_types, val1, val2)
          class(MTriangZone_t), intent(inout) :: this
          class(MPoint_t), intent(in) :: Cp, P1, P2
-         logical, intent(in)            :: is_refinement
+         logical, intent(in)         :: is_refinement
          character(len = *), intent(in), optional :: val_types
-         real(RDP), intent(in), optional          :: val1, val2
+         real(bsa_real_t), intent(in), optional   :: val1, val2
       end subroutine
 
 
@@ -250,7 +248,7 @@ module BsaLib_MTriangZone
          & )
          class(MTriangZone_t), intent(inout) :: this
 #ifdef __BSA_OMP
-         real(RDP), intent(in) :: bfm(:, :)
+         real(bsa_real_t), intent(in)  :: bfm(:, :)
          class(*), pointer, intent(in) :: pdata
 #endif
       end subroutine

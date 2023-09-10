@@ -15,8 +15,6 @@
 !! along with BSA Library.  If not, see <https://www.gnu.org/licenses/>.
 submodule(BsaLib) BsaLib_ClassicImpl
 
-#include "../../precisions"
-
    use BsaLib_Data
    implicit none
 
@@ -26,9 +24,9 @@ contains
    !> BUG: now only supports EVENLY SPACED FREQUENCIES..
    module subroutine mainClassic_(m2mf_cls, m2mr_cls, m2o2mr_cls, m3mf_cls, m3mr_cls)
       use BsaLib_Functions
-      real(RDP), allocatable :: m2mf_cls(:), m2mr_cls(:), m2o2mr_cls(:), m3mf_cls(:), m3mr_cls(:)
+      real(bsa_real_t), allocatable :: m2mf_cls(:), m2mr_cls(:), m2o2mr_cls(:), m3mf_cls(:), m3mr_cls(:)
       integer :: idim2
-      real(RDP), allocatable :: S_uvw(:, :), f(:)
+      real(bsa_real_t), allocatable :: S_uvw(:, :), f(:)
       integer :: itc_, idir_, idxi, idxe
 
 #ifdef __BSA_DEBUG
@@ -43,20 +41,20 @@ contains
       ! some shared memory allocation
       if (settings%i_compute_psd_ == 1) then
          allocate(m2mf_cls(dimM_psd_))
-         m2mf_cls = 0._RDP
+         m2mf_cls = 0._bsa_real_t
 
          allocate(m2mr_cls(dimM_psd_))
-         m2mr_cls = 0._RDP
+         m2mr_cls = 0._bsa_real_t
 
          allocate(m2o2mr_cls(dimM_psd_))
-         m2o2mr_cls = 0._RDP
+         m2o2mr_cls = 0._bsa_real_t
       endif
       if (settings%i_compute_bisp_== 1) then
          allocate(m3mf_cls(dimM_bisp_))
-         m3mf_cls = 0._RDP
+         m3mf_cls = 0._bsa_real_t
 
          allocate(m3mr_cls(dimM_bisp_))
-         m3mr_cls = 0._RDP
+         m3mr_cls = 0._bsa_real_t
       endif
 
 
@@ -90,7 +88,7 @@ contains
 
 #ifdef __BSA_CL
       block
-         real(RDP), allocatable :: S_uvw_T_(:, :)
+         real(bsa_real_t), allocatable :: S_uvw_T_(:, :)
          
          call bsacl_AcquireResultBFMVect(m3mf_cls)
          call bsacl_AcquireComputationFreqs(NFREQS, f, NFREQS, f)
@@ -118,7 +116,7 @@ contains
 #endif
 
       block
-         real(RDP) :: m2(idim2)
+         real(bsa_real_t) :: m2(idim2)
 
          call intgSpectraVect_(settings%nfreqs_, f, psd=S_uvw, m2=m2)
          call bsa_exportMomentToFile('m2_PSDs.txt', m2)
@@ -136,7 +134,7 @@ contains
          print '(/1x, 2a)', INFOMSG, 'Using  VECTORISED  version'
 
          block
-            real(RDP), allocatable :: psd(:, :), bisp(:, :, :)
+            real(bsa_real_t), allocatable :: psd(:, :), bisp(:, :, :)
 
 
             !===========================================================
@@ -156,7 +154,7 @@ contains
             if (settings%i_compute_psd_ == 1) call bsa_exportPSDToFile('psdmr.txt', psd, 'psdmr', f)
             
             block
-               real(RDP), allocatable :: omegas(:)
+               real(bsa_real_t), allocatable :: omegas(:)
                integer :: i
 
                omegas = f * CST_PIt2
@@ -184,21 +182,21 @@ contains
             WARNMSG, 'For scalar version, computation of m2o2_mr not yet implemented !'
 
          block
-            real(RDP) :: fi, fj, dw, dw2, omg
-            real(RDP), allocatable :: S_uvw_pad(:, :)
+            real(bsa_real_t) :: fi, fj, dw, dw2, omg
+            real(bsa_real_t), allocatable :: S_uvw_pad(:, :)
 
             integer, pointer :: jfr_ext => null()
             integer, target  :: one_ext = 1
 
             integer :: lpad, indxi, indxe
 
-            real(RDP), dimension(dimM_psd_)  :: psdfm, psdrm, r_tmp
-            real(RDP), dimension(dimM_bisp_) :: bispfm, bisprm
+            real(bsa_real_t), dimension(dimM_psd_)  :: psdfm, psdrm, r_tmp
+            real(bsa_real_t), dimension(dimM_bisp_) :: bispfm, bisprm
 
-            psdfm  = 0._RDP
-            psdrm  = 0._RDP
-            bispfm = 0._RDP
-            bisprm = 0._RDP
+            psdfm  = 0._bsa_real_t
+            psdrm  = 0._bsa_real_t
+            bispfm = 0._bsa_real_t
+            bisprm = 0._bsa_real_t
 
             dw  = (f(2) - f(1)) * CST_PIt2 ! [rad/s]
             dw2 = dw*dw
@@ -270,7 +268,7 @@ contains
 
 
    subroutine checkMaxAllocation_()
-      integer :: itmp
+      integer(int32) :: itmp
 
       if (settings%i_test_mode_ == 0) then
 
@@ -332,13 +330,13 @@ contains
       ! class(bsa_classic_t), intent(inout)   :: this
       class(settings_t), intent(inout)      :: setts
       class(StructureData_t), intent(inout) :: struct
-      real(RDP), allocatable, intent(out)   :: f(:)
+      real(bsa_real_t), allocatable, intent(out) :: f(:)
 
-      logical   :: l_df_big = .false.
-      integer   :: nfreqs_1
-      real(RDP) :: df_ref, max_freq, max_freq_ref
+      logical :: l_df_big = .false.
+      integer(int32)   :: nfreqs_1
+      real(bsa_real_t) :: df_ref, max_freq, max_freq_ref
 
-      if (setts%nfreqs_ == 0 .or. setts%df_ == 0._RDP) &
+      if (setts%nfreqs_ == 0 .or. setts%df_ == 0._bsa_real_t) &
          call bsa_Abort('Either NFREQs or DF are == 0.')
 
 
@@ -452,20 +450,20 @@ contains
 
 
    subroutine intgSpectraVect_(nf, f, psd, m2, bisp, m3)
-      integer, intent(in)   :: nf
-      real(RDP), intent(in) :: f(nf)
-      ! integer, intent(in), optional   :: dimpsd, dimbisp
-      real(RDP), intent(in), optional  :: psd(nf, *), bisp(nf, nf, *)
-      real(RDP), intent(out), optional :: m2(:), m3(:)
+      integer(bsa_int_t), intent(in) :: nf
+      real(bsa_real_t), intent(in)   :: f(nf)
+      ! integer(int32), intent(in), optional   :: dimpsd, dimbisp
+      real(bsa_real_t), intent(in), optional  :: psd(nf, *), bisp(nf, nf, *)
+      real(bsa_real_t), intent(out), optional :: m2(:), m3(:)
 
-      integer   :: nf_1 = 0, dim = 0, i
-      real(RDP) :: delta
-      real(RDP) :: rtmp, d_2, d2, d2_2
+      integer(int32)   :: nf_1 = 0, dim = 0, i
+      real(bsa_real_t) :: delta
+      real(bsa_real_t) :: rtmp, d_2, d2, d2_2
 
 
       delta = f(2) - f(1)
       if (settings%i_def_scaling_ == 1) delta = delta * CST_PIt2  ! [rad/s]
-      d_2  = delta / 2._RDP
+      d_2  = delta / 2._bsa_real_t
 
       !  PSDs
       if (present(psd) .and. present(m2)) then
@@ -492,7 +490,7 @@ contains
          ! removing excess from vertexes/borders
 
          rtmp = CST_3d2 * d2
-         d2_2 = d2 / 2._RDP
+         d2_2 = d2 / 2._bsa_real_t
          nf_1 = nf - 1
 
          ! LEFT

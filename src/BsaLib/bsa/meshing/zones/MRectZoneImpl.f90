@@ -15,8 +15,6 @@
 !! along with BSA Library.  If not, see <https://www.gnu.org/licenses/>.
 submodule(BsaLib_MRectZone) BsaLib_MRectZoneImpl
 
-#include "../../../precisions"
-
 ! #ifndef BSA_M3MF_ONLY_PREMESH_
 ! # define BSA_M3MF_ONLY_PREMESH_ 0
 ! #else
@@ -36,7 +34,7 @@ contains
 
 
    module function MRectZone_t_custom_constructor(rot, name) result(this)
-      real(RDP), intent(in), optional :: rot
+      real(bsa_real_t), intent(in), optional :: rot
       character(len=*), intent(in), optional :: name
       ! NOTE: compiler uses default initialisation here (built-in)
       type(MRectZone_t) :: this
@@ -56,7 +54,7 @@ contains
    !> Gets rect base along I-dir
    module elemental function baseI_rct(this) result(res)
       class(MRectZone_t), intent(in) :: this
-      real(RDP) :: res
+      real(bsa_real_t) :: res
 
       res = this%base_I_
    end function
@@ -65,7 +63,7 @@ contains
    !> Gets rect base along J-dir
    module elemental function baseJ_rct(this) result(res)
       class(MRectZone_t), intent(in) :: this
-      real(RDP) :: res
+      real(bsa_real_t) :: res
 
       res = this%base_J_
    end function
@@ -92,16 +90,13 @@ contains
    !> along the I-dir (X-axis) parallel side.
    module pure function getBPoint(this) result(pt)
       class(MRectZone_t), intent(in) :: this
-      type(MPoint_t) :: pt
-      real(RDP) :: ang
+      type(MPoint_t)   :: pt
+      real(bsa_real_t) :: ang
 
       ! in 4-th quadrant, decrement by 3/2*pi -> first quadrant
       if (this%rot_ > CST_PIt3d2) then
-
          ang = this%rot_ - CST_PIt3d2
-
       else ! otherwise, increment by 1/2*pi
-         
          ang = this%rot_ + CST_PId2
       endif
       pt = this%Ipt_%getNewPointFromDistAndRot(this%base_I_, ang)
@@ -111,7 +106,7 @@ contains
 
    module subroutine deduceDeltas_rect(this)
       class(MRectZone_t), intent(inout) :: this
-      integer :: nsegi, nsegj
+      integer(int32) :: nsegi, nsegj
 
       !
       this%refmts_set_ = .true.
@@ -133,7 +128,7 @@ contains
 
    module subroutine setDeltas(this, dfi, dfj, adapt)
       class(MRectZone_t), intent(inout) :: this
-      real(RDP), intent(in)             :: dfi, dfj
+      real(bsa_real_t), intent(in)      :: dfi, dfj
       logical, intent(in), optional     :: adapt
       logical :: do_adapt = .false.
 
@@ -150,7 +145,7 @@ contains
    module subroutine deduceRefinements(this, adapt)
       class(MRectZone_t), intent(inout) :: this
       logical, intent(in) :: adapt
-      integer :: ni, nj
+      integer(int32) :: ni, nj
 
       ! NOTE: as such, they mean N. OF SEGMENTS
       ni = floor(this%base_I_ / this%deltaf_I_)
@@ -204,22 +199,18 @@ contains
       character(len=1) :: loc
 
       !> Delta values
-      real(RDP), intent(in) :: dfi, dfj
+      real(bsa_real_t), intent(in) :: dfi, dfj
 
       !> Refinements
       integer, value :: ni, nj
-!DIR$ ATTRIBUTES VALUE :: ni, nj
-
 
       if (.not. this%isGRSAligned()) call bsa_Abort('Rect zone is not GRS aligned.')
-
-
 ! #ifdef __BSA_DEBUG
 !       write(unit_debug_, *) ' @MRectZoneImpl::defineFromDeltas_refinements() : init...'
 ! #endif
 
 
-      ! force them odd
+      ! NOTE: force them odd
       if (mod(ni, 2) == 0) ni = ni + 1
       if (mod(nj, 2) == 0) nj = nj + 1
 
@@ -234,17 +225,11 @@ contains
       this%base_I_ = ni * dfi
       this%base_J_ = nj * dfj
 
-
       this%refmts_set_ = .true.
       this%deltaf_I_   = dfi
       this%deltaf_J_   = dfj
 
-
-      ! NOTE: loc(x) returns the integer address of variable x !!
-      !
       call this%define(pt, loc=loc)
-
-
 ! #ifdef __BSA_DEBUG
 !       write(unit_debug_, *) ' @MRectZoneImpl::defineFromDeltas_refinements() : init -- ok.'
 ! #endif
@@ -272,15 +257,14 @@ contains
       character(len=1), intent(in) :: loc
 
       !> Delta values
-      real(RDP), value :: dfi, dfj
+      real(bsa_real_t), value :: dfi, dfj
 !DIR$ ATTRIBUTES VALUE :: dfi, dfj
 
       !> Max deltas values
-      real(RDP) :: maxF_i, maxF_j
+      real(bsa_real_t) :: maxF_i, maxF_j
 
       !> adjusts deltas to max values specified.
       logical, intent(in), optional :: force
-
 
       logical, intent(in), optional :: exceed
 
@@ -292,19 +276,17 @@ contains
          call bsa_Abort(&
             'Cannot define deltas from max values if given point location is not "i" (Init).')
 
-
 ! #ifdef __BSA_DEBUG
 !       write(unit_debug_, *) ' @MRectZoneImpl::defineFromDeltas_maxvalues() : init...'
 ! #endif
 
 
       block
-         ! local
          character(len = *), parameter :: invalid_max_vals = &
             ERRMSG//'Invalid max values (out of allowed bounds).'
-         logical   :: do_force
-         real(RDP) :: fi, fj, bi, bj
-         integer   :: ni, nj
+         logical :: do_force
+         real(bsa_real_t) :: fi, fj, bi, bj
+         integer(int32)   :: ni, nj
 
 
          if (present(force) .and. force) then
@@ -314,10 +296,10 @@ contains
          endif
 
          ! initialise
-         bi = 0._RDP
-         bj = 0._RDP
-         fi = 0._RDP
-         fj = 0._RDP
+         bi = 0._bsa_real_t
+         bj = 0._bsa_real_t
+         fi = 0._bsa_real_t
+         fj = 0._bsa_real_t
          ni = 0
          nj = 0
 
@@ -326,7 +308,7 @@ contains
             fi = pt%freqI()
             fj = pt%freqJ()
 
-            if (this%rot_ == 0._RDP) then
+            if (this%rot_ == 0._bsa_real_t) then
                if (maxF_i <= fi .or. maxF_j <= fj) call bsa_Abort(invalid_max_vals)
 
                bi = maxF_i - fi
@@ -356,7 +338,7 @@ contains
             ! invert deltas if needed
             if (.not. (this%rot_ == 0 .or. this%rot_ == CST_PIGREC)) then
                block
-                  real(RDP) :: tmp
+                  real(bsa_real_t) :: tmp
 
                   tmp = dfi
                   dfi = dfj
@@ -382,8 +364,8 @@ contains
 
 
             block
-               real(RDP) :: di, dj
-               logical   :: do_exceed = .false.
+               real(bsa_real_t) :: di, dj
+               logical :: do_exceed = .false.
 
                
                ! defaults
@@ -394,7 +376,7 @@ contains
                nj = 1
 
 
-               if (this%rot_ == 0._RDP) then
+               if (this%rot_ == 0._bsa_real_t) then
 
                   fi = pt%freqI() + di
                   fj = pt%freqJ() + dj
@@ -470,7 +452,7 @@ contains
                if (ni == 1 .or. nj == 1) call bsa_Abort('At least one max value is too small.')
 
 
-               if (this%rot_ == 0._RDP) then
+               if (this%rot_ == 0._bsa_real_t) then
                   bi = (ni - 1) * di
                   bj = (nj - 1) * dj
 
@@ -534,12 +516,9 @@ contains
                   endif
 
                end if ! rot
-
             end block
 
-
          endif ! force
-
          
          ! backup actual n. of points
          this%ni_ = ni
@@ -551,11 +530,8 @@ contains
          this%deltaf_I_   = dfi
          this%deltaf_J_   = dfj
 
-
          call this%define(pt, loc, bi, bj)
-
       end block
-
 
 ! #ifdef __BSA_DEBUG
 !       write(unit_debug_, *) ' @MRectZoneImpl::defineFromDeltas_maxvalues() : init -- ok.'
@@ -571,15 +547,15 @@ contains
       this, Pi, coord_val, coord_ty_ch, baseval, base_dir, called)
 
       class(MRectZone_t), intent(inout) :: this
-      class(MPoint_t), intent(in) :: Pi
-      real(RDP), intent(in) :: coord_val
-      character(len = 1), intent(in) :: coord_ty_ch
-      real(RDP), intent(in) :: baseval
-      character(len = 1), intent(in)  :: base_dir
-      logical, intent(in)             :: called
+      class(MPoint_t), intent(in)       :: Pi
+      real(bsa_real_t), intent(in)      :: coord_val
+      character(len = 1), intent(in)    :: coord_ty_ch
+      real(bsa_real_t), intent(in)      :: baseval
+      character(len = 1), intent(in)    :: base_dir
+      logical, intent(in)               :: called
 
-      real(RDP)      :: ang
-      type(MPoint_t) :: pt
+      real(bsa_real_t) :: ang
+      type(MPoint_t)   :: pt
 
       if (.not. (coord_ty_ch == 'i' .or. coord_ty_ch == 'j')) &
          call bsa_Abort('Unvalid coordinate type identifier. Must be one of "i"/"j".')
@@ -640,13 +616,12 @@ contains
       this, Pi, coord_val, coord_ty_ch, baseval, base_dir, dfi, dfj)
 
       class(MRectZone_t), intent(inout) :: this
-      class(MPoint_t), intent(in) :: Pi
-      real(RDP), intent(in) :: coord_val
-      character(len = 1), intent(in) :: coord_ty_ch
-      real(RDP), intent(in) :: baseval
-      character(len = 1), intent(in)  :: base_dir
-      real(RDP), intent(in)           :: dfi, dfj
-
+      class(MPoint_t), intent(in)       :: Pi
+      real(bsa_real_t), intent(in)      :: coord_val
+      character(len = 1), intent(in)    :: coord_ty_ch
+      real(bsa_real_t), intent(in)      :: baseval
+      character(len = 1), intent(in)    :: base_dir
+      real(bsa_real_t), intent(in)      :: dfi, dfj
 
 ! #ifdef __BSA_DEBUG
 !       write(unit_debug_, *) ' @MRectZoneImpl::defineFromEndPtCoordAndBase_forceDeltas() : init...'
@@ -676,7 +651,7 @@ contains
       class(MRectZone_t), intent(inout) :: this
       class(MPoint_t), intent(in)       :: pt
       character(len=1), optional, intent(in) :: loc
-      real(RDP), intent(in), optional        :: base_i, base_j
+      real(bsa_real_t), intent(in), optional :: base_i, base_j
 
       character(len=1) :: location = 'i'
 
@@ -685,7 +660,7 @@ contains
       if (location == 'c') then
          
          block
-            real(RDP) :: bid2, bjd2
+            real(bsa_real_t) :: bid2, bjd2
 
             if (present(base_i)) then
                this%base_I_ = base_i
@@ -725,7 +700,7 @@ contains
       class(MPoint_t), intent(in)       :: pt
       character(len=1), intent(in)      :: loc
 
-      real(RDP) :: c, s, ang, di, dj
+      real(bsa_real_t) :: c, s, ang, di, dj
 
       if (.not. (loc == 'i' .or. loc == 'e')) &
          call bsa_Abort('Invalid point location.')
@@ -791,10 +766,10 @@ contains
    !> Avoid setting a delta smaller than given limit
    module elemental impure subroutine validateDeltas(this, lval)
       class(MRectZone_t), intent(inout) :: this
-      real(RDP), intent(in) :: lval
+      real(bsa_real_t), intent(in) :: lval
 
-      real(RDP) :: dfi, dfj
-      logical   :: coarsen = .false.
+      real(bsa_real_t) :: dfi, dfj
+      logical :: coarsen = .false.
 
       dfi = this%deltaf_I_
       dfj = this%deltaf_J_
@@ -819,8 +794,8 @@ contains
 
    ! !> Returns euqivalent rotation in the FIRST quadrant.
    ! elemental function getFirstQuadEquivRot(rot) result(rot1)
-   !    real(RDP), intent(in) :: rot
-   !    real(RDP) :: rot1
+   !    real(bsa_real_t), intent(in) :: rot
+   !    real(bsa_real_t) :: rot1
 
    !    if (rot < CST_PId2) then ! FIRST quad, keep it
    !       rot1 = rot
@@ -844,14 +819,14 @@ contains
       class(MRectZone_t), intent(inout) :: this
       class(MPoint_t), intent(in)  :: pt
       character(len=1), intent(in) :: base_dir, known_coord
-      real(RDP), intent(in) :: coord_val
+      real(bsa_real_t), intent(in) :: coord_val
 
-      real(RDP) :: kd, rot, cd, fi, fj
+      real(bsa_real_t) :: kd, rot, cd, fi, fj
       type(MPoint_t) :: Pe
 
       
       ! NOTE: preinitialise to avoid errors !!!!!!!!!!!!
-      cd = 0._RDP
+      cd = 0._bsa_real_t
 
 
       if (base_dir == 'i') then ! we passed B point, we know side along I-dir
@@ -1014,16 +989,16 @@ contains
    !> zone rotation w.r.t. GRS.
    module subroutine getIJfsteps(this, dfIx, dfIy, dfJx, dfJy)
       class(MRectZone_t), intent(in) :: this
-      real(RDP), intent(out) :: dfIx, dfIy, dfJx, dfJy
+      real(bsa_real_t), intent(out)  :: dfIx, dfIy, dfJx, dfJy
 
-      real(RDP) :: c, s, ang
+      real(bsa_real_t) :: c, s, ang
 
       if (this%rot_ < CST_PId2) then ! FIRST quadrant
 
          c = cos(this%rot_)
          s = sin(this%rot_)
 
-         dfIx = this%deltaf_I_ * c
+         dfIx =   this%deltaf_I_ * c
          dfIy = - this%deltaf_I_ * s
 
          dfJx = this%deltaf_J_ * s
@@ -1038,7 +1013,7 @@ contains
          dfIx = - this%deltaf_I_ * s
          dfIy = - this%deltaf_I_ * c
 
-         dfJx = this%deltaf_J_ * c
+         dfJx =   this%deltaf_J_ * c
          dfJy = - this%deltaf_J_ * s
 
       elseif (this%rot_ < CST_PIt3d2) then ! THIRD quadrant
@@ -1048,7 +1023,7 @@ contains
          s   = sin(ang)
 
          dfIx = - this%deltaf_I_ * c
-         dfIy = this%deltaf_I_ * s
+         dfIy =   this%deltaf_I_ * s
 
          dfJx = - this%deltaf_J_ * s
          dfJy = - this%deltaf_J_ * c
@@ -1063,7 +1038,7 @@ contains
          dfIy = this%deltaf_I_ * c
 
          dfJx = - this%deltaf_J_ * c
-         dfJy = this%deltaf_J_ * s
+         dfJy =   this%deltaf_J_ * s
 
       endif
    end subroutine
@@ -1077,11 +1052,11 @@ contains
    module function reconstructZoneBaseMesh(this) result(msh)
       class(MRectZone_t), intent(in) :: this
       !> BUG: might be 2-rank array instead of 3!
-      real(RDP) :: msh(2, this%nj_, this%ni_)
+      real(bsa_real_t) :: msh(2, this%nj_, this%ni_)
 
-      real(RDP) :: dfIi, dfIj, dfJi, dfJj
-      real(RDP) :: base_fi, base_fj, fi, fj
-      integer   :: i, j
+      real(bsa_real_t) :: dfIi, dfIj, dfJi, dfJj
+      real(bsa_real_t) :: base_fi, base_fj, fi, fj
+      integer(int32)   :: i, j
 
       call this%getIJfsteps(dfIi, dfIj, dfJi, dfJj)
 
@@ -1148,18 +1123,18 @@ contains
       
 
       block
-         real(RDP) :: dfIi, dfIj, dfJi, dfJj
-         real(RDP) :: base_fi, base_fj, fi, fj
+         real(bsa_real_t) :: dfIi, dfIj, dfJi, dfJj
+         real(bsa_real_t) :: base_fi, base_fj, fi, fj
 
-         integer :: niM1, njM1
-         integer :: i, j, idbfm, zNp
+         integer(int32) :: niM1, njM1
+         integer(int32) :: i, j, idbfm, zNp
 
-         real(RDP), allocatable :: bfm(:, :)
+         real(bsa_real_t), allocatable :: bfm(:, :)
 
 #ifdef BSA_M3MF_ONLY_PREMESH_
-         real(RDP) :: dwI, dwJ
-         real(RDP) :: ctr_infl, brd_infl, vtx_infl
-         real(RDP), allocatable :: intg(:)
+         real(bsa_real_t) :: dwI, dwJ
+         real(bsa_real_t) :: ctr_infl, brd_infl, vtx_infl
+         real(bsa_real_t), allocatable :: intg(:)
 #endif
 
          call this%getIJfsteps(dfIi, dfIj, dfJi, dfJj)
@@ -1357,9 +1332,9 @@ contains
    !> w.r.t. Center point, in zone's LRS.
    module pure function getNthQuadVtx(this, iquad) result(pt)
       class(MRectZone_t), intent(in) :: this
-      integer, intent(in) :: iquad
-      type(MPoint_t) :: pt
-      real(RDP) :: c, s, rot, di, dj
+      integer(int32), intent(in)     :: iquad
+      type(MPoint_t)   :: pt
+      real(bsa_real_t) :: c, s, rot, di, dj
 
       if (iquad < 1 .or. iquad > 4) return
 
@@ -1512,8 +1487,8 @@ contains
    module subroutine undumpRZ(this)
       class(MRectZone_t), intent(inout) :: this
       
-      real(RDP)      :: rval1, rval2
-      integer        :: ival1, ival2
+      real(bsa_real_t)   :: rval1, rval2
+      integer(bsa_int_t) :: ival1, ival2
 
       ! init point
       read(unit_dump_bfm_) rval1, rval2
@@ -1547,7 +1522,7 @@ contains
       & )
       class(MRectZone_t), intent(inout) :: this
 #ifdef __BSA_OMP
-      real(RDP), intent(in) :: bfm(:, :)
+      real(bsa_real_t), intent(in)  :: bfm(:, :)
       class(*), pointer, intent(in) :: pdata
 
       ! NOTE: for the moment only supporting HTPC method
@@ -1588,51 +1563,51 @@ contains
       !
       class(MRectZone_t), intent(inout) :: this
 #ifdef __BSA_OMP
-      real(RDP), intent(in) :: bfm_undump(:, :)
+      real(bsa_real_t), intent(in)  :: bfm_undump(:, :)
       class(*), pointer, intent(in) :: pdata
 #endif
 
-      type(MPolicy_t) :: pol
-      integer   :: ni, nj, ni_bfm_ref_, nj_bfm_ref_
-      integer   :: nipI, nipJ, nPtsPost, n_im_, im_idx_
-      integer   :: i, ist, n_segs_bfm_ref_i_, n_segs_bfm_ref_j_
-      integer   :: n_pts_bfm_ref_i_, n_pts_bfm_ref_j_
-      real(RDP) :: dfIi_bfm_lv0_, dfIj_bfm_lv0_, dfJi_bfm_lv0_, dfJj_bfm_lv0_
-      real(RDP) :: dfIi_bfm_ref_, dfIj_bfm_ref_, dfJi_bfm_ref_, dfJj_bfm_ref_
-      real(RDP) :: dfI_bfm_lv0_, dfJ_bfm_lv0_, dfI_bfm_ref_, dfJ_bfm_ref_
-      real(RDP) :: dfIi_brm_interp, dfIj_brm_interp, dfJi_brm_interp, dfJj_brm_interp
-      real(RDP) :: dfI_brm_interp_, dfJ_brm_interp_, dwI, dwJ
-      real(RDP) :: vtx_infl, brd_infl, ctr_infl
-      integer(kind = 4), allocatable :: inter_modes_(:)
+      type(MPolicy_t)  :: pol
+      integer(int32)   :: ni, nj, ni_bfm_ref_, nj_bfm_ref_
+      integer(int32)   :: nipI, nipJ, nPtsPost, n_im_, im_idx_
+      integer(int32)   :: i, ist, n_segs_bfm_ref_i_, n_segs_bfm_ref_j_
+      integer(int32)   :: n_pts_bfm_ref_i_, n_pts_bfm_ref_j_
+      real(bsa_real_t) :: dfIi_bfm_lv0_, dfIj_bfm_lv0_, dfJi_bfm_lv0_, dfJj_bfm_lv0_
+      real(bsa_real_t) :: dfIi_bfm_ref_, dfIj_bfm_ref_, dfJi_bfm_ref_, dfJj_bfm_ref_
+      real(bsa_real_t) :: dfI_bfm_lv0_, dfJ_bfm_lv0_, dfI_bfm_ref_, dfJ_bfm_ref_
+      real(bsa_real_t) :: dfIi_brm_interp, dfIj_brm_interp, dfJi_brm_interp, dfJj_brm_interp
+      real(bsa_real_t) :: dfI_brm_interp_, dfJ_brm_interp_, dwI, dwJ
+      real(bsa_real_t) :: vtx_infl, brd_infl, ctr_infl
+      integer(int32), allocatable :: inter_modes_(:)
 
       ! HTPC indexes
-      integer :: pIcurr, pIprev, pJhead, pJtail
+      integer(int32) :: pIcurr, pIprev, pJhead, pJtail
 
       ! Pos in general BFM undumped data
-      integer :: i_bfm_old, i_bfm_ref_i, i_bfm_ref_j
-      integer :: i_brm, i_brm_shift, i_brm_write_, i_brm_offsetJ
-      integer :: i_bfm_interpJ, i_ftc
+      integer(int32) :: i_bfm_old, i_bfm_ref_i, i_bfm_ref_j
+      integer(int32) :: i_brm, i_brm_shift, i_brm_write_, i_brm_offsetJ
+      integer(int32) :: i_bfm_interpJ, i_ftc
 
       ! freqs
-      real(RDP) :: fi_baseptI, fj_baseptI, fi_baseptJ, fj_baseptJ
-      real(RDP) :: fi, fj
+      real(bsa_real_t) :: fi_baseptI, fj_baseptI, fi_baseptJ, fj_baseptJ
+      real(bsa_real_t) :: fi, fj
 #ifdef __BSA_OMP
-      real(RDP), allocatable, dimension(:) :: fi_v_, fj_v_
+      real(bsa_real_t), allocatable, dimension(:) :: fi_v_, fj_v_
 #endif
 
 
-      real(RDP), allocatable :: bfm_new_left(:, :), bfm_new_right(:, :)
-      real(RDP), allocatable :: bfm_interp(:, :)
+      real(bsa_real_t), allocatable :: bfm_new_left(:, :), bfm_new_right(:, :)
+      real(bsa_real_t), allocatable :: bfm_interp(:, :)
 
-      real(RDP) :: dfJtail, dfJhead, dfIcurr, dfIprev
-      real(RDP) :: bfmtail(dimM_bisp_), bfmhead(dimM_bisp_)
+      real(bsa_real_t) :: dfJtail, dfJhead, dfIcurr, dfIprev
+      real(bsa_real_t) :: bfmtail(dimM_bisp_), bfmhead(dimM_bisp_)
 
-      real(RDP), allocatable :: brm(:, :)
-      real(RDP) :: intg(dimM_bisp_)
+      real(bsa_real_t), allocatable :: brm(:, :)
+      real(bsa_real_t) :: intg(dimM_bisp_)
 
 #ifndef BSA_M3MF_ONLY_PREMESH_
-      real(RDP) :: vtx_infl_bfm, brd_infl_bfm, ctr_infl_bfm
-      real(RDP) :: intg_bfm(dimM_bisp_)
+      real(bsa_real_t) :: vtx_infl_bfm, brd_infl_bfm, ctr_infl_bfm
+      real(bsa_real_t) :: intg_bfm(dimM_bisp_)
 #endif
 
 
@@ -1743,16 +1718,16 @@ contains
       dwI = dfI_bfm_ref_ * CST_PIt2
       dwJ = dfJ_bfm_ref_ * CST_PIt2
       ctr_infl_bfm = dwI * dwJ
-      brd_infl_bfm = ctr_infl / 2._RDP
-      vtx_infl_bfm = brd_infl / 2._RDP
+      brd_infl_bfm = ctr_infl / 2._bsa_real_t
+      vtx_infl_bfm = brd_infl / 2._bsa_real_t
 #endif
 
       ! compute BRM influence areas for integration
       dwI = dfI_brm_interp_ * CST_PIt2
       dwJ = dfJ_brm_interp_ * CST_PIt2
       ctr_infl = dwI * dwJ
-      brd_infl = ctr_infl / 2._RDP
-      vtx_infl = brd_infl / 2._RDP
+      brd_infl = ctr_infl / 2._bsa_real_t
+      vtx_infl = brd_infl / 2._bsa_real_t
 
       ! get actualised BFM-refined and BRM-interp  refinements (along borders)
       ni_bfm_ref_ = (this%ni_ - 1)
@@ -1772,29 +1747,29 @@ contains
       nPtsPost = ni * nj
       allocate(brm(dimM_bisp_, nPtsPost), stat=ist)
       if (ist /= 0) call bsa_Abort("Error allocating ""brm"" in interpolating RZ.")
-      brm = 0._RDP
+      brm = 0._bsa_real_t
 
       allocate(bfm_new_left(dimM_bisp_, nj), stat=ist)
       if (ist /= 0) call bsa_Abort("Error allocating ""bfm_new_left"" in interpolating RZ.")
-      bfm_new_left  = 0._RDP
+      bfm_new_left  = 0._bsa_real_t
 
       allocate(bfm_new_right(dimM_bisp_, nj), stat=ist)
       if (ist /= 0) call bsa_Abort("Error allocating ""bfm_new_right"" in interpolating RZ.")
-      bfm_new_right = 0._RDP
+      bfm_new_right = 0._bsa_real_t
       
       allocate(bfm_interp(dimM_bisp_, nj), stat=ist)
       if (ist /= 0) call bsa_Abort("Error allocating ""bfm_interp"" in interpolating RZ.")
-      bfm_interp = 0._RDP
+      bfm_interp = 0._bsa_real_t
 
 
 #ifdef __BSA_OMP
       allocate(fi_v_(nPtsPost), stat=ist)
       if (ist /= 0) call bsa_Abort("Error allocating ""fi"" in interpolating RZ.")
-      fi = 0._RDP
+      fi = 0._bsa_real_t
 
       allocate(fj_v_(nPtsPost), stat=ist)
       if (ist /= 0) call bsa_Abort("Error allocating ""fj"" in interpolating RZ.")
-      fj = 0._RDP
+      fj = 0._bsa_real_t
 
 # define __FREQ_I_  fi_v_(i_brm) = fi
 # define __FREQ_J_  fj_v_(i_brm) = fj
@@ -1872,7 +1847,7 @@ contains
 #endif
 
             dfJhead = dfJ_bfm_ref_
-            dfJtail = 0._RDP
+            dfJtail = 0._bsa_real_t
             do pJtail = 1, nipJ ! interp (J-dir) between tail-head
 
                fi = fi + dfJi_brm_interp
@@ -1943,7 +1918,7 @@ contains
 
          
          dfJhead = dfJ_bfm_ref_
-         dfJtail = 0._RDP
+         dfJtail = 0._bsa_real_t
          do pJtail = 1, nipJ ! interp (J-dir) between tail-head
 
             fi = fi + dfJi_brm_interp
@@ -2050,7 +2025,7 @@ contains
                   
                   ! once we moved head, restore init, distances from head/tail
                   dfJhead = dfJ_bfm_ref_
-                  dfJtail = 0._RDP
+                  dfJtail = 0._bsa_real_t
                   do pJtail = 1, nipJ ! interp (J-dir) between tail-head
          
                      fi = fi + dfJi_brm_interp
@@ -2106,7 +2081,7 @@ contains
 
                ! once we moved head, restore init, distances from head/tail
                dfJhead = dfJ_bfm_ref_
-               dfJtail = 0._RDP
+               dfJtail = 0._bsa_real_t
                do pJtail = 1, nipJ
       
                   fi = fi + dfJi_brm_interp
@@ -2159,7 +2134,7 @@ contains
             ! Now INTERPOLATE along I-dir between left and right BFM infl lines.
             !
             dfIcurr = dfI_bfm_ref_ ! reset I-dir CURR-PREV distances
-            dfIprev = 0._RDP
+            dfIprev = 0._bsa_real_t
             do pIprev = 1, nipI ! interp (I-dir) between prev-curr
 
                ! bulk I-dir interpolation until pj_head section level.
@@ -2279,7 +2254,7 @@ contains
       
                ! once we moved head, restore init, distances from head/tail
                dfJhead = dfJ_bfm_ref_
-               dfJtail = 0._RDP
+               dfJtail = 0._bsa_real_t
                do pJtail = 1, nipJ
       
                   fi = fi + dfJi_brm_interp
@@ -2337,7 +2312,7 @@ contains
 
             ! once we moved head, restore init distances from head/tail
             dfJhead = dfJ_bfm_ref_
-            dfJtail = 0._RDP
+            dfJtail = 0._bsa_real_t
             do pJtail = 1, nipJ
    
                fi = fi + dfJi_brm_interp
@@ -2401,7 +2376,7 @@ contains
 
 
          dfIcurr = dfI_bfm_ref_ ! reset I-dir CURR-PREV distances
-         dfIprev = 0._RDP
+         dfIprev = 0._bsa_real_t
          do pIprev = 1, nipI ! interpolate along I
 
             ! bulk I-dir interpolation until pj_head section level.
@@ -2544,34 +2519,34 @@ contains
 !       type(MPolicy_t) :: pol
 !       integer   :: ni, nj
 !       integer   :: nipI, nipJ, zNintrpPts
-!       real(RDP) :: dfIi_old, dfIj_old, dfJi_old, dfJj_old
-!       real(RDP) :: dfIi_interp, dfIj_interp, dfJi_interp, dfJj_interp
-!       real(RDP) :: dfI_old, dfJ_old, dfI_interp, dfJ_interp, dwI, dwJ
-!       real(RDP) :: vtx_infl, brd_infl, ctr_infl
+!       real(bsa_real_t) :: dfIi_old, dfIj_old, dfJi_old, dfJj_old
+!       real(bsa_real_t) :: dfIi_interp, dfIj_interp, dfJi_interp, dfJj_interp
+!       real(bsa_real_t) :: dfI_old, dfJ_old, dfI_interp, dfJ_interp, dwI, dwJ
+!       real(bsa_real_t) :: vtx_infl, brd_infl, ctr_infl
 
 !       ! HTPC indexes
-!       integer :: picurr, piprev, pjhead, pjtail
+!       integer(int32) :: picurr, piprev, pjhead, pjtail
 
 !       !> Pos in general BFM undumped data
-!       integer :: i_bfm
-!       integer :: i_brm, i_brm_shift, ibrmoffset
-!       integer :: i_bfm_interpJ
+!       integer(int32) :: i_bfm
+!       integer(int32) :: i_brm, i_brm_shift, ibrmoffset
+!       integer(int32) :: i_bfm_interpJ
 
 !       ! freqs
-!       real(RDP) :: base_fi, base_fj, fi, fj
+!       real(bsa_real_t) :: base_fi, base_fj, fi, fj
 
 
-!       real(RDP), allocatable :: bfm_new_left(:, :), bfm_new_right(:, :)
-!       real(RDP), allocatable :: bfm_interp(:, :)
+!       real(bsa_real_t), allocatable :: bfm_new_left(:, :), bfm_new_right(:, :)
+!       real(bsa_real_t), allocatable :: bfm_interp(:, :)
 
-!       real(RDP) :: dfJtail, dfJhead, dfIcurr, dfIprev
-!       real(RDP) :: bfmtail(dimM_bisp_), bfmhead(dimM_bisp_)
+!       real(bsa_real_t) :: dfJtail, dfJhead, dfIcurr, dfIprev
+!       real(bsa_real_t) :: bfmtail(dimM_bisp_), bfmhead(dimM_bisp_)
 
 
-!       real(RDP), allocatable :: brm(:, :)
-!       real(RDP) :: intg(dimM_bisp_)
+!       real(bsa_real_t), allocatable :: brm(:, :)
+!       real(bsa_real_t) :: intg(dimM_bisp_)
 
-!       integer :: iall1, iall2, iall3, iall4
+!       integer(int32) :: iall1, iall2, iall3, iall4
 
 
 !       ! zone's policy
@@ -2604,8 +2579,8 @@ contains
 !       dwI = dfI_interp * CST_PIt2
 !       dwJ = dfJ_interp * CST_PIt2
 !       ctr_infl = dwI * dwJ
-!       brd_infl = ctr_infl / 2._RDP
-!       vtx_infl = brd_infl / 2._RDP
+!       brd_infl = ctr_infl / 2._bsa_real_t
+!       vtx_infl = brd_infl / 2._bsa_real_t
 
 !       ! get actualised refinements (along borders)
 !       ni = (this%ni_ - 1) * pol%interp_I_fct_ + 1
@@ -2621,13 +2596,13 @@ contains
 !       ! allocate data
 !       zNintrpPts = ni * nj
 !       allocate(brm(dimM_bisp_, zNintrpPts), stat=iall1)
-!       brm = 0._RDP
+!       brm = 0._bsa_real_t
 !       allocate(bfm_new_left(dimM_bisp_, nj), stat=iall2)
-!       bfm_new_left  = 0._RDP
+!       bfm_new_left  = 0._bsa_real_t
 !       allocate(bfm_new_right(dimM_bisp_, nj), stat=iall3)
-!       bfm_new_right = 0._RDP
+!       bfm_new_right = 0._bsa_real_t
 !       allocate(bfm_interp(dimM_bisp_, nj), stat=iall4)
-!       bfm_interp = 0._RDP
+!       bfm_interp = 0._bsa_real_t
 
 
 !       ! before starting, interpolate very first column
@@ -2655,7 +2630,7 @@ contains
 !          ! once we moved head, restore init
 !          ! distances from head/tail
 !          dfJhead = dfJ_old
-!          dfJtail = 0._RDP
+!          dfJtail = 0._bsa_real_t
 
 !          do pjtail = 1, nipJ
 
@@ -2734,7 +2709,7 @@ contains
 !             ! once we moved head, restore init
 !             ! distances from head/tail
 !             dfJhead = dfJ_old
-!             dfJtail = 0._RDP
+!             dfJtail = 0._bsa_real_t
    
    
 !             do pjtail = 1, nipJ
@@ -2794,7 +2769,7 @@ contains
 
 !          ! reset I-dir CURR-PREV distances
 !          dfIcurr    = dfI_old
-!          dfIprev    = 0._RDP
+!          dfIprev    = 0._bsa_real_t
 
 !          ! interpolate along I
 !          do piprev = 1, nipI

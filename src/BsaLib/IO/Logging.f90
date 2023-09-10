@@ -15,8 +15,6 @@
 !! along with BSA Library.  If not, see <https://www.gnu.org/licenses/>.
 module Logging
 
-#include "../precisions"
-
    use BsaLib_IO, only: unit_dump_bfm_, unit_debug_, undebug_fname_
    use BsaLib_CONSTANTS
    implicit none
@@ -36,7 +34,7 @@ module Logging
    type, public :: logger_t
 
       private
-      integer(kind = 4)             :: iun_ = 0
+      integer(int32) :: iun_ = 0
       character(len=:), allocatable :: fileName_
 
    contains
@@ -67,7 +65,7 @@ module Logging
 
       module subroutine init(this, iun, fname)
          class(logger_t),   intent(inout) :: this
-         integer(kind = 4), intent(in)    :: iun
+         integer(int32), intent(in)       :: iun
          character(len=*), intent(in), optional :: fname
       end subroutine
 
@@ -100,9 +98,9 @@ module Logging
 
       
       module subroutine logZonePremeshingTotTime(this, zname, rtime, npts, print2console)
-         class(logger_t), intent(in)  :: this
-         character(len=*), intent(in) :: zname
-         real(RDP), intent(in) :: rtime
+         class(logger_t), intent(in)   :: this
+         character(len=*), intent(in)  :: zname
+         real(real64), intent(in)      :: rtime
          integer, intent(in), optional :: npts
          logical, intent(in), optional :: print2console
       end subroutine
@@ -121,13 +119,13 @@ module Logging
 #ifdef __BSA_ALLOC_DEBUG
       module subroutine allocOKMsg_scalar_(name_, iloc, nbytes)
          character(len = *), intent(in) :: name_
-         integer(kind = 8), intent(in), optional  :: iloc, nbytes
+         integer(int64), intent(in), optional  :: iloc, nbytes
       end subroutine
 
       module subroutine allocOKMsg_array_(name_, dims, iloc, nbytes)
          character(len = *), intent(in) :: name_
          integer, intent(in)            :: dims(..)
-         integer(kind = 8), intent(in), optional  :: iloc, nbytes
+         integer(int64), intent(in), optional  :: iloc, nbytes
       end subroutine
 
       module subroutine deallocOKMsg(name_)

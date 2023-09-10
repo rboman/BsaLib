@@ -15,29 +15,43 @@
 !! along with BSA Library.  If not, see <https://www.gnu.org/licenses/>.
 module BsaLib_CONSTANTS
 
+   use, intrinsic :: iso_fortran_env
+#ifndef IK
+# define IK int32
+#endif
+#ifndef RK
+# define RK real64
+#endif
    implicit none
    public
 
 
    !**************************************************************************************
+   !   BSA  integer/real types selected kinds
+   !**************************************************************************************
+   integer, parameter :: bsa_int_t  = IK
+   integer, parameter :: bsa_real_t = RK
+
+
+   !**************************************************************************************
    !   BSA  GENERICS
    !**************************************************************************************
-   integer(kind = 4), parameter :: BSA_SPATIAL_SYM_NONE = 1
-   integer(kind = 4), parameter :: BSA_SPATIAL_SYM_HALF = 2
-   integer(kind = 4), parameter :: BSA_SPATIAL_SYM_FOUR = 4
+   integer(int32), parameter :: BSA_SPATIAL_SYM_NONE = 1_int32
+   integer(int32), parameter :: BSA_SPATIAL_SYM_HALF = 2_int32
+   integer(int32), parameter :: BSA_SPATIAL_SYM_FOUR = 4_int32
 
-   integer(kind = 4), parameter :: BSA_PREMESH_MODE_BASE = 0
-   integer(kind = 4), parameter :: BSA_PREMESH_MODE_ZONE_REFINED = 1
+   integer(int32), parameter :: BSA_PREMESH_MODE_BASE         = 0_int32
+   integer(int32), parameter :: BSA_PREMESH_MODE_ZONE_REFINED = 1_int32
    
-   integer(kind = 4), parameter :: BSA_PREMESH_TYPE_DIAG_CREST_NO  = 0
-   integer(kind = 4), parameter :: BSA_PREMESH_TYPE_DIAG_CREST_YES = 1
+   integer(int32), parameter :: BSA_PREMESH_TYPE_DIAG_CREST_NO  = 0_int32
+   integer(int32), parameter :: BSA_PREMESH_TYPE_DIAG_CREST_YES = 1_int32
 
-   integer(kind = 4), parameter :: BSA_VALIDATE_DELTAS_POLICY_NONE    = 0
-   integer(kind = 4), parameter :: BSA_VALIDATE_DELTAS_POLICY_DEFAULT = 1
-   integer(kind = 4), parameter :: BSA_VALIDATE_DELTAS_POLICY_LIGHT   = 2
-   integer(kind = 4), parameter :: BSA_VALIDATE_DELTAS_POLICY_MEDIUM  = 3
-   integer(kind = 4), parameter :: BSA_VALIDATE_DELTAS_POLICY_HIGH    = 4
-   integer(kind = 4), parameter :: BSA_VALIDATE_DELTAS_POLICY_STRICT  = 5
+   integer(int32), parameter :: BSA_VALIDATE_DELTAS_POLICY_NONE    = 0_int32
+   integer(int32), parameter :: BSA_VALIDATE_DELTAS_POLICY_DEFAULT = 1_int32
+   integer(int32), parameter :: BSA_VALIDATE_DELTAS_POLICY_LIGHT   = 2_int32
+   integer(int32), parameter :: BSA_VALIDATE_DELTAS_POLICY_MEDIUM  = 3_int32
+   integer(int32), parameter :: BSA_VALIDATE_DELTAS_POLICY_HIGH    = 4_int32
+   integer(int32), parameter :: BSA_VALIDATE_DELTAS_POLICY_STRICT  = 5_int32
 
    !**************************************************************************************
    !   BSA  I/O  DEFAULTS
@@ -96,14 +110,14 @@ module BsaLib_CONSTANTS
    !**************************************************************************
    !  EXPORT CONSTANTs
    !**************************************************************************
-   integer(kind = 4), parameter :: BSA_EXPORT_FORMAT_FORMATTED   = 0
-   integer(kind = 4), parameter :: BSA_EXPORT_FORMAT_UNFORMATTED = 1
-   integer(kind = 4), parameter :: BSA_EXPORT_MODE_APPEND  = 0
-   integer(kind = 4), parameter :: BSA_EXPORT_MODE_REPLACE = 1
+   integer(int32), parameter :: BSA_EXPORT_FORMAT_FORMATTED   = 0_int32
+   integer(int32), parameter :: BSA_EXPORT_FORMAT_UNFORMATTED = 1_int32
+   integer(int32), parameter :: BSA_EXPORT_MODE_APPEND  = 0_int32
+   integer(int32), parameter :: BSA_EXPORT_MODE_REPLACE = 1_int32
 
-   integer(kind = 4), parameter :: BSA_EXPORT_BRM_MODE_NONE = 0
-   integer(kind = 4), parameter :: BSA_EXPORT_BRM_MODE_BASE = 1
-   integer(kind = 4), parameter :: BSA_EXPORT_BRM_MODE_USR  = 9
+   integer(int32), parameter :: BSA_EXPORT_BRM_MODE_NONE = 0_int32
+   integer(int32), parameter :: BSA_EXPORT_BRM_MODE_BASE = 1_int32
+   integer(int32), parameter :: BSA_EXPORT_BRM_MODE_USR  = 9_int32
 
 
    character(len = *), parameter :: BSA_EXPORT_M2MF_CLS_FNAME   = "m2mf_cls"
@@ -120,12 +134,14 @@ module BsaLib_CONSTANTS
 
    abstract interface
       subroutine exportBRMinterf_scalar_(f1, f2, brm, pdata)
-         real(kind = 8), intent(in) :: f1, f2, brm(:)
+         import bsa_real_t 
+         real(bsa_real_t), intent(in)  :: f1, f2, brm(:)
          class(*), pointer, intent(in) :: pdata
       end subroutine
 
       subroutine exportBRMinterf_vect_all_(f1, f2, brm, pdata)
-         real(kind = 8), intent(in) :: f1(:), f2(:), brm(:, :)
+         import bsa_real_t
+         real(bsa_real_t), intent(in)  :: f1(:), f2(:), brm(:, :)
          class(*), pointer, intent(in) :: pdata
       end subroutine
    end interface
@@ -138,24 +154,22 @@ module BsaLib_CONSTANTS
    !**************************************************************************************
    
    !> TO AVOID CRASHING BECAUSE OF MACHINE FLOATING PRECISION ERRORS
-   real(kind = 8), parameter :: MACHINE_PRECISION = 1e-12
+   real(real64), parameter :: MACHINE_PRECISION = 1e-12_real64
 
-   real(kind = 8), parameter :: CST_PIGREC = 4.d0 * atan(1.d0)
+   real(real64), parameter :: CST_PIGREC = 4.0_real64 * atan(1.0_real64)
 
-   real(kind = 8), parameter :: CST_PIt2   = CST_PIGREC * 2.d0
-   real(kind = 8), parameter :: CST_PIt4   = CST_PIGREC * 4.d0
+   real(real64), parameter :: CST_PIt2   = CST_PIGREC * 2.0_real64
+   real(real64), parameter :: CST_PIt4   = CST_PIGREC * 4.0_real64
 
-   real(kind = 8), parameter :: CST_PId2   = CST_PIGREC / 2.d0
-   real(kind = 8), parameter :: CST_PId4   = CST_PIGREC / 4.d0
+   real(real64), parameter :: CST_PId2   = CST_PIGREC / 2.0_real64
+   real(real64), parameter :: CST_PId4   = CST_PIGREC / 4.0_real64
 
    
-   real(kind = 8), parameter :: CST_2d3    = 2.d0 / 3.d0
-   real(kind = 8), parameter :: CST_3d2    = 3.d0 / 2.d0
-   real(kind = 8), parameter :: CST_PIt3d2 = CST_PIGREC * CST_3d2
-
+   real(real64), parameter :: CST_2d3    = 2.0_real64 / 3.0_real64
+   real(real64), parameter :: CST_3d2    = 3.0_real64 / 2.0_real64
+   real(real64), parameter :: CST_PIt3d2 = CST_PIGREC * CST_3d2
 
    logical, protected :: header_called_ = .false.
-
 
 contains
 

@@ -15,8 +15,6 @@
 !! along with BSA Library.  If not, see <https://www.gnu.org/licenses/>.
 submodule(BsaLib) BsaLib_MesherImpl
 
-#include "../../precisions"
-
    use BsaLib_Data
    use BsaLib_MPoint
    use BsaLib_MRectZone
@@ -29,11 +27,11 @@ submodule(BsaLib) BsaLib_MesherImpl
    implicit none
 
    ! to have a local instance to be referenced
-   integer :: NM__, NM_EFF__
+   integer(bsa_int_t) :: NM__, NM_EFF__
    character(len = *), parameter :: bfm_dump_file_name_ = 'dumpfile'
    
    ! BUG: let the user choose how many modes it allows to be covered max.
-   integer(kind = 4), parameter :: N_RES_PEAK_IN_BKG_ZONE_DIV_FCT_ = 4
+   integer(int32), parameter :: N_RES_PEAK_IN_BKG_ZONE_DIV_FCT_ = 4
 
    interface getEquivalentLooperIterator
       module procedure getEquivalentLooperIterator_char
@@ -48,8 +46,8 @@ contains
 
    module subroutine mainMesher_(m3mf_msh, m3mr_msh)
       use BsaLib_Functions, only: cleanSVDWorkInfo_
-      real(RDP), target, allocatable :: m3mf_msh(:), m3mr_msh(:)
-      integer :: istat
+      real(bsa_real_t), target, allocatable :: m3mf_msh(:), m3mr_msh(:)
+      integer(int32) :: istat
       character(len = 256) :: emsg
       logical :: lflag
 
@@ -73,7 +71,7 @@ contains
       else
          call allocKOMsg('m3mf_msh', istat, emsg)
       endif
-      m3mf_msh = 0._RDP
+      m3mf_msh = 0._bsa_real_t
       m3mf_msh_ptr_ => m3mf_msh
 
       call PreMesh()
@@ -95,7 +93,7 @@ contains
       else
          call allocKOMsg('m3mr_msh', istat, emsg)
       endif
-      m3mr_msh = 0._RDP
+      m3mr_msh = 0._bsa_real_t
       m3mr_msh_ptr_ => m3mr_msh
       call Mesh()
 
@@ -178,14 +176,14 @@ contains
 #ifdef __BSA_CHECK_NOD_COH_SVD
       use BsaLib_Functions, only: MSHR_SVD_INFO, MSHR_SVD_LWORK, MSHR_SVD_WORK
 #endif
-      real(RDP), parameter :: cst_sqrt2d2 = sqrt(2.d0) / 2._RDP      
-      integer(kind = 4) :: NLims, iost
+      real(real64), parameter :: cst_sqrt2d2 = sqrt(2._real64) / 2._real64      
+      integer(int32) :: NLims, iost
       
-      real(RDP) :: base_i, base_j, max_ext
-      real(RDP) :: deltaI_S2_2, deltaI_2_S2_2
-      real(RDP) :: df_I_ref, df_J_ref
-      logical   :: iun_open
-      real(RDP), allocatable :: limits(:)
+      logical :: iun_open
+      real(bsa_real_t) :: base_i, base_j, max_ext
+      real(bsa_real_t) :: deltaI_S2_2, deltaI_2_S2_2
+      real(bsa_real_t) :: df_I_ref, df_J_ref
+      real(bsa_real_t), allocatable :: limits(:)
       type(MPolicy_t), allocatable, target :: policies(:)
 
       type(MRectZone_t) :: bkgz
@@ -238,7 +236,7 @@ contains
       base_j = base_i
 
       deltaI_S2_2   = base_i * cst_sqrt2d2
-      deltaI_2_S2_2 = deltaI_S2_2 / 2.
+      deltaI_2_S2_2 = deltaI_S2_2 / 2._bsa_real_t
 
       max_ext = getMaxSpaceExtension_() ! Get max point in space to reach
 
@@ -302,10 +300,10 @@ contains
       !       point for other nearby zones correct identification.
       call timer%init()
       zone_title = 'BKG center peak'
-      bkgz       = MRectZone(0._RDP, zone_title)
+      bkgz       = MRectZone(0._bsa_real_t, zone_title)
       if (settings%i_bisp_sym_ == BSA_SPATIAL_SYM_HALF) then
-         base_i = base_i / 2._RDP
-         call bkgz%define(MPoint(0._RDP, - base_i), 'i', base_i, base_j)
+         base_i = base_i / 2._bsa_real_t
+         call bkgz%define(MPoint(0._bsa_real_t, - base_i), 'i', base_i, base_j)
       else
          call bkgz%define(MPoint_t(), 'c', base_i, base_j)
       endif
@@ -369,9 +367,9 @@ contains
       block
 
          !> Number of main directions ['NORTH', 'EAST ', 'SOUTH', 'WEST ']
-         integer(kind = 4), parameter :: N_DIRS_FULL = 4
-         integer(kind = 4), parameter :: N_DIRS_HALF = 3
-         integer(kind = 4) :: n_dirs_
+         integer(int32), parameter :: N_DIRS_FULL = 4_int32
+         integer(int32), parameter :: N_DIRS_HALF = 3_int32
+         integer(int32) :: n_dirs_
 
          !> Main directions labels 
          !> ['NORTH', 'EAST ', 'SOUTH', 'WEST ']
@@ -383,26 +381,26 @@ contains
             ['NORTH-EAST', 'SOUTH-EAST', 'SOUTH-WEST', 'NORTH-WEST']
          
          !> Set of pair rotations, per main direction
-         real(RDP), parameter :: ROTATIONS(6) = &
-            [CST_PIt3d2, 0._RDP, CST_PId2, CST_PIGREC, CST_PIt3d2, 0._RDP]
+         real(real64), parameter :: ROTATIONS(6) = &
+            [CST_PIt3d2, 0._real64, CST_PId2, CST_PIGREC, CST_PIt3d2, 0._real64]
 
          !> Which base is actually passed, depending on N-E-S-W direction
          character(len = 1), parameter :: COORDS_DIR_CH(4) = ['j', 'i', 'j', 'i']
 
          !> Signs to apply at limits, depending on N-E-S-W direction
-         integer(kind = 4), parameter :: LIM_SIGN_DIRS(4) = [1, 1, -1, -1]
+         integer(int32), parameter :: LIM_SIGN_DIRS(4) = [1, 1, -1, -1]
 
-         integer(kind = 4), parameter :: LEFT_RZ_SIGNS(4)  = [1, -1, -1, 1]
+         integer(int32), parameter :: LEFT_RZ_SIGNS(4)  = [1, -1, -1, 1]
 
-         real(RDP), parameter :: DF_FCT_CST = 0.5_RDP
+         real(real64), parameter :: DF_FCT_CST = 0._real64
 
-         integer(kind = 4) :: i, NLimsP1, idir, iim, ilim, nim, idir_t2
-         integer(kind = 4) :: id_im_last, ilim_init_ = 0, n_bfm_pts_pre_
-         real(RDP) :: lim, rtmp
-         real(RDP) :: df_I, df_J
-         real(RDP) :: sign_dir
-         real(RDP) :: maxF, base_i_
-         real(RDP), allocatable :: maxext_sym_(:), bases_i_(:)
+         integer(int32)   :: i, NLimsP1, idir, iim, ilim, nim, idir_t2
+         integer(int32)   :: id_im_last, ilim_init_ = 0, n_bfm_pts_pre_
+         real(bsa_real_t) :: lim, rtmp
+         real(bsa_real_t) :: df_I, df_J
+         integer(int32)   :: sign_dir
+         real(bsa_real_t) :: maxF, base_i_
+         real(bsa_real_t), allocatable :: maxext_sym_(:), bases_i_(:)
 
          logical :: warn_zone_over_limits = .false.
 
@@ -412,27 +410,27 @@ contains
          character(len = 1) :: coord_dir
 
          ! allocatables depending on Nlim +1
-         real(RDP), allocatable          :: rots(:)
-         real(RDP), allocatable          :: deltas(:, :)
-         integer(kind = 4), allocatable  :: refmts(:, :), inter_modes_(:)
-         integer(kind = 4), allocatable  :: int_modes_(:)
-         real(RDP)                       :: rval
+         real(bsa_real_t), allocatable   :: rots(:)
+         real(bsa_real_t), allocatable   :: deltas(:, :)
+         integer(bsa_int_t), allocatable :: refmts(:, :), inter_modes_(:)
+         integer(bsa_int_t), allocatable :: int_modes_(:)
+         real(bsa_real_t) :: rval
 
          !> general rectangular zone
          type(MRectZone_t) :: rz
          type(MPoint_t)    :: basePts(4), ptI, ptE
 
-         integer(kind = 4) :: N_THREADS_MIN_
+         integer(int32) :: N_THREADS_MIN_
 
 
          ! 
          NLimsP1 = NLims + 1
          allocate(rots(NLimsP1))
-         rots   = 0._RDP
+         rots   = 0._bsa_real_t
          allocate(deltas(2, NLimsP1))
-         deltas = 0._RDP
+         deltas = 0._bsa_real_t
          allocate(refmts(2, NLimsP1))
-         refmts = 0
+         refmts = 0_bsa_int_t
          allocate(inter_modes_(NLimsP1))
          inter_modes_ = 0
 
@@ -549,9 +547,9 @@ contains
                ! BUG: optimise this!!
                select case (idir)
                   case (1, 3)
-                     call ptI%move(0._RDP, sign_dir * lim - ptI%freqJ())
+                     call ptI%move(0._bsa_real_t, sign_dir * lim - ptI%freqJ())
                   case (2, 4)
-                     call ptI%move(sign_dir * lim - ptI%freqI(), 0._RDP)
+                     call ptI%move(sign_dir * lim - ptI%freqI(), 0._bsa_real_t)
                end select
 
 #ifdef __BSA_DEBUG
@@ -626,13 +624,13 @@ contains
 
             block
                character(len = 1), allocatable :: bases_ch(:)
-               real(RDP) :: init_freq_, rbase_
-               real(RDP) :: main_rz_rot_, left_rz_rot_, right_rz_rot_
-               real(RDP) :: delta_main_rz_, rlimit_
+               real(bsa_real_t) :: init_freq_, rbase_
+               real(bsa_real_t) :: main_rz_rot_, left_rz_rot_, right_rz_rot_
+               real(bsa_real_t) :: delta_main_rz_, rlimit_
                character(len = 40) :: z_name_
                character(len = 1)  :: left_known_coord_, right_known_coord_
-               integer(kind = 4)   :: left_sign_, right_sign_, main_refs_
-               integer(kind = 4)   :: idirP1_
+               integer(int32)      :: left_sign_, right_sign_, main_refs_
+               integer(int32)      :: idirP1_
 
                if (allocated(zone_title)) deallocate(zone_title)
                if (allocated(rots))       deallocate(rots)
@@ -684,7 +682,7 @@ contains
 
                   ptI    = basePts(idir)
                   rbase_ = limits(1) - init_freq_
-                  if (rbase_ <= 0._RDP) call bsa_Abort("Negative base.")
+                  if (rbase_ <= 0._bsa_real_t) call bsa_Abort("Negative base.")
 
                   ! BUG: better understand how to correctly define these zones..
                   call rz%define(ptI, 'i', rbase_, rbase_)
@@ -858,9 +856,9 @@ contains
             block
                type(MTriangZone_t) :: tz
                type(MPoint_t)      :: ptA, ptB
-               real(RDP) :: lim_I, lim_J, tmprot, tmprots(2), tmpdelta
+               real(bsa_real_t)    :: lim_I, lim_J, tmprot, tmprots(2), tmpdelta
 
-               integer :: rftmp(2), ni, nj, idrot
+               integer(int32) :: rftmp(2), ni, nj, idrot
 
                ! reset rotations for inclined crests
                tmprots(1) = CST_PId2   + CST_PId4
@@ -1132,13 +1130,13 @@ contains
             allocate(maxext_sym_(4))  ! BUG: default allocate with max (4) elements
 
             if (settings%i_bisp_sym_ == BSA_SPATIAL_SYM_HALF) then
-               basePts(1) = MPoint(0._RDP, maxF)
+               basePts(1) = MPoint(0._bsa_real_t, maxF)
                basePts(2) = MPoint( maxF, maxF)
                basePts(3) = MPoint( maxF,-maxF)
 
                maxext_sym_(1) = max_ext
                maxext_sym_(2) = max_ext
-               maxext_sym_(3) = 0._RDP
+               maxext_sym_(3) = 0._bsa_real_t
 
                n_dirs_ = N_DIRS_HALF
             else
@@ -1265,12 +1263,12 @@ contains
    !>    - HTPC : Head-Tail-Previous-Current
    subroutine Mesh()
       use BsaLib_MZone, only: MZone_t
-      integer :: izone_id, izone, ival2
+      integer(int32) :: izone_id, izone, ival2
 #ifdef __BSA_OMP
 # define __BFM_DATA_  ,bfmdata
 # define __bfmdata_in_ bfmdata,
 # define __BRM_EXPORT_DATA brm_export_data_
-      real(RDP), allocatable :: bfmdata(:, :)
+      real(bsa_real_t), allocatable :: bfmdata(:, :)
 #else
 # define __BFM_DATA_
 # define __bfmdata_in_
@@ -1422,7 +1420,7 @@ contains
       character(len = *), intent(in) :: pattern
       character(len = 1)             :: LoopIter(dim)
 
-      integer :: lpat, npat, ipat, id, i
+      integer(int32) :: lpat, npat, ipat, id, i
 
       lpat = len(pattern)
       if (lpat > dim) call bsa_Abort('String length is greater than required Iterator length.')
@@ -1446,11 +1444,11 @@ contains
 
 
    function getEquivalentLooperIterator_real(dim, vals) result(LoopIter)
-      integer, intent(in)   :: dim
-      real(RDP), intent(in) :: vals(:)
-      real(RDP)             :: LoopIter(dim)
+      integer, intent(in) :: dim
+      real(bsa_real_t), intent(in) :: vals(:)
+      real(bsa_real_t)             :: LoopIter(dim)
 
-      integer :: nvals, nint, i, j, id
+      integer(int32) :: nvals, nint, i, j, id
 
       nvals = size(vals)
       if (nvals > dim) call bsa_Abort('Num of values greater than required Iterator length.')
@@ -1477,7 +1475,7 @@ contains
 
 
    pure elemental function getMaxSpaceExtension_() result(max_ext)
-      real(RDP) :: max_ext
+      real(bsa_real_t) :: max_ext
       
       max_ext = maxval(struct_data%modal_%nat_freqs_)
       max_ext = max_ext * settings%max_area_extension_
@@ -1489,15 +1487,14 @@ contains
 
 
    subroutine prefetchZoneLimits_(bpw_ext_2, limits, policies, NLims, inter_modes)
-      real(RDP), intent(in)  :: bpw_ext_2
-      real(RDP), allocatable, intent(out)       :: limits(:)
-      type(MPolicy_t), allocatable, intent(out) :: policies(:)
-      integer(kind = 4), intent(out)                      :: NLims
-      integer(kind = 4), allocatable, intent(out)         :: inter_modes(:)
+      real(bsa_real_t), intent(in)  :: bpw_ext_2
+      real(bsa_real_t), allocatable, intent(out) :: limits(:)
+      type(MPolicy_t), allocatable, intent(out)  :: policies(:)
+      integer(int32), intent(out)                :: NLims
+      integer(int32), allocatable, intent(out)   :: inter_modes(:)
 
-      integer   :: skip, imodesout
-
-      real(RDP) :: peak_ext_lims_(2, NM_EFF__)
+      integer(int32)   :: skip, imodesout
+      real(bsa_real_t) :: peak_ext_lims_(2, NM_EFF__)
 
 
       ! get actual peak extensions, for each mode
@@ -1541,16 +1538,16 @@ contains
 
       block
          ! local instances, to move using move_alloc()
-         real(RDP), allocatable       :: limits_(:)
-         type(MPolicy_t), allocatable :: policies_(:)
-         integer                      :: NLims_
-         integer, allocatable         :: inter_modes_(:)
+         real(bsa_real_t), allocatable :: limits_(:)
+         type(MPolicy_t), allocatable  :: policies_(:)
+         integer(int32)                :: NLims_
+         integer(int32), allocatable   :: inter_modes_(:)
 
-         integer :: itmp, iim, jim, im, istat, nmode
+         integer(int32) :: itmp, iim, jim, im, istat, nmode
          character(len = 256) :: emsg
 
          ! peak zone's BACK and FORTH Frontiers
-         real(RDP) :: pzBF, pzFF
+         real(bsa_real_t) :: pzBF, pzFF
 
 
          ! allocate results
@@ -1563,7 +1560,7 @@ contains
          else
             call allocKOMsg('limits_', istat, emsg)
          endif
-         limits_ = 0._RDP
+         limits_ = 0._bsa_real_t
 
          allocate(policies_(itmp), stat=istat, errmsg=emsg)
          if (istat == 0) then
@@ -1743,12 +1740,12 @@ contains
 
 
    function getActualPeakZoneExtensionLimits_() result(peak_exts_lims)
-      real(RDP) :: peak_exts_lims(2, NM_EFF__)
-      real(RDP) :: cst, modf, ext
-      integer :: im, nmode
-      integer(kind = 4), parameter :: I_PEAK_EXT_DIV_ = 1
+      real(bsa_real_t) :: peak_exts_lims(2, NM_EFF__)
+      real(bsa_real_t) :: cst, modf, ext
+      integer(int32)   :: im, nmode
+      integer(int32), parameter :: I_PEAK_EXT_DIV_ = 1
 
-      cst = real(settings%gen_peak_area_extension_ / I_PEAK_EXT_DIV_, kind = RDP)
+      cst = real(settings%gen_peak_area_extension_ / I_PEAK_EXT_DIV_, kind=bsa_real_t)
 
       allocate(peak_exts_(NM__))
       peak_exts_ = -1.

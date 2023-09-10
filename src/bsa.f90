@@ -16,50 +16,49 @@
 module data
 
    use BsaLib
-   
    implicit none
    public
-   integer(kind = 4), parameter :: IUN_BSADATA = 22222
-   integer(kind = 4), parameter :: IUN_FINDATA = 22223
+   integer(int32), parameter :: IUN_BSADATA = 22222
+   integer(int32), parameter :: IUN_FINDATA = 22223
    logical :: l_formmode = .false.
    logical :: fin_data_read_ = .false.
    logical :: bsa_data_read_ = .false.
    character(len = :), allocatable :: FINFILE_FNAME_
 
 
-   integer(kind = 4) :: i_suban, i_vers, i_defsc, i_psd, i_bisp, i_onlyd, i_test
-   integer(kind = 4) :: i_bispsym, i_3dsym, i_nfreqs
-   real(kind = 8)    :: r_df
-   integer(kind = 4) :: i_svd, i_bkgrfmt, i_bkgaext, i_genpaext, i_maxaext, i_fcov, i_dumpmod
+   integer(int32)   :: i_suban, i_vers, i_defsc, i_psd, i_bisp, i_onlyd, i_test
+   integer(int32)   :: i_bispsym, i_3dsym, i_nfreqs
+   real(bsa_real_t) :: r_df
+   integer(int32)   :: i_svd, i_bkgrfmt, i_bkgaext, i_genpaext, i_maxaext, i_fcov, i_dumpmod
 
-   integer(kind = 4) :: i_ntc, i_ndirs, tc(3), dirs(3)
+   integer(int32) :: i_ntc, i_ndirs, tc(3), dirs(3)
 
-   integer(kind = 4) :: i_nnodes, i_nlibs, i_nnodesl, i_nlibsl
-   integer(kind = 4), target, allocatable :: nodesl(:), libsl(:)
-   real(kind = 8), target, allocatable    :: nod_cords(:, :)
+   integer(int32) :: i_nnodes, i_nlibs, i_nnodesl, i_nlibsl
+   integer(int32), target, allocatable   :: nodesl(:), libsl(:)
+   real(bsa_real_t), target, allocatable :: nod_cords(:, :)
 
-   integer(kind = 4) :: i_varu, i_su, i_vert, i_degw
-   integer(kind = 4) :: i_nzones
-   real(kind = 8)    :: r_aird, r_rotW2G(3, 3)
-   real(kind = 8), target, allocatable :: r_Zref_z(:), r_UBref_z(:), r_alph_z(:), r_lims_z(:)
-   real(kind = 8), target, allocatable :: r_L_z(:, :, :), r_std_z(:, :), r_corrC_z(:, :, :)
-   real(kind = 8), target, allocatable :: r_corrEx_z(:, :, :), r_rotW2G_z(:, :, :), r_incang_z(:)
+   integer(int32)   :: i_varu, i_su, i_vert, i_degw
+   integer(int32)   :: i_nzones
+   real(bsa_real_t) :: r_aird, r_rotW2G(3, 3)
+   real(bsa_real_t), target, allocatable :: r_Zref_z(:), r_UBref_z(:), r_alph_z(:), r_lims_z(:)
+   real(bsa_real_t), target, allocatable :: r_L_z(:, :, :), r_std_z(:, :), r_corrC_z(:, :, :)
+   real(bsa_real_t), target, allocatable :: r_corrEx_z(:, :, :), r_rotW2G_z(:, :, :), r_incang_z(:)
 
-   integer(kind = 4), target, allocatable :: i_wzNod(:)
-   real(kind = 8), target, allocatable    :: r_wAltNod(:), r_UBnod(:), r_corrNod(:, :)
+   integer(int32), target, allocatable   :: i_wzNod(:)
+   real(bsa_real_t), target, allocatable :: r_wAltNod(:), r_UBnod(:), r_corrNod(:, :)
 
-   real(kind = 8), target, allocatable    :: r_wfc(:, :, :)
+   real(bsa_real_t), target, allocatable :: r_wfc(:, :, :)
 
-   integer(kind = 4) :: i_nm, i_ndofs
-   real(kind = 8), target, allocatable :: r_natf(:), r_modm(:, :)
-   real(kind = 8), target, allocatable :: r_Mg(:), r_Kg(:), r_Cg(:, :)
-   real(kind = 8), target, allocatable :: r_xsist(:), r_xsiad(:)
+   integer(int32) :: i_nm, i_ndofs
+   real(bsa_real_t), target, allocatable :: r_natf(:), r_modm(:, :)
+   real(bsa_real_t), target, allocatable :: r_Mg(:), r_Kg(:), r_Cg(:, :)
+   real(bsa_real_t), target, allocatable :: r_xsist(:), r_xsiad(:)
 
    logical :: use_custom_damping_ = .false.
-   real(kind = 8), allocatable :: custom_damp_val_(:)
+   real(bsa_real_t), allocatable :: custom_damp_val_(:)
 
-   integer(kind = 4) :: i_exprt_mode_ = BSA_EXPORT_MODE_APPEND
-   integer(kind = 4) :: i_exprt_form_ = BSA_EXPORT_FORMAT_FORMATTED
+   integer(int32) :: i_exprt_mode_ = BSA_EXPORT_MODE_APPEND
+   integer(int32) :: i_exprt_form_ = BSA_EXPORT_FORMAT_FORMATTED
    logical :: export_results_to_files_ = .true.
 end module data
 
@@ -77,24 +76,24 @@ program bsa
    implicit none
 
    ! local, used to retrieve single run BSA results
-   real(kind = 8), allocatable :: bkg_(:),  res_(:)
-   real(kind = 8), allocatable :: m2mf_(:), m2mr_(:), m2o2mr_(:)   ! NOTE: implicitly classic
-   real(kind = 8), allocatable :: m3mf_cls_(:), m3mr_cls_(:)
-   real(kind = 8), allocatable :: m3mf_msh_(:), m3mr_msh_(:)
+   real(bsa_real_t), allocatable :: bkg_(:),  res_(:)
+   real(bsa_real_t), allocatable :: m2mf_(:), m2mr_(:), m2o2mr_(:)   ! NOTE: implicitly classic
+   real(bsa_real_t), allocatable :: m3mf_cls_(:), m3mr_cls_(:)
+   real(bsa_real_t), allocatable :: m3mf_msh_(:), m3mr_msh_(:)
 
 
-   real(kind = 8), allocatable, dimension(:) :: m2_r_diag, m3_r_diag, sk_r_diag, m2o2_r_diag
-   real(kind = 8), allocatable, dimension(:) :: m2_r_full, m3_r_full, sk_r_full, m2o2_r_full
+   real(bsa_real_t), allocatable, dimension(:) :: m2_r_diag, m3_r_diag, sk_r_diag, m2o2_r_diag
+   real(bsa_real_t), allocatable, dimension(:) :: m2_r_full, m3_r_full, sk_r_full, m2o2_r_full
 
-   real(kind = 8), allocatable :: peak_pos_r_diag_g(:), peak_pos_r_diag_ng(:)
-   real(kind = 8), allocatable :: peak_pos_r_full_g(:), peak_pos_r_full_ng(:)
-   real(kind = 8), allocatable :: extr_pos_r_diag_g(:), extr_pos_r_diag_ng(:)
-   real(kind = 8), allocatable :: extr_pos_r_full_g(:), extr_pos_r_full_ng(:)
+   real(bsa_real_t), allocatable :: peak_pos_r_diag_g(:), peak_pos_r_diag_ng(:)
+   real(bsa_real_t), allocatable :: peak_pos_r_full_g(:), peak_pos_r_full_ng(:)
+   real(bsa_real_t), allocatable :: extr_pos_r_diag_g(:), extr_pos_r_diag_ng(:)
+   real(bsa_real_t), allocatable :: extr_pos_r_full_g(:), extr_pos_r_full_ng(:)
    
-   real(kind = 8), allocatable :: peak_neg_r_diag_ng(:)
-   real(kind = 8), allocatable :: peak_neg_r_full_ng(:)
-   real(kind = 8), allocatable :: extr_neg_r_diag_ng(:)
-   real(kind = 8), allocatable :: extr_neg_r_full_ng(:)
+   real(bsa_real_t), allocatable :: peak_neg_r_diag_ng(:)
+   real(bsa_real_t), allocatable :: peak_neg_r_full_ng(:)
+   real(bsa_real_t), allocatable :: extr_neg_r_diag_ng(:)
+   real(bsa_real_t), allocatable :: extr_neg_r_full_ng(:)
 
    character(len = *), parameter   :: exp_prfx = 'export_'
    character(len = *), parameter   :: cls_sffx = 'cls', msh_sffx = 'msh'
@@ -149,7 +148,7 @@ program bsa
       endif
 
       block
-         integer(kind = 4), allocatable :: i_modes(:)
+         integer(int32), allocatable :: i_modes(:)
 
          i_modes = bsa_getUsedModeShapes()
 
@@ -487,7 +486,7 @@ contains ! utility procedures
       character(len = *), intent(in) :: arg
       integer :: iich, iech, lench, ixsi
       ! BUG: limits to 20 xsi values. Allow infinite.
-      real(kind = 8) :: xsi_(20)
+      real(bsa_real_t) :: xsi_(20)
 
       lench = len_trim(arg)
       if (lench == 0) goto 99
@@ -523,8 +522,8 @@ contains ! utility procedures
 
 
    ! subroutine allocGlobFromLocSizes(loc, glob, n)
-   !    real(kind = 8), allocatable, intent(in)  :: loc(:)
-   !    real(kind = 8), allocatable, intent(out) :: glob(:, :)
+   !    real(bsa_real_t), allocatable, intent(in)  :: loc(:)
+   !    real(bsa_real_t), allocatable, intent(out) :: glob(:, :)
    !    integer, intent(in) :: n
    !    integer :: dim
 
@@ -536,8 +535,8 @@ contains ! utility procedures
 
 
    ! subroutine moveAllocToGlob(glob, loc, idx)
-   !    real(kind = 8), intent(out) :: glob(:, :)
-   !    real(kind = 8), allocatable :: loc(:)
+   !    real(bsa_real_t), intent(out) :: glob(:, :)
+   !    real(bsa_real_t), allocatable :: loc(:)
    !    integer, intent(in) :: idx
 
    !    if (allocated(loc)) then
@@ -1033,13 +1032,13 @@ contains ! utility procedures
 
 
    subroutine modalRecombination(r_Phi, m2mr, m3mr, m2o2mr)
-      real(kind = 8), intent(in) :: r_Phi(:, :), m2mr(:), m3mr(:)
-      real(kind = 8), intent(in), allocatable :: m2o2mr(:)
+      real(bsa_real_t), intent(in) :: r_Phi(:, :), m2mr(:), m3mr(:)
+      real(bsa_real_t), intent(in), allocatable :: m2o2mr(:)
       integer :: ndofs, nmodes, nm3
       integer :: idof, imode
       integer :: imodeM1, posm2, posm3, itmp1
       logical :: is_diag
-      real(kind = 8) :: phi1, r_tmp
+      real(bsa_real_t) :: phi1, r_tmp
 
 
       ndofs  = size(r_Phi, 1)
@@ -1101,7 +1100,7 @@ contains ! utility procedures
       block
          integer :: jmode, kmode, jmodeM1, kmodeM1
          integer :: itmp12, itmp13, itmp23
-         real(kind = 8), dimension(ndofs) :: phi2_, phi3_
+         real(bsa_real_t), dimension(ndofs) :: phi2_, phi3_
 
          do kmode = 1, nmodes
 

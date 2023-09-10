@@ -25,11 +25,11 @@ module BsaLib_IO
    !  I/O  UNITs (mutables)
    !**************************************************************************
    ! dumpfile
-   integer(kind = 4) :: unit_dump_bfm_ = 999
-   integer(kind = 4) :: unit_dump_brm_ = 1204
+   integer(int32) :: unit_dump_bfm_ = 999_int32
+   integer(int32) :: unit_dump_brm_ = 1204_int32
 
    ! debug
-   integer(kind = 4) :: unit_debug_ = 99999
+   integer(int32) :: unit_debug_ = 99999_int32
    character(len = :), allocatable :: undebug_fname_
 
 
@@ -53,7 +53,7 @@ contains
 
 
    subroutine io_setExportAppendMode(imode)
-      integer(kind = 4), intent(in) :: imode
+      integer(int32), intent(in) :: imode
 
       if (imode == BSA_EXPORT_MODE_APPEND) then
          export_file_position_ = IO_POSITION_APPEND
@@ -83,7 +83,7 @@ contains
 
 
    subroutine io_setExportFileFormat(iform)
-      integer(kind = 4), intent(in) :: iform
+      integer(int32), intent(in) :: iform
       
       if (iform == BSA_EXPORT_FORMAT_FORMATTED) then
          export_file_form_ = IO_FORM_FORMATTED
@@ -97,9 +97,9 @@ contains
 
    subroutine io_exportMomentToFile(fname, vec, form)
       character(len = *), intent(in) :: fname
-      real(kind = 8), intent(in)     :: vec(:)
+      real(bsa_real_t), intent(in)   :: vec(:)
       character(len = *), intent(in), optional :: form
-      integer :: iun, i, dim
+      integer(int32) :: iun, i, dim
       character(len = :), allocatable :: exp_form_
 
       exp_form_ = export_file_form_
@@ -156,8 +156,8 @@ contains
    function io_openExportFileByName(file) result(iun)
       !! Opens a file, returning its intenal integer unit descriptor.
       character(len = *), intent(in) :: file
-      integer :: iun
-      integer :: ierr_
+      integer(int32) :: iun
+      integer(int32) :: ierr_
       
       open(newunit=iun, file=file          &
          , iostat=ierr_                    &
@@ -182,7 +182,7 @@ contains
 
 
    subroutine io_getVerifiedFile(iun, fname, openfile)
-      integer(kind = 4), intent(inout)  :: iun
+      integer(int32), intent(inout)     :: iun
       character(len = *), intent(inout) :: fname
       logical, intent(in), optional     :: openfile
       logical :: is_opn
@@ -242,7 +242,7 @@ contains
 
 
    function setDefFileNameFromUnitNum_(iun) result(fname)
-      integer(kind = 4), intent(in)   :: iun
+      integer(int32), intent(in) :: iun
       character(len = :), allocatable :: fname
       character(len = 64) :: tmpfname
 
@@ -257,7 +257,7 @@ contains
       character(len = *), intent(in)  :: path
       character(len = :), allocatable :: res
       character(len = 1) :: filesep
-      integer :: ilen
+      integer(int32) :: ilen
 
       ilen = len_trim(path)
 #ifdef _WIN32

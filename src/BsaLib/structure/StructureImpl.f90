@@ -15,8 +15,6 @@
 !! along with BSA Library.  If not, see <https://www.gnu.org/licenses/>.
 submodule(BsaLib_Structure) BsaLib_StructDataImpl
 
-#include "../precisions"
-
    use Logging
    use BsaLib_IO, only: INFOMSG, WARNMSG, ERRMSG, MSGCONT, DBGMSG &
                         , BSA_STRUCT_DATA_DUMPFILE, unit_debug_
@@ -29,8 +27,8 @@ contains
 
    module subroutine SetNodalCoords(this, nn, coords)
       class(StructureData_t), intent(inout) :: this
-      integer(kind = 4), intent(in)  :: nn
-      real(RDP), target, allocatable :: coords(:, :)
+      integer(bsa_int_t), intent(in)  :: nn
+      real(bsa_real_t), target, allocatable :: coords(:, :)
 
 #ifdef __BSA_DEBUG
       write(unit_debug_, *) INFOMSG//'@StructImpl::SetNodalCoords() : init...'
@@ -57,7 +55,7 @@ contains
 
    module subroutine SetNOfNodalDOFs(this, nlibs)
       class(StructureData_t), intent(inout) :: this
-      integer(kind = 4), intent(in)         :: nlibs
+      integer(bsa_int_t), intent(in)        :: nlibs
 
 #ifdef __BSA_DEBUG
       write(unit_debug_, *) INFOMSG//'@StructImpl::SetNOfNodalDOFs() : init...'
@@ -80,7 +78,7 @@ contains
 
    module subroutine SetTotalNOfNodes(this, nn)
       class(StructureData_t), intent(inout) :: this
-      integer(kind = 4), intent(in)         :: nn
+      integer(bsa_int_t), intent(in)        :: nn
 
       this%nn_ = nn
 
@@ -94,8 +92,8 @@ contains
 
    module subroutine SetLoadedNodalDOFs(this, nlib, lib)
       class(StructureData_t), intent(inout) :: this
-      integer(kind = 4), intent(in) :: nlib
-      integer(kind = 4), target, intent(in) :: lib(:)
+      integer(bsa_int_t), intent(in) :: nlib
+      integer(bsa_int_t), target, intent(in) :: lib(:)
 
 
 #ifdef __BSA_DEBUG
@@ -120,8 +118,8 @@ contains
 
    module subroutine SetLoadedNodes(this, nnl, nl)
       class(StructureData_t), intent(inout) :: this
-      integer(kind = 4), intent(in) :: nnl
-      integer(kind = 4), target, intent(in) :: nl(:)
+      integer(bsa_int_t), intent(in) :: nnl
+      integer(bsa_int_t), target, intent(in) :: nl(:)
 
 #ifdef __BSA_DEBUG
       write(unit_debug_, *) INFOMSG//'@StructImpl::SetLoadedNodes() : init...'
@@ -144,8 +142,8 @@ contains
 
    module subroutine SetModalInfo(this, ndofs, nm, Phi, natf)
       class(StructureData_t), intent(inout) :: this
-      integer(kind = 4), intent(in) :: ndofs, nm
-      real(RDP), intent(in), target :: Phi(ndofs, nm), natf(nm)
+      integer(bsa_int_t), intent(in) :: ndofs, nm
+      real(bsa_real_t), intent(in), target :: Phi(ndofs, nm), natf(nm)
 
 #ifdef __BSA_DEBUG
       write(unit_debug_, *) INFOMSG//'@StructImpl::SetModalInfo() : init...'
@@ -166,8 +164,8 @@ contains
 
    module subroutine SetKeptModes(this, modes)
       class(StructureData_t), intent(inout) :: this
-      integer(kind = 4), intent(in) :: modes(:)
-      integer :: istat, nmodes
+      integer(bsa_int_t), intent(in) :: modes(:)
+      integer(int32) :: istat, nmodes
       character(len = 256) :: emsg
 
 #ifdef __BSA_DEBUG
@@ -207,7 +205,7 @@ contains
 
    module subroutine SetKeptModesDefault(this)
       class(StructureData_t), intent(inout) :: this
-      integer :: istat
+      integer(int32) :: istat
       character(len = 256) :: emsg
 
       if (this%modal_%nm_ == 0) call bsa_Abort('Trying to allocate modes when NM==0 yet.')
@@ -233,9 +231,9 @@ contains
 
    module subroutine SetModalMatrices(this, nm, Mg, Kg, Cg)
       class(StructureData_t), intent(inout) :: this
-      integer(kind = 4), intent(in) :: nm
-      real(RDP), intent(in), target :: Mg(nm), Kg(nm)
-      real(RDP), intent(in), target :: Cg(nm, nm)
+      integer(bsa_int_t), intent(in) :: nm
+      real(bsa_real_t), intent(in), target :: Mg(nm), Kg(nm)
+      real(bsa_real_t), intent(in), target :: Cg(nm, nm)
 
 #ifdef __BSA_DEBUG
       write(unit_debug_, *) INFOMSG//'@StructImpl::SetModalMatrices() : init...'
@@ -265,7 +263,7 @@ contains
 
    module subroutine SetTotDamping(this, xsi)
       class(StructureData_t), intent(inout) :: this
-      real(RDP), target, intent(in) :: xsi(this%modal_%nm_)
+      real(bsa_real_t), target, intent(in) :: xsi(this%modal_%nm_)
 
       if (this%modal_%nm_ == 0) then
          print '(/ 1x, a, a, a /)', &
@@ -296,7 +294,7 @@ contains
 
    module subroutine ComputeResPeakWidths(this)
       class(StructureData_t), intent(inout) :: this
-      integer :: istat
+      integer(int32) :: istat
       character(len = 256) :: emsg
 
 #ifdef __BSA_DEBUG
@@ -305,7 +303,7 @@ contains
 
       if (allocated(this%res_peak_width_)) then
          
-         if (.not. all(this%res_peak_width_ == 0._RDP)) return
+         if (.not. all(this%res_peak_width_ == 0._bsa_real_t)) return
 
       else
 
@@ -340,9 +338,9 @@ contains
 
    module subroutine computeBKGPeakWidths(this, wind_scales)
       class(StructureData_t), intent(inout) :: this
-      real(RDP), intent(in) :: wind_scales(:, :)
+      real(bsa_real_t), intent(in) :: wind_scales(:, :)
       integer   :: j, i
-      integer :: istat
+      integer(int32) :: istat
       character(len = 256) :: emsg
 
 ! #ifdef __BSA_DEBUG
@@ -362,14 +360,14 @@ contains
          endif
       endif
 
-      this%bkg_peak_width_ = 0._RDP
+      this%bkg_peak_width_ = 0._bsa_real_t
 
       ! BUG: this is not optimal!
 !DIR$ UNROLL
       do j = 1, 3
          do i = 1, 3
-            if (wind_scales(i, j) == 0._RDP) cycle
-            this%bkg_peak_width_(i, j) = 1 / wind_scales(i, j)
+            if (wind_scales(i, j) == 0._bsa_real_t) cycle
+            this%bkg_peak_width_(i, j) = 1._bsa_real_t / wind_scales(i, j)
          enddo
       enddo
 
@@ -393,7 +391,7 @@ contains
 
    module subroutine clean(this)
       class(StructureData_t) :: this
-      integer :: istat
+      integer(int32) :: istat
       character(len = 256) :: emsg
 
 ! #ifdef __BSA_DEBUG

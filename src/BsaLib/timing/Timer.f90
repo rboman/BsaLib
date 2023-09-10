@@ -15,17 +15,17 @@
 !! along with BSA Library.  If not, see <https://www.gnu.org/licenses/>.
 module BsaLib_Timing
 
-   
+   use BsaLib_CONSTANTS, only: real64
    implicit none
    private
 
 
    type, public :: timer_t
       private
-      real(kind = 8) :: t_init_     = 0.d0
-      real(kind = 8) :: t_last_     = 0.d0
-      real(kind = 8) :: t_tot_      = 0.d0
-      real(kind = 8) :: t_tot_prev_ = 0.d0
+      real(real64) :: t_init_     = 0._real64
+      real(real64) :: t_last_     = 0._real64
+      real(real64) :: t_tot_      = 0._real64
+      real(real64) :: t_tot_prev_ = 0._real64
    contains
       procedure, public, pass(this) :: init  => InitTimer
       procedure, public, pass(this) :: time  => ClockTimer
@@ -56,8 +56,8 @@ contains
 
    function ClockTimer(this) result(dt)
       class(timer_t) :: this
-      real(kind = 8) :: dt_tmp
-      real(kind = 8) :: dt
+      real(real64) :: dt_tmp
+      real(real64) :: dt
 
 ! #ifdef __BSA_DEBUG
 !       write(unit_debug_, *), ' @BsaLib_Timing::ClockTimer() : save partial time...'
@@ -83,7 +83,7 @@ contains
 
    pure elemental function GetTimerTotal(this) result(tot)
       class(timer_t), intent(in) :: this
-      real(kind = 8) :: tot
+      real(real64) :: tot
 
 ! #ifdef __BSA_DEBUG
 !       write(unit_debug_, *), ' @BsaLib_Timing::GetTimerTotal() : getting timer total time...'
@@ -106,10 +106,10 @@ contains
 !       write(unit_debug_, *), ' @BsaLib_Timing::ResetTimer() : Reset timer...'
 ! #endif
 
-      this%t_init_     = 0.d0
-      this%t_last_     = 0.d0
-      this%t_tot_      = 0.d0
-      this%t_tot_prev_ = 0.d0
+      this%t_init_     = 0._real64
+      this%t_last_     = 0._real64
+      this%t_tot_      = 0._real64
+      this%t_tot_prev_ = 0._real64
 
 ! #ifdef __BSA_DEBUG
 !       write(unit_debug_, *), ' @BsaLib_Timing::ResetTimer() : Reset timer -- ok.'

@@ -15,7 +15,7 @@
 !! along with BSA Library.  If not, see <https://www.gnu.org/licenses/>.
 module BsaLib_Utility
 
-   use BsaLib_CONSTANTS, only: INFOMSG, ERRMSG, MSGCONT, WARNMSG, NOTEMSG
+   use BsaLib_CONSTANTS, only: INFOMSG, ERRMSG, MSGCONT, WARNMSG, NOTEMSG, int32
    implicit none
    public
    
@@ -28,7 +28,7 @@ contains
       !!
       character(len = *), intent(in)  :: dirname
       character(len = :), allocatable :: cmd
-      integer :: ierr
+      integer(int32) :: ierr
       logical :: lflag
 
       ierr = 0
@@ -59,10 +59,9 @@ contains
       !! correlation as a vector (avoiding storing duplicates, symmetric)
       !! NOTE: assumes that ni is the leading node, nj >= ni.
       !!       Otherwise, swaps them (makes use of symmetry).
-      integer(kind = 4), intent(in) :: ni, nj
-      integer(kind = 4), intent(in) :: tot
-
-      integer(kind = 4) :: id
+      integer(int32), intent(in) :: ni, nj
+      integer(int32), intent(in) :: tot
+      integer(int32) :: id
 
       if (nj >= ni) then
          id = (ni - 1) * tot + nj - int((ni*ni - ni) / 2., kind = 4)

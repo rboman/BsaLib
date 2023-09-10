@@ -15,8 +15,6 @@
 !! along with BSA Library.  If not, see <https://www.gnu.org/licenses/>.
 submodule(BsaLib_Settings) BsaLib_SettingsImpl
 
-#include "../precisions"
-
    use BsaLib_IO, only: INFOMSG, WARNMSG, ERRMSG, MSGCONT, DBGMSG &
                         , BSA_SETTS_DATA_DUMPFILE, unit_debug_
    use BsaLib_Data, only: bsa_Abort
@@ -29,7 +27,7 @@ contains
 
    module subroutine SetSubanType(this, isuban)
       class(settings_t), intent(inout) :: this
-      integer(kind = 4), intent(in) :: isuban
+      integer(bsa_int_t), intent(in)   :: isuban
 
       if (isuban < 0 .or. isuban > 3) call bsa_Abort('Invalid "sub-an" value.')
       this%i_suban_type_ = isuban
@@ -38,7 +36,7 @@ contains
 
    module subroutine SetVersion(this, ivers)
       class(settings_t), intent(inout) :: this
-      integer(kind = 4), intent(in) :: ivers
+      integer(bsa_int_t), intent(in)   :: ivers
 
       if (ivers < 0 .or. ivers > 2) call bsa_Abort('Invalid "ivers" value.')
       this%i_vers_ = ivers
@@ -47,7 +45,7 @@ contains
 
    module subroutine SetScalingType(this, idefsc)
       class(settings_t), intent(inout) :: this
-      integer(kind = 4), intent(in) :: idefsc
+      integer(bsa_int_t), intent(in)   :: idefsc
 
       if (idefsc < 0 .or. idefsc > 2) call bsa_Abort('Invalid "idefsc" value.')
       this%i_def_scaling_ = idefsc
@@ -56,7 +54,7 @@ contains
 
    module subroutine ActivateSpectraComputation(this, ipsd, ibisp)
       class(settings_t), intent(inout) :: this
-      integer(kind = 4), intent(in), optional    :: ipsd, ibisp
+      integer(bsa_int_t), intent(in), optional :: ipsd, ibisp
 
       if (present(ipsd)) then
          if (ipsd < 0 .or. ipsd > 1) call bsa_Abort('Invalid "ipsd" value.')
@@ -73,7 +71,7 @@ contains
 
    module subroutine SetExtension(this, ionlydiag)
       class(settings_t), intent(inout) :: this
-      integer(kind = 4), intent(in) :: ionlydiag
+      integer(bsa_int_t), intent(in)   :: ionlydiag
 
       if (ionlydiag < 0 .or. ionlydiag > 1) call bsa_Abort('Invalid "ionlydiag" value.')
       this%i_only_diag_ = ionlydiag
@@ -83,7 +81,7 @@ contains
 
    module subroutine TestMode(this, itest)
       class(settings_t), intent(inout) :: this
-      integer(kind = 4), intent(in) :: itest
+      integer(bsa_int_t), intent(in)   :: itest
 
       if (itest < 0 .or. itest > 1) call bsa_Abort('Invalid "itest" value.')
       this%i_test_mode_ = itest
@@ -92,7 +90,7 @@ contains
 
    module subroutine setSymmetries(this, ibispsym, i3dsym)
       class(settings_t), intent(inout) :: this
-      integer(kind = 4), intent(in)    :: ibispsym, i3dsym
+      integer(bsa_int_t), intent(in)   :: ibispsym, i3dsym
 
       if (ibispsym == 0) then
          this%i_bisp_sym_ =  BSA_SPATIAL_SYM_NONE
@@ -110,13 +108,13 @@ contains
 
    module subroutine setClsSettings(this, nfreqs, df)
       class(settings_t), intent(inout) :: this
-      integer(kind = 4), intent(in)    :: nfreqs
-      real(RDP), intent(in) :: df
+      integer(bsa_int_t), intent(in)   :: nfreqs
+      real(bsa_real_t), intent(in) :: df
 
       if (nfreqs <= 0) call bsa_Abort('Invalid "nfreqs" value.')
       this%nfreqs_ = nfreqs
 
-      if (df <= 0._RDP) call bsa_Abort('Invalid "df" value.')
+      if (df <= 0._bsa_real_t) call bsa_Abort('Invalid "df" value.')
       this%df_ = df
 
 #ifdef __BSA_DEBUG
@@ -131,7 +129,7 @@ contains
 
    module subroutine SetMshrSetts(this, isvd, bkgrfmt, bkgaext, genpaext, maxaext, ifcov, idumpmod)
       class(settings_t), intent(inout) :: this
-      integer(kind = 4), intent(in) :: isvd, bkgrfmt, bkgaext, genpaext, maxaext, ifcov, idumpmod
+      integer(bsa_int_t), intent(in)   :: isvd, bkgrfmt, bkgaext, genpaext, maxaext, ifcov, idumpmod
 
 ! #ifdef __BSA_DEBUG
 !       write(unit_debug_, *) ' @SettingsImpl::SetMshrSetts() : init setting Bsa Mesher settings...'

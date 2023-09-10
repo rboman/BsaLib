@@ -15,8 +15,6 @@
 !! along with BSA Library.  If not, see <https://www.gnu.org/licenses/>.
 submodule(BsaLib) BsaLib_Impl
 
-#include "../precisions"
-
    use BsaLib_Data
    use BsaLib_Utility
    implicit none
@@ -46,7 +44,7 @@ contains
 
 
    module subroutine bsa_Init()
-      integer(kind = 4)    :: istat
+      integer(int32) :: istat
       character(len = 256) :: emsg
 
       if (.not. header_called_) call bsa_printBSAHeader()
@@ -142,11 +140,11 @@ contains
 
 
    module subroutine bsa_setPODTruncationThreshold(rval)
-      real(kind = 8), intent(in) :: rval
+      real(real64), intent(in) :: rval
 
-      if (rval > 0.d0) then
+      if (rval > 0.0_real64) then
          do_trunc_POD_ = .true.
-         POD_trunc_lim_ = rval / 100.d0
+         POD_trunc_lim_ = rval / 100.0_real64
       endif
    end subroutine
 
@@ -155,7 +153,7 @@ contains
 
    module subroutine bsa_Run(m2mf_cls, m2mr_cls, m2o2mr_cls, m3mf_msh, m3mr_msh, m3mf_cls, m3mr_cls)
       use BsaLib_Functions
-      real(RDP), target, allocatable, dimension(:) :: &
+      real(bsa_real_t), target, allocatable, dimension(:) :: &
          m2mf_cls, m2mr_cls, m2o2mr_cls, m3mf_msh, m3mr_msh, m3mf_cls, m3mr_cls
 
 
@@ -173,7 +171,7 @@ contains
 
       print *
       block
-         integer(kind = 4) :: itmp
+         integer(int32) :: itmp
 
          call logger_debug%init(unit_debug_)  ! setting up logger
          call io_setExportSpecifiers()
@@ -329,7 +327,7 @@ contains
 ! #ifdef __BSA_DEBUG
       character(len=64) :: fmt
       character(len=64) :: fmt2
-      integer(kind = 4) :: i
+      integer(int32) :: i
 
 
       write(unit_debug_, *) INFOMSG//'@BsaLibImpl::CheckVars() : log checking internal variables...'
@@ -372,7 +370,7 @@ contains
 ! #endif
 
       
-      if (POD_trunc_lim_ == 0.d0 .or. POD_trunc_lim_ == 1.d0) do_trunc_POD_ = .false.
+      if (POD_trunc_lim_ == 0.0_real64 .or. POD_trunc_lim_ == 1.0_real64) do_trunc_POD_ = .false.
       if (I_BKG_PEAK_DELTAF_BFM_REFMT_FCT_ <= 0) I_BKG_PEAK_DELTAF_BFM_REFMT_FCT_ = 2
       if (I_BKG_PEAK_DELTAF_BFM_REFMT_FCT_ <= 0) I_BKG_PEAK_DELTAF_BFM_REFMT_FCT_ = 3
       
@@ -446,9 +444,9 @@ contains
          
       if (.not. allocated(struct_data%bkg_peak_width_)) then
          block
-            real(RDP) :: vtmp(3, 3, wd%nz_)
-            real(RDP) :: vtmp2(3, 3)
-            integer(kind = 4) :: itmp
+            real(bsa_real_t) :: vtmp(3, 3, wd%nz_)
+            real(bsa_real_t) :: vtmp2(3, 3)
+            integer(int32)   :: itmp
 
             do itmp = 1, wd%nz_
                vtmp(:, :, itmp) = wd%turb_scales_wz_(:, :, itmp) / wd%u_mean_ref_wz_(itmp)
@@ -556,18 +554,17 @@ contains
    !> NOTE: here is where NMODES_EFF is actually set.
    !>       Better not to give user the chance to do it.
    subroutine validateModalInfo_()
-      real(RDP), dimension(struct_data%modal_%nm_) :: maxvals
-      integer(kind = 4) :: i, j, nskip, ilocmax(1), ilib
-      integer(kind = 4) :: nmk
-      integer(kind = 4), allocatable :: modesk(:)
-      integer(kind = 4)    :: istat
+      real(bsa_real_t), dimension(struct_data%modal_%nm_) :: maxvals
+      integer(int32) :: i, j, nskip, ilocmax(1), ilib
+      integer(int32) :: nmk, istat
+      integer(int32), allocatable :: modesk(:)
       character(len = 256) :: emsg
 
       maxvals = maxval(abs(struct_data%modal_%phi_), dim=1)
       nskip   = 0
       do i = 1, struct_data%modal_%nm_
 
-         if (maxvals(i) == 1._RDP) cycle
+         if (maxvals(i) == 1._bsa_real_t) cycle
 
          ! ! NOTE: might also be greater than 1..
          ! if (maxvals(i) < 1._RDP .or. maxvals(i) > 1._RDP + incr) then
@@ -578,7 +575,7 @@ contains
          nskip = nskip + 1
 
          ! check at which lib happens the MAX
-         ilocmax = maxloc(abs(struct_data%modal_%phi_(:, i)), kind = 4)
+         ilocmax = maxloc(abs(struct_data%modal_%phi_(:, i)), kind = int32)
          ilib    = mod(ilocmax(1), struct_data%nlibs_)
          if (ilib == 0) ilib = struct_data%nlibs_
          print '(1x, a, a, i0 /)', MSGCONT, 'Its local max abs value is for LIB= ', ilib
@@ -606,7 +603,7 @@ contains
       j = 1
       do i = 1, struct_data%modal_%nm_
 
-         if (maxvals(i) == 1._RDP) then
+         if (maxvals(i) == 1._bsa_real_t) then
             modesk(j) = i
             j = j + 1
          endif
@@ -628,9 +625,9 @@ contains
    !> This is to avoid memory error if NMODES_EFF < NMODES
    !> but externally PHItimesC is allocated using NMODES.
    subroutine setPhitimesCLocalInstance_()
-      integer(kind = 4) :: ndegw, nlib_l, nnodes_l, nmodes, ndofs
-      integer(kind = 4) :: id, in, im, n, m, skip
-      integer(kind = 4) :: istat
+      integer(int32) :: ndegw, nlib_l, nnodes_l, nmodes, ndofs
+      integer(int32) :: id, in, im, n, m, skip
+      integer(int32) :: istat
       character(len = 256) :: emsg
 
       if (.not. associated(wd%wfc_)) &
@@ -669,7 +666,7 @@ contains
       else
          call allocKOMsg('PHItimesC_local_', istat, emsg)
       endif
-      PHItimesC_local_ = 0._RDP
+      PHItimesC_local_ = 0._bsa_real_t
 
 
       do in = 1, nnodes_l
@@ -986,14 +983,14 @@ contains
 
    module subroutine bsa_setupClassic(nfreqs, df)
       integer(kind = 4), intent(in) :: nfreqs
-      real(RDP), intent(in) :: df
+      real(bsa_real_t), intent(in)  :: df
 
       call settings%setClsSettings(nfreqs, df)
    end subroutine
 
    module subroutine bsa_setupMesher(isvd, bkgrfmt, bkgaext, genpaext, maxaext, ifcov, idumpmod)
-      integer(kind = 4), intent(in) :: isvd, bkgrfmt, maxaext
-      integer(kind = 4), intent(in) :: bkgaext, genpaext, ifcov, idumpmod
+      integer(bsa_int_t), intent(in) :: isvd, bkgrfmt, maxaext
+      integer(bsa_int_t), intent(in) :: bkgaext, genpaext, ifcov, idumpmod
 
       call settings%SetMshrSetts(isvd, bkgrfmt, bkgaext, genpaext, maxaext, ifcov, idumpmod)
    end subroutine
@@ -1045,7 +1042,7 @@ contains
 
 
    module subroutine bsa_setWindZoneLimits(lim, ilim)
-      real(RDP), intent(in) :: lim(..)
+      real(bsa_real_t), intent(in) :: lim(..)
       integer(kind = 4), intent(in), optional :: ilim(..)
 
       call wd%SetWindZoneLimits(lim, ilim)
@@ -1053,70 +1050,70 @@ contains
 
 
    module subroutine bsa_setAirDensity(aird)
-      real(RDP), intent(in) :: aird
+      real(bsa_real_t), intent(in) :: aird
       
       call wd%SetAirDensity(aird)
    end subroutine
 
 
    module subroutine bsa_setGlobalRotMatW2G(rotW2G)
-      real(RDP), intent(in) :: rotW2G(3, 3)
+      real(bsa_real_t), intent(in) :: rotW2G(3, 3)
 
       call wd%SetGlobalW2G(rotW2G)
    end subroutine
 
 
    module subroutine bsa_setWZMeanWindVel(mat)
-      real(RDP), target, intent(in) :: mat(:)
+      real(bsa_real_t), target, intent(in) :: mat(:)
 
       call wd%SetWZMeanWindVel(mat)
    end subroutine
 
 
    module subroutine bsa_setWZRefAlt(Zref)
-      real(RDP), target, intent(in) :: Zref(:)
+      real(bsa_real_t), target, intent(in) :: Zref(:)
 
       call wd%SetWZRefAlt(Zref)
    end subroutine
 
 
    module subroutine bsa_setTurbWindScales(L)
-      real(RDP), target, intent(in) :: L(3, 3, *)
+      real(bsa_real_t), target, intent(in) :: L(3, 3, *)
 
       call wd%SetTurbWindScales(L)
    end subroutine
 
 
    module subroutine bsa_setTurbWindSDT(sigma)
-      real(RDP), target, intent(in) :: sigma(3, *)
+      real(bsa_real_t), target, intent(in) :: sigma(3, *)
 
       call wd%SetTurbWindSDT(sigma)
    end subroutine
 
 
    module subroutine bsa_setWindCorrCoeffs(ccoeffs)
-      real(RDP), target, intent(in) :: ccoeffs(3, 3, *)
+      real(bsa_real_t), target, intent(in) :: ccoeffs(3, 3, *)
 
       call wd%SetWindCorrCoeffs(ccoeffs)
    end subroutine
 
 
    module subroutine bsa_setWindCorrExpnts(cexpn)
-      real(RDP), target, intent(in) :: cexpn(3, 3, *)
+      real(bsa_real_t), target, intent(in) :: cexpn(3, 3, *)
 
       call wd%SetWindCorrExpnts(cexpn)
    end subroutine
 
 
    module subroutine bsa_setIncidenceAngles(incang)
-      real(RDP), target, intent(in) :: incang(:)
+      real(bsa_real_t), target, intent(in) :: incang(:)
 
       call wd%SetIncidenceAngles(incang)
    end subroutine
 
 
    module subroutine bsa_setWZRotMatW2G(rotW2G_L)
-      real(RDP), target, intent(in) :: rotW2G_L(3, 3, *)
+      real(bsa_real_t), target, intent(in) :: rotW2G_L(3, 3, *)
 
       call wd%SetLocalRotMatW2G(rotW2G_L)
    end subroutine
@@ -1124,7 +1121,7 @@ contains
 
 
    module subroutine bsa_setNodalVel(Unod)
-      real(RDP), target, intent(in) :: Unod(:)
+      real(bsa_real_t), target, intent(in) :: Unod(:)
 
       call wd%SetNodalVel(Unod)
    end subroutine
@@ -1138,14 +1135,14 @@ contains
 
 
    module subroutine bsa_setNodalWindAltitudes(WnodAlt)
-      real(RDP), target, intent(in) :: WnodAlt(:)
+      real(bsa_real_t), target, intent(in) :: WnodAlt(:)
 
       call wd%SetNodalWindAltitudes(WnodAlt)
    end subroutine
 
 
    module subroutine bsa_setSpatialNodalCorr(nodCorr)
-      real(RDP), target, intent(in) :: nodCorr(:, :)
+      real(bsa_real_t), target, intent(in) :: nodCorr(:, :)
 
       call wd%SetSpatialNodalCorr(nodCorr)
    end subroutine
@@ -1153,7 +1150,7 @@ contains
 
 
    module subroutine bsa_setWindFCoeffs(wfc)
-      real(RDP), target, intent(in) :: wfc(:, :, :)
+      real(bsa_real_t), target, intent(in) :: wfc(:, :, :)
 
       call wd%SetWindFCoeffs(wfc)
    end subroutine
@@ -1161,7 +1158,7 @@ contains
 
 
    module subroutine bsa_setPhitimesC(phiTc)
-      real(RDP), target, intent(in) :: phiTc(:, :, :)
+      real(bsa_real_t), target, intent(in) :: phiTc(:, :, :)
 
       call wd%SetPhitimesC(phiTc)
    end subroutine bsa_setPhitimesC
@@ -1175,7 +1172,7 @@ contains
 
    module subroutine bsa_setNodalCoords(nn, coords)
       integer(kind = 4), intent(in)  :: nn
-      real(RDP), target, allocatable :: coords(:, :)
+      real(bsa_real_t), target, allocatable :: coords(:, :)
 
       call struct_data%SetNodalCoords(nn, coords)
    end subroutine
@@ -1250,7 +1247,7 @@ contains
 
    module subroutine bsa_setModalInfo(ndofs, nm, Phi, natf)
       integer(kind = 4), intent(in) :: ndofs, nm
-      real(RDP), intent(in), target :: Phi(ndofs, nm), natf(nm)
+      real(bsa_real_t), intent(in), target :: Phi(ndofs, nm), natf(nm)
 
       call struct_data%SetModalInfo(ndofs, nm, Phi, natf)
    end subroutine
@@ -1259,8 +1256,8 @@ contains
 
    module subroutine bsa_setModalMatrices(nm, Mgen, Kgen, Cgen)
       integer(kind = 4), intent(in) :: nm
-      real(RDP), intent(in), target, dimension(nm) :: Mgen, Kgen
-      real(RDP), intent(in), target :: Cgen(nm, nm)
+      real(bsa_real_t), intent(in), target, dimension(nm) :: Mgen, Kgen
+      real(bsa_real_t), intent(in), target :: Cgen(nm, nm)
 
       call struct_data%SetModalMatrices(nm, Mgen, Kgen, Cgen)
    end subroutine
@@ -1275,7 +1272,7 @@ contains
 
 
    module subroutine bsa_setTotDamping(xsi)
-      real(RDP), target, intent(in) :: xsi(:)
+      real(bsa_real_t), target, intent(in) :: xsi(:)
 
       call struct_data%SetTotDamping(xsi)
    end subroutine
@@ -1304,17 +1301,17 @@ contains
 
    module subroutine bsa_computeBRdecomp(m2mf, bkg, res)
       use BsaLib_Functions, only: getBR_SFm_val_
-      real(RDP), intent(in)  :: m2mf(:)
-      real(RDP), allocatable, intent(out) :: bkg(:), res(:)
+      real(bsa_real_t), intent(in)  :: m2mf(:)
+      real(bsa_real_t), allocatable, intent(out) :: bkg(:), res(:)
       
-      integer :: im, m
+      integer(int32) :: im, m
 
       associate(nm => struct_data%modal_%nm_eff_, modes => struct_data%modal_%modes_, &
          Km => struct_data%modal_%Km_, f => struct_data%modal_%nat_freqs_)
    
 
          block
-            integer :: istat
+            integer(int32) :: istat
             allocate(bkg(nm), stat=istat)
             if (istat /= 0) then
                print '(1x, a, a)', &
@@ -1332,8 +1329,8 @@ contains
          block
             integer   :: idim2, ipsd, ibisp, dimPSD, dimBSP, id
             integer   :: iun, idxi, idxe, itc_, idir_
-            real(RDP) :: fnat, SFm_fnat, rtmp(1), Km_loc2_
-            real(RDP), allocatable :: S_uvw(:, :), S_pad(:)
+            real(bsa_real_t) :: fnat, SFm_fnat, rtmp(1), Km_loc2_
+            real(bsa_real_t), allocatable :: S_uvw(:, :), S_pad(:)
 
 
             ! NOTE: backup this data, for later reset to right values
@@ -1542,9 +1539,9 @@ contains
    module subroutine bsa_exportBR_nocompute_(fname, bkg, res, xsi)
       !! BUG: adapt to a more general XSI management..
       character(len = *), intent(in) :: fname
-      real(RDP), intent(in) :: bkg(:), res(:), xsi(:)
-      integer :: iun, im, j 
-      ! integer :: s2
+      real(bsa_real_t), intent(in)   :: bkg(:), res(:), xsi(:)
+      integer(int32) :: iun, im, j
+      ! integer(int32) :: s2
 
       ! s2  = size(bkg, 2)
       iun = io_openExportFileByName(fname)
@@ -1567,8 +1564,8 @@ contains
 
    module subroutine bsa_exportMomentToFile(fname, vec)
       character(len = *), intent(in) :: fname
-      real(RDP), intent(in)          :: vec(:)
-      integer :: iun, i, dim
+      real(bsa_real_t), intent(in)   :: vec(:)
+      integer(int32) :: iun, i, dim
 
       iun = io_openExportFileByName(exp_dir_ // fname)
       if (iun == 0) call bsa_Abort()
@@ -1584,8 +1581,8 @@ contains
 
 
    module subroutine bsa_exportSkewness_nocompute_(fname, sk)
-      character(len = *), intent(in)  :: fname
-      real(RDP), intent(in)  :: sk(:)
+      character(len = *), intent(in) :: fname
+      real(bsa_real_t), intent(in)   :: sk(:)
 
       associate(nm => struct_data%modal_%nm_eff_, modes => struct_data%modal_%modes_)
          call exportSkewness_(fname, dimM_bisp_, sk, nm, modes)
@@ -1595,9 +1592,9 @@ contains
 
 
    module subroutine bsa_exportSkewness_compute_(fname, m2, m3)
-      character(len = *), intent(in)  :: fname
-      real(RDP), intent(in)  :: m2(:), m3(:)
-      real(RDP), allocatable :: sk(:)
+      character(len = *), intent(in) :: fname
+      real(bsa_real_t), intent(in)   :: m2(:), m3(:)
+      real(bsa_real_t), allocatable  :: sk(:)
 
       associate(nm => struct_data%modal_%nm_eff_, modes => struct_data%modal_%modes_)
          sk = computeSkewness_(nm, m2, m3, only_diag_elems_)
@@ -1613,10 +1610,10 @@ contains
       use, intrinsic :: ieee_arithmetic
 #endif
       integer(kind = 4), intent(in) :: dim
-      real(RDP), intent(in)  :: m2(:), m3(:)
-      logical, intent(in)    :: only_diag
-      real(RDP), allocatable :: sk(:)
-      real(RDP), parameter   :: cst3d2 = 3._RDP / 2._RDP
+      real(bsa_real_t), intent(in)  :: m2(:), m3(:)
+      logical, intent(in) :: only_diag
+      real(real64), parameter :: cst3d2 = 3._real64 / 2._real64
+      real(bsa_real_t), allocatable :: sk(:)
 
       if (only_diag) then
          sk = m3 / (m2)**(cst3d2)
@@ -1624,14 +1621,14 @@ contains
       endif
 
       block
-         integer :: szm2, szm3
-         integer :: pm3, pm2
-         integer ::  k,  j,  i, l
-         integer :: ik, ij, ii
-         integer :: s2
+         integer(int32) :: szm2, szm3
+         integer(int32) :: pm3, pm2
+         integer(int32) ::  k,  j,  i, l
+         integer(int32) :: ik, ij, ii
+         integer(int32) :: s2
 
-         real(RDP), allocatable :: sigm(:)
-         real(RDP) :: denK, denJ
+         real(bsa_real_t), allocatable :: sigm(:)
+         real(bsa_real_t) :: denK, denJ
 
          ! s2   = size(m2, 2)
          ! if (.not. size(m3, 2) == s2) then
@@ -1643,7 +1640,7 @@ contains
          szm3 = size(m3, 1)
          
          allocate(sk(szm3))
-         sk = 0._RDP
+         sk = 0._bsa_real_t
 
          sigm = sqrt(m2)  ! std
 
@@ -1695,11 +1692,11 @@ contains
 
 
    subroutine exportSkewness_(fname, dim, vec, nmodes, modes)
-      character(len = *), intent(in)  :: fname
-      integer(kind = 4), intent(in)   :: dim, nmodes
-      integer(kind = 4), intent(in)   :: modes(nmodes)
-      real(RDP), intent(in) :: vec(:)
-      integer :: iun, i
+      character(len = *), intent(in) :: fname
+      integer(kind = 4), intent(in)  :: dim, nmodes
+      integer(kind = 4), intent(in)  :: modes(nmodes)
+      real(bsa_real_t), intent(in)   :: vec(:)
+      integer(int32) :: iun, i
 
       iun = io_openExportFileByName(exp_dir_ // fname)
       if (iun == 0) call bsa_Abort()
@@ -1728,8 +1725,8 @@ contains
 
    module subroutine bsa_exportPeakOrExtremesToFile(fname, rvar)
       character(len = *), intent(in) :: fname
-      real(RDP), intent(in) :: rvar(:)
-      integer :: ndofs, iun, i
+      real(bsa_real_t), intent(in)   :: rvar(:)
+      integer(int32) :: ndofs, iun, i
 
       iun   = io_openExportFileByName(fname)
       if (iun == 0) call bsa_Abort()
@@ -1765,9 +1762,9 @@ contains
 
    subroutine exportBRM_void_internal_(f1, f2, brm, pdata)
 #ifdef __BSA_OMP
-      real(kind = 8), intent(in) :: f1(:), f2(:), brm(:, :)
+      real(bsa_real_t), intent(in) :: f1(:), f2(:), brm(:, :)
 #else
-      real(kind = 8), intent(in) :: f1, f2, brm(:)
+      real(bsa_real_t), intent(in) :: f1, f2, brm(:)
 #endif
       class(*), pointer, intent(in) :: pdata
 
@@ -1807,9 +1804,9 @@ contains
 
    subroutine exportBRM_base_internal_(fi, fj, brm, pdata)
 #ifdef __BSA_OMP
-      real(kind = 8), intent(in) :: fi(:), fj(:), brm(:, :)
+      real(bsa_real_t), intent(in) :: fi(:), fj(:), brm(:, :)
 #else
-      real(kind = 8), intent(in) :: fi, fj, brm(:)
+      real(bsa_real_t), intent(in) :: fi, fj, brm(:)
 #endif
       class(*), pointer, intent(in) :: pdata
 
@@ -1825,15 +1822,15 @@ contains
 
 #ifdef __BSA_OMP
       block
-         integer :: i, siz
+         integer(int32) :: i, siz
 
          siz = size(fi)
          do i= 1, siz
-            write(unit_dump_brm_) real(fi(i), kind=4), real(fj(i), kind=4), real(brm(:, i), kind=4)      
+            write(unit_dump_brm_) real(fi(i), kind=real32), real(fj(i), kind=real32), real(brm(:, i), kind=real32)      
          enddo
       endblock
 #else
-      write(unit_dump_brm_) real(fi, kind=4), real(fj, kind=4), real(brm, kind=4)
+      write(unit_dump_brm_) real(fi, kind=real32), real(fj, kind=real32), real(brm, kind=real32)
 #endif
    end subroutine
 
@@ -1841,8 +1838,8 @@ contains
 
 
    module subroutine bsa_setBRMExportDefaultMode(imode)
-      integer(kind = 4), intent(in) :: imode
-      integer(kind = 4) :: iost
+      integer(int32), intent(in) :: imode
+      integer(int32) :: iost
 
       select case (imode)
 
@@ -1878,10 +1875,10 @@ contains
 
 
    module subroutine bsa_saveCoordinatesToFile(fname, coords)
-      character(len = *), intent(in)  :: fname
-      real(RDP), intent(in), target, optional :: coords(:, :)
-      real(RDP), pointer :: coords_(:, :)
-      integer(kind = 4)  :: iun, istat, i, nn_
+      character(len = *), intent(in) :: fname
+      real(bsa_real_t), intent(in), target, optional :: coords(:, :)
+      real(bsa_real_t), pointer :: coords_(:, :)
+      integer(int32)  :: iun, istat, i, nn_
 
       if (.not. present(coords) .and. .not. associated(struct_data%coords_)) then
          print '(1x, a, a)', &
@@ -1917,11 +1914,11 @@ contains
    module subroutine bsa_exportPSDToFile(fname, psd, varname, f)
       character(len = *), intent(in) :: fname
       character(len = *), intent(in), optional :: varname
-      real(RDP), intent(in), optional :: f(:)
-      real(RDP), intent(in) :: psd(:, :)
-      real(RDP), allocatable :: tmp(:)
+      real(bsa_real_t), intent(in), optional   :: f(:)
+      real(bsa_real_t), intent(in)             :: psd(:, :)
+      real(bsa_real_t), allocatable            :: tmp(:)
       
-      integer :: s1, s2, iun, j
+      integer(int32) :: s1, s2, iun, j
 
       s1 = size(psd, 1)
       s2 = size(psd, 2)
@@ -1968,10 +1965,10 @@ contains
 
    module subroutine bsa_exportBispToFile(fname, bisp, varname)
       character(len = *), intent(in) :: fname
+      real(bsa_real_t), intent(in)   :: bisp(:, :, :)
       character(len = *), intent(in), optional :: varname
-      real(RDP), intent(in) :: bisp(:, :, :)
       
-      integer :: s1, s2, s3, iun, i, j
+      integer(int32) :: s1, s2, s3, iun, i, j
 
       s1 = size(bisp, 1)
       s2 = size(bisp, 2)

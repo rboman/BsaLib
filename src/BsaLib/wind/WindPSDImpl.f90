@@ -15,9 +15,8 @@
 !! along with BSA Library.  If not, see <https://www.gnu.org/licenses/>.
 submodule(BsaLib_WindData) BsaLib_WindPSDImpl
 
-#include "../precisions"
-
    use BsaLib_IO, only: INFOMSG, WARNMSG, ERRMSG, MSGCONT, DBGMSG
+   use BsaLib_CONSTANTS, only: bsa_int_t, bsa_real_t, real64, int32
    implicit none
 
    type :: arr_proc_pointer_t
@@ -32,8 +31,8 @@ contains
 
    module subroutine SetPSDType(this, ipsd)
       class(WindData_t), intent(inout) :: this
-      integer(kind = 4), value :: ipsd
-      integer :: istat
+      integer(bsa_int_t), value :: ipsd
+      integer(int32) :: istat
       character(len = 256) :: emsg
 
       ! if (ipsd < 1 .or. ipsd > 5) call bsa_Abort('Invalid "ipsd" value.')
@@ -63,7 +62,7 @@ contains
 #ifdef __BSA_DEBUG
       print *, INFOMSG, '@WindImpl::SetPSDType() : PSD type set to ', this%i_psd_type_
 #endif
-   end subroutine SetPSDType
+   end subroutine
 
 
 
@@ -72,14 +71,14 @@ contains
    module function getFullNodalPSD(this, innl, nodesl, PSDvec, f, idir) result(PSDmat)
       use BsaLib_Utility, only: util_getCorrVectIndex
       use BsaLib_Data, only: struct_data
-      class(WindData_t), intent(in) :: this
-      integer(kind = 4), intent(in) :: innl, idir
-      integer(kind = 4), intent(in) :: nodesl(innl)
-      real(RDP), intent(in) :: PSDvec(innl)
-      real(RDP), intent(in) :: f
-      real(RDP) :: PSDmat(innl, innl)
-      real(RDP) :: absf
-      integer(kind = 4) :: i, j, ni, nj, id
+      class(WindData_t), intent(in)  :: this
+      integer(bsa_int_t), intent(in) :: innl, idir
+      integer(bsa_int_t), intent(in) :: nodesl(innl)
+      real(bsa_real_t), intent(in) :: PSDvec(innl)
+      real(bsa_real_t), intent(in) :: f
+      real(bsa_real_t) :: PSDmat(innl, innl)
+      real(bsa_real_t) :: absf
+      integer(int32)   :: i, j, ni, nj, id
 
       absf = abs(f)
 
@@ -130,11 +129,11 @@ contains
 
    module function evalPSD_(this, nf, f, innl, nnl, idir, itc) result(PSD)
       use BsaLib_Data, only: settings
-      class(WindData_t), intent(in) :: this
-      integer(kind = 4), intent(in)           :: nf, innl, idir, itc
-      integer(kind = 4), intent(in) :: nnl(innl)
-      real(RDP), intent(in)  :: f(nf)
-      real(RDP) :: PSD(nf, innl)
+      class(WindData_t), intent(in)  :: this
+      integer(bsa_int_t), intent(in) :: nf, innl, idir, itc
+      integer(bsa_int_t), intent(in) :: nnl(innl)
+      real(bsa_real_t), intent(in)   :: f(nf)
+      real(bsa_real_t) :: PSD(nf, innl)
 
       if (idir /= 1) then
          print '(/ 1x, a, a, i1, a)', &
@@ -156,18 +155,18 @@ contains
 
    function vonKarmanPSD_(wd, nf, freqs, innl, nnl, idir, itc) result(PSD)
       class(WindData_t), intent(in) :: wd
-      integer(kind = 4), intent(in) :: nf       ! n. frequencies
-      integer(kind = 4), intent(in) :: innl     ! n. actual nodes loaded
-      integer(kind = 4), intent(in) :: idir     ! wind direction
-      integer(kind = 4), intent(in) :: itc      ! 
-      real(RDP), intent(in)  :: freqs(nf)       ! frequencies
-      integer(kind = 4), intent(in) :: nnl(innl)   ! list of actual loaded nodes
-      real(RDP) :: PSD(nf, innl)
+      integer(bsa_int_t), intent(in) :: nf       ! n. frequencies
+      integer(bsa_int_t), intent(in) :: innl     ! n. actual nodes loaded
+      integer(bsa_int_t), intent(in) :: idir     ! wind direction
+      integer(bsa_int_t), intent(in) :: itc      ! 
+      real(bsa_real_t), intent(in)  :: freqs(nf)       ! frequencies
+      integer(bsa_int_t), intent(in) :: nnl(innl)   ! list of actual loaded nodes
+      real(bsa_real_t) :: PSD(nf, innl)
 
       ! tmp
-      real(RDP), dimension(1, innl) :: L
-      real(RDP), allocatable :: rtmp1(:, :)
-      integer :: i
+      real(bsa_real_t), dimension(1, innl) :: L
+      real(bsa_real_t), allocatable :: rtmp1(:, :)
+      integer(int32) :: i
 
 
 ! #ifdef __BSA_DEBUG
@@ -185,31 +184,31 @@ contains
          PSD   = matmul(reshape(abs(freqs), [nf, 1]), rtmp1)
          PSD   = PSD * PSD ! square
          rtmp1 = rtmp1 * reshape(wd%sigmaUVW_wz_(itc, wd%wz_node_(1 : innl))**2, [1, innl])
-         PSD   = (1 + 70.7_RDP * PSD)**(5._RDP/6._RDP)
+         PSD   = (1 + 70.7_bsa_real_t * PSD)**(5._bsa_real_t/6._bsa_real_t)
          
 
          ! BUG: LOCAL(i) is superflous (should be error..)
          do concurrent (i = 1 : innl) local(i)
-            PSD(:, i) = 4._RDP * rtmp1(1, i) / PSD(:, i)
+            PSD(:, i) = 4._bsa_real_t * rtmp1(1, i) / PSD(:, i)
          enddo
 
       else ! WARNING: should not pass from here
 
          block
-            real(RDP) :: dnlsu(nf, innl), rtmp2(nf, innl), rtmp3(nf, innl)
+            real(bsa_real_t) :: dnlsu(nf, innl), rtmp2(nf, innl), rtmp3(nf, innl)
 
-            dnlsu = 2._RDP * &
+            dnlsu = 2._bsa_real_t * &
                matmul(reshape(freqs, [nf, 1]), &
                reshape(wd%turb_scales_wz_(1, idir, wd%wz_node_(nnl)), [1, innl]) / &
                reshape(wd%u_node_(1 : innl), [1, innl]))
 
             dnlsu = dnlsu*dnlsu
 
-            rtmp1 = 1._RDP + 70.7_RDP * dnlsu
-            rtmp2 = rtmp1 ** (11._RDP / 6._RDP)
+            rtmp1 = 1._bsa_real_t + 70.7_bsa_real_t * dnlsu
+            rtmp2 = rtmp1 ** (11._bsa_real_t / 6._bsa_real_t)
             rtmp2 = rtmp2 * reshape(wd%u_node_(1 : innl), [1, innl])
             rtmp3 = reshape(wd%turb_scales_wz_(itc, idir, wd%wz_node_(nnl)), [1, innl]) * &
-               (1._RDP + 188.4_RDP * dnlsu) / &
+               (1._bsa_real_t + 188.4_bsa_real_t * dnlsu) / &
                rtmp2 * reshape(wd%sigmaUVW_wz_(itc, wd%wz_node_(nnl))**2, [1, innl])
 
             rtmp1 = rtmp3 + rtmp3
@@ -227,19 +226,19 @@ contains
 
    function kaimalPSD_(wd, nf, freqs, innl, nnl, idir, itc) result(PSD)
       class(WindData_t), intent(in) :: wd
-      integer(kind = 4), intent(in) :: nf                    ! n. frequencies
-      integer(kind = 4), intent(in) :: innl                  ! n. actual nodes loaded
-      integer(kind = 4), intent(in) :: idir                  ! wind direction
-      integer(kind = 4), intent(in) :: itc                   ! 
-      integer(kind = 4), intent(in) :: nnl(innl)     ! list of actual loaded nodes
-      real(RDP), intent(in)  :: freqs(nf)   ! frequencies
-      real(RDP) :: PSD(nf, innl)
+      integer(bsa_int_t), intent(in) :: nf                    ! n. frequencies
+      integer(bsa_int_t), intent(in) :: innl                  ! n. actual nodes loaded
+      integer(bsa_int_t), intent(in) :: idir                  ! wind direction
+      integer(bsa_int_t), intent(in) :: itc                   ! 
+      integer(bsa_int_t), intent(in) :: nnl(innl)     ! list of actual loaded nodes
+      real(bsa_real_t), intent(in)  :: freqs(nf)   ! frequencies
+      real(bsa_real_t) :: PSD(nf, innl)
 
 #ifdef __BSA_DEBUG
       write(unit_debug_, '(1x, a, a)') INFOMSG, '@WindPSDImpl::kaimalPSD_() : computing PSD.. [NOT YET IMPLEMENTED]'
 #endif
 
-      PSD = 0._RDP
+      PSD = 0._bsa_real_t
 
 ! #ifdef __BSA_DEBUG
 !       write(unit_debug_, '(1x, a, a)') &
@@ -253,15 +252,15 @@ contains
 
    function davenportPSD_Greisch_(wd, nf, freqs, innl, nnl, idir, itc) result(PSD)
       class(WindData_t), intent(in) :: wd
-      integer(kind = 4), intent(in) :: nf          ! n. frequencies
-      integer(kind = 4), intent(in) :: innl        ! n. actual nodes loaded
-      integer(kind = 4), intent(in) :: idir        ! wind direction
-      integer(kind = 4), intent(in) :: itc         ! 
-      integer(kind = 4), intent(in) :: nnl(innl)     ! list of actual loaded nodes
-      real(RDP), intent(in) :: freqs(nf)   ! frequencies
-      real(RDP), parameter :: cst1 = 1200._RDP
+      integer(bsa_int_t), intent(in) :: nf          ! n. frequencies
+      integer(bsa_int_t), intent(in) :: innl        ! n. actual nodes loaded
+      integer(bsa_int_t), intent(in) :: idir        ! wind direction
+      integer(bsa_int_t), intent(in) :: itc         ! 
+      integer(bsa_int_t), intent(in) :: nnl(innl)     ! list of actual loaded nodes
+      real(bsa_real_t), intent(in) :: freqs(nf)   ! frequencies
+      real(bsa_real_t), parameter :: cst1 = 1200._bsa_real_t
       integer   :: i, n
-      real(RDP) :: PSD(nf, innl)
+      real(bsa_real_t) :: PSD(nf, innl)
 
 ! #ifdef __BSA_DEBUG
 !       write(unit_debug_, '(1x, a, a)') INFOMSG, '@WindPSDImpl::davenportPSD_Greisch_() : computing PSD...'
@@ -272,8 +271,8 @@ contains
          n = nnl(i)
 
          PSD(:, i) = wd%sigmaUVW_wz_(itc, wd%wz_node_(n)) * wd%sigmaUVW_wz_(itc, wd%wz_node_(n)) * &
-            0.65_RDP * cst1 / wd%u_mean_ref_wz_(wd%wz_node_(n)) / &
-            (1 + (cst1 * freqs / wd%u_mean_ref_wz_(wd%wz_node_(n)))**2._RDP)**(5._RDP / 6._RDP)
+            0.65_bsa_real_t * cst1 / wd%u_mean_ref_wz_(wd%wz_node_(n)) / &
+            (1 + (cst1 * freqs / wd%u_mean_ref_wz_(wd%wz_node_(n)))**2._bsa_real_t)**(5._bsa_real_t / 6._bsa_real_t)
       enddo
 
 ! #ifdef __BSA_DEBUG
@@ -287,15 +286,15 @@ contains
 
    function davenportPSD_Uliege_(wd, nf, freqs, innl, nnl, idir, itc) result(PSD)
       class(WindData_t), intent(in) :: wd
-      integer(kind = 4), intent(in) :: nf                    ! n. frequencies
-      integer(kind = 4), intent(in) :: innl                  ! n. actual nodes loaded
-      integer(kind = 4), intent(in) :: idir                  ! wind direction
-      integer(kind = 4), intent(in) :: itc                   ! 
-      integer(kind = 4), intent(in) :: nnl(innl)     ! list of actual loaded nodes
-      real(RDP), intent(in)  :: freqs(nf)   ! frequencies
-      real(RDP) :: PSD(nf, innl)
-      real(RDP) :: cstL_U(1, innl), cstFL_U(nf, innl)
-      integer   :: i, n
+      integer(bsa_int_t), intent(in) :: nf                    ! n. frequencies
+      integer(bsa_int_t), intent(in) :: innl                  ! n. actual nodes loaded
+      integer(bsa_int_t), intent(in) :: idir                  ! wind direction
+      integer(bsa_int_t), intent(in) :: itc                   ! 
+      integer(bsa_int_t), intent(in) :: nnl(innl)     ! list of actual loaded nodes
+      real(bsa_real_t), intent(in)  :: freqs(nf)   ! frequencies
+      real(bsa_real_t) :: PSD(nf, innl)
+      real(bsa_real_t) :: cstL_U(1, innl), cstFL_U(nf, innl)
+      integer(int32)   :: i, n
 
 
       cstL_U(1, :) = wd%turb_scales_wz_(itc, idir, wd%wz_node_(nnl)) / wd%u_node_(nnl)

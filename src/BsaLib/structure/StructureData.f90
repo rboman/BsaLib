@@ -14,9 +14,8 @@
 !! You should have received a copy of the GNU General Public License
 !! along with BSA Library.  If not, see <https://www.gnu.org/licenses/>.
 module BsaLib_Structure
-
-#include "../precisions"
    
+   use BsaLib_CONSTANTS, only: bsa_int_t, bsa_real_t, int32
    implicit none
    private
 
@@ -24,35 +23,35 @@ module BsaLib_Structure
    type, public :: StructureModalData_t
 
       !> n. of (in memory) kept structure vibration modes
-      integer(kind = 4) :: nm_ = 0
+      integer(bsa_int_t) :: nm_ = 0
 
       !> n. of "usable" structure vibration modes
       !> To account for non 1-normalised modes, if any.
-      integer(kind = 4) :: nm_eff_ = 0
+      integer(bsa_int_t) :: nm_eff_ = 0
 
       !> List of "usable" structural vibration modes.
       !> They might be less than the actual computed, 
       !> since some of them might refer to torsional
       !> modes, etc..
-      integer(kind = 4), allocatable :: modes_(:)
+      integer(bsa_int_t), allocatable :: modes_(:)
 
       !> structural natural frequencies
-      real(RDP), dimension(:), pointer    :: nat_freqs_;
+      real(bsa_real_t), dimension(:), pointer    :: nat_freqs_;
 
       !> generalised modal matrix
-      real(RDP), dimension(:, :), pointer :: phi_;
+      real(bsa_real_t), dimension(:, :), pointer :: phi_;
 
       !> modal damping ratios
-      real(RDP), dimension(:), pointer :: xsi_;
+      real(bsa_real_t), dimension(:), pointer :: xsi_;
 
       !> generalised mass matrix
-      real(RDP), dimension(:), pointer :: Mm_;
+      real(bsa_real_t), dimension(:), pointer :: Mm_;
 
       !> generalised damping matrix (Rayleigh)
-      real(RDP), dimension(:, :), pointer :: Cm_;
+      real(bsa_real_t), dimension(:, :), pointer :: Cm_;
 
       !> generalised stiffness matrix
-      real(RDP), dimension(:), pointer :: Km_;
+      real(bsa_real_t), dimension(:), pointer :: Km_;
    end type StructureModalData_t
 
 
@@ -60,29 +59,29 @@ module BsaLib_Structure
    type, public :: StructureData_t
 
       !> n. of all nodes
-      integer(kind = 4) :: nn_ = 0
+      integer(bsa_int_t) :: nn_ = 0
 
       !> n. of all libs (per node)
-      integer(kind = 4) :: nlibs_ = 0
+      integer(bsa_int_t) :: nlibs_ = 0
 
       !> n. of total DOFs
-      integer(kind = 4) :: ndofs_ = 0
+      integer(bsa_int_t) :: ndofs_ = 0
       
       !> n. of actually loaded nodes
-      integer(kind = 4) :: nn_load_ = 0
+      integer(bsa_int_t) :: nn_load_ = 0
 
       !> n. of actually loaded DOFs (per loaded node)
-      integer(kind = 4) :: nlibs_load_ = 0
+      integer(bsa_int_t) :: nlibs_load_ = 0
 
       !> list of actual loaded nodes
-      integer(kind = 4), pointer :: n_load_(:) => null();
+      integer(bsa_int_t), pointer :: n_load_(:) => null();
 
       !> list of actual loaded DOFs (per node)
-      integer(kind = 4), pointer :: libs_load_(:) => null();
+      integer(bsa_int_t), pointer :: libs_load_(:) => null();
 
       ! NOTE: pointer since we do not want to copy.
       !> Nodal coordinates.
-      real(RDP), pointer :: coords_(:, :) => null()
+      real(bsa_real_t), pointer :: coords_(:, :) => null()
 
       !> modal structure info
       type(StructureModalData_t) :: modal_
@@ -91,13 +90,13 @@ module BsaLib_Structure
       ! NOTE: following allocatables since are local instances !
 
       !> structure time scales
-      real(RDP), dimension(:), allocatable :: str_time_scales_
+      real(bsa_real_t), dimension(:), allocatable :: str_time_scales_
 
       !> background peak widths
-      real(RDP), dimension(:, :), allocatable :: bkg_peak_width_
+      real(bsa_real_t), dimension(:, :), allocatable :: bkg_peak_width_
 
       !> resonant peak widths
-      real(RDP), dimension(:), allocatable :: res_peak_width_
+      real(bsa_real_t), dimension(:), allocatable :: res_peak_width_
 
    contains
 
@@ -124,35 +123,35 @@ module BsaLib_Structure
 
       module subroutine SetNodalCoords(this, nn, coords)
          class(StructureData_t), intent(inout) :: this
-         integer(kind = 4), intent(in)         :: nn
-         real(RDP), target, allocatable        :: coords(:, :)
+         integer(bsa_int_t), intent(in)         :: nn
+         real(bsa_real_t), target, allocatable        :: coords(:, :)
       end subroutine
 
       module subroutine SetNOfNodalDOFs(this, nlibs)
          class(StructureData_t), intent(inout) :: this
-         integer(kind = 4), intent(in) :: nlibs
+         integer(bsa_int_t), intent(in) :: nlibs
       end subroutine
 
 
       module subroutine SetTotalNOfNodes(this, nn)
          class(StructureData_t), intent(inout) :: this
-         integer(kind = 4), intent(in) :: nn
+         integer(bsa_int_t), intent(in) :: nn
       end subroutine
 
 
 
       module subroutine SetLoadedNodalDOFs(this, nlib, lib)
          class(StructureData_t), intent(inout) :: this
-         integer(kind = 4), intent(in) :: nlib
-         integer(kind = 4), target, intent(in) :: lib(:)
+         integer(bsa_int_t), intent(in) :: nlib
+         integer(bsa_int_t), target, intent(in) :: lib(:)
       end subroutine
 
 
 
       module subroutine SetLoadedNodes(this, nnl, nl)
          class(StructureData_t), intent(inout) :: this
-         integer(kind = 4), intent(in) :: nnl
-         integer(kind = 4), target, intent(in) :: nl(:)
+         integer(bsa_int_t), intent(in) :: nnl
+         integer(bsa_int_t), target, intent(in) :: nl(:)
       end subroutine
 
 
@@ -162,14 +161,14 @@ module BsaLib_Structure
 
       module subroutine SetModalInfo(this, ndofs, nm, Phi, natf)
          class(StructureData_t), intent(inout) :: this
-         integer(kind = 4), intent(in) :: ndofs, nm
-         real(RDP), intent(in), target :: Phi(ndofs, nm), natf(nm)
+         integer(bsa_int_t), intent(in) :: ndofs, nm
+         real(bsa_real_t), intent(in), target :: Phi(ndofs, nm), natf(nm)
       end subroutine
 
 
       module subroutine SetKeptModes(this, modes)
          class(StructureData_t), intent(inout) :: this
-         integer(kind = 4), intent(in) :: modes(:)
+         integer(bsa_int_t), intent(in) :: modes(:)
       end subroutine
 
 
@@ -182,16 +181,16 @@ module BsaLib_Structure
 
       module subroutine SetModalMatrices(this, nm, Mg, Kg, Cg)
          class(StructureData_t), intent(inout) :: this
-         integer(kind = 4), intent(in) :: nm
-         real(RDP), intent(in), target, dimension(nm) :: Mg, Kg
-         real(RDP), intent(in), target :: Cg(nm, nm)
+         integer(bsa_int_t), intent(in) :: nm
+         real(bsa_real_t), intent(in), target, dimension(nm) :: Mg, Kg
+         real(bsa_real_t), intent(in), target :: Cg(nm, nm)
       end subroutine
 
 
 
       module subroutine SetTotDamping(this, xsi)
          class(StructureData_t), intent(inout) :: this
-         real(RDP), target, intent(in) :: xsi(this%modal_%nm_)
+         real(bsa_real_t), target, intent(in) :: xsi(this%modal_%nm_)
       end subroutine
 
 
@@ -207,7 +206,7 @@ module BsaLib_Structure
 
       module subroutine computeBKGPeakWidths(this, wind_scales)
          class(StructureData_t), intent(inout) :: this
-         real(RDP), intent(in) :: wind_scales(:, :)
+         real(bsa_real_t), intent(in) :: wind_scales(:, :)
       end subroutine
 
 

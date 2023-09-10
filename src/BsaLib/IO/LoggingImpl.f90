@@ -15,8 +15,6 @@
 !! along with BSA Library.  If not, see <https://www.gnu.org/licenses/>.
 submodule(Logging) LoggingImpl
 
-#include "../precisions"
-
    use BsaLib_IO, only: INFOMSG, WARNMSG, ERRMSG, MSGCONT, DBGMSG, NOTEMSG
    use BsaLib_Data, only: bsa_Abort
    implicit none
@@ -76,7 +74,7 @@ contains
    module subroutine logZonePremeshingTotTime(this, zname, rtime, npts, print2console)
       class(logger_t), intent(in)  :: this
       character(len=*), intent(in) :: zname
-      real(RDP), intent(in) :: rtime
+      real(real64), intent(in) :: rtime
       integer, intent(in), optional :: npts
       logical, intent(in), optional :: print2console
 

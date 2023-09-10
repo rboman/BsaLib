@@ -24,9 +24,9 @@ contains
 
 
    module function evaluatePSD(f, nf, itc) result(PSD)
-      integer(kind = 4), intent(in) :: nf, itc
-      real(kind = 8), intent(in)    :: f(nf)
-      real(kind = 8), allocatable, target :: PSD(:, :)
+      integer(bsa_int_t), intent(in) :: nf, itc
+      real(bsa_real_t), intent(in)   :: f(nf)
+      real(bsa_real_t), allocatable, target :: PSD(:, :)
 
       PSD = wd%evalPSD(nf, f, struct_data%nn_load_, struct_data%n_load_, 1, itc)
    end function
@@ -35,7 +35,7 @@ contains
 
 
    module subroutine cleanBSAData_()
-      integer(kind = 4)    :: istat
+      integer(int32) :: istat
       character(len = 256) :: emsg
       logical :: isopn
 
@@ -159,7 +159,7 @@ contains
 
    module subroutine bsa_Abort(emsg)
       character(len = *), intent(in), optional :: emsg
-      external :: abort
+      ! external :: abort
 
       if (present(emsg)) print '(/ 1x, a, a/)', ERRMSG, emsg
       

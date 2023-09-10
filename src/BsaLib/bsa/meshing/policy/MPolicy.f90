@@ -15,6 +15,7 @@
 !! along with BSA Library.  If not, see <https://www.gnu.org/licenses/>.
 module BsaLib_MPolicy
    
+   use BsaLib_CONSTANTS, only: int32
    implicit none
    private
 
@@ -30,31 +31,29 @@ module BsaLib_MPolicy
    !    enumerator :: MPolicy_PAD_ZONE_INTERN = 8
    !    enumerator :: MPolicy_PAD_ZONE_EXTERN = 9
    ! end enum
-   integer, public, parameter :: MPolicy_NULL  = 0
-   integer, public, parameter :: MPolicy_DEF   = 1
-   integer, public, parameter :: MPolicy_CONST = 2
-   integer, public, parameter :: MPolicy_PRE_PEAK_1 = 3
-   integer, public, parameter :: MPolicy_PRE_PEAK_2 = 4
-   integer, public, parameter :: MPolicy_PEAK  = 5
-   integer, public, parameter :: MPolicy_CREST = 6
-   integer, public, parameter :: MPolicy_BASIN = 7
-   integer, public, parameter :: MPolicy_PAD_ZONE_INTERN = 8
-   integer, public, parameter :: MPolicy_PAD_ZONE_EXTERN = 9
+   integer(int32), public, parameter :: MPolicy_NULL  = 0
+   integer(int32), public, parameter :: MPolicy_DEF   = 1
+   integer(int32), public, parameter :: MPolicy_CONST = 2
+   integer(int32), public, parameter :: MPolicy_PRE_PEAK_1 = 3
+   integer(int32), public, parameter :: MPolicy_PRE_PEAK_2 = 4
+   integer(int32), public, parameter :: MPolicy_PEAK  = 5
+   integer(int32), public, parameter :: MPolicy_CREST = 6
+   integer(int32), public, parameter :: MPolicy_BASIN = 7
+   integer(int32), public, parameter :: MPolicy_PAD_ZONE_INTERN = 8
+   integer(int32), public, parameter :: MPolicy_PAD_ZONE_EXTERN = 9
 
    
    type, public :: MPolicy_t
 
-      integer(kind = 4) :: delta_fI_fct_     = 0
-      integer(kind = 4) :: delta_fJ_fct_     = 0
-      integer(kind = 4) :: interp_bfm_I_fct_ = 0
-      integer(kind = 4) :: interp_bfm_J_fct_ = 0
-      integer(kind = 4) :: interp_I_fct_     = 0
-      integer(kind = 4) :: interp_J_fct_     = 0
-
-      integer(kind = 4) :: n_interp_bfm_lvs_ = 0
+      integer(int32) :: delta_fI_fct_     = 0
+      integer(int32) :: delta_fJ_fct_     = 0
+      integer(int32) :: interp_bfm_I_fct_ = 0
+      integer(int32) :: interp_bfm_J_fct_ = 0
+      integer(int32) :: interp_I_fct_     = 0
+      integer(int32) :: interp_J_fct_     = 0
+      integer(int32) :: n_interp_bfm_lvs_ = 0
       
-      integer(kind = 4), private :: id_pol_ = 0
-   
+      integer(int32), private :: id_pol_ = 0
    contains
 
       procedure :: getID
@@ -103,14 +102,14 @@ contains
       !    int(interpi, kind = 4),      &
       !    int(interpj, kind = 4),      &
       !    id)
-      pol%delta_fI_fct_     = int(dfi, kind = 4)
-      pol%delta_fJ_fct_     = int(dfj, kind = 4)
-      pol%interp_bfm_I_fct_ = int(interp_bfm_i, kind = 4)
-      pol%interp_bfm_J_fct_ = int(interp_bfm_j, kind = 4)
-      pol%interp_I_fct_     = int(interpi, kind = 4)
-      pol%interp_J_fct_     = int(interpj, kind = 4)
-      pol%n_interp_bfm_lvs_ = int(nlevs, kind = 4)
-      pol%id_pol_           = int(id, kind = 4)
+      pol%delta_fI_fct_     = int(dfi, kind = int32)
+      pol%delta_fJ_fct_     = int(dfj, kind = int32)
+      pol%interp_bfm_I_fct_ = int(interp_bfm_i, kind = int32)
+      pol%interp_bfm_J_fct_ = int(interp_bfm_j, kind = int32)
+      pol%interp_I_fct_     = int(interpi, kind = int32)
+      pol%interp_J_fct_     = int(interpj, kind = int32)
+      pol%n_interp_bfm_lvs_ = int(nlevs, kind = int32)
+      pol%id_pol_           = int(id, kind = int32)
    end function
 
 
@@ -184,7 +183,7 @@ contains
 
    elemental pure function getID(this) result(id)
       class(MPolicy_t), intent(in) :: this
-      integer(kind = 4) :: id
+      integer(int32) :: id
 
       id = this%id_pol_
    end function getID
