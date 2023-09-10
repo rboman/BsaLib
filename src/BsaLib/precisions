@@ -1,0 +1,11 @@
+
+use iso_fortran_env
+
+#ifndef MY_PRECISIONS
+
+#define MY_PRECISIONS
+
+#define RDP real64
+#define RSP real32
+
+#endif
