@@ -3,12 +3,12 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.32407.337
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "BSA", "src\BSA.vfproj", "{DA0DDA4B-436F-4F32-9664-D89DB5F50096}"
+Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "BSA", "BSA.vfproj", "{DA0DDA4B-436F-4F32-9664-D89DB5F50096}"
 	ProjectSection(ProjectDependencies) = postProject
 		{FA4C5412-70FD-4A98-9A97-758D8F0FE907} = {FA4C5412-70FD-4A98-9A97-758D8F0FE907}
 	EndProjectSection
 EndProject
-Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "BSAlib", "src\BsaLib\BSAlib.vfproj", "{FA4C5412-70FD-4A98-9A97-758D8F0FE907}"
+Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "BSAlib", "BsaLib\BSAlib.vfproj", "{FA4C5412-70FD-4A98-9A97-758D8F0FE907}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
