@@ -1231,7 +1231,7 @@ contains ! utility procedures
 
       if (iexit == 0) then
          print '(/ 1x, a, a)', INFOMSG, 'BSA terminated correctly.'
-      elseif (iexit > 1) then
+      else
          print '(/ 1x, a, a, i0)', &
             ERRMSG, 'BSA terminated with error. Exit status code  ', iexit
       endif
