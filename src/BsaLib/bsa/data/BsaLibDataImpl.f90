@@ -57,81 +57,39 @@ contains
 
       if (allocated(PHItimesC_local_)) then
          deallocate(PHItimesC_local_, stat=istat, errmsg=emsg)
-         if (istat == 0) then
-#ifdef __BSA_ALLOC_DEBUG
-            call deallocOKMsg('PHItimesC_local_')
-#endif
-         else
-            call deallocKOMsg('PHItimesC_local_', istat, emsg)
-         endif
+         if (istat /= 0) call deallocKOMsg('PHItimesC_local_', istat, emsg)
       endif
 
 
       if (allocated(peak_exts_)) then
          deallocate(peak_exts_, stat=istat, errmsg=emsg)
-         if (istat == 0) then
-#ifdef __BSA_ALLOC_DEBUG
-            call deallocOKMsg('peak_exts_')
-#endif
-         else
-            call deallocKOMsg('peak_exts_', istat, emsg)
-         endif
+         if (istat /= 0) call deallocKOMsg('peak_exts_', istat, emsg)
       endif
 
 
       if (allocated(settings)) then
          deallocate(settings, stat=istat, errmsg=emsg)
-         if (istat == 0) then
-#ifdef __BSA_ALLOC_DEBUG
-            call deallocOKMsg('settings')
-#endif
-         else
-            call deallocKOMsg('settings', istat, emsg)
-         endif
+         if (istat /= 0) call deallocKOMsg('settings', istat, emsg)
       endif
 
       if (allocated(wd)) then
          deallocate(wd, stat=istat, errmsg=emsg)
-         if (istat == 0) then
-#ifdef __BSA_ALLOC_DEBUG
-            call deallocOKMsg('wd')
-#endif
-         else
-            call deallocKOMsg('wd', istat, emsg)
-         endif
+         if (istat /= 0) call deallocKOMsg('wd', istat, emsg)
       endif
 
       if (allocated(struct_data)) then
          deallocate(struct_data, stat=istat, errmsg=emsg)
-         if (istat == 0) then
-#ifdef __BSA_ALLOC_DEBUG
-            call deallocOKMsg('struct_data')
-#endif
-         else
-            call deallocKOMsg('struct_data', istat, emsg)
-         endif
+         if (istat /= 0) call deallocKOMsg('struct_data', istat, emsg)
       endif
 
       if (allocated(timer)) then
          deallocate(timer, stat=istat, errmsg=emsg)
-         if (istat == 0) then
-#ifdef __BSA_ALLOC_DEBUG
-            call deallocOKMsg('timer')
-#endif
-         else
-            call deallocKOMsg('timer', istat, emsg)
-         endif
+         if (istat /= 0) call deallocKOMsg('timer', istat, emsg)
       endif
 
       if (allocated(logger_debug)) then
          deallocate(logger_debug, stat=istat, errmsg=emsg)
-         if (istat == 0) then
-#ifdef __BSA_ALLOC_DEBUG
-            call deallocOKMsg('logger_debug')
-#endif
-         else
-            call deallocKOMsg('logger_debug', istat, emsg)
-         endif
+         if (istat /= 0) call deallocKOMsg('logger_debug', istat, emsg)
       endif
 
       is_data_cleaned_ = .true.

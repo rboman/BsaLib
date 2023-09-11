@@ -318,13 +318,7 @@ contains
       
       if (.not. allocated(MSHR_SVD_INFO)) then
          allocate(MSHR_SVD_INFO, stat=istat, errmsg=emsg)
-         if (istat == 0) then
-#ifdef __BSA_ALLOC_DEBUG
-            call allocOKMsg('MSHR_SVD_INFO', loc(MSHR_SVD_INFO), sizeof(MSHR_SVD_INFO))
-#endif
-         else
-            call allocKOMsg('MSHR_SVD_INFO', istat, emsg)
-         endif
+         if (istat /= 0) call allocKOMsg('MSHR_SVD_INFO', istat, emsg)
 		endif
       
       MSHR_SVD_INFO = 0
@@ -362,25 +356,11 @@ contains
             if (size(MSHR_SVD_WORK) /= MSHR_SVD_LWORK) then
                deallocate(MSHR_SVD_WORK)
                allocate(MSHR_SVD_WORK(MSHR_SVD_LWORK), stat=istat, errmsg=emsg)
-               if (istat == 0) then
-#ifdef __BSA_ALLOC_DEBUG
-                  call allocOKMsg('MSHR_SVD_WORK', &
-                     int(MSHR_SVD_LWORK), loc(MSHR_SVD_WORK), sizeof(MSHR_SVD_WORK))
-#endif
-               else
-                  call allocKOMsg('MSHR_SVD_WORK', istat, emsg)
-               endif
+               if (istat /= 0) call allocKOMsg('MSHR_SVD_WORK', istat, emsg)
             endif
          else
             allocate(MSHR_SVD_WORK(MSHR_SVD_LWORK), stat=istat, errmsg=emsg)
-            if (istat == 0) then
-#ifdef __BSA_ALLOC_DEBUG
-               call allocOKMsg('MSHR_SVD_WORK', &
-                  int(MSHR_SVD_LWORK), loc(MSHR_SVD_WORK), sizeof(MSHR_SVD_WORK))
-#endif
-            else
-               call allocKOMsg('MSHR_SVD_WORK', istat, emsg)
-            endif
+            if (istat /= 0) call allocKOMsg('MSHR_SVD_WORK', istat, emsg)
          endif
          return ! correct execution flow
       endif
@@ -405,24 +385,12 @@ contains
 
       if (allocated(MSHR_SVD_INFO)) then
          deallocate(MSHR_SVD_INFO, stat=istat, errmsg=emsg)
-         if (istat == 0) then
-#ifdef __BSA_ALLOC_DEBUG
-            call deallocOKMsg('MSHR_SVD_INFO')
-#endif
-         else
-            call deallocKOMsg('MSHR_SVD_INFO', istat, emsg)
-         endif
+         if (istat /= 0) call deallocKOMsg('MSHR_SVD_INFO', istat, emsg)
       endif
 
       if (allocated(MSHR_SVD_WORK)) then
          deallocate(MSHR_SVD_WORK, stat=istat, errmsg=emsg)
-         if (istat == 0) then
-#ifdef __BSA_ALLOC_DEBUG
-            call deallocOKMsg('MSHR_SVD_WORK')
-#endif
-         else
-            call deallocKOMsg('MSHR_SVD_WORK', istat, emsg)
-         endif
+         if (istat /= 0) call deallocKOMsg('MSHR_SVD_WORK', istat, emsg)
       endif
 
 #ifdef __BSA_DEBUG
@@ -1197,117 +1165,44 @@ contains
       ! these are needed regardlessly of if PSDs or BISPs
 
       allocate(psd(NFREQS, dimM_psd_), stat=ilk, errmsg=emsg)
-      if (ilk == 0) then
-#ifdef __BSA_ALLOC_DEBUG
-         call allocOKMsg('psd', [NFREQS, dimM_psd_], loc(psd), sizeof(psd))
-#endif
-      else
-         call allocKOMsg('psd', ilk, emsg)
-      endif
+      if (ilk /= 0) call allocKOMsg('psd', ilk, emsg)
       psd = 0._bsa_real_t
 
       allocate(S_uvw_k(NFREQS), stat=ilk, errmsg=emsg)
-      if (ilk == 0) then
-#ifdef __BSA_ALLOC_DEBUG
-         call allocOKMsg('S_uvw_k', NFREQS, loc(S_uvw_k), sizeof(S_uvw_k))
-#endif
-      else
-         call allocKOMsg('S_uvw_k', ilk, emsg)
-      endif
+      if (ilk /= 0) call allocKOMsg('S_uvw_k', ilk, emsg)
 
       allocate(S_uvw_j(NFREQS), stat=ilk, errmsg=emsg)
-      if (ilk == 0) then
-#ifdef __BSA_ALLOC_DEBUG
-         call allocOKMsg('S_uvw_j', NFREQS, loc(S_uvw_j), sizeof(S_uvw_j))
-#endif
-      else
-         call allocKOMsg('S_uvw_j', ilk, emsg)
-      endif
+      if (ilk /= 0) call allocKOMsg('S_uvw_j', ilk, emsg)
 
       allocate(S_uvw_JK(NFREQS), stat=ilk, errmsg=emsg)
-      if (ilk == 0) then
-#ifdef __BSA_ALLOC_DEBUG
-         call allocOKMsg('S_uvw_JK', NFREQS, loc(S_uvw_JK), sizeof(S_uvw_JK))
-#endif
-      else
-         call allocKOMsg('S_uvw_JK', ilk, emsg)
-      endif
+      if (ilk /= 0) call allocKOMsg('S_uvw_JK', ilk, emsg)
 
       allocate(PSDF_jk_JK_w(NFREQS), stat=ilk, errmsg=emsg)
-      if (ilk == 0) then
-#ifdef __BSA_ALLOC_DEBUG
-         call allocOKMsg('PSDF_jk_JK_w', NFREQS, loc(PSDF_jk_JK_w), sizeof(PSDF_jk_JK_w))
-#endif
-      else
-         call allocKOMsg('PSDF_jk_JK_w', ilk, emsg)
-      endif
+      if (ilk /= 0) call allocKOMsg('PSDF_jk_JK_w', ilk, emsg)
 
       if (settings%i_compute_bisp_ == 1) then
 
          allocate(bisp(NFREQS, NFREQS, dimM_bisp_), stat=ilk, errmsg=emsg)
-         if (ilk == 0) then
-#ifdef __BSA_ALLOC_DEBUG
-            call allocOKMsg('bisp', [NFREQS, NFREQS, dimM_bisp_], loc(bisp), sizeof(bisp))
-#endif
-         else
-            call allocKOMsg('bisp', ilk, emsg)
-         endif
+         if (ilk /= 0) call allocKOMsg('bisp', ilk, emsg)
          bisp = 0._bsa_real_t
 
          allocate(bf_ijk_IJK_w_w2(NFREQS), stat=ilk, errmsg=emsg)
-         if (ilk == 0) then
-#ifdef __BSA_ALLOC_DEBUG
-            call allocOKMsg(&
-               'bf_ijk_IJK_w_w2', NFREQS, loc(bf_ijk_IJK_w_w2), sizeof(bf_ijk_IJK_w_w2))
-#endif
-         else
-            call allocKOMsg('bf_ijk_IJK_w_w2', ilk, emsg)
-         endif
+         if (ilk /= 0) call allocKOMsg('bf_ijk_IJK_w_w2', ilk, emsg)
 
          allocate(S_uvw_i(NFREQS), stat=ilk, errmsg=emsg)
-         if (ilk == 0) then
-#ifdef __BSA_ALLOC_DEBUG
-            call allocOKMsg('S_uvw_i', NFREQS, loc(S_uvw_i), sizeof(S_uvw_i))
-#endif
-         else
-            call allocKOMsg('S_uvw_i', ilk, emsg)
-         endif
+         if (ilk /= 0) call allocKOMsg('S_uvw_i', ilk, emsg)
 
          allocate(S_uvw_IK(NFREQS), stat=ilk, errmsg=emsg)
-         if (ilk == 0) then
-#ifdef __BSA_ALLOC_DEBUG
-            call allocOKMsg('S_uvw_IK', NFREQS, loc(S_uvw_IK), sizeof(S_uvw_IK))
-#endif
-         else
-            call allocKOMsg('S_uvw_IK', ilk, emsg)
-         endif
+         if (ilk /= 0) call allocKOMsg('S_uvw_IK', ilk, emsg)
 
          allocate(S_uvw_IJ(NFREQS), stat=ilk, errmsg=emsg)
-         if (ilk == 0) then
-#ifdef __BSA_ALLOC_DEBUG
-            call allocOKMsg('S_uvw_IJ', NFREQS, loc(S_uvw_IJ), sizeof(S_uvw_IJ))
-#endif
-         else
-            call allocKOMsg('S_uvw_IJ', ilk, emsg)
-         endif
+         if (ilk /= 0) call allocKOMsg('S_uvw_IJ', ilk, emsg)
 
          allocate(S_uvw_IK_w1w2(i_pad_len), stat=ilk, errmsg=emsg)
-         if (ilk == 0) then
-#ifdef __BSA_ALLOC_DEBUG
-            call allocOKMsg('S_uvw_IK_w1w2', i_pad_len, loc(S_uvw_IK_w1w2), sizeof(S_uvw_IK_w1w2))
-#endif
-         else
-            call allocKOMsg('S_uvw_IK_w1w2', ilk, emsg)
-         endif
+         if (ilk /= 0) call allocKOMsg('S_uvw_IK_w1w2', ilk, emsg)
 
          allocate(S_uvw_IJ_w1w2(i_pad_len), stat=ilk, errmsg=emsg)
-         if (ilk == 0) then
-#ifdef __BSA_ALLOC_DEBUG
-            call allocOKMsg('S_uvw_IJ_w1w2', i_pad_len, loc(S_uvw_IJ_w1w2), sizeof(S_uvw_IJ_w1w2))
-#endif
-         else
-            call allocKOMsg('S_uvw_IJ_w1w2', ilk, emsg)
-         endif
+         if (ilk /= 0) call allocKOMsg('S_uvw_IJ_w1w2', ilk, emsg)
 
       endif
 
@@ -1647,147 +1542,53 @@ contains
       ! these are needed regardlessly of if PSDs or BISPs
 
       allocate(psd(NFREQS, dimM_psd_), stat=itc, errmsg=emsg)
-      if (itc == 0) then
-#ifdef __BSA_ALLOC_DEBUG
-         call allocOKMsg('psd', [NFREQS, dimM_psd_], loc(psd), sizeof(psd))
-#endif
-      else
-         call allocKOMsg('psd', itc, emsg)
-      endif
+      if (itc /= 0) call allocKOMsg('psd', itc, emsg)
       psd = 0._bsa_real_t
 
       allocate(S_uvw_k(NFREQS), stat=itc, errmsg=emsg)
-      if (itc == 0) then
-#ifdef __BSA_ALLOC_DEBUG
-         call allocOKMsg('S_uvw_k', NFREQS, loc(S_uvw_k), sizeof(S_uvw_k))
-#endif
-      else
-         call allocKOMsg('S_uvw_k', itc, emsg)
-      endif
+      if (itc /= 0) call allocKOMsg('S_uvw_k', itc, emsg)
 
       allocate(S_uvw_j(NFREQS), stat=itc, errmsg=emsg)
-      if (itc == 0) then
-#ifdef __BSA_ALLOC_DEBUG
-         call allocOKMsg('S_uvw_j', NFREQS, loc(S_uvw_j), sizeof(S_uvw_j))
-#endif
-      else
-         call allocKOMsg('S_uvw_j', itc, emsg)
-      endif
+      if (itc /= 0) call allocKOMsg('S_uvw_j', itc, emsg)
 
       allocate(S_uvw_JK(NFREQS), stat=itc, errmsg=emsg)
-      if (itc == 0) then
-#ifdef __BSA_ALLOC_DEBUG
-         call allocOKMsg('S_uvw_JK', NFREQS, loc(S_uvw_JK), sizeof(S_uvw_JK))
-#endif
-      else
-         call allocKOMsg('S_uvw_JK', itc, emsg)
-      endif
+      if (itc /= 0) call allocKOMsg('S_uvw_JK', itc, emsg)
 
       allocate(PSDF_jk_JK_w(NFREQS), stat=itc, errmsg=emsg)
-      if (itc == 0) then
-#ifdef __BSA_ALLOC_DEBUG
-         call allocOKMsg('PSDF_jk_JK_w', NFREQS, loc(PSDF_jk_JK_w), sizeof(PSDF_jk_JK_w))
-#endif
-      else
-         call allocKOMsg('PSDF_jk_JK_w', itc, emsg)
-      endif
+      if (itc /= 0) call allocKOMsg('PSDF_jk_JK_w', itc, emsg)
 
       if (settings%i_compute_bisp_ == 1) then
 
          allocate(bisp(NFREQS, NFREQS, dimM_bisp_), stat=itc, errmsg=emsg)
-         if (itc == 0) then
-#ifdef __BSA_ALLOC_DEBUG
-            call allocOKMsg('bisp', [NFREQS, NFREQS, dimM_bisp_], loc(bisp), sizeof(bisp))
-#endif
-         else
-            call allocKOMsg('bisp', itc, emsg)
-         endif
+         if (itc /= 0) call allocKOMsg('bisp', itc, emsg)
          bisp = 0._bsa_real_t
 
          allocate(bf_ijk_IJK_w_w2(NFREQS), stat=itc, errmsg=emsg)
-         if (itc == 0) then
-#ifdef __BSA_ALLOC_DEBUG
-            call allocOKMsg(&
-               'bf_ijk_IJK_w_w2', NFREQS, loc(bf_ijk_IJK_w_w2), sizeof(bf_ijk_IJK_w_w2))
-#endif
-         else
-            call allocKOMsg('bf_ijk_IJK_w_w2', itc, emsg)
-         endif
+         if (itc /= 0) call allocKOMsg('bf_ijk_IJK_w_w2', itc, emsg)
 
          allocate(tmp1(NFREQS), stat=itc, errmsg=emsg)
-         if (itc == 0) then
-#ifdef __BSA_ALLOC_DEBUG
-            call allocOKMsg(&
-               'tmp1', NFREQS, loc(tmp1), sizeof(tmp1))
-#endif
-         else
-            call allocKOMsg('tmp1', itc, emsg)
-         endif
+         if (itc /= 0) call allocKOMsg('tmp1', itc, emsg)
 
          allocate(tmp2(NFREQS), stat=itc, errmsg=emsg)
-         if (itc == 0) then
-#ifdef __BSA_ALLOC_DEBUG
-            call allocOKMsg(&
-               'tmp2', NFREQS, loc(tmp2), sizeof(tmp2))
-#endif
-         else
-            call allocKOMsg('tmp2', itc, emsg)
-         endif
+         if (itc /= 0) call allocKOMsg('tmp2', itc, emsg)
 
          allocate(tmp3(NFREQS), stat=itc, errmsg=emsg)
-         if (itc == 0) then
-#ifdef __BSA_ALLOC_DEBUG
-            call allocOKMsg(&
-               'tmp3', NFREQS, loc(tmp3), sizeof(tmp3))
-#endif
-         else
-            call allocKOMsg('tmp3', itc, emsg)
-         endif
+         if (itc /= 0) call allocKOMsg('tmp3', itc, emsg)
 
          allocate(S_uvw_i(NFREQS), stat=itc, errmsg=emsg)
-         if (itc == 0) then
-#ifdef __BSA_ALLOC_DEBUG
-            call allocOKMsg('S_uvw_i', NFREQS, loc(S_uvw_i), sizeof(S_uvw_i))
-#endif
-         else
-            call allocKOMsg('S_uvw_i', itc, emsg)
-         endif
+         if (itc /= 0) call allocKOMsg('S_uvw_i', itc, emsg)
 
          allocate(S_uvw_IK(NFREQS), stat=itc, errmsg=emsg)
-         if (itc == 0) then
-#ifdef __BSA_ALLOC_DEBUG
-            call allocOKMsg('S_uvw_IK', NFREQS, loc(S_uvw_IK), sizeof(S_uvw_IK))
-#endif
-         else
-            call allocKOMsg('S_uvw_IK', itc, emsg)
-         endif
+         if (itc /= 0) call allocKOMsg('S_uvw_IK', itc, emsg)
 
          allocate(S_uvw_IJ(NFREQS), stat=itc, errmsg=emsg)
-         if (itc == 0) then
-#ifdef __BSA_ALLOC_DEBUG
-            call allocOKMsg('S_uvw_IJ', NFREQS, loc(S_uvw_IJ), sizeof(S_uvw_IJ))
-#endif
-         else
-            call allocKOMsg('S_uvw_IJ', itc, emsg)
-         endif
+         if (itc /= 0) call allocKOMsg('S_uvw_IJ', itc, emsg)
 
          allocate(S_uvw_IK_w1w2(i_pad_len), stat=itc, errmsg=emsg)
-         if (itc == 0) then
-#ifdef __BSA_ALLOC_DEBUG
-            call allocOKMsg('S_uvw_IK_w1w2', i_pad_len, loc(S_uvw_IK_w1w2), sizeof(S_uvw_IK_w1w2))
-#endif
-         else
-            call allocKOMsg('S_uvw_IK_w1w2', itc, emsg)
-         endif
+         if (itc /= 0) call allocKOMsg('S_uvw_IK_w1w2', itc, emsg)
 
          allocate(S_uvw_IJ_w1w2(i_pad_len), stat=itc, errmsg=emsg)
-         if (itc == 0) then
-#ifdef __BSA_ALLOC_DEBUG
-            call allocOKMsg('S_uvw_IJ_w1w2', i_pad_len, loc(S_uvw_IJ_w1w2), sizeof(S_uvw_IJ_w1w2))
-#endif
-         else
-            call allocKOMsg('S_uvw_IJ_w1w2', itc, emsg)
-         endif
+         if (itc /= 0) call allocKOMsg('S_uvw_IJ_w1w2', itc, emsg)
 
       endif ! i bisp allocation
 

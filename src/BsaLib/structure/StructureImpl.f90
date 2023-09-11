@@ -182,14 +182,7 @@ contains
       
       if (.not. allocated(this%modal_%modes_)) then
          allocate(this%modal_%modes_(this%modal_%nm_eff_), stat=istat, errmsg=emsg)
-         if (istat == 0) then
-#ifdef __BSA_ALLOC_DEBUG
-            call allocOKMsg('this % modal_%modes_', &
-               this%modal_%nm_eff_, loc(this%modal_%modes_), sizeof(this%modal_%modes_))
-#endif
-         else
-            call allocKOMsg('this % modal_%modes_', istat, emsg)
-         endif
+         if (istat /= 0) call allocKOMsg('this % modal_%modes_', istat, emsg)
       endif
 
       this%modal_%modes_ = modes
@@ -212,14 +205,7 @@ contains
 
       if (.not. allocated(this%modal_%modes_)) then
          allocate(this%modal_%modes_(this%modal_%nm_), stat=istat, errmsg=emsg)
-         if (istat == 0) then
-#ifdef __BSA_ALLOC_DEBUG
-            call allocOKMsg('this % modal_%modes_', &
-               this%modal_%nm_, loc(this%modal_%modes_), sizeof(this%modal_%modes_))
-#endif
-         else
-            call allocKOMsg('this % modal_%modes_', istat, emsg)
-         endif
+         if (istat /= 0) call allocKOMsg('this % modal_%modes_', istat, emsg)
       endif
 
       this%modal_%modes_ = [1 : this%modal_%nm_]    
@@ -308,14 +294,7 @@ contains
       else
 
          allocate(this%res_peak_width_(this%modal_%nm_), stat=istat, errmsg=emsg)
-         if (istat == 0) then
-#ifdef __BSA_ALLOC_DEBUG
-            call allocOKMsg('this % res_peak_width_', &
-               this%modal_%nm_, loc(this%res_peak_width_), sizeof(this%res_peak_width_))
-#endif
-         else
-            call allocKOMsg('this % res_peak_width_', istat, emsg)
-         endif
+         if (istat /= 0) call allocKOMsg('this % res_peak_width_', istat, emsg)
 
       endif
       
@@ -350,14 +329,7 @@ contains
 
       if (.not. allocated(this%bkg_peak_width_)) then
          allocate(this%bkg_peak_width_(3, 3), stat=istat, errmsg=emsg)
-         if (istat == 0) then
-#ifdef __BSA_ALLOC_DEBUG
-            call allocOKMsg('this % bkg_peak_width_', &
-               [3, 3], loc(this%bkg_peak_width_), sizeof(this%bkg_peak_width_))
-#endif
-         else
-            call allocKOMsg('this % bkg_peak_width_', istat, emsg)
-         endif
+         if (istat /= 0) call allocKOMsg('this % bkg_peak_width_', istat, emsg)
       endif
 
       this%bkg_peak_width_ = 0._bsa_real_t
@@ -405,13 +377,7 @@ contains
 
       if (allocated(this%modal_%modes_)) then
          deallocate(this%modal_%modes_, stat=istat, errmsg=emsg)
-         if (istat == 0) then
-#ifdef __BSA_ALLOC_DEBUG
-            call deallocOKMsg('this%modal_%modes_')
-#endif
-         else
-            call deallocKOMsg('this%modal_%modes_', istat, emsg)
-         endif
+         if (istat /= 0) call deallocKOMsg('this%modal_%modes_', istat, emsg)
       endif
 
       if (associated(this%modal_%Cm_))        nullify(this%modal_%Cm_)
@@ -424,35 +390,17 @@ contains
 
       if (allocated(this%str_time_scales_)) then
          deallocate(this%str_time_scales_, stat=istat, errmsg=emsg)
-         if (istat == 0) then
-#ifdef __BSA_ALLOC_DEBUG
-            call deallocOKMsg('this%str_time_scales_')
-#endif
-         else
-            call deallocKOMsg('this%str_time_scales_', istat, emsg)
-         endif
+         if (istat /= 0) call deallocKOMsg('this%str_time_scales_', istat, emsg)
       endif
 
       if (allocated(this%bkg_peak_width_)) then
          deallocate(this%bkg_peak_width_, stat=istat, errmsg=emsg)
-         if (istat == 0) then
-#ifdef __BSA_ALLOC_DEBUG
-            call deallocOKMsg('this%bkg_peak_width_')
-#endif
-         else
-            call deallocKOMsg('this%bkg_peak_width_', istat, emsg)
-         endif
+         if (istat /= 0) call deallocKOMsg('this%bkg_peak_width_', istat, emsg)
       endif
 
       if (allocated(this%res_peak_width_)) then
          deallocate(this%res_peak_width_, stat=istat, errmsg=emsg)
-         if (istat == 0) then
-#ifdef __BSA_ALLOC_DEBUG
-            call deallocOKMsg('this%res_peak_width_')
-#endif
-         else
-            call deallocKOMsg('this%res_peak_width_', istat, emsg)
-         endif
+         if (istat /= 0) call deallocKOMsg('this%res_peak_width_', istat, emsg)
       endif
 
 #ifdef __BSA_DEBUG

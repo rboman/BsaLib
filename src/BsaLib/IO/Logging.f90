@@ -20,14 +20,13 @@ module Logging
    implicit none
    private
 
-#ifdef __BSA_ALLOC_DEBUG
-   interface allocOKMsg
-      module procedure allocOKMsg_scalar_
-      module procedure allocOKMsg_array_
-   end interface
-
-   public :: allocOKMsg, deallocOKMsg
-#endif
+! #ifdef __BSA_ALLOC_DEBUG
+!    interface allocOKMsg
+!       module procedure allocOKMsg_scalar_
+!       module procedure allocOKMsg_array_
+!    end interface
+!    public :: allocOKMsg, deallocOKMsg
+! #endif
 
    public :: allocKOMsg, deallocKOMsg
 
@@ -114,24 +113,6 @@ module Logging
 !     ALLOCATION
 !
 !=========================================================================================
-
-
-#ifdef __BSA_ALLOC_DEBUG
-      module subroutine allocOKMsg_scalar_(name_, iloc, nbytes)
-         character(len = *), intent(in) :: name_
-         integer(int64), intent(in), optional  :: iloc, nbytes
-      end subroutine
-
-      module subroutine allocOKMsg_array_(name_, dims, iloc, nbytes)
-         character(len = *), intent(in) :: name_
-         integer, intent(in)            :: dims(..)
-         integer(int64), intent(in), optional  :: iloc, nbytes
-      end subroutine
-
-      module subroutine deallocOKMsg(name_)
-         character(len = *), intent(in) :: name_
-      end subroutine
-#endif
 
       module subroutine allocKOMsg(name_, istat, emsg)
          character(len = *), intent(in) :: name_, emsg

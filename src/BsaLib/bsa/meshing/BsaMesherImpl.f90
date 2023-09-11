@@ -64,13 +64,7 @@ contains
       msh_brmpts_post_ = 0
 
       allocate(m3mf_msh(dimM_bisp_), stat=istat, errmsg=emsg)
-      if (istat == 0) then
-#ifdef __BSA_ALLOC_DEBUG
-         call allocOKMsg('m3mf_msh', dimM_bisp_, loc(m3mf_msh), sizeof(m3mf_msh))
-#endif
-      else
-         call allocKOMsg('m3mf_msh', istat, emsg)
-      endif
+      if (istat /= 0) call allocKOMsg('m3mf_msh', istat, emsg)
       m3mf_msh = 0._bsa_real_t
       m3mf_msh_ptr_ => m3mf_msh
 
@@ -86,13 +80,7 @@ contains
 
       ! ! post-meshing -> BRM
       allocate(m3mr_msh(dimM_bisp_), stat=istat, errmsg=emsg)
-      if (istat == 0) then
-#ifdef __BSA_ALLOC_DEBUG
-         call allocOKMsg('m3mr_msh', dimM_bisp_, loc(m3mr_msh), sizeof(m3mr_msh))
-#endif
-      else
-         call allocKOMsg('m3mr_msh', istat, emsg)
-      endif
+      if (istat /= 0) call allocKOMsg('m3mr_msh', istat, emsg)
       m3mr_msh = 0._bsa_real_t
       m3mr_msh_ptr_ => m3mr_msh
       call Mesh()
@@ -1307,14 +1295,7 @@ contains
       ! allocate BFM tmp variable to hold data
       ! for at most the zone with max n. of points.
       allocate(bfm_undump(dimM_bisp_, msh_max_zone_NPts), stat=izone_id, errmsg=emsg)
-      if (izone_id == 0) then
-# ifdef __BSA_ALLOC_DEBUG
-         call allocOKMsg('bfm_undump', &
-            [dimM_bisp_, msh_max_zone_NPts], loc(bfm_undump), sizeof(bfm_undump))
-# endif
-      else
-         call allocKOMsg('bfm_undump', izone_id, emsg)
-      endif
+      if (izone_id /= 0) call allocKOMsg('bfm_undump', izone_id, emsg)
 #endif
 
       
@@ -1553,23 +1534,11 @@ contains
          ! allocate results
          itmp = imodesout * 2 + 1
          allocate(limits_(itmp), stat=istat, errmsg=emsg)
-         if (istat == 0) then
-#ifdef __BSA_ALLOC_DEBUG
-            call allocOKMsg('limits_', itmp, loc(limits_), sizeof(limits_))
-#endif
-         else
-            call allocKOMsg('limits_', istat, emsg)
-         endif
+         if (istat /= 0) call allocKOMsg('limits_', istat, emsg)
          limits_ = 0._bsa_real_t
 
          allocate(policies_(itmp), stat=istat, errmsg=emsg)
-         if (istat == 0) then
-#ifdef __BSA_ALLOC_DEBUG
-            call allocOKMsg('policies_', itmp, loc(policies_), sizeof(policies_))
-#endif
-         else
-            call allocKOMsg('policies_', istat, emsg)
-         endif
+         if (istat /= 0) call allocKOMsg('policies_', istat, emsg)
          policies_(:) = MPolicy_DEF
 
          ! BUG: do not hard code dimension !!??
@@ -1577,13 +1546,7 @@ contains
          !      Might throw run time error if we try to access
          !      out of bound!!
          allocate(inter_modes_(200), stat=istat, errmsg=emsg)
-         if (istat == 0) then
-#ifdef __BSA_ALLOC_DEBUG
-            call allocOKMsg('inter_modes_', 200, loc(inter_modes_), sizeof(inter_modes_))
-#endif
-         else
-            call allocKOMsg('inter_modes_', istat, emsg)
-         endif
+         if (istat /= 0) call allocKOMsg('inter_modes_', istat, emsg)
          inter_modes_ = 0
 
 
@@ -1725,13 +1688,7 @@ contains
 
 
          allocate(policies(NLims_), stat=istat, errmsg=emsg)
-         if (istat == 0) then
-#ifdef __BSA_ALLOC_DEBUG
-            call allocOKMsg('policies', NLims_, loc(policies), sizeof(policies))
-#endif
-         else
-            call allocKOMsg('policies', istat, emsg)
-         endif
+         if (istat /= 0) call allocKOMsg('policies', istat, emsg)
          policies = policies_(1 : NLims_)
       end block
    end subroutine ! prefetch zone limits

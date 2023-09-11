@@ -117,74 +117,75 @@ contains
 !     ALLOCATION
 !*****************************************************************************************
 
-#ifdef __BSA_ALLOC_DEBUG
-   module subroutine allocOKMsg_scalar_(name_, iloc, nbytes)
-      character(len = *), intent(in) :: name_
-      integer(kind = 8), intent(in), optional  :: iloc, nbytes
 
-      write(unit_debug_, fmt='(3a)', advance='no') &
-         'variable  "', name_, '"  allocated.'
+! #ifdef __BSA_ALLOC_DEBUG
+!    module subroutine allocOKMsg_scalar_(name_, iloc, nbytes)
+!       character(len = *), intent(in) :: name_
+!       integer(kind = 8), intent(in), optional  :: iloc, nbytes
 
-      if (present(iloc)) then
-         write(unit_debug_, '(a, i0)', advance='no') &
-            'Location in memory:  ', iloc
-      endif
+!       write(unit_debug_, fmt='(3a)', advance='no') &
+!          'variable  "', name_, '"  allocated.'
 
-      if (present(nbytes)) then
-         write(unit_debug_, fmt='(a, i0, ".")', advance='no') &
-            'Occupancy (bytes):  ', nbytes
-         write(unit_debug_, *) ''
-      endif
-   end subroutine
+!       if (present(iloc)) then
+!          write(unit_debug_, '(a, i0)', advance='no') &
+!             'Location in memory:  ', iloc
+!       endif
 
-
-   module subroutine allocOKMsg_array_(name_, dims, iloc, nbytes)
-      character(len = *), intent(in) :: name_
-      integer, intent(in)            :: dims(..)
-      integer(kind = 8), intent(in), optional  :: iloc, nbytes
-      integer :: dim, ndims
-
-      write(unit_debug_, fmt='(3a)', advance='no') &
-         'variable  "', name_, '"  allocated.'
-
-      select rank (dims)
-         rank (0)
-            dim = dims
-            write(unit_debug_, '(a, i0)') &
-               'Dimension:  ', dim
-         rank (1)
-            ndims = size(dims)
-            write(unit_debug_, '(a, i0, *(" - ", i0) )') &
-               'Dimension:  ', (dims(dim), dim = 1, ndims)
-
-         rank default
-
-            print '(1x, a, a)', &
-               ERRMSG, &  
-               ' Dimensions for a NDrank array allocation must be at most 1D-rank array.'
-            call bsa_Abort()
-      end select
-
-      if (present(iloc)) then
-         write(unit_debug_, '(a, i0)', advance='no') &
-            'Location in memory:  ', iloc
-      endif
-
-      if (present(nbytes)) then
-         write(unit_debug_, fmt='(a, i0, ".")', advance='no') &
-            'Occupancy (bytes):  ', nbytes
-         write(unit_debug_, *) ''
-      endif
-   end subroutine
+!       if (present(nbytes)) then
+!          write(unit_debug_, fmt='(a, i0, ".")', advance='no') &
+!             'Occupancy (bytes):  ', nbytes
+!          write(unit_debug_, *) ''
+!       endif
+!    end subroutine
 
 
-   module subroutine deallocOKMsg(name_)
-      character(len = *), intent(in) :: name_
+!    module subroutine allocOKMsg_array_(name_, dims, iloc, nbytes)
+!       character(len = *), intent(in) :: name_
+!       integer, intent(in)            :: dims(..)
+!       integer(kind = 8), intent(in), optional  :: iloc, nbytes
+!       integer :: dim, ndims
 
-      write(unit_debug_, fmt='(3a)') &
-         'variable  "', name_, '"  de-allocated.'
-   end subroutine
-#endif
+!       write(unit_debug_, fmt='(3a)', advance='no') &
+!          'variable  "', name_, '"  allocated.'
+
+!       select rank (dims)
+!          rank (0)
+!             dim = dims
+!             write(unit_debug_, '(a, i0)') &
+!                'Dimension:  ', dim
+!          rank (1)
+!             ndims = size(dims)
+!             write(unit_debug_, '(a, i0, *(" - ", i0) )') &
+!                'Dimension:  ', (dims(dim), dim = 1, ndims)
+
+!          rank default
+
+!             print '(1x, a, a)', &
+!                ERRMSG, &  
+!                ' Dimensions for a NDrank array allocation must be at most 1D-rank array.'
+!             call bsa_Abort()
+!       end select
+
+!       if (present(iloc)) then
+!          write(unit_debug_, '(a, i0)', advance='no') &
+!             'Location in memory:  ', iloc
+!       endif
+
+!       if (present(nbytes)) then
+!          write(unit_debug_, fmt='(a, i0, ".")', advance='no') &
+!             'Occupancy (bytes):  ', nbytes
+!          write(unit_debug_, *) ''
+!       endif
+!    end subroutine
+
+
+!    module subroutine deallocOKMsg(name_)
+!       character(len = *), intent(in) :: name_
+
+!       write(unit_debug_, fmt='(3a)') &
+!          'variable  "', name_, '"  de-allocated.'
+!    end subroutine
+! #endif
 
 
 

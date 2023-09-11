@@ -43,13 +43,7 @@ contains
       this%i_psd_type_ = ipsd
 
       allocate(this%psd_, stat=istat, errmsg=emsg)
-      if (istat == 0) then
-#ifdef __BSA_ALLOC_DEBUG
-         call allocOKMsg('this % psd_', loc(this%psd_), sizeof(this%psd_))
-#endif
-      else
-         call allocKOMsg('this % psd_', istat, emsg)
-      endif
+      if (istat /= 0) call allocKOMsg('this % psd_', istat, emsg)
 
       ! setting function pointer array 
       psd_funcs(1)%ptr => vonKarmanPSD_

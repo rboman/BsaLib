@@ -61,58 +61,28 @@ contains
    
       if (.not. allocated(settings)) then
          allocate(settings, stat=istat, errmsg=emsg)
-         if (istat == 0) then
-#ifdef __BSA_ALLOC_DEBUG
-            call allocOKMsg('settings', loc(settings), sizeof(settings))
-#endif
-         else
-            call allocKOMsg('settings', istat, emsg)
-         endif
+         if (istat /= 0) call allocKOMsg('settings', istat, emsg)
       endif
 
       if (.not. allocated(wd)) then
          allocate(wd, stat=istat, errmsg=emsg)
-         if (istat == 0) then
-#ifdef __BSA_ALLOC_DEBUG
-            call allocOKMsg('wd', loc(wd), sizeof(wd))
-#endif
-         else
-            call allocKOMsg('wd', istat, emsg)
-         endif
+         if (istat /= 0) call allocKOMsg('wd', istat, emsg)
       endif
 
       if (.not. allocated(struct_data)) then
          allocate(struct_data, stat=istat, errmsg=emsg)
-         if (istat == 0) then
-#ifdef __BSA_ALLOC_DEBUG
-            call allocOKMsg('struct_data', loc(struct_data), sizeof(struct_data))
-#endif
-         else
-            call allocKOMsg('struct_data', istat, emsg)
-         endif
+         if (istat /= 0) call allocKOMsg('struct_data', istat, emsg)
       endif
 
       if (.not. allocated(timer)) then
          allocate(timer, stat=istat, errmsg=emsg)
-         if (istat == 0) then
-#ifdef __BSA_ALLOC_DEBUG
-            call allocOKMsg('timer', loc(timer), sizeof(timer))
-#endif
-         else
-            call allocKOMsg('timer', istat, emsg)
-         endif
+         if (istat /= 0) call allocKOMsg('timer', istat, emsg)
       endif
 
 
       if (.not. allocated(logger_debug)) then
          allocate(logger_debug, stat=istat, errmsg=emsg)
-         if (istat == 0) then
-#ifdef __BSA_ALLOC_DEBUG
-            call allocOKMsg('logger_debug', loc(logger_debug), sizeof(logger_debug))
-#endif
-         else
-            call allocKOMsg('logger_debug', istat, emsg)
-         endif
+         if (istat /= 0) call allocKOMsg('logger_debug', istat, emsg)
       endif
       call logger_debug%init(unit_debug_, undebug_fname_)
       
@@ -592,13 +562,7 @@ contains
       nmk = struct_data%modal_%nm_ - nskip
       
       allocate(modesk(nmk), stat=istat, errmsg=emsg)
-      if (istat == 0) then
-#ifdef __BSA_ALLOC_DEBUG
-         call allocOKMsg('modesk', int(nmk), loc(modesk), sizeof(modesk))
-#endif
-      else
-         call allocKOMsg('modesk', istat, emsg)
-      endif
+      if (istat /= 0) call allocKOMsg('modesk', istat, emsg)
 
       j = 1
       do i = 1, struct_data%modal_%nm_
@@ -658,14 +622,7 @@ contains
 
       allocate(PHItimesC_local_(struct_data%modal_%nm_eff_, nnodes_l, ndegw), &
          stat=istat, errmsg=emsg)
-      if (istat == 0) then
-#ifdef __BSA_ALLOC_DEBUG
-         call allocOKMsg('PHItimesC_local_', &
-            int([struct_data%modal_%nm_eff_, nnodes_l, ndegw]), loc(PHItimesC_local_), sizeof(PHItimesC_local_))
-#endif
-      else
-         call allocKOMsg('PHItimesC_local_', istat, emsg)
-      endif
+      if (istat /= 0) call allocKOMsg('PHItimesC_local_', istat, emsg)
       PHItimesC_local_ = 0._bsa_real_t
 
 

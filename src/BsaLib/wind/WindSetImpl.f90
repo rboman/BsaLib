@@ -60,10 +60,15 @@ contains
 
    module subroutine SetWindZoneLimits(this, lim, ilim)
       class(WindData_t), intent(inout) :: this
-      real(bsa_real_t), intent(in), target :: lim(..)
+#if  (! defined(__INTEL_COMPILER_BUILD_DATE)) || (__INTEL_COMPILER_BUILD_DATE >= 20221019)
+      real(bsa_real_t), intent(in), target     :: lim(..)
       integer(bsa_int_t), intent(in), optional :: ilim(..)
+#else
+      real(bsa_real_t), intent(in), target     :: lim(:)
+      integer(bsa_int_t), intent(in), optional :: ilim(:)   ! limits' index passed
+#endif
 
-
+#if  (! defined(__INTEL_COMPILER_BUILD_DATE)) || (__INTEL_COMPILER_BUILD_DATE >= 20221019)
       select rank (lim)
       rank (0)
 
@@ -78,18 +83,24 @@ contains
          endselect
 
       rank (1)
+#endif
 
          if (present(ilim)) then
 
+#if  (! defined(__INTEL_COMPILER_BUILD_DATE)) || (__INTEL_COMPILER_BUILD_DATE >= 20221019)
             select rank (ilim)
             rank (1)
+#endif
                if (.not. (size(lim(:)) == size(ilim(:)))) &
                   call bsa_Abort('sizes of "lim" and "ilim" do not match.')
                   
                this%limits_wz_(ilim(:)) = lim(:)
+            
+#if  (! defined(__INTEL_COMPILER_BUILD_DATE)) || (__INTEL_COMPILER_BUILD_DATE >= 20221019)
             rank default
                call bsa_Abort('expecting "ilim" to be a 1-rank array.')
             endselect
+#endif
 
          else
 
@@ -102,11 +113,12 @@ contains
             this%limits_wz_ => lim(:)
          endif ! present ilim
          
-         
+#if  (! defined(__INTEL_COMPILER_BUILD_DATE)) || (__INTEL_COMPILER_BUILD_DATE >= 20221019)
       rank default
          call bsa_Abort('Expeting "lim" either to be a scalar or a 1-rank array.')
       endselect
-   end subroutine SetWindZoneLimits
+#endif
+   end subroutine
 
 
 
@@ -133,13 +145,7 @@ contains
 
       if (.not. allocated(rot_W2G_)) then
          allocate(rot_W2G_(3, 3), stat=istat, errmsg=emsg)
-         if (istat == 0) then
-#ifdef __BSA_ALLOC_DEBUG
-            call allocOKMsg('rot_W2G_', [3, 3], loc(rot_W2G_), sizeof(rot_W2G_))
-#endif
-         else
-            call allocKOMsg('rot_W2G_', istat, emsg)
-         endif
+         if (istat /= 0) call allocKOMsg('rot_W2G_', istat, emsg)
       endif
       rot_W2G_ = mat
 
@@ -297,25 +303,13 @@ contains
       this%i_ntc_ = 1
       if (.not. allocated(this%tc_)) then
          allocate(this%tc_(1), stat=istat, errmsg=emsg)
-         if (istat == 0) then
-#ifdef __BSA_ALLOC_DEBUG
-            call allocOKMsg('this % tc_', 1, loc(this%tc_), sizeof(this%tc_))
-#endif
-         else
-            call allocKOMsg('this % tc_', istat, emsg)
-         endif
+         if (istat /= 0) call allocKOMsg('this % tc_', istat, emsg)
       else
          itmp = size(this%tc_)
          if (itmp /= 1) then
             deallocate(this%tc_)
             allocate(this%tc_(1), stat=istat, errmsg=emsg)
-            if (istat == 0) then
-#ifdef __BSA_ALLOC_DEBUG
-               call allocOKMsg('this % tc_', 1, loc(this%tc_), sizeof(this%tc_))
-#endif
-            else
-               call allocKOMsg('this % tc_', istat, emsg)
-            endif
+            if (istat /= 0) call allocKOMsg('this % tc_', istat, emsg)
          endif
       endif
       this%tc_(1) = 1
