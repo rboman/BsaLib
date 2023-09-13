@@ -17,7 +17,8 @@ submodule(BsaLib_Functions) BsaLib_FunctionsImpl
 
    use Logging
    use BsaLib_Utility
-   use BsaLib_Data, only: bsa_Abort, do_trunc_POD_, POD_trunc_lim_
+   use BsaLib_Data, only: bsa_Abort, &
+      do_trunc_POD_, POD_trunc_lim_, nPODmodes_set_, nmodes_POD_, do_export_POD_trunc_
    use BsaLib_IO, only: INFOMSG, WARNMSG, ERRMSG, MSGCONT, DBGMSG, NOTEMSG &
                         , unit_dump_bfm_, unit_debug_, undebug_fname_
    implicit none
@@ -405,6 +406,15 @@ contains
 
 
    module function getFM_full_tm_scalar_msh_POD_(fi, fj) result(bfm)
+#ifdef __BSA_EXPORT_POD_TRUNC_INFO
+# ifdef __BSA_OMP
+      !$ use omp_lib, only: omp_get_thread_num
+#  define __export_POD_trunc_id__  omp_get_thread_num()+1
+# else
+#  define __export_POD_trunc_id__  1
+# endif
+      use BsaLib_Data, only: iun_POD_trunc_
+#endif
       real(bsa_real_t), intent(in) :: fi, fj
       real(bsa_real_t) :: bfm(dimM_bisp_)
 
@@ -640,10 +650,29 @@ contains
             endif
 
          else
-            nmw1   = NNODESL
-            nmw2   = nmw1
-            nmw1w2 = nmw2
+            if (nPODmodes_set_) then
+               nmw1   = nmodes_POD_
+               nmw2   = nmodes_POD_
+               nmw1w2 = nmodes_POD_
+            else
+               nmw1   = NNODESL
+               nmw2   = nmw1
+               nmw1w2 = nmw2
+            endif
          endif
+
+
+#ifdef __BSA_EXPORT_POD_TRUNC_INFO
+         if (itc == 1 .and. do_export_POD_trunc_(__export_POD_trunc_id__)) then
+            !$omp critical
+            write(iun_POD_trunc_) int(__export_POD_trunc_id__, kind=int32)
+            write(iun_POD_trunc_) real(fj, kind=real64)
+            write(iun_POD_trunc_) int(size(D_S_uvw_w2), kind=int32)
+            write(iun_POD_trunc_) D_S_uvw_w2(:)
+            !$omp end critical
+         endif
+         ! NOTE: we could place a barrier ?
+#endif
 
 
          ! 5-2-2, 2-2-5 (6-3-3, 3-3-6) (7-4-4, 4-4-7)

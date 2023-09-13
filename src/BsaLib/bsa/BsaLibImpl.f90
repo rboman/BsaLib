@@ -33,11 +33,20 @@ contains
       !! BUG: not really adapted to logic...
 
       ! DEBUG unit
-      if (.not. allocated(undebug_fname_)) &
-         undebug_fname_ = 'bsadebug.bsa'
+      if (.not. allocated(undebug_fname_)) undebug_fname_ = 'bsadebug.bsa'
       call io_getVerifiedFile(unit_debug_, undebug_fname_)
-      open(unit=unit_debug_, file=undebug_fname_, &
-         status='replace', form='formatted', action='write')
+      open(unit=unit_debug_, file=undebug_fname_  &
+         , status=IO_STATUS_REPLACE  &
+         , form=IO_FORM_FORMATTED    &
+         , action=IO_ACTION_WRITE )
+
+#ifdef __BSA_EXPORT_POD_TRUNC_INFO
+      open(unit=iun_POD_trunc_, file=iun_POD_trunc_fname_  &
+         , status=IO_STATUS_REPLACE  &
+         , form=IO_FORM_UNFORMATTED  &
+         , access=IO_ACCESS_STREAM   &
+         , action=IO_ACTION_WRITE )
+#endif
    end subroutine
 
 
@@ -116,6 +125,14 @@ contains
          do_trunc_POD_ = .true.
          POD_trunc_lim_ = rval / 100.0_real64
       endif
+   end subroutine
+
+
+   module subroutine bsa_setPODNOfModesKept(nmodes)
+      integer(int32), intent(in) :: nmodes
+
+      nPODmodes_set_ = .true.
+      nmodes_POD_    = nmodes
    end subroutine
 
 
@@ -339,8 +356,14 @@ contains
       ! write(unit_debug_, fmt) 'ROUNDING PRECISION = ',  settings%i_round_prec_
 ! #endif
 
-      
-      if (POD_trunc_lim_ == 0.0_real64 .or. POD_trunc_lim_ == 1.0_real64) do_trunc_POD_ = .false.
+      if (do_trunc_POD_) then
+         if (POD_trunc_lim_ == 0.0_real64 .or. POD_trunc_lim_ == 1.0_real64)   do_trunc_POD_  = .false.
+      endif
+      if (nPODmodes_set_) then
+         if (nmodes_POD_ <= 0_int32 .or. nmodes_POD_ >= struct_data%nn_load_) nPODmodes_set_ = .false.
+         if (nPODmodes_set_) &
+            print '(/ 1x, a, a, i0, a /)', INFOMSG, 'Using  ', nmodes_POD_, '  POD modes.'
+      endif
       if (I_BKG_PEAK_DELTAF_BFM_REFMT_FCT_ <= 0) I_BKG_PEAK_DELTAF_BFM_REFMT_FCT_ = 2
       if (I_BKG_PEAK_DELTAF_BFM_REFMT_FCT_ <= 0) I_BKG_PEAK_DELTAF_BFM_REFMT_FCT_ = 3
       

@@ -1102,8 +1102,18 @@ contains
    !> Actual zone comutation (pre phase).
    module subroutine compute_s(this)
       use BsaLib_Data, only: &
-         dimM_bisp_, getBFM_msh, settings  &
-         , m3mf_msh_ptr_, msh_NZones, msh_bfmpts_pre_
+         dimM_bisp_, getBFM_msh, settings                &
+         , m3mf_msh_ptr_, msh_NZones, msh_bfmpts_pre_    &
+         , do_export_POD_trunc_
+
+#ifdef __BSA_EXPORT_POD_TRUNC_INFO
+# ifdef __BSA_OMP
+         !$ use omp_lib, only: omp_get_thread_num
+#  define __export_POD_trunc_id__  omp_get_thread_num()+1
+# else
+#  define __export_POD_trunc_id__  1
+# endif
+#endif
       class(MRectZone_t), intent(inout) :: this
 
 
@@ -1207,6 +1217,10 @@ contains
 #endif
          idbfm     = j + 1
 
+
+#ifdef __BSA_EXPORT_POD_TRUNC_INFO
+         do_export_POD_trunc_(__export_POD_trunc_id__) = .false.
+#endif
 
 
          !=========================================================

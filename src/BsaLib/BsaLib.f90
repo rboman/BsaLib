@@ -155,6 +155,12 @@ module BsaLib
       end subroutine
 
 
+      module subroutine bsa_setPODNOfModesKept(nmodes)
+         integer(int32), intent(in) :: nmodes
+      end subroutine
+
+
+
       module subroutine bsa_Run(m2mf_cls, m2mr_cls, m2o2mr_cls, m3mf_msh, m3mr_msh, m3mf_cls, m3mr_cls)
          real(bsa_real_t), target, allocatable, dimension(:) :: &
             m2mf_cls, m2mr_cls, m2o2mr_cls, m3mf_msh, m3mr_msh, m3mf_cls, m3mr_cls

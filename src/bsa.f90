@@ -573,7 +573,8 @@ contains ! utility procedures
 
       call bsa_setMaxBkgPeakRestriction(.true.)
 
-      call bsa_setPODTruncationThreshold(100.d0)
+      ! call bsa_setPODTruncationThreshold(100.d0)
+      call bsa_setPODNOfModesKept(3)
 
       call bsa_Init()  ! This initialises all necessary instances.
 

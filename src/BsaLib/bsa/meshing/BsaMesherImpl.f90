@@ -333,6 +333,18 @@ contains
       if (.not. abs(df_I_ref - df_J_ref) < MACHINE_PRECISION) &
          call bsa_Abort("Freq deltas of BKG peak zone differ. Should be the same.")
 
+#ifdef __BSA_EXPORT_POD_TRUNC_INFO
+
+# ifdef __BSA_OMP
+#  define __export_POD_trunc_id__  omp_get_thread_num()+1
+# else
+#  define __export_POD_trunc_id__  1
+# endif
+
+      allocate(do_export_POD_trunc_(16))
+      do_export_POD_trunc_    = .false.
+      do_export_POD_trunc_(1) = .true.  ! <-- NO OMP parall here regardless.
+#endif
       
       call bkgz%compute()
       call logger_debug%logZonePremeshingTotTime(&
@@ -475,6 +487,7 @@ contains
          !$omp          , NFREQS, NNODES, NNODESL, NLIBS, NLIBSL &
          !$omp          , NMODES, NMODES_EFF, MODES &
          !$omp          , NPSDEL, NTCOMPS, NDIRS, TCOMPS, DIRS &
+         !$omp          , do_export_POD_trunc_   &
          !$omp          , msh_NZones, msh_bfmpts_pre_, msh_max_zone_NPts, m3mf_msh_ptr_), &
          !$omp   num_threads(n_dirs_)
          do idir = 1, n_dirs_
@@ -556,6 +569,10 @@ contains
                   deltas(2, ilim)   = rz%deltaf_J_
                endif
 
+#ifdef __BSA_EXPORT_POD_TRUNC_INFO
+               if (idir == 1 .or. idir == 3) do_export_POD_trunc_(__export_POD_trunc_id__) = .true.
+#endif
+
                call rz%compute()
                n_bfm_pts_pre_ = n_bfm_pts_pre_ + rz%zoneTotNPts()
 
@@ -575,6 +592,10 @@ contains
                deltas(1, NLimsP1)    = rz%deltaf_I_
                deltas(2, NLimsP1)    = rz%deltaf_J_
             endif
+#endif
+
+#ifdef __BSA_EXPORT_POD_TRUNC_INFO
+            if (idir == 1 .or. idir == 3) do_export_POD_trunc_(__export_POD_trunc_id__) = .true.
 #endif
 
             call rz%compute()
@@ -598,9 +619,15 @@ contains
 #endif
          inter_modes_(NLimsP1) = id_im_last
 
+
          print '(1x, a, a, i0, a/)', &
             INFOMSG, 'Done with   ', msh_NZones, '  pre meshing zones.'
 
+
+#ifdef __BSA_EXPORT_POD_TRUNC_INFO
+         ! From now on, no need for this anymore.
+         do_export_POD_trunc_(:) = .false.
+#endif
 
 
          ! goto 998

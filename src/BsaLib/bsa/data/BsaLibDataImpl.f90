@@ -37,7 +37,6 @@ contains
    module subroutine cleanBSAData_()
       integer(int32) :: istat
       character(len = 256) :: emsg
-      logical :: isopn
 
 #ifdef __BSA_DEBUG
       write(unit_debug_, *) INFOMSG//'@BsaLibData::cleanBSAData_() : cleaning...'
@@ -98,6 +97,14 @@ contains
       write(unit_debug_, *) INFOMSG//'@BsaLibData::cleanBSAData_() : cleaning -- ok.'
 #endif
 
+      call closeBSAUnits_()
+   end subroutine
+
+
+
+   subroutine closeBSAUnits_()
+      logical :: isopn
+
       ! NOTE: keep conditions since they might be provided from 
       !       host program, so they would not want me to close them.
       !       They'll manage it ;)
@@ -111,6 +118,11 @@ contains
 
       inquire(unit = unit_dump_brm_, opened = isopn)
       if (isopn) close(unit_dump_brm_)
+
+#ifdef __BSA_EXPORT_POD_TRUNC_INFO
+      inquire(unit = iun_POD_trunc_, opened = isopn)
+      if (isopn) close(iun_POD_trunc_)
+#endif
    end subroutine
 
 
