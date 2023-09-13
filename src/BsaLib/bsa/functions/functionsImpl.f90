@@ -676,7 +676,11 @@ contains
 
 
          ! 5-2-2, 2-2-5 (6-3-3, 3-3-6) (7-4-4, 4-4-7)
+#ifdef BSA_USE_SVD_METHOD__
          do p = 1, nmw1
+#else
+         do p = NNODESL, NNODESL-(nmw1-1), -1
+#endif
 
             eigvp(:, 1) = S_uvw_w1(:, p)
 
@@ -692,7 +696,11 @@ contains
 
 
             ! 5-2-2 (6-3-3, 7-4-4)
+#ifdef BSA_USE_SVD_METHOD__
             do q = 1, nmw2
+#else
+            do q = NNODESL, NNODESL-(nmw2-1), -1
+#endif
 
                eigvq(:, 1) = S_uvw_w2(:, q)
 
@@ -734,7 +742,11 @@ contains
 
 
             ! 2-2-5 (3-3-6, 4-4-7)
+#ifdef BSA_USE_SVD_METHOD__
             do q = 1, nmw1w2
+#else
+            do q = NNODESL, NNODESL-(nmw1w2-1), -1
+#endif
 
                eigvq(:, 1) = S_uvw_w1w2(:, q)
 
@@ -775,7 +787,11 @@ contains
 
 
          ! 2-5-2 (3-6-3, 4-7-4)
+#ifdef BSA_USE_SVD_METHOD__
          do p = 1, nmw1w2
+#else
+         do p = NNODESL, NNODESL-(nmw1w2-1), -1
+#endif
 
             eigvp(:, 1) = S_uvw_w1w2(:, p)
 
@@ -784,7 +800,11 @@ contains
 
             tmpDp = D_S_uvw_w1w2(p)
 
+#ifdef BSA_USE_SVD_METHOD__
             do q = 1, nmw2
+#else
+            do q = NNODESL, NNODESL-(nmw2-1), -1
+#endif
 
                eigvq(:, 1) = S_uvw_w2(:, q)
 
