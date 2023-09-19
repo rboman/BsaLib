@@ -205,9 +205,8 @@ contains
             dimNf_bisp_ = itmp
             dimM_psd_   = struct_data%modal_%nm_eff_
             dimM_bisp_  = dimM_psd_
-            itmp        = struct_data%nn_ * struct_data%ndofs_
-            dimNr_psd_  = itmp
-            dimNr_bisp_ = itmp
+            dimNr_psd_  = struct_data%ndofs_
+            dimNr_bisp_ = struct_data%ndofs_
 
 
             ! classic fct pointers
@@ -231,9 +230,9 @@ contains
             dimM_psd_   = struct_data%modal_%nm_eff_**2
             dimM_bisp_  = dimM_psd_ * struct_data%modal_%nm_eff_  ! nm^3
 
-            itmp        = struct_data%nn_ * struct_data%ndofs_
-            dimNr_psd_  = itmp * itmp
-            dimNr_bisp_ = itmp * dimNr_psd_
+            itmp        = struct_data%ndofs_
+            dimNr_psd_  = itmp ! * itmp
+            dimNr_bisp_ = itmp ! * dimNr_psd_
 
 
             ! classic fct pointers
