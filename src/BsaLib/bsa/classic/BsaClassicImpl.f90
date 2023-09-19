@@ -136,7 +136,6 @@ contains
          block
             real(bsa_real_t), allocatable :: psd(:, :), bisp(:, :, :)
 
-
             !===========================================================
             ! MODAL FORCES
             !
@@ -163,7 +162,42 @@ contains
                enddo
                call intgSpectraVect_(settings%nfreqs_, f, psd=psd, m2=m2o2mr_cls)
             end block
-            
+
+#if 0
+            block
+               real(bsa_real_t), allocatable :: psd_r(:, :)
+               integer(int32) :: im, jm, idx
+               
+               allocate(psd_r(settings%nfreqs_, dimNr_psd_))
+               psd_r = 0._bsa_real_t
+
+               idx = 0
+               do jm = 1, struct_data%modal_%nm_eff_
+                  do im = 1, struct_data%modal_%nm_eff_
+
+                     idx = idx + 1
+                     psd_r = psd_r + &
+                        matmul(psd(:, idx:idx), reshape(struct_data%modal_%phi_(:, im:im)*struct_data%modal_%phi_(:, jm:jm), [1, struct_data%ndofs_]))
+                  enddo
+               enddo
+
+               open(newunit=idx, file='psd_r', action='write', status='replace', form='unformatted')
+               rewind(idx)
+               write(idx) settings%nfreqs_, struct_data%ndofs_
+               do im = 1, settings%nfreqs_
+                  write(idx) f(im), psd_r(im, :)
+               enddo
+               close(idx)
+
+               open(newunit=idx, file='psd_r.txt', action='write', status='replace', form='formatted')
+               rewind(idx)
+               write(idx, '(*(i))') settings%nfreqs_, struct_data%ndofs_
+               do im = 1, settings%nfreqs_
+                  write(idx, '(*(g, 2x))') f(im), psd_r(im, :)
+               enddo
+               close(idx)
+            end block
+#endif            
 
             if (allocated(psd))  deallocate(psd)
             if (allocated(bisp)) deallocate(bisp)
