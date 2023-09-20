@@ -148,22 +148,24 @@ program bsa
       endif
 
       block
-         integer(int32), allocatable :: i_modes(:)
+         integer(int32), allocatable :: modes_(:)
+         integer(int32) :: nmodes_
 
-         i_modes = bsa_getUsedModeShapes()
+         modes_  = bsa_getUsedModeShapes()
+         nmodes_ = size(modes_)
 
          if (allocated(m2mf_)) then
             call bsa_computeBRdecomp(m2mf_, bkg_, res_)
             fname = exp_prfx // 'm2_BR_decomp.txt'
-            call bsa_exportBRdecomp(fname, bkg_, res_, r_xsist(i_modes))
+            call bsa_exportBRdecomp(fname, bkg_, res_, r_xsist(modes_))
 
             fname = exp_prfx // 'm2_mf_' // cls_sffx // udscr // cmb_sffx // exp_fext
             call bsa_exportMomentToFile(fname, m2mf_)
 
             if (allocated(m3mf_cls_)) &
-               call bsa_exportSkewness(exp_prfx // 'sk_mf_' // cls_sffx // udscr // cmb_sffx // exp_fext, m2mf_, m3mf_cls_)
+               call bsa_exportSkewness(exp_prfx // 'sk_mf_' // cls_sffx // udscr // cmb_sffx // exp_fext, nmodes_, m2mf_, m3mf_cls_)
             if (allocated(m3mf_msh_)) &
-               call bsa_exportSkewness(exp_prfx // 'sk_mf_' // msh_sffx // udscr // cmb_sffx // exp_fext, m2mf_, m3mf_msh_)
+               call bsa_exportSkewness(exp_prfx // 'sk_mf_' // msh_sffx // udscr // cmb_sffx // exp_fext, nmodes_, m2mf_, m3mf_msh_)
          endif
 
 
@@ -174,15 +176,15 @@ program bsa
 
             if (allocated(m3mr_msh_)) then
                fname = exp_prfx // 'sk_mr_' // msh_sffx // udscr // cmb_sffx // exp_fext
-               call bsa_exportSkewness(fname, m2mr_, m3mr_msh_)
-               call modalRecombination(r_modm(:, i_modes), m2mr_, m3mr_msh_, m2o2mr_)
+               call bsa_exportSkewness(fname, nmodes_, m2mr_, m3mr_msh_)
+               call modalRecombination(r_modm(:, modes_), m2mr_, m3mr_msh_, m2o2mr_)
             endif
             
             if (allocated(m3mr_cls_)) then
                fname = exp_prfx // 'sk_mr_' // cls_sffx // udscr // cmb_sffx // exp_fext
-               call bsa_exportSkewness(fname, m2mr_, m3mr_cls_)
+               call bsa_exportSkewness(fname, nmodes_, m2mr_, m3mr_cls_)
                if (.not. allocated(m3mr_msh_)) &
-                  call modalRecombination(r_modm(:, i_modes), m2mr_, m3mr_cls_, m2o2mr_)
+                  call modalRecombination(r_modm(:, modes_), m2mr_, m3mr_cls_, m2o2mr_)
             endif
 
 
@@ -275,7 +277,7 @@ program bsa
             endif
 
          endif ! allocated m2mr
-         deallocate(i_modes)
+         deallocate(modes_)
 
          if (allocated(m3mf_cls_)) then
             fname = exp_prfx // 'm3_mf_' // cls_sffx // udscr // cmb_sffx // exp_fext
@@ -574,7 +576,7 @@ contains ! utility procedures
       call bsa_setMaxBkgPeakRestriction(.true.)
 
       ! call bsa_setPODTruncationThreshold(100.d0)
-      call bsa_setPODNOfModesKept(3)
+      call bsa_setPODNOfModesKept(0)
 
       call bsa_Init()  ! This initialises all necessary instances.
 

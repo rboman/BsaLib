@@ -1564,22 +1564,19 @@ contains
       character(len = *), intent(in) :: fname
       real(bsa_real_t), intent(in)   :: sk(:)
 
-      associate(nm => struct_data%modal_%nm_eff_, modes => struct_data%modal_%modes_)
-         call exportSkewness_(fname, dimM_bisp_, sk, nm, modes)
-      end associate
+      call exportSkewness_(fname, sk)
    end subroutine
 
 
 
-   module subroutine bsa_exportSkewness_compute_(fname, m2, m3)
+   module subroutine bsa_exportSkewness_compute_(fname, dim, m2, m3)
       character(len = *), intent(in) :: fname
+      integer(bsa_int_t), intent(in) :: dim
       real(bsa_real_t), intent(in)   :: m2(:), m3(:)
       real(bsa_real_t), allocatable  :: sk(:)
 
-      associate(nm => struct_data%modal_%nm_eff_, modes => struct_data%modal_%modes_)
-         sk = computeSkewness_(nm, m2, m3, only_diag_elems_)
-         call exportSkewness_(fname, dimM_bisp_, sk, nm, modes)
-      end associate
+      sk = computeSkewness_(dim, m2, m3, only_diag_elems_)
+      call exportSkewness_(fname, sk)
    end subroutine
 
 
@@ -1589,9 +1586,10 @@ contains
 #ifdef __BSA_DEBUG
       use, intrinsic :: ieee_arithmetic
 #endif
-      integer(kind = 4), intent(in) :: dim
-      real(bsa_real_t), intent(in)  :: m2(:), m3(:)
-      logical, intent(in) :: only_diag
+      integer(bsa_int_t), intent(in) :: dim
+      real(bsa_real_t), intent(in)   :: m2(:), m3(:)
+      logical, intent(in)            :: only_diag
+
       real(real64), parameter :: cst3d2 = 3._real64 / 2._real64
       real(bsa_real_t), allocatable :: sk(:)
 
@@ -1610,12 +1608,6 @@ contains
          real(bsa_real_t), allocatable :: sigm(:)
          real(bsa_real_t) :: denK, denJ
 
-         ! s2   = size(m2, 2)
-         ! if (.not. size(m3, 2) == s2) then
-         !    print '(1x, a, a)', ERRMSG, '2nd size mismatch between m2 and m3. Skipping.'
-         !    return
-         ! endif
-
          szm2 = size(m2, 1)
          szm3 = size(m3, 1)
          
@@ -1624,66 +1616,65 @@ contains
 
          sigm = sqrt(m2)  ! std
 
-         ! do l = 1, s2
+         pm3 = 1
+         ik  = 1
+         do k = 1, dim
 
-            pm3 = 1
-            ik  = 1
-            do k = 1, dim
+            denK = sigm(ik)
 
-               denK = sigm(ik)
+            ij = 1
+            do j = 1, dim
 
-               ij = 1
-               do j = 1, dim
+               denJ = denK * sigm(ij)
 
-                  denJ = denK * sigm(ij)
+               ii = 1
+               do i = 1, dim
 
-                  ii = 1
-                  do i = 1, dim
-
-                     sk(pm3) = m3(pm3) / (denJ * sigm(ii))
+                  sk(pm3) = m3(pm3) / (denJ * sigm(ii))
 
 #ifdef __BSA_DEBUG
-                     if (ieee_is_nan(sk(pm3))) then
-                        print '(1x, a, a, 2i6)', &
-                          ERRMSG, 'SK is NaN at indexes   ', pm3, l
-                        goto 99 ! exit loop
-                     endif
+                  if (ieee_is_nan(sk(pm3))) then
+                     print '(1x, a, a, 2i6)', &
+                        ERRMSG, 'SK is NaN at indexes   ', pm3, l
+                     goto 99 ! exit loop
+                  endif
 #endif
 
-                     pm3 = pm3 + 1
-                     ii  = i * dim + i + 1
-                  enddo ! i modes
+                  pm3 = pm3 + 1
+                  ii  = i * dim + i + 1
+               enddo ! dim i
 
-                  ij = j * dim + j + 1
-               enddo ! j modes
+               ij = j * dim + j + 1
+            enddo ! dim j
 
-               ik = k * dim + k + 1
-            enddo ! k modes
-
-         ! enddo
+            ik = k * dim + k + 1
+         enddo ! dim k
 
          99 continue
-
       end block
-   end function
+   end function computeSkewness_
 
 
 
 
 
-   subroutine exportSkewness_(fname, dim, vec, nmodes, modes)
+   subroutine exportSkewness_(fname, vec)
+      use BsaLib_Data, only: struct_data
       character(len = *), intent(in) :: fname
-      integer(kind = 4), intent(in)  :: dim, nmodes
-      integer(kind = 4), intent(in)  :: modes(nmodes)
       real(bsa_real_t), intent(in)   :: vec(:)
-      integer(int32) :: iun, i
-
+      integer(int32) :: iun, i, dim
+      logical :: is_modal
       iun = io_openExportFileByName(exp_dir_ // fname)
       if (iun == 0) call bsa_Abort()
 
-      ! header
-      write(iun, *) nmodes
-      write(iun, *) modes
+      dim = size(vec)
+      is_modal = dim == dimM_bisp_
+      
+      if (is_modal) then
+         ! modal header
+         write(iun, *) struct_data%modal_%nm_eff_
+         write(iun, *) struct_data%modal_%modes_
+      endif
 
       ! actual data
       write(iun, *) dim

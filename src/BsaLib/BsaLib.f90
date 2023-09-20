@@ -484,27 +484,28 @@ module BsaLib
 
       module subroutine bsa_exportBR_nocompute_(fname, bkg, res, xsi)
          character(len = *), intent(in) :: fname
-         real(bsa_real_t), intent(in) :: bkg(:), res(:), xsi(:)
+         real(bsa_real_t), intent(in)   :: bkg(:), res(:), xsi(:)
       end subroutine
 
 
 
       module subroutine bsa_exportMomentToFile(fname, vec)
          character(len = *), intent(in) :: fname
-         real(bsa_real_t), intent(in)          :: vec(:)
+         real(bsa_real_t), intent(in)   :: vec(:)
       end subroutine
 
 
 
       module subroutine bsa_exportSkewness_nocompute_(fname, sk)
-         character(len = *), intent(in)  :: fname
-         real(bsa_real_t), intent(in)  :: sk(:)
+         character(len = *), intent(in) :: fname
+         real(bsa_real_t), intent(in)   :: sk(:)
       end subroutine
 
 
-      module subroutine bsa_exportSkewness_compute_(fname, m2, m3)
+      module subroutine bsa_exportSkewness_compute_(fname, dim, m2, m3)
          character(len = *), intent(in)  :: fname
-         real(bsa_real_t), intent(in)  :: m2(:), m3(:)
+         integer(bsa_int_t), intent(in)  :: dim
+         real(bsa_real_t), intent(in)    :: m2(:), m3(:)
       end subroutine
 
 
@@ -512,7 +513,7 @@ module BsaLib
       module subroutine bsa_exportPSDToFile(fname, psd, varname, f)
          character(len = *), intent(in) :: fname
          character(len = *), intent(in), optional :: varname
-         real(bsa_real_t), intent(in), optional :: f(:)
+         real(bsa_real_t), intent(in),   optional :: f(:)
          real(bsa_real_t), intent(in) :: psd(:, :)
       end subroutine
 
