@@ -732,7 +732,7 @@ contains
    
    
    module subroutine bsa_setOutUnit(iunit)
-      integer(kind = 4), intent(in) :: iunit
+      integer(bsa_int_t), intent(in) :: iunit
 
       unit_debug_ = iunit
    end subroutine
@@ -759,7 +759,7 @@ contains
 
 
    module subroutine bsa_setSpatialSymmetry(isym)
-      integer(kind = 4), intent(in) :: isym
+      integer(bsa_int_t), intent(in) :: isym
 
       select case (isym)
          case (BSA_SPATIAL_SYM_NONE)
@@ -786,7 +786,7 @@ contains
 
 
    module subroutine bsa_setPremeshType(itype)
-      integer(kind = 4), intent(in) :: itype
+      integer(bsa_int_t), intent(in) :: itype
 
       select case (itype)
          case (BSA_PREMESH_TYPE_DIAG_CREST_YES)
@@ -803,7 +803,7 @@ contains
 
 
    module subroutine bsa_setPremeshMode(imode)
-      integer(kind = 4), intent(in) :: imode
+      integer(bsa_int_t), intent(in) :: imode
 
       select case (imode)
          case (BSA_PREMESH_MODE_BASE)
@@ -879,14 +879,14 @@ contains
 
 
    module subroutine bsa_setExportFileFormat(iform)
-      integer(kind = 4), intent(in) :: iform
+      integer(bsa_int_t), intent(in) :: iform
       
       call io_setExportFileFormat(iform)
    end subroutine
 
 
    module subroutine bsa_setExportAppendMode(imode)
-      integer(kind = 4), intent(in) :: imode
+      integer(bsa_int_t), intent(in) :: imode
 
       call io_setExportAppendMode(imode)
    end subroutine
@@ -913,28 +913,28 @@ contains
 
 
    module subroutine bsa_setSubanType(isuban)
-      integer(kind = 4), intent(in) :: isuban
+      integer(bsa_int_t), intent(in) :: isuban
 
       call settings%SetSubanType(isuban)
    end subroutine
 
 
    module subroutine bsa_setVersion(ivers)
-      integer(kind = 4), intent(in) :: ivers
+      integer(bsa_int_t), intent(in) :: ivers
       
       call settings%SetVersion(ivers)
    end subroutine
 
 
    module subroutine bsa_setScalingConv(iconv)
-      integer(kind = 4), intent(in) :: iconv
+      integer(bsa_int_t), intent(in) :: iconv
 
       call settings%SetScalingType(iconv)
    end subroutine
 
 
    module subroutine bsa_setSpectraComputation(ipsd, ibisp)
-      integer(kind = 4), intent(in), optional :: ipsd, ibisp
+      integer(bsa_int_t), intent(in), optional :: ipsd, ibisp
 
       call settings%ActivateSpectraComputation(ipsd, ibisp)
    end subroutine
@@ -942,27 +942,27 @@ contains
 
 
    module subroutine bsa_setSpectraExtension(ionlydiag)
-      integer(kind = 4), intent(in) :: ionlydiag
+      integer(bsa_int_t), intent(in) :: ionlydiag
 
       call settings%SetExtension(ionlydiag)
    end subroutine
 
    module subroutine bsa_setTestMode(itest)
-      integer(kind = 4), intent(in) :: itest
+      integer(bsa_int_t), intent(in) :: itest
 
       call settings%TestMode(itest)
    end subroutine
 
 
    module subroutine bsa_setSymmetries(ibispsym, i3dsym)
-      integer(kind = 4), intent(in) :: ibispsym, i3dsym
+      integer(bsa_int_t), intent(in) :: ibispsym, i3dsym
 
       call settings%setSymmetries(ibispsym, i3dsym)
    end subroutine
 
 
    module subroutine bsa_setupClassic(nfreqs, df)
-      integer(kind = 4), intent(in) :: nfreqs
+      integer(bsa_int_t), intent(in) :: nfreqs
       real(bsa_real_t), intent(in)  :: df
 
       call settings%setClsSettings(nfreqs, df)
@@ -985,16 +985,16 @@ contains
    !=====================================
 
    module subroutine bsa_setWindDirections(dirs, ndirs)
-      integer(kind = 4), intent(in) :: dirs(:)
-      integer(kind = 4), intent(in), optional :: ndirs
+      integer(bsa_int_t), intent(in) :: dirs(:)
+      integer(bsa_int_t), intent(in), optional :: ndirs
 
       call wd%setWindDirections(dirs, ndirs)
    end subroutine
 
 
    module subroutine bsa_setWindTurbComps(tc, ntc)
-      integer(kind = 4), intent(in) :: tc(:)
-      integer(kind = 4), intent(in), optional :: ntc
+      integer(bsa_int_t), intent(in) :: tc(:)
+      integer(bsa_int_t), intent(in), optional :: ntc
 
       call wd%setTurbComps(tc, ntc)
    end subroutine
@@ -1002,20 +1002,20 @@ contains
 
 
    module subroutine bsa_setWindVertProf(iwprof)
-      integer(kind = 4), intent(in) :: iwprof
+      integer(bsa_int_t), intent(in) :: iwprof
       call wd%SetWindvertProf(iwprof)
    end subroutine
 
 
    module subroutine bsa_setPSDType(ipsd)
-      integer(kind = 4), intent(in) :: ipsd
+      integer(bsa_int_t), intent(in) :: ipsd
 
       call wd%SetPSDType(ipsd)
    end subroutine
 
 
    module subroutine bsa_setWindAltDir(ivert)
-      integer(kind = 4), intent(in) :: ivert
+      integer(bsa_int_t), intent(in) :: ivert
 
       call wd%SetMainVertDir(ivert)
    end subroutine
@@ -1023,7 +1023,7 @@ contains
 
    module subroutine bsa_setWindZoneLimits(lim, ilim)
       real(bsa_real_t), intent(in) :: lim(..)
-      integer(kind = 4), intent(in), optional :: ilim(..)
+      integer(bsa_int_t), intent(in), optional :: ilim(..)
 
       call wd%SetWindZoneLimits(lim, ilim)
    end subroutine
@@ -1108,7 +1108,7 @@ contains
 
 
    module subroutine bsa_setNodalWindZones(NodWZ)
-      integer(kind = 4), target, intent(in) :: NodWZ(:)
+      integer(bsa_int_t), target, intent(in) :: NodWZ(:)
 
       call wd%SetNodalWindZones(NodWZ)
    end subroutine
@@ -1151,7 +1151,7 @@ contains
    !=====================================
 
    module subroutine bsa_setNodalCoords(nn, coords)
-      integer(kind = 4), intent(in)  :: nn
+      integer(bsa_int_t), intent(in)  :: nn
       real(bsa_real_t), target, allocatable :: coords(:, :)
 
       call struct_data%SetNodalCoords(nn, coords)
@@ -1160,7 +1160,7 @@ contains
 
 
    module subroutine bsa_setNodalNOfDOFs(nlibs)
-      integer(kind = 4), intent(in) :: nlibs
+      integer(bsa_int_t), intent(in) :: nlibs
 
       call struct_data%SetNOfNodalDOFs(nlibs)
    end subroutine
@@ -1168,7 +1168,7 @@ contains
 
 
    module subroutine bsa_setTotalNOfNodes(nn)
-      integer(kind = 4), intent(in) :: nn
+      integer(bsa_int_t), intent(in) :: nn
 
       call struct_data%SetTotalNOfNodes(nn)
    end subroutine
@@ -1176,9 +1176,9 @@ contains
 
 
    module subroutine bsa_setLoadedNodalDOFs(libs_l, nlibs_l)
-      integer(kind = 4), intent(in), target, allocatable :: libs_l(:)
-      integer(kind = 4), intent(in), optional :: nlibs_l
-      integer(kind = 4) :: siz
+      integer(bsa_int_t), intent(in), target, allocatable :: libs_l(:)
+      integer(bsa_int_t), intent(in), optional :: nlibs_l
+      integer(bsa_int_t) :: siz
 
       if (.not. allocated(libs_l)) return
 
@@ -1196,9 +1196,9 @@ contains
 
 
    module subroutine bsa_setLoadedNodes(nodes_l, nn_l)
-      integer(kind = 4), intent(in), target, allocatable :: nodes_l(:)
-      integer(kind = 4), intent(in), optional :: nn_l
-      integer(kind = 4) :: siz
+      integer(bsa_int_t), intent(in), target, allocatable :: nodes_l(:)
+      integer(bsa_int_t), intent(in), optional :: nn_l
+      integer(bsa_int_t) :: siz
 
       if (.not. allocated(nodes_l)) return
 
@@ -1226,7 +1226,7 @@ contains
    !=====================================
 
    module subroutine bsa_setModalInfo(ndofs, nm, Phi, natf)
-      integer(kind = 4), intent(in) :: ndofs, nm
+      integer(bsa_int_t), intent(in) :: ndofs, nm
       real(bsa_real_t), intent(in), target :: Phi(ndofs, nm), natf(nm)
 
       call struct_data%SetModalInfo(ndofs, nm, Phi, natf)
@@ -1235,7 +1235,7 @@ contains
 
 
    module subroutine bsa_setModalMatrices(nm, Mgen, Kgen, Cgen)
-      integer(kind = 4), intent(in) :: nm
+      integer(bsa_int_t), intent(in) :: nm
       real(bsa_real_t), intent(in), target, dimension(nm) :: Mgen, Kgen
       real(bsa_real_t), intent(in), target :: Cgen(nm, nm)
 
@@ -1244,7 +1244,7 @@ contains
 
 
    module subroutine bsa_setKeptModalShapes(modes)
-      integer(kind = 4), intent(in) :: modes(:)
+      integer(bsa_int_t), intent(in) :: modes(:)
 
       call struct_data%SetKeptModes(modes)
    end subroutine
@@ -1259,7 +1259,7 @@ contains
 
 
    module pure function bsa_getUsedModeShapes() result(modes)
-      integer(kind = 4), allocatable :: modes(:)
+      integer(bsa_int_t), allocatable :: modes(:)
 
       modes = struct_data%modal_%modes_
    end function

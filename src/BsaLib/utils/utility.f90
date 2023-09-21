@@ -64,9 +64,9 @@ contains
       integer(int32) :: id
 
       if (nj >= ni) then
-         id = (ni - 1) * tot + nj - int((ni*ni - ni) / 2., kind = 4)
+         id = (ni - 1) * tot + nj - int((ni*ni - ni) / 2., kind=int32)
       else
-         id = (nj - 1) * tot + ni - int((nj*nj - nj) / 2., kind = 4)
+         id = (nj - 1) * tot + ni - int((nj*nj - nj) / 2., kind=int32)
       endif
 
 ! #ifdef __BSA_DEBUG
