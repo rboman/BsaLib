@@ -64,7 +64,8 @@ module BsaLib_MZone
       procedure(intf_MZoneIntFct_),    pass, deferred :: zoneTotNPts
       procedure(intf_MZoneGenIn_),     pass, deferred :: dump
       procedure(intf_MZoneGenInOut_),  pass, deferred :: undump
-#ifdef __BSA_OMP
+#if (defined(__BSA_USE_CACHED_POD_DATA)) || (defined(_OPENMP))
+# define __new_interp_proc__
       procedure(intf_MZoneInterpOMP_), pass, deferred :: interpolate
 #else
       procedure(intf_MZoneGenInOut_),  pass, deferred :: interpolate
@@ -90,13 +91,20 @@ module BsaLib_MZone
          class(MZone_t), intent(inout) :: this
       end subroutine
 
-#ifdef __BSA_OMP
-      subroutine intf_MZoneInterpOMP_(this, bfm, pdata)
+#ifdef __new_interp_proc__
+      subroutine intf_MZoneInterpOMP_(this &
+# ifndef __BSA_USE_CACHED_POD_DATA
+         & , bfm &
+# endif
+         &, pdata)
          import MZone_t, bsa_real_t
          class(MZone_t), intent(inout) :: this
+# ifndef __BSA_USE_CACHED_POD_DATA
          real(bsa_real_t), intent(in)  :: bfm(:, :)
+# endif
          class(*), pointer, intent(in) :: pdata
       end subroutine
+#undef __new_interp_proc__
 #endif
    end interface
 
@@ -114,6 +122,7 @@ contains
 
 
    subroutine zoneName(this, name_in)
+!DIR$ ATTRIBUTES FORCEINLINE :: zoneName
       class(MZone_t), intent(inout) :: this
       character(len=*), intent(in)  :: name_in
 
@@ -157,11 +166,18 @@ contains
 
 
 
-
-   
-   subroutine DumpZone(z, data)
+#ifdef __BSA_USE_CACHED_POD_DATA
+# define __bfm_dump__
+# define __decl__
+#else
+# define __bfm_dump__ ,data
+# define __decl__ real(bsa_real_t), intent(in) :: data(:, :)
+#endif
+   subroutine DumpZone(z  __bfm_dump__ )
       class(MZone_t), intent(in)   :: z
-      real(bsa_real_t), intent(in) :: data(:, :)
+      __decl__
+#undef __bfm_dump__
+#undef __decl__
       ! integer             :: tot
 
       ! dump specific zone data
@@ -189,27 +205,38 @@ contains
       ! ! deferred knowing num of zone's meshing points
       ! tot = size(data)
       ! write(unit_dump_bfm_) tot
-      
+#ifndef __BSA_USE_CACHED_POD_DATA
       write(unit_dump_bfm_) data ! NOTE: dimBISP first, then nj * ni
+#endif
    end subroutine DumpZone
 
 
 
-   subroutine UndumpZone(z &
-#ifdef __BSA_OMP
-      & , bfm_undump &
-#endif
-      & )
-      use BsaLib_Data, &
-#ifdef __BSA_OMP
-         & only: dimM_bisp_
-      real(bsa_real_t), allocatable, intent(inout) :: bfm_undump(:, :)
+#ifdef __BSA_USE_CACHED_POD_DATA
+# define __bfm_dump__
+# define __use_only__
+# define __decl__
 #else
-         & only: bfm_undump
+# ifdef _OPENMP
+#  define __bfm_dump__  ,bfm_undump
+#  define __use_only__ use BsaLib_Data, only: dimM_bisp_
+#  define __decl__ real(bsa_real_t), allocatable, intent(inout) :: bfm_undump(:, :)
+# else
+#  define __bfm_dump__
+#  define __use_only__ use BsaLib_Data, only: bfm_undump
+#  define __decl__
+# endif
 #endif
+   subroutine UndumpZone(z  __bfm_dump__ )
+      __use_only__
       class(MZone_t), intent(inout) :: z
+      __decl__
       character(len = 64) :: name_hdr
       integer(int32)      :: zNp
+
+#undef __bfm_dump__
+#undef __use_only__
+#undef __decl__
 
       call z%undump()  ! read zone's specific data first
 
@@ -225,11 +252,13 @@ contains
       ! zone interest modes index ptr
       read(unit_dump_bfm_) z%id_im_
 
+
+#ifndef __BSA_USE_CACHED_POD_DATA
       ! once zone is undumped, get its N. of points
       ! NOTE: needed in order to correctly index into bfm_undump !
       zNp = z%zoneTotNPts()
 
-#ifdef __BSA_OMP
+# ifdef _OPENMP
       if (.not. allocated(bfm_undump)) then
          allocate(bfm_undump(dimM_bisp_, zNp))
       else
@@ -239,12 +268,13 @@ contains
             allocate(bfm_undump(dimM_bisp_, zNp))
          endif
       endif
-#endif
+# endif
 
       ! read actual BFM dumped data
       ! NOTE: in second dimension, nj leading over ni
       !       laydown.
       read(unit_dump_bfm_) bfm_undump(:, 1 : zNp)
+#endif
    end subroutine UndumpZone
 
 

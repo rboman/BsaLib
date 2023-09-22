@@ -1716,11 +1716,8 @@ contains
    ! BUG: should also providfe a way to pass pointer to user defined exporting data 
    !      structure that has to be finally dereferenced in actual exporting routine!
    module subroutine bsa_setBRMExportFunction(fptr)
-#ifdef __BSA_OMP
-      procedure(exportBRMinterf_vect_all_), pointer, intent(in) :: fptr
-#else
-      procedure(exportBRMinterf_scalar_),   pointer, intent(in) :: fptr
-#endif
+      procedure(exportBRMinterf_vect_), pointer, intent(in) :: fptr
+      
       write_brm_fptr_ => fptr
 
       ! if user provides its own function, make sure it does not get overridden
@@ -1732,11 +1729,7 @@ contains
 
 
    subroutine exportBRM_void_internal_(f1, f2, brm, pdata)
-#ifdef __BSA_OMP
-      real(bsa_real_t), intent(in) :: f1(:), f2(:), brm(:, :)
-#else
-      real(bsa_real_t), intent(in) :: f1, f2, brm(:)
-#endif
+      real(bsa_real_t), intent(in)  :: f1(:), f2(:), brm(:, :)
       class(*), pointer, intent(in) :: pdata
 
       ! do nothing
@@ -1764,7 +1757,7 @@ contains
          write(unit_dump_brm_) pdata%nI_
          write(unit_dump_brm_) pdata%nJ_
 
-! #ifdef __BSA_OMP
+! #ifdef _OPENMP
 !          print *, ' Dumping zone with id, ni, nj  =  ', &
 !             pdata%idZone_, pdata%nI_, pdata%nJ_
 ! #endif
@@ -1774,11 +1767,7 @@ contains
 
 
    subroutine exportBRM_base_internal_(fi, fj, brm, pdata)
-#ifdef __BSA_OMP
-      real(bsa_real_t), intent(in) :: fi(:), fj(:), brm(:, :)
-#else
-      real(bsa_real_t), intent(in) :: fi, fj, brm(:)
-#endif
+      real(bsa_real_t), intent(in)  :: fi(:), fj(:), brm(:, :)
       class(*), pointer, intent(in) :: pdata
 
       ! Need to verify if to print headers
@@ -1791,7 +1780,6 @@ contains
          end select
       endif
 
-#ifdef __BSA_OMP
       block
          integer(int32) :: i, siz
 
@@ -1800,9 +1788,6 @@ contains
             write(unit_dump_brm_) real(fi(i), kind=real32), real(fj(i), kind=real32), real(brm(:, i), kind=real32)      
          enddo
       endblock
-#else
-      write(unit_dump_brm_) real(fi, kind=real32), real(fj, kind=real32), real(brm, kind=real32)
-#endif
    end subroutine
 
 

@@ -547,11 +547,7 @@ module BsaLib
 
 
       module subroutine bsa_setBRMExportFunction(fptr)
-#ifdef __BSA_OMP
-         procedure(exportBRMinterf_vect_all_), pointer, intent(in) :: fptr
-#else
-         procedure(exportBRMinterf_scalar_),   pointer, intent(in) :: fptr
-#endif
+         procedure(exportBRMinterf_vect_), pointer, intent(in) :: fptr
       end subroutine
 
 

@@ -54,8 +54,8 @@ contains
 
 
    module function getFM_full_tnm_scalar_msh_(fi, fj) result(bfm)
-      real(bsa_real_t), intent(in) :: fi, fj
-      real(bsa_real_t) :: bfm(dimM_bisp_)
+      real(bsa_real_t), intent(in), contiguous :: fi(:), fj(:)
+      real(bsa_real_t) :: bfm(dimM_bisp_, size(fi)*size(fj))
       real(bsa_real_t) :: fiPfj(1), abs_fi, abs_fj, abs_fiPfj
 
       ! indexes
@@ -91,9 +91,9 @@ contains
       real(bsa_real_t), dimension(NLIBSL, NLIBSL) :: tmp1, tmp2, tmp3
 
       ! frequencies values
-      fiPfj     = fi + fj
-      abs_fi    = abs(fi)
-      abs_fj    = abs(fj)
+      fiPfj(1)  = fi(1) + fj(1)
+      abs_fi    = abs(fi(1))
+      abs_fj    = abs(fj(1))
       abs_fiPfj = abs(fiPfj(1))
 
 
@@ -101,16 +101,15 @@ contains
 		!       Like using memset() in C.
       bfm = 0._bsa_real_t
 
-
       do itc = 1, NTCOMPS
 
          tc   = wd%tc_(itc)
          tcP3 = tc + 3
 
          ! prefetch wind turbulence PSDs for all loaded nodes
-         S_IJK_fi = wd%evalPSD(1, [fi], NNODESL, struct_data%n_load_, 1, tc)
+         S_IJK_fi = wd%evalPSD(1, fi, NNODESL, struct_data%n_load_, 1, tc)
          
-         S_IJK_fj = wd%evalPSD(1, [fj], NNODESL, struct_data%n_load_, 1, tc)
+         S_IJK_fj = wd%evalPSD(1, fj, NNODESL, struct_data%n_load_, 1, tc)
          
          S_IJK_fiPfj = wd%evalPSD(1, fiPfj, NNODESL, struct_data%n_load_, 1, tc)
 
@@ -246,7 +245,7 @@ contains
                               ! bfm(iposM) = bfm(iposM) + &
                               !    sum(BF_IJK_ijk(:, :, :) * (matmul(phiI, phiJ) * phiK(:, :, :)))
                            
-                              bfm(iposM) = bfm(iposM) + &
+                              bfm(iposM, 1) = bfm(iposM, 1) + &
                                  sum(BF_IJK_ijk(:, :) * (matmul(phiI, phiJ) * phiK))
 
                               iposM = iposM + 1
@@ -320,7 +319,7 @@ contains
       if (.not. allocated(MSHR_SVD_INFO)) then
          allocate(MSHR_SVD_INFO, stat=istat, errmsg=emsg)
          if (istat /= 0) call allocKOMsg('MSHR_SVD_INFO', istat, emsg)
-		endif
+      endif
       
       MSHR_SVD_INFO = 0
 #ifdef BSA_USE_SVD_METHOD__
@@ -403,11 +402,40 @@ contains
 
 
 
+   integer(int32) pure function getNPODModesByThreshold_(eigvals, rlim) result(nPODmodes)
+!DIR$ ATTRIBUTES FORCEINLINE :: getNPODModesByThreshold_
+      real(real64), intent(in), contiguous :: eigvals(:)
+      real(real64), intent(in) :: rlim
+      real(real64) :: limval
+
+#ifdef BSA_USE_SVD_METHOD__
+# define __IDX 1
+# define __OP  +
+#else
+# define __IDX NNODESL
+# define __OP  -
+#endif
+
+      nPODmodes = 1
+      if (any(eigvals /= eigvals(__IDX))) then
+         limval    = rlim * eigvals(__IDX)
+         nPODmodes = 2
+         do while (eigvals(nPODmodes) >= limval)
+            nPODmodes = nPODmodes __OP 1
+         enddo
+         nPODmodes = nPODmodes - 1
+      endif
+#undef __IDX
+#undef __OP
+   end function getNPODModesByThreshold_
+
+
+
 
 
    module function getFM_full_tm_scalar_msh_POD_(fi, fj) result(bfm)
 #ifdef __BSA_EXPORT_POD_TRUNC_INFO
-# ifdef __BSA_OMP
+# ifdef _OPENMP
       !$ use omp_lib, only: omp_get_thread_num
 #  define __export_POD_trunc_id__  omp_get_thread_num()+1
 # else
@@ -415,10 +443,47 @@ contains
 # endif
       use BsaLib_Data, only: iun_POD_trunc_
 #endif
-      real(bsa_real_t), intent(in) :: fi, fj
-      real(bsa_real_t) :: bfm(dimM_bisp_)
+      real(bsa_real_t), intent(in), contiguous :: fi(:), fj(:)
+      real(bsa_real_t) :: bfm(dimM_bisp_, size(fi)*size(fj))
+      
+#ifdef __BSA_USE_CACHED_POD_DATA
 
-      real(bsa_real_t) :: fiPfj(1), fi_(1), fj_(1)
+# define __EGVL_w1 D_S_uvw_w1_ptr
+# define __EGVL_w2 D_S_uvw_w2_ptr
+# define __EGVT_w1 S_uvw_w1_ptr
+# define __EGVT_w2 S_uvw_w2_ptr
+
+      integer(int32)   :: nfi_, nfj_, ifi, ifj
+      real(bsa_real_t) :: fi_
+      integer(int32), allocatable   :: npodw1(:), npodw2(:)
+      double precision, allocatable, target :: D_S_uvw_w1(:, :)
+      double precision, allocatable, target :: D_S_uvw_w2(:, :)
+      double precision, pointer     :: D_S_uvw_w1_ptr(:)
+      double precision, pointer     :: D_S_uvw_w2_ptr(:)
+      double precision, allocatable, target :: S_uvw_w1(:, :, :)
+      double precision, allocatable, target :: S_uvw_w2(:, :, :)
+      double precision, pointer     :: S_uvw_w1_ptr(:, :)
+      double precision, pointer     :: S_uvw_w2_ptr(:, :)
+#else
+
+# define __EGVL_w1 D_S_uvw_w1
+# define __EGVL_w2 D_S_uvw_w2
+# define __EGVT_w1 S_uvw_w1
+# define __EGVT_w2 S_uvw_w2
+
+      double precision :: D_S_uvw_w1(NNODESL)   ! singular values vectors (DECREASING ordering!)
+      double precision :: D_S_uvw_w2(NNODESL)
+      double precision, allocatable :: S_uvw_w1(:, :)
+      double precision, allocatable :: S_uvw_w2(:, :)
+#endif
+      double precision :: D_S_uvw_w1w2(NNODESL)
+      double precision, allocatable :: S_uvw_w1w2(:, :)
+      
+      double precision :: tmpv(1, NNODESL)   ! tmp vec for interfacing, BUG: might be avoided?
+
+      double precision, dimension(NNODESL, 1)    :: eigvp, eigvq
+      double precision, dimension(NMODES_EFF, 1) :: tmpm1, tmpm2, tmpm3
+      double precision :: tmpDp, tmpTq, tmpo, tmpn
       
       ! wind turbulent comps indexes
       integer(int32) :: itc, tc, tcP3
@@ -426,23 +491,9 @@ contains
       ! n. of kept modes from wind fields decomposition
       integer(int32) :: nmw1, nmw2, nmw1w2
       integer(int32) :: p, q
-      integer(int32) :: m, n, o, posm
-      
-      double precision, allocatable :: S_uvw_w1  (:, :)
-      double precision, allocatable :: S_uvw_w2  (:, :)
-      double precision, allocatable :: S_uvw_w1w2(:, :)
-      
-      ! tmp vec for interfacing, BUG: might be avoided?
-      double precision :: tmpv(1, NNODESL)
+      integer(int32) :: m, n, o, posm, posf
 
-      ! singular values vectors (DECREASING ordering!)
-      double precision :: D_S_uvw_w1  (NNODESL)
-      double precision :: D_S_uvw_w2  (NNODESL)
-      double precision :: D_S_uvw_w1w2(NNODESL)
-
-      double precision, dimension(NNODESL, 1)    :: eigvp, eigvq
-      double precision, dimension(NMODES_EFF, 1) :: tmpm1, tmpm2, tmpm3
-      double precision :: tmpDp, tmpTq, tmpo, tmpn
+      real(bsa_real_t) :: fiPfj_(1)
 
       interface
 #ifdef BSA_USE_SVD_METHOD__
@@ -468,14 +519,24 @@ contains
 #endif
       end interface
 
-      bfm      = 0._bsa_real_t
-      fi_(1)   = fi
-      fj_(1)   = fj
-      fiPfj(1) = fi + fj
+      bfm = 0._bsa_real_t
 
-
+#ifdef __BSA_USE_CACHED_POD_DATA
+      nfi_ = size(fi)
+      nfj_ = size(fj)
+      if (do_trunc_POD_) then
+         allocate(npodw1(nfi_))
+         allocate(npodw2(nfj_))
+      endif
+      allocate(D_S_uvw_w1(NNODESL, nfi_))
+      allocate(S_uvw_w1  (NNODESL, NNODESL, nfi_))
+      allocate(D_S_uvw_w2(NNODESL, nfj_))
+      allocate(S_uvw_w2  (NNODESL, NNODESL, nfj_))
+      
+#else
       allocate(S_uvw_w1  (NNODESL, NNODESL))
       allocate(S_uvw_w2  (NNODESL, NNODESL))
+#endif
       allocate(S_uvw_w1w2(NNODESL, NNODESL))
 
 
@@ -484,19 +545,109 @@ contains
          tc   = wd%tc_(itc)
          tcP3 = tc + 3
 
+         posf = 1
+
+
+#ifdef __BSA_USE_CACHED_POD_DATA
+
+         !
+         ! NOTE: we could use OpenMP parallelisation here, 2 separate tasks
+         !
+         do ifi = 1, nfi_
+
+            S_uvw_w1(:, 1:1, ifi) = &
+               reshape(wd%evalPSD(1, [fi(ifi)], NNODESL, struct_data%n_load_, 1, tc), &
+                  [NNODESL, 1])
+         
+            S_uvw_w1(:, :, ifi) = &
+               wd%getFullNodalPSD(NNODESL, struct_data%n_load_, S_uvw_w1(:, 1, ifi), fi(ifi), 1)
+
+            !$omp critical
+#ifdef BSA_USE_SVD_METHOD__
+            call dgesvd(&
+                 'O' &                    ! min(M,N) columns of U are overwritten on array A (saves memory)
+               , 'N' &                    ! no rows of V are computed
+               , NNODESL    &             ! n. of rows M
+               , NNODESL    &             ! n. of cols N
+               , S_uvw_w1(:, :, ifi) &    ! A matrix (overwritten with left-singular vectors)
+               , NNODESL             &
+               , D_S_uvw_w1(:, ifi)  &    ! singular values
+               , tmpv       &    ! U
+               , 1          & 
+               , tmpv       &    ! VT
+               , 1          &
+               , MSHR_SVD_WORK, MSHR_SVD_LWORK, MSHR_SVD_INFO)
+# else
+            call dsyev('V', 'L', &
+               NNODESL, S_uvw_w1(:, :, ifi), NNODESL, D_S_uvw_w1(:, ifi), &
+                  MSHR_SVD_WORK, MSHR_SVD_LWORK, MSHR_SVD_INFO)
+# endif
+            if (MSHR_SVD_INFO /= 0) then
+               print '(1x, a, a, i0)', &
+                  ERRMSG, 'Error applying SVD to S_uvw_w1. Exit code  ', MSHR_SVD_INFO
+               call bsa_Abort()
+            endif
+            !$omp end critical
+
+            if (do_trunc_POD_) npodw1(ifi) = getNPODModesByThreshold_(D_S_uvw_w1(:, ifi), POD_trunc_lim_)
+         enddo  ! nfi
+
+
+         do ifj = 1, nfj_
+
+            S_uvw_w2(:, 1:1, ifj) = &
+               reshape(wd%evalPSD(1, [fj(ifj)], NNODESL, struct_data%n_load_, 1, tc), &
+                  [NNODESL, 1])
+         
+            S_uvw_w2(:, :, ifj) = &
+               wd%getFullNodalPSD(NNODESL, struct_data%n_load_, S_uvw_w2(:, 1, ifj), fj(ifj), 1)
+         
+            !$omp critical
+#ifdef BSA_USE_SVD_METHOD__
+            call dgesvd(&
+                 'O' &                    ! min(M,N) columns of U are overwritten on array A (saves memory)
+               , 'N' &                    ! no rows of V are computed
+               , NNODESL    &             ! n. of rows M
+               , NNODESL    &             ! n. of cols N
+               , S_uvw_w2(:, :, ifj) &    ! A matrix (overwritten with left-singular vectors)
+               , NNODESL             &
+               , D_S_uvw_w2(:, ifj)  &    ! singular values
+               , tmpv       &    ! U
+               , 1          & 
+               , tmpv       &    ! VT
+               , 1          &
+               , MSHR_SVD_WORK, MSHR_SVD_LWORK, MSHR_SVD_INFO)
+# else
+            call dsyev('V', 'L', &
+               NNODESL, S_uvw_w2(:, :, ifj), NNODESL, D_S_uvw_w2(:, ifj), &
+                  MSHR_SVD_WORK, MSHR_SVD_LWORK, MSHR_SVD_INFO)
+# endif
+            if (MSHR_SVD_INFO /= 0) then
+               print '(1x, a, a, i0)', &
+                  ERRMSG, 'Error applying SVD to S_uvw_w2. Exit code  ', MSHR_SVD_INFO
+               call bsa_Abort()
+            endif
+            !$omp end critical
+         
+            if (do_trunc_POD_) npodw2(ifj) = getNPODModesByThreshold_(D_S_uvw_w2(:, ifj), POD_trunc_lim_)
+         enddo ! nfj
+
+
+! __BSA_USE_CACHED_POD_DATA  not defined
+#else
+
+
          !
          ! NODAL WIND TURBULENCEs PSDs (for given tc)
          !
          S_uvw_w1(:, 1:1) = &
-            reshape(wd%evalPSD(1, fi_,   NNODESL, struct_data%n_load_, 1, tc), [NNODESL, 1])
+            reshape(wd%evalPSD(1, fi,   NNODESL, struct_data%n_load_, 1, tc), [NNODESL, 1])
          S_uvw_w2(:, 1:1) = &
-            reshape(wd%evalPSD(1, fj_,   NNODESL, struct_data%n_load_, 1, tc), [NNODESL, 1])
-         S_uvw_w1w2(:, 1:1) = &
-            reshape(wd%evalPSD(1, fiPfj, NNODESL, struct_data%n_load_, 1, tc), [NNODESL, 1])
+            reshape(wd%evalPSD(1, fj,   NNODESL, struct_data%n_load_, 1, tc), [NNODESL, 1])
 
 #ifdef __BSA_CHECK_NOD_COH_SVD
          if (itc == 1) then
-            write(5482, *) fj_
+            write(5482, *) fj
             do nmw1 = 1, NNODESL
                write(5482, *) S_uvw_w2(nmw1, 1)
             enddo
@@ -506,9 +657,8 @@ contains
          !
          ! applying spatial nodal coherence
          !
-         S_uvw_w1   = wd%getFullNodalPSD(NNODESL, struct_data%n_load_, S_uvw_w1(:, 1),      fi, 1)
-         S_uvw_w2   = wd%getFullNodalPSD(NNODESL, struct_data%n_load_, S_uvw_w2(:, 1),      fj, 1)
-         S_uvw_w1w2 = wd%getFullNodalPSD(NNODESL, struct_data%n_load_, S_uvw_w1w2(:, 1), fiPfj(1), 1)
+         S_uvw_w1 = wd%getFullNodalPSD(NNODESL, struct_data%n_load_, S_uvw_w1(:, 1), fi(1), 1)
+         S_uvw_w2 = wd%getFullNodalPSD(NNODESL, struct_data%n_load_, S_uvw_w2(:, 1), fj(1), 1)
 
 #ifdef __BSA_CHECK_NOD_COH_SVD
          if (itc == 1) then
@@ -538,7 +688,8 @@ contains
          )
 #else
          call dsyev('V', 'L', &
-            NNODESL, S_uvw_w1, NNODESL, D_S_uvw_w1, MSHR_SVD_WORK, MSHR_SVD_LWORK, MSHR_SVD_INFO)
+            NNODESL, S_uvw_w1, NNODESL, D_S_uvw_w1, &
+               MSHR_SVD_WORK, MSHR_SVD_LWORK, MSHR_SVD_INFO)
 #endif
          if (MSHR_SVD_INFO /= 0) then
             print '(1x, a, a, i0)', &
@@ -573,6 +724,7 @@ contains
                ERRMSG, 'Error applying SVD to S_uvw_w2. Exit code  ', MSHR_SVD_INFO
             call bsa_Abort()
          endif
+         !$omp end critical
 
 #ifdef __BSA_CHECK_NOD_COH_SVD
          if (itc == 1) then
@@ -584,6 +736,48 @@ contains
          endif
 #endif
 
+
+! __BSA_USE_CACHED_POD_DATA
+#endif
+
+
+
+
+#ifdef __BSA_USE_CACHED_POD_DATA
+   if (.not. do_trunc_POD_) then
+      if (nPODmodes_set_) then
+         nmw1 = nmodes_POD_
+         nmw2 = nmodes_POD_
+      else
+         nmw1 = NNODESL
+         nmw2 = NNODESL
+      endif
+   endif
+
+   do ifi = 1, nfi_
+      
+      D_S_uvw_w1_ptr => D_S_uvw_w1(:, ifi)
+      S_uvw_w1_ptr   => S_uvw_w1(:, :, ifi)
+      if (do_trunc_POD_) nmw1 = npodw1(ifi)
+
+      fi_ = fi(ifi)
+
+      do ifj = 1, nfj_
+
+         D_S_uvw_w2_ptr => D_S_uvw_w2(:, ifj)
+         S_uvw_w2_ptr   => S_uvw_w2(:, :, ifj)
+         if (do_trunc_POD_) nmw2 = npodw2(ifj)
+
+         fiPfj_(1) = fi_ + fj(ifj)
+#else
+         fiPfj_(1) = fi(1) + fj(1)
+#endif
+
+         S_uvw_w1w2(:, 1:1) = &
+            reshape(wd%evalPSD(1, fiPfj_, NNODESL, struct_data%n_load_, 1, tc), [NNODESL, 1])
+         S_uvw_w1w2 = wd%getFullNodalPSD(NNODESL, struct_data%n_load_, S_uvw_w1w2(:, 1), fiPfj_(1), 1)
+
+         !$omp critical
 #ifdef BSA_USE_SVD_METHOD__
          call dgesvd(&
               'O' &             ! min(M,N) columns of U are overwritten on array A (saves memory)
@@ -603,7 +797,8 @@ contains
          )
 #else
          call dsyev('V', 'L', &
-            NNODESL, S_uvw_w1w2, NNODESL, D_S_uvw_w1w2, MSHR_SVD_WORK, MSHR_SVD_LWORK, MSHR_SVD_INFO)
+            NNODESL, S_uvw_w1w2, NNODESL, D_S_uvw_w1w2, &
+               MSHR_SVD_WORK, MSHR_SVD_LWORK, MSHR_SVD_INFO)
 #endif
          if (MSHR_SVD_INFO /= 0) then
             print '(1x, a, a, i0)', &
@@ -614,50 +809,29 @@ contains
 
          
 #ifdef __BSA_CHECK_NOD_COH_SVD
-         return
+         goto 99
 #endif
 
 
          if (do_trunc_POD_) then
-            nmw1 = 1
-            if (.not. all(D_S_uvw_w1 == D_S_uvw_w1(1))) then
-               tmpn = POD_trunc_lim_ * D_S_uvw_w1(1)
-               nmw1 = 2
-               do while (D_S_uvw_w1(nmw1) >= tmpn)
-                  nmw1 = nmw1 + 1
-               enddo
-               nmw1 = nmw1 - 1
-            endif
-
-            nmw2 = 1
-            if (.not. all(D_S_uvw_w2 == D_S_uvw_w2(1))) then
-               tmpn = POD_trunc_lim_ * D_S_uvw_w2(1)
-               nmw2 = 2
-               do while (D_S_uvw_w2(nmw2) >= tmpn)
-                  nmw2 = nmw2 + 1
-               enddo
-               nmw2 = nmw2 - 1
-            endif
-
-            nmw1w2 = 1
-            if (.not. all(D_S_uvw_w1w2 == D_S_uvw_w1w2(1))) then
-               tmpn = POD_trunc_lim_ * D_S_uvw_w1w2(1)
-               nmw1w2 = 2
-               do while (D_S_uvw_w1w2(nmw1w2) >= tmpn)
-                  nmw1w2 = nmw1w2 + 1
-               enddo
-               nmw1w2 = nmw1w2 - 1
-            endif
-
+#ifndef __BSA_USE_CACHED_POD_DATA
+            nmw1   = getNPODModesByThreshold_(D_S_uvw_w1, POD_trunc_lim_)
+            nmw2   = getNPODModesByThreshold_(D_S_uvw_w2, POD_trunc_lim_)
+#endif
+            nmw1w2 = getNPODModesByThreshold_(D_S_uvw_w1w2, POD_trunc_lim_)
          else
             if (nPODmodes_set_) then
+#ifndef __BSA_USE_CACHED_POD_DATA
                nmw1   = nmodes_POD_
                nmw2   = nmodes_POD_
+#endif
                nmw1w2 = nmodes_POD_
             else
+#ifndef __BSA_USE_CACHED_POD_DATA
                nmw1   = NNODESL
-               nmw2   = nmw1
-               nmw1w2 = nmw2
+               nmw2   = NNODESL
+#endif
+               nmw1w2 = NNODESL
             endif
          endif
 
@@ -666,9 +840,10 @@ contains
          if (itc == 1 .and. do_export_POD_trunc_(__export_POD_trunc_id__)) then
             !$omp critical
             write(iun_POD_trunc_) int(__export_POD_trunc_id__, kind=int32)
+            write(iun_POD_trunc_) size(fj)
             write(iun_POD_trunc_) real(fj, kind=real64)
             write(iun_POD_trunc_) int(size(D_S_uvw_w2), kind=int32)
-            write(iun_POD_trunc_) D_S_uvw_w2(:)
+            write(iun_POD_trunc_) D_S_uvw_w2
             !$omp end critical
          endif
          ! NOTE: we could place a barrier ?
@@ -682,7 +857,7 @@ contains
          do p = NNODESL, NNODESL-(nmw1-1), -1
 #endif
 
-            eigvp(:, 1) = S_uvw_w1(:, p)
+            eigvp(:, 1) = __EGVT_w1(:, p)
 
             ! V_lin_w1
             ! tmpm1 = matmul(wd%phi_times_A_ndegw_(:, :, tc), eigvp)
@@ -692,7 +867,7 @@ contains
 
 
             ! D_p_w1
-            tmpDp = D_S_uvw_w1(p)
+            tmpDp = __EGVL_w1(p)
 
 
             ! 5-2-2 (6-3-3, 7-4-4)
@@ -702,7 +877,7 @@ contains
             do q = NNODESL, NNODESL-(nmw2-1), -1
 #endif
 
-               eigvq(:, 1) = S_uvw_w2(:, q)
+               eigvq(:, 1) = __EGVT_w2(:, q)
 
                ! VZ_quad_w1w2
                tmpm2 = matmul(wd%phi_times_A_ndegw_(:, :, tcP3), eigvp * eigvq)
@@ -711,7 +886,7 @@ contains
                tmpm3 = matmul(wd%phi_times_A_ndegw_(:, :, tc), eigvq)
 
                ! T_q_w2
-               tmpTq = D_S_uvw_w2(q)
+               tmpTq = __EGVL_w2(q)
 
 
                posm = 1
@@ -725,7 +900,7 @@ contains
 
                      do m = 1, NMODES_EFF
 
-                        bfm(posm) = bfm(posm) + &
+                        bfm(posm, posf) = bfm(posm, posf) + &
                            (2 * tmpm2(m, 1) * &
                               tmpn * &
                               tmpo * tmpDp * tmpTq)
@@ -770,7 +945,7 @@ contains
 
                      do m = 1, NMODES_EFF
 
-                        bfm(posm) = bfm(posm) + &
+                        bfm(posm, posf) = bfm(posm, posf) + &
                            (2 * tmpm2(m, 1) * &
                               tmpn * &
                               tmpo * tmpDp * tmpTq)
@@ -806,7 +981,7 @@ contains
             do q = NNODESL, NNODESL-(nmw2-1), -1
 #endif
 
-               eigvq(:, 1) = S_uvw_w2(:, q)
+               eigvq(:, 1) = __EGVT_w2(:, q)
 
                ! Z_lin_w2
                tmpm2 = matmul(wd%phi_times_A_ndegw_(:, :, tc), eigvq)
@@ -814,7 +989,7 @@ contains
                ! VZ_quad_w1w2w2
                tmpm3 = matmul(wd%phi_times_A_ndegw_(:, :, tcP3), eigvp * eigvq)
 
-               tmpTq = D_S_uvw_w2(q)
+               tmpTq = __EGVL_w2(q)
 
                posm = 1
                do o = 1, NMODES_EFF
@@ -827,7 +1002,7 @@ contains
 
                      do m = 1, NMODES_EFF
 
-                        bfm(posm) = bfm(posm) + &
+                        bfm(posm, posf) = bfm(posm, posf) + &
                            (2 * tmpm1(m, 1) * &
                               tmpn * &
                               tmpo * tmpDp * tmpTq)
@@ -839,6 +1014,14 @@ contains
 
             enddo ! q = 1, nmw2
          enddo ! p = 1, nmw1w2
+
+
+#ifdef __BSA_USE_CACHED_POD_DATA
+         posf = posf + 1
+      enddo ! nfj_
+   enddo ! nfi_
+#endif
+
 
       enddo ! itc = 1, NTCOMPS
 
@@ -853,6 +1036,8 @@ contains
       ! write(4384, '(g)') bfm
       ! write(4384, *) ''
       ! !$omp end critical
+
+      99 return
    end function getFM_full_tm_scalar_msh_POD_
 
 
@@ -865,12 +1050,14 @@ contains
 
 
 
-   module function getRM_full_scalar_msh_(bfm, fi, fj) result(brm)
-      real(bsa_real_t), intent(in) :: bfm(dimM_bisp_), fi, fj
-      real(bsa_real_t) :: brm(dimM_bisp_)
+   module function getRM_full_scalar_msh_(fi, fj, bfm) result(brm)
+      real(bsa_real_t), intent(in), contiguous :: fi(:), fj(:)
+      real(bsa_real_t), intent(in) :: bfm(dimM_bisp_, size(fi)*size(fj))
+      real(bsa_real_t) :: brm(dimM_bisp_, size(fi)*size(fj))
 
+      integer(int32)   :: i, j
       real(bsa_real_t) :: wi, wj, wiPwj
-      integer(int32)   :: posm, imk, imj, imi
+      integer(int32)   :: posm, posf, imk, imj, imi
 
       real(bsa_real_t), dimension(NMODES_EFF) :: Cdiag, rpart, ipart, htmp
       real(bsa_real_t), dimension(NMODES_EFF) :: H1r, H1i
@@ -879,64 +1066,74 @@ contains
 
       real(bsa_real_t) :: H12k_r, H12k_i, H2j_r, H2j_i
 
-      wi    = fi * CST_PIt2
-      wj    = fj * CST_PIt2
-      wiPwj = wi + wj
+
+      posf = 1
+      do i = 1, size(fi)
+
+         wi = fi(i) * CST_PIt2
+
+         do j = 1, size(fj)
+
+            wj    = fj(j) * CST_PIt2
+            wiPwj = wi + wj
 
 
-      ! pre evaluate TFs (per mode)
+            ! pre evaluate TFs (per mode)
 
-      ! H1
-      rpart = - (wi*wi * struct_data%modal_%Mm_(MODES)) + struct_data%modal_%Km_(MODES)
-      do imi = 1, NMODES_EFF
-         Cdiag(imi) = struct_data%modal_%Cm_(MODES(imi), MODES(imi))
-      enddo
-      ipart = Cdiag * wi
-      htmp  = rpart*rpart + ipart*ipart
-      H1r   =   rpart / htmp
-      H1i   = - ipart / htmp
-
-      ! H2
-      rpart = - (wj*wj * struct_data%modal_%Mm_(MODES)) + struct_data%modal_%Km_(MODES)
-      ipart = Cdiag * wj
-      htmp  = rpart*rpart + ipart*ipart
-      H2r   =   rpart / htmp
-      H2i   = - ipart / htmp
-
-
-      ! H12
-      rpart = - (wiPwj*wiPwj * struct_data%modal_%Mm_(MODES)) + struct_data%modal_%Km_(MODES)
-      ipart = Cdiag * wiPwj
-      htmp  = rpart*rpart + ipart*ipart
-      H12r  =   rpart / htmp
-      H12i  = - ipart / htmp
-
-      posm = 1
-      do imk = 1, NMODES_EFF
-
-         H12k_r = H12r(imk)
-         H12k_i = H12i(imk)
-
-         do imj = 1, NMODES_EFF
-
-            H2j_r = H2r(imj)
-            H2j_i = H2i(imj)
-
+            ! H1
+            rpart = - (wi*wi * struct_data%modal_%Mm_(MODES)) + struct_data%modal_%Km_(MODES)
             do imi = 1, NMODES_EFF
+               Cdiag(imi) = struct_data%modal_%Cm_(MODES(imi), MODES(imi))
+            enddo
+            ipart = Cdiag * wi
+            htmp  = rpart*rpart + ipart*ipart
+            H1r   =   rpart / htmp
+            H1i   = - ipart / htmp
 
-               brm(posm) = bfm(posm) * &
-                  (&
-                     H1r(imi) * H2j_r * H12k_r + &
-                     H1r(imi) * H2j_i * H12k_i + &
-                     H1i(imi) * H2j_r * H12k_i - &
-                     H1i(imi) * H2j_i * H12k_r   &
-                  )
+            ! H2
+            rpart = - (wj*wj * struct_data%modal_%Mm_(MODES)) + struct_data%modal_%Km_(MODES)
+            ipart = Cdiag * wj
+            htmp  = rpart*rpart + ipart*ipart
+            H2r   =   rpart / htmp
+            H2i   = - ipart / htmp
 
-               posm = posm + 1
-            enddo ! imi
-         enddo ! imj
-      enddo ! imk
 
+            ! H12
+            rpart = - (wiPwj*wiPwj * struct_data%modal_%Mm_(MODES)) + struct_data%modal_%Km_(MODES)
+            ipart = Cdiag * wiPwj
+            htmp  = rpart*rpart + ipart*ipart
+            H12r  =   rpart / htmp
+            H12i  = - ipart / htmp
+
+            posm = 1
+            do imk = 1, NMODES_EFF
+
+               H12k_r = H12r(imk)
+               H12k_i = H12i(imk)
+
+               do imj = 1, NMODES_EFF
+
+                  H2j_r = H2r(imj)
+                  H2j_i = H2i(imj)
+
+                  do imi = 1, NMODES_EFF
+
+                     brm(posm, posf) = bfm(posm, posf) * &
+                        (&
+                           H1r(imi) * H2j_r * H12k_r + &
+                           H1r(imi) * H2j_i * H12k_i + &
+                           H1i(imi) * H2j_r * H12k_i - &
+                           H1i(imi) * H2j_i * H12k_r   &
+                        )
+
+                     posm = posm + 1
+                  enddo ! imi
+               enddo ! imj
+            enddo ! imk
+
+            posf = posf + 1
+         enddo
+      enddo
    end function getRM_full_scalar_msh_
 
 
@@ -950,8 +1147,8 @@ contains
 
 
    module function getFM_diag_tnm_scalar_msh_(fi, fj) result(bfm)
-      real(bsa_real_t), intent(in) :: fi, fj
-      real(bsa_real_t) :: bfm(dimM_bisp_)
+      real(bsa_real_t), intent(in), contiguous :: fi(:), fj(:)
+      real(bsa_real_t) :: bfm(dimM_bisp_, size(fi)*size(fj))
 
       real(bsa_real_t) :: fiPfj(1)
 
@@ -971,16 +1168,16 @@ contains
 
       bfm = 0._bsa_real_t
 
-      fiPfj(1) = fi + fj
+      fiPfj(1) = fi(1) + fj(1)
 
       do itc = 1, NTCOMPS
 
          tc   = wd%tc_(itc)
          tcP3 = tc + 3      ! quadratic term coeff
 
-         Suvw_fi = wd%evalPSD(1, [fi], NNODESL, struct_data%n_load_, 1, tc)
+         Suvw_fi = wd%evalPSD(1, fi, NNODESL, struct_data%n_load_, 1, tc)
 
-         Suvw_fj = wd%evalPSD(1, [fj], NNODESL, struct_data%n_load_, 1, tc)
+         Suvw_fj = wd%evalPSD(1, fj, NNODESL, struct_data%n_load_, 1, tc)
 
          Suvw_fiPfj = wd%evalPSD(1, fiPfj, NNODESL, struct_data%n_load_, 1, tc)
 
@@ -1031,7 +1228,7 @@ contains
                posm = 1
                do imode = 1, NMODES_EFF
 
-                  bfm(posm) = bfm(posm) + &
+                  bfm(posm, 1) = bfm(posm, 1) + &
                      sum( &
                         BF_ijk_I * &
                            (matmul(phi_(:, imode:imode), transpose(phi_(:, imode:imode))) &
@@ -1049,10 +1246,12 @@ contains
 
 
 
-   module function getRM_diag_scalar_msh_(bfm, fi, fj) result(brm)
-      real(bsa_real_t), intent(in) :: bfm(dimM_bisp_), fi, fj
-      real(bsa_real_t) :: brm(dimM_bisp_)
+   module function getRM_diag_scalar_msh_(fi, fj, bfm) result(brm)
+      real(bsa_real_t), intent(in), contiguous :: fi(:), fj(:)
+      real(bsa_real_t), intent(in) :: bfm(dimM_bisp_, size(fi)*size(fj))
+      real(bsa_real_t) :: brm(dimM_bisp_, size(fi)*size(fj))
 
+      integer(int32)     :: i, j, posf
       real(bsa_real_t)   :: wi, wj, wiPwj
       integer(bsa_int_t) :: imi
 
@@ -1061,45 +1260,53 @@ contains
       real(bsa_real_t), dimension(NMODES_EFF) :: H2r, H2i
       real(bsa_real_t), dimension(NMODES_EFF) :: H12r, H12i
 
+      posf = 1
+      do i = 1, size(fi)
 
-      wi = fi * CST_PIt2
-      wj = fj * CST_PIt2
-      wiPwj = wi + wj
+         wi = fi(i) * CST_PIt2
+
+         do j = 1, size(fj)
+
+            wj    = fj(j) * CST_PIt2
+            wiPwj = wi + wj
+
+            ! pre evaluate TFs (per mode)
+
+            ! H1
+            rpart = - (wi*wi * struct_data%modal_%Mm_(MODES)) + struct_data%modal_%Km_(MODES)
+            do imi = 1, NMODES_EFF
+               Cdiag(imi) = struct_data%modal_%Cm_(MODES(imi), MODES(imi))
+            enddo
+            ipart = Cdiag * wi
+            htmp  = rpart*rpart + ipart*ipart
+            H1r   =   rpart / htmp
+            H1i   = - ipart / htmp
+
+            ! H2
+            rpart = - (wj*wj * struct_data%modal_%Mm_(MODES)) + struct_data%modal_%Km_(MODES)
+            ipart = Cdiag * wj
+            htmp  = rpart*rpart + ipart*ipart
+            H2r   =   rpart / htmp
+            H2i   = - ipart / htmp
 
 
-      ! pre evaluate TFs (per mode)
+            ! H12
+            rpart  = - (wiPwj*wiPwj * struct_data%modal_%Mm_(MODES)) + struct_data%modal_%Km_(MODES)
+            ipart  = Cdiag * wiPwj
+            htmp   = rpart*rpart + ipart*ipart
+            H12r   =   rpart / htmp
+            H12i   = - ipart / htmp
 
-      ! H1
-      rpart = - (wi*wi * struct_data%modal_%Mm_(MODES)) + struct_data%modal_%Km_(MODES)
-      do imi = 1, NMODES_EFF
-         Cdiag(imi) = struct_data%modal_%Cm_(MODES(imi), MODES(imi))
+            brm(:, posf) = bfm(:, posf) * (&
+               H1r * H2r * H12r + &
+               H1r * H2i * H12i + &
+               H1i * H2r * H12i - &
+               H1i * H2i * H12r   &
+            )
+
+            posf = posf + 1
+         enddo
       enddo
-      ipart = Cdiag * wi
-      htmp  = rpart*rpart + ipart*ipart
-      H1r   =   rpart / htmp
-      H1i   = - ipart / htmp
-
-      ! H2
-      rpart = - (wj*wj * struct_data%modal_%Mm_(MODES)) + struct_data%modal_%Km_(MODES)
-      ipart = Cdiag * wj
-      htmp  = rpart*rpart + ipart*ipart
-      H2r   =   rpart / htmp
-      H2i   = - ipart / htmp
-
-
-      ! H12
-      rpart  = - (wiPwj*wiPwj * struct_data%modal_%Mm_(MODES)) + struct_data%modal_%Km_(MODES)
-      ipart  = Cdiag * wiPwj
-      htmp   = rpart*rpart + ipart*ipart
-      H12r   =   rpart / htmp
-      H12i   = - ipart / htmp
-
-      brm = bfm * (&
-         H1r * H2r * H12r + &
-         H1r * H2i * H12i + &
-         H1i * H2r * H12i - &
-         H1i * H2i * H12r   &
-      )
 
    end function getRM_diag_scalar_msh_
 

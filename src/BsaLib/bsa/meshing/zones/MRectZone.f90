@@ -173,7 +173,6 @@ module BsaLib_MRectZone
 
          !> Refinements
          integer, value :: ni, nj
-!DIR$ ATTRIBUTES VALUE :: ni, nj
       end subroutine
 
 
@@ -345,16 +344,24 @@ module BsaLib_MRectZone
       end subroutine
 
 
+#if (defined(__BSA_USE_CACHED_POD_DATA)) || (defined(_OPENMP))
+# define __new_interp_proc__
+#endif
 
       !> Implementation of rect zone interpolation methods
       module subroutine interpolateRZ( this &
-#ifdef __BSA_OMP
-         , bfm, pdata &
+#ifdef __new_interp_proc__
+# ifndef __BSA_USE_CACHED_POD_DATA
+      & , bfm   &
+# endif
+      & , pdata &
 #endif
          & )
          class(MRectZone_t), intent(inout) :: this
-#ifdef __BSA_OMP
+#ifdef __new_interp_proc__
+# ifndef __BSA_USE_CACHED_POD_DATA
          real(bsa_real_t), intent(in) :: bfm(:, :)
+# endif
          class(*), pointer, intent(in) :: pdata
 #endif
       end subroutine

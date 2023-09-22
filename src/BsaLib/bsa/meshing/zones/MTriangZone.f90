@@ -239,16 +239,24 @@ module BsaLib_MTriangZone
       end subroutine
 
 
+#if (defined(__BSA_USE_CACHED_POD_DATA)) || (defined(_OPENMP))
+# define __new_interp_proc__
+#endif
 
       !> Implementation of triang zone interpolation methods
       module subroutine interpolateTZ( this &
-#ifdef __BSA_OMP
-         , bfm, pdata &
+#ifdef __new_interp_proc__
+# ifndef __BSA_USE_CACHED_POD_DATA
+         & , bfm   &
+# endif
+         & , pdata &
 #endif
          & )
          class(MTriangZone_t), intent(inout) :: this
-#ifdef __BSA_OMP
+#ifdef __new_interp_proc__
+# ifndef __BSA_USE_CACHED_POD_DATA
          real(bsa_real_t), intent(in)  :: bfm(:, :)
+# endif
          class(*), pointer, intent(in) :: pdata
 #endif
       end subroutine

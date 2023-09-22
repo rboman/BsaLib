@@ -55,11 +55,7 @@ module BsaLib_Data
    logical :: do_export_brm_ = .false.
    integer(bsa_int_t) :: i_brmexport_mode_ = BSA_EXPORT_BRM_MODE_BASE
    character(len = *), parameter :: brm_export_file_name_ = 'bsaexport.brm'
-#ifdef __BSA_OMP
-   procedure(exportBRMinterf_vect_all_), pointer :: write_brm_fptr_  => null()
-#else
-   procedure(exportBRMinterf_scalar_),   pointer :: write_brm_fptr_  => null()
-#endif
+   procedure(exportBRMinterf_vect_), pointer :: write_brm_fptr_  => null()
    type, public :: BrmExportBaseData_t
       
       integer(bsa_int_t) :: i_doNotPrintGenHeader_ = 0   ! == 0  means DO PRINT !!
@@ -146,7 +142,7 @@ module BsaLib_Data
    !
    real(bsa_real_t), pointer :: m3mf_msh_ptr_(:) => null(), m3mr_msh_ptr_(:) => null()
 
-#ifndef __BSA_OMP
+#ifndef _OPENMP
    !> Shared instance of undumped BFM.
    !> It holds the max N. of points of all the dumped zones, so that no overflows occur.
    real(bsa_real_t), allocatable :: bfm_undump(:, :)
@@ -208,17 +204,17 @@ module BsaLib_Data
    procedure(getMshBFM), pointer :: getBFM_msh => null()
    procedure(getMshBRM), pointer :: getBRM_msh => null()
    abstract interface
-      function getMshBFM(fi, fj) result(vals)
+      function getMshBFM(fi, fj) result(bfm)
          import bsa_real_t, dimM_bisp_
-         real(bsa_real_t), intent(in) :: fi, fj
-         real(bsa_real_t) :: vals(dimM_bisp_)
+         real(bsa_real_t), intent(in), contiguous :: fi(:), fj(:)
+         real(bsa_real_t) :: bfm(dimM_bisp_, size(fi)*size(fj))
       end function
 
-      function getMshBRM(bfm, fi, fj) result(vals)
+      function getMshBRM(fi, fj, bfm) result(brm)
          import bsa_real_t, dimM_bisp_
-         real(bsa_real_t), intent(in) :: bfm(dimM_bisp_)
-         real(bsa_real_t), intent(in) :: fi, fj
-         real(bsa_real_t) :: vals(dimM_bisp_)
+         real(bsa_real_t), intent(in), contiguous :: fi(:), fj(:)
+         real(bsa_real_t), intent(in) :: bfm(dimM_bisp_, size(fi)*size(fj))
+         real(bsa_real_t) :: brm(dimM_bisp_, size(fi)*size(fj))
       end function
    end interface
 
