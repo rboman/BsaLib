@@ -64,12 +64,7 @@ module BsaLib_MZone
       procedure(intf_MZoneIntFct_),    pass, deferred :: zoneTotNPts
       procedure(intf_MZoneGenIn_),     pass, deferred :: dump
       procedure(intf_MZoneGenInOut_),  pass, deferred :: undump
-#if (defined(__BSA_USE_CACHED_POD_DATA)) || (defined(_OPENMP))
-# define __new_interp_proc__
-      procedure(intf_MZoneInterpOMP_), pass, deferred :: interpolate
-#else
-      procedure(intf_MZoneGenInOut_),  pass, deferred :: interpolate
-#endif
+      procedure(intf_MZoneInterp_),    pass, deferred :: interpolate
    end type MZone_t
 
 
@@ -91,21 +86,18 @@ module BsaLib_MZone
          class(MZone_t), intent(inout) :: this
       end subroutine
 
-#ifdef __new_interp_proc__
-      subroutine intf_MZoneInterpOMP_(this &
-# ifndef __BSA_USE_CACHED_POD_DATA
+      subroutine intf_MZoneInterp_(this &
+#ifndef __BSA_USE_CACHED_POD_DATA
          & , bfm &
-# endif
+#endif
          &, pdata)
          import MZone_t, bsa_real_t
          class(MZone_t), intent(inout) :: this
-# ifndef __BSA_USE_CACHED_POD_DATA
+#ifndef __BSA_USE_CACHED_POD_DATA
          real(bsa_real_t), intent(in)  :: bfm(:, :)
-# endif
+#endif
          class(*), pointer, intent(in) :: pdata
       end subroutine
-#undef __new_interp_proc__
-#endif
    end interface
 
 
@@ -214,28 +206,19 @@ contains
 
 #ifdef __BSA_USE_CACHED_POD_DATA
 # define __bfm_dump__
-# define __use_only__
 # define __decl__
 #else
-# ifdef _OPENMP
-#  define __bfm_dump__  ,bfm_undump
-#  define __use_only__ use BsaLib_Data, only: dimM_bisp_
-#  define __decl__ real(bsa_real_t), allocatable, intent(inout) :: bfm_undump(:, :)
-# else
-#  define __bfm_dump__
-#  define __use_only__ use BsaLib_Data, only: bfm_undump
-#  define __decl__
-# endif
+# define __bfm_dump__  ,bfm_undump
+# define __decl__ real(bsa_real_t), allocatable, intent(inout) :: bfm_undump(:, :)
 #endif
    subroutine UndumpZone(z  __bfm_dump__ )
-      __use_only__
+      use BsaLib_Data, only: dimM_bisp_
       class(MZone_t), intent(inout) :: z
       __decl__
       character(len = 64) :: name_hdr
       integer(int32)      :: zNp
 
 #undef __bfm_dump__
-#undef __use_only__
 #undef __decl__
 
       call z%undump()  ! read zone's specific data first
@@ -283,6 +266,7 @@ contains
    elemental pure subroutine disableZonePolicyBfmMLR(z)
       class(MZone_t), intent(inout) :: z
 
+      z%policy_%n_interp_bfm_lvs_ = 0
       z%policy_%interp_bfm_I_fct_ = 1
       z%policy_%interp_bfm_J_fct_ = 1
    end subroutine

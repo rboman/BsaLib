@@ -763,31 +763,31 @@ contains
 
 
 
-   !> Avoid setting a delta smaller than given limit
-   module elemental impure subroutine validateDeltas(this, lval)
-      class(MRectZone_t), intent(inout) :: this
-      real(bsa_real_t), intent(in) :: lval
+   ! !> Avoid setting a delta smaller than given limit
+   ! module elemental impure subroutine validateDeltas(this, lval)
+   !    class(MRectZone_t), intent(inout) :: this
+   !    real(bsa_real_t), intent(in) :: lval
 
-      real(bsa_real_t) :: dfi, dfj
-      logical :: coarsen = .false.
+   !    real(bsa_real_t) :: dfi, dfj
+   !    logical :: coarsen = .false.
 
-      dfi = this%deltaf_I_
-      dfj = this%deltaf_J_
-      if (dfi < lval .or. dfi > lval) then
-         dfi     = lval
-         coarsen = .true.
-      endif
-      if (dfj < lval .or. dfj > lval) then
-         dfj     = lval
-         coarsen = .true.
-      endif
-      if (coarsen) then
-         print '( 1x, 2a, g10.5, " [Hz])." )', &
-            WARNMSG, 'Detected at least one zone deltas too  small/big. Setting to optimal value  (', &
-            lval
-         call this%setDeltas(dfi, dfj, .true.)
-      endif
-   end subroutine
+   !    dfi = this%deltaf_I_
+   !    dfj = this%deltaf_J_
+   !    if (dfi < lval .or. dfi > lval) then
+   !       dfi     = lval
+   !       coarsen = .true.
+   !    endif
+   !    if (dfj < lval .or. dfj > lval) then
+   !       dfj     = lval
+   !       coarsen = .true.
+   !    endif
+   !    if (coarsen) then
+   !       print '( 1x, 2a, g10.5, " [Hz])." )', &
+   !          WARNMSG, 'Detected at least one zone deltas too  small/big. Setting to optimal value  (', &
+   !          lval
+   !       call this%setDeltas(dfi, dfj, .true.)
+   !    endif
+   ! end subroutine
 
 
 
@@ -987,9 +987,9 @@ contains
    !> Gets actualised frequency deltas along two main
    !> sides directions (I, J), actualised based on *this
    !> zone rotation w.r.t. GRS.
-   module subroutine getIJfsteps(this, dfIx, dfIy, dfJx, dfJy)
+   module subroutine getIJfsteps(this, dfIi, dfIj, dfJi, dfJj)
       class(MRectZone_t), intent(in) :: this
-      real(bsa_real_t), intent(out)  :: dfIx, dfIy, dfJx, dfJy
+      real(bsa_real_t), intent(out)  :: dfIi, dfIj, dfJi, dfJj
 
       real(bsa_real_t) :: c, s, ang
 
@@ -998,11 +998,11 @@ contains
          c = cos(this%rot_)
          s = sin(this%rot_)
 
-         dfIx =   this%deltaf_I_ * c
-         dfIy = - this%deltaf_I_ * s
+         dfIi =   this%deltaf_I_ * c
+         dfIj = - this%deltaf_I_ * s
 
-         dfJx = this%deltaf_J_ * s
-         dfJy = this%deltaf_J_ * c
+         dfJi = this%deltaf_J_ * s
+         dfJj = this%deltaf_J_ * c
 
       elseif (this%rot_ < CST_PIGREC) then ! SECOND quadrant
 
@@ -1010,11 +1010,11 @@ contains
          c   = cos(ang)
          s   = sin(ang)
 
-         dfIx = - this%deltaf_I_ * s
-         dfIy = - this%deltaf_I_ * c
+         dfIi = - this%deltaf_I_ * c   ! - this%deltaf_I_ * s
+         dfIj = - this%deltaf_I_ * s   ! - this%deltaf_I_ * c
 
-         dfJx =   this%deltaf_J_ * c
-         dfJy = - this%deltaf_J_ * s
+         dfJi = - this%deltaf_J_ * s   !   this%deltaf_J_ * c
+         dfJj =   this%deltaf_J_ * c   ! - this%deltaf_J_ * s
 
       elseif (this%rot_ < CST_PIt3d2) then ! THIRD quadrant
 
@@ -1022,11 +1022,11 @@ contains
          c   = cos(ang)
          s   = sin(ang)
 
-         dfIx = - this%deltaf_I_ * c
-         dfIy =   this%deltaf_I_ * s
+         dfIi = - this%deltaf_I_ * c
+         dfIj =   this%deltaf_I_ * s
 
-         dfJx = - this%deltaf_J_ * s
-         dfJy = - this%deltaf_J_ * c
+         dfJi = - this%deltaf_J_ * s
+         dfJj = - this%deltaf_J_ * c
 
       elseif (this%rot_ < CST_PIt2) then ! FOURTH quadrant
 
@@ -1034,11 +1034,11 @@ contains
          c   = cos(ang)
          s   = sin(ang)
 
-         dfIx = this%deltaf_I_ * s
-         dfIy = this%deltaf_I_ * c
+         dfIi =   this%deltaf_I_ * c   ! this%deltaf_I_ * s
+         dfIj =   this%deltaf_I_ * s   ! this%deltaf_I_ * c
 
-         dfJx = - this%deltaf_J_ * c
-         dfJy =   this%deltaf_J_ * s
+         dfJi =   this%deltaf_J_ * s   ! - this%deltaf_J_ * c
+         dfJj = - this%deltaf_J_ * c   !   this%deltaf_J_ * s
 
       endif
    end subroutine
@@ -1049,50 +1049,50 @@ contains
 
 
 
-   module function reconstructZoneBaseMesh(this) result(msh)
-      class(MRectZone_t), intent(in) :: this
-      !> BUG: might be 2-rank array instead of 3!
-      real(bsa_real_t) :: msh(2, this%nj_, this%ni_)
+   ! module function reconstructZoneBaseMesh(this) result(msh)
+   !    class(MRectZone_t), intent(in) :: this
+   !    !> BUG: might be 2-rank array instead of 3!
+   !    real(bsa_real_t) :: msh(2, this%nj_, this%ni_)
 
-      real(bsa_real_t) :: dfIi, dfIj, dfJi, dfJj
-      real(bsa_real_t) :: base_fi, base_fj, fi, fj
-      integer(int32)   :: i, j
+   !    real(bsa_real_t) :: dfIi, dfIj, dfJi, dfJj
+   !    real(bsa_real_t) :: base_fi, base_fj, fi, fj
+   !    integer(int32)   :: i, j
 
-      call this%getIJfsteps(dfIi, dfIj, dfJi, dfJj)
+   !    call this%getIJfsteps(dfIi, dfIj, dfJi, dfJj)
 
-      fi = this%Ipt_%freqI()
-      fj = this%Ipt_%freqJ()
-      base_fi = fi
-      base_fj = fj
+   !    fi = this%Ipt_%freqI()
+   !    fj = this%Ipt_%freqJ()
+   !    base_fi = fi
+   !    base_fj = fj
 
-      msh(:, 1, 1) = [fj, fi]
+   !    msh(:, 1, 1) = [fj, fi]
 
-      ! internal lines
-      do j = 2, this%nj_
-         fi = fi + dfJi
-         fj = fj + dfJj
-         msh(:, j, 1) = [fj, fi]
-      enddo ! pj_head
+   !    ! internal lines
+   !    do j = 2, this%nj_
+   !       fi = fi + dfJi
+   !       fj = fj + dfJj
+   !       msh(:, j, 1) = [fj, fi]
+   !    enddo ! pj_head
 
       
-      ! internal columns
-      do i = 2, this%ni_
+   !    ! internal columns
+   !    do i = 2, this%ni_
 
-         base_fi = base_fi + dfIi
-         base_fj = base_fj + dfIj
+   !       base_fi = base_fi + dfIi
+   !       base_fj = base_fj + dfIj
 
-         fi = base_fi
-         fj = base_fj
+   !       fi = base_fi
+   !       fj = base_fj
 
-         msh(:, 1, i) = [fj, fi]
+   !       msh(:, 1, i) = [fj, fi]
 
-         do j = 2, this%nj_
-            fi = fi + dfJi
-            fj = fj + dfJj
-            msh(:, j, i) = [fj, fi]
-         enddo ! pj_head
-      enddo ! pi_head
-   end function 
+   !       do j = 2, this%nj_
+   !          fi = fi + dfJi
+   !          fj = fj + dfJj
+   !          msh(:, j, i) = [fj, fi]
+   !       enddo ! pj_head
+   !    enddo ! pi_head
+   ! end function 
 
 
 
@@ -1141,10 +1141,10 @@ contains
       block
 #ifndef __BSA_USE_CACHED_POD_DATA
          real(bsa_real_t) :: dfIi, dfIj, dfJi, dfJj
-         real(bsa_real_t) :: base_fi, base_fj, fi(1), fj(1)
+         real(bsa_real_t) :: base_fi, base_fj
+         real(bsa_real_t), target :: fi(1), fj(1)
 
-         integer(int32) :: niM1, njM1
-         integer(int32) :: i, j, idbfm, zNp
+         integer(int32) :: i, j, i_bfm, zNp
 
          real(bsa_real_t), allocatable :: bfm(:, :)
 
@@ -1152,6 +1152,12 @@ contains
          real(bsa_real_t) :: dwI, dwJ
          real(bsa_real_t) :: ctr_infl, brd_infl, vtx_infl
          real(bsa_real_t), allocatable :: intg(:)
+
+! #   define __local_debug_write__
+#   ifdef __local_debug_write__
+         integer(int32), save :: iun = 430000
+         real(bsa_real_t), allocatable :: fi_v_save_(:), fj_v_save_(:)
+#   endif
 # endif
 
          call this%getIJfsteps(dfIi, dfIj, dfJi, dfJj)
@@ -1166,13 +1172,11 @@ contains
          vtx_infl = brd_infl / 2
 
          allocate(intg(dimM_bisp_))
+#   ifdef __local_debug_write__
+         allocate(fi_v_save_(this%ni_))
+         allocate(fj_v_save_(this%nj_))
+#   endif
 # endif
-
-
-         ! get before last refmts indexes (along I and J dirs)
-         niM1 = this%ni_ - 1
-         njM1 = this%nj_ - 1
-
 
          ! allocate memory
          ! NOTE: but dimBISP as 1st dimensions, since
@@ -1189,13 +1193,31 @@ contains
          !
          base_fi = this%Ipt_%freqI()
          base_fj = this%Ipt_%freqJ()
+         block
+            real(bsa_real_t) :: rtmp
+   
+            if     (this%rot_ < CST_PId2)   then  ! < 90
+            elseif (this%rot_ < CST_PIGREC) then  ! < 180
+               rtmp    = base_fj
+               base_fj = base_fi
+               base_fi = rtmp
+            elseif (this%rot_ < CST_PIt3d2) then  ! < 270
+            elseif (this%rot_ < CST_PIt2)   then  ! < 360
+               rtmp    = base_fj
+               base_fj = base_fi
+               base_fi = rtmp
+            endif
+         end block
 
          fi(1) = base_fi
          fj(1) = base_fj
-
          bfm(:, 1:1) = getBFM_msh(fi, fj)
 # ifdef BSA_M3MF_ONLY_PREMESH_
-         intg(:) = bfm(:, 1) * vtx_infl
+         intg = bfm(:, 1) * vtx_infl
+#   ifdef __local_debug_write__
+         fi_v_save_(1) = fi(1)
+         fj_v_save_(1) = fj(1)
+#   endif
 # endif
 
 # ifdef __BSA_CHECK_NOD_COH_SVD
@@ -1203,26 +1225,26 @@ contains
 # endif
 
          ! internal lines
-         do j = 2, njM1
+         do j = 2, this%nj_
 
             fi(1) = fi(1) + dfJi
             fj(1) = fj(1) + dfJj
+
             bfm(:, j:j) = getBFM_msh(fi, fj)
 # ifdef BSA_M3MF_ONLY_PREMESH_
-            intg(:) = intg(:) + bfm(:, j) * brd_infl
+            intg = intg + bfm(:, j) * brd_infl
+#   ifdef __local_debug_write__
+            fj_v_save_(j) = fj(1)
+#   endif
 # endif
          enddo
 
-         ! BUG: handle in case 2 > njM1 ???
-         if (njM1 == 1 .and. (.not. j==2)) j = 2
+         i_bfm = this%nj_
 
-         fi(1) = fi(1) + dfJi
-         fj(1) = fj(1) + dfJj
-         bfm(:, j:j) = getBFM_msh(fi, fj)
+         ! removing excess integral
 # ifdef BSA_M3MF_ONLY_PREMESH_
-         intg(:) = intg(:) + bfm(:, j) * vtx_infl
+         intg = intg - bfm(:, i_bfm) * vtx_infl
 # endif
-         idbfm   = j + 1
 
 
 # ifdef __BSA_EXPORT_POD_TRUNC_INFO
@@ -1231,10 +1253,10 @@ contains
 # endif
 
 
-         !=========================================================
-         ! INTERNAL COLUMNS
+         ! *********************************************************
+         ! Moving along I dir
          !
-         do i = 2, niM1
+         do i = 2, this%ni_
 
             ! update base freqs moving along I local direction (X)
             base_fi = base_fi + dfIi
@@ -1242,97 +1264,76 @@ contains
             fi(1) = base_fi
             fj(1) = base_fj
 
-            bfm(:, idbfm:idbfm) = getBFM_msh(fi, fj)
+            i_bfm = i_bfm + 1
+            bfm(:, i_bfm:i_bfm) = getBFM_msh(fi, fj)
 # ifdef BSA_M3MF_ONLY_PREMESH_
-            intg(:) = intg(:) + bfm(:, idbfm) * brd_infl
+            intg = intg + bfm(:, i_bfm) * brd_infl
+#   ifdef __local_debug_write__
+            fi_v_save_(i) = fi(1)
+#   endif
 # endif
-            idbfm   = idbfm + 1
 
             ! internal lines
-            do j = 2, njM1
+            do j = 2, this%nj_
 
                fi(1) = fi(1) + dfJi
                fj(1) = fj(1) + dfJj
-               bfm(:, idbfm:idbfm) = getBFM_msh(fi, fj)
+
+               i_bfm = i_bfm + 1
+               bfm(:, i_bfm:i_bfm) = getBFM_msh(fi, fj)
 # ifdef BSA_M3MF_ONLY_PREMESH_
-               intg(:) = intg(:) + bfm(:, idbfm) * ctr_infl
+               intg = intg + bfm(:, i_bfm) * ctr_infl
 # endif
-               idbfm   = idbfm + 1
             enddo
 
-            ! last line
-            ! BUG: handle in case 2 > njM1 ???
-            if (njM1 == 1 .and. (.not. j==2)) j = 2
-
-            fi(1) = fi(1) + dfJi
-            fj(1) = fj(1) + dfJj
-            bfm(:, idbfm:idbfm) = getBFM_msh(fi, fj)
 # ifdef BSA_M3MF_ONLY_PREMESH_
-            intg(:) = intg(:) + bfm(:, idbfm) * brd_infl
+            intg = intg - bfm(:, i_bfm) * brd_infl
 # endif
-            idbfm   = idbfm + 1
-         enddo
+         enddo ! i = 2, this % ni_
 
-
-         !=========================================================
-         ! LAST COLUMN (from B to E)
-         !
-         ! BUG: handle in case 2 > niM1 ???
-         if (niM1 == 1 .and. (.not. i==2)) i = 2
-
-         base_fi = base_fi + dfIi
-         base_fj = base_fj + dfIj
-         fi(1) = base_fi
-         fj(1) = base_fj
-         ! first line
-         bfm(:, idbfm:idbfm) = getBFM_msh(fi, fj)
-# ifdef BSA_M3MF_ONLY_PREMESH_
-         intg(:) = intg(:) + bfm(:, idbfm) * vtx_infl
-# endif
-         idbfm   = idbfm + 1
-
-         ! internal lines
-         do j = 2, njM1
-            fi(1) = fi(1) + dfJi
-            fj(1) = fj(1) + dfJj
-            bfm(:, idbfm:idbfm) = getBFM_msh(fi, fj)
-# ifdef BSA_M3MF_ONLY_PREMESH_
-            intg(:) = intg(:) + bfm(:, idbfm) * brd_infl
-# endif
-            idbfm   = idbfm + 1
-         enddo
-
-         ! last line
-         ! BUG: handle in case 2 > njM1 ???
-         if (njM1 == 1 .and. (.not. j==2)) j = 2
-
-         fi(1) = fi(1) + dfJi
-         fj(1) = fj(1) + dfJj
-         bfm(:, idbfm:idbfm) = getBFM_msh(fi, fj)
-# ifdef BSA_M3MF_ONLY_PREMESH_
-         intg(:)       = intg(:) + bfm(:, idbfm) * vtx_infl
-# endif
 
 ! # ifdef __BSA_DEBUG
-         if (idbfm /= zNp) then
-            print *, 'idbfm , zNp  =  ', idbfm, zNp
-            call bsa_Abort('"idbfm" does not equally tot N of Rect zone''s points.')
+         if (i_bfm /= zNp) then
+            print *, 'i_bfm , zNp  =  ', i_bfm, zNp
+            call bsa_Abort('"i_bfm" does not equally tot N of Rect zone''s points.')
          endif
 ! # endif
+
+# ifdef BSA_M3MF_ONLY_PREMESH_
+         intg = intg - bfm(:, i_bfm - this%nj_ + 1) * vtx_infl
+         intg = intg - sum(bfm(:, i_bfm - this%nj_ + 1 : i_bfm-1) * brd_infl, dim=2)
+         intg = intg - bfm(:, i_bfm) * vtx_infl
+# endif
+
 
          !$omp critical
 # ifdef BSA_M3MF_ONLY_PREMESH_
          m3mf_msh_ptr_   = m3mf_msh_ptr_ + (intg * settings%i_bisp_sym_) ! update main integral
+
+#   ifdef __local_debug_write__
+         iun = iun + 1
+         write(iun, '(  (g) )') 0
+         write(iun, '(  (g) )') this%rot_ / CST_PIGREC * 180._bsa_real_t
+         write(iun, '( *(g, 2x) )') dfIi, dfIj
+         write(iun, '( *(g, 2x) )') fi_v_save_
+         write(iun, '( *(g, 2x) )') dfJi, dfJj
+         write(iun, '( *(g, 2x) )') fj_v_save_
+         block
+            integer :: i
+            do i = 1, zNp
+               write(iun, '( *(g, 2x) )')  bfm(:, i)
+            enddo
+         end block
+         deallocate(fi_v_save_)
+         deallocate(fj_v_save_)
+#   endif
 # endif
          msh_bfmpts_pre_ = msh_bfmpts_pre_ + zNp   ! update tot num of meshing points
          
          ! eventually, update zone with max N of points
          if (zNp > msh_max_zone_NPts) msh_max_zone_NPts = zNp
 
-
-! __BSA_USE_CACHED_POD_DATA  not defined
-#else
-
+#else  ! __BSA_USE_CACHED_POD_DATA  defined
          !$omp critical
 #endif
          msh_NZones = msh_NZones + 1            ! update n. of zones count
@@ -1541,30 +1542,22 @@ contains
 #endif
 
    module subroutine interpolateRZ( this &
-#ifdef __new_interp_proc__
-# ifndef __BSA_USE_CACHED_POD_DATA
+#ifndef __BSA_USE_CACHED_POD_DATA
+# define __bfm_undump__ bfm, 
       & , bfm &
-# endif
-      & , pdata &
+#else
+# define __bfm_undump__
 #endif
-      & )
+      & , pdata )
       !! Implementation of rect zone interpolation wrapper routine
       class(MRectZone_t), intent(inout) :: this
-#ifdef __new_interp_proc__
-# ifndef __BSA_USE_CACHED_POD_DATA
+#ifndef __BSA_USE_CACHED_POD_DATA
       real(bsa_real_t), intent(in)  :: bfm(:, :)
-# endif
+#endif
       class(*), pointer, intent(in) :: pdata
 
       ! NOTE: for the moment only supporting HTPC method
-      call interpolateRZ_HTPC_v3(this &
-# ifndef __BSA_USE_CACHED_POD_DATA
-         & , bfm   &
-# endif
-         & , pdata )
-#else
-      call interpolateRZ_HTPC_v3(this)
-#endif
+      call interpolateRZ_HTPC_v3(this, __bfm_undump__  pdata)
    end subroutine
 
 

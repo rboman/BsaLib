@@ -448,36 +448,36 @@ contains
       
 #ifdef __BSA_USE_CACHED_POD_DATA
 
-# define __EGVL_w1 D_S_uvw_w1_ptr
 # define __EGVL_w2 D_S_uvw_w2_ptr
-# define __EGVT_w1 S_uvw_w1_ptr
 # define __EGVT_w2 S_uvw_w2_ptr
 
       integer(int32)   :: nfi_, nfj_, ifi, ifj
       real(bsa_real_t) :: fi_
-      integer(int32), allocatable   :: npodw1(:), npodw2(:)
-      double precision, allocatable, target :: D_S_uvw_w1(:, :)
-      double precision, allocatable, target :: D_S_uvw_w2(:, :)
-      double precision, pointer     :: D_S_uvw_w1_ptr(:)
-      double precision, pointer     :: D_S_uvw_w2_ptr(:)
-      double precision, allocatable, target :: S_uvw_w1(:, :, :)
-      double precision, allocatable, target :: S_uvw_w2(:, :, :)
-      double precision, pointer     :: S_uvw_w1_ptr(:, :)
-      double precision, pointer     :: S_uvw_w2_ptr(:, :)
+      integer(int32), allocatable   :: npodw2(:)
+
+      double precision, allocatable, target  :: D_S_uvw_w2(:, :)
+      double precision,              pointer :: D_S_uvw_w2_ptr(:)
+
+      double precision, allocatable, target  :: S_uvw_w2(:, :, :)
+      double precision,              pointer :: S_uvw_w2_ptr(:, :)
 #else
 
-# define __EGVL_w1 D_S_uvw_w1
 # define __EGVL_w2 D_S_uvw_w2
-# define __EGVT_w1 S_uvw_w1
 # define __EGVT_w2 S_uvw_w2
 
-      double precision :: D_S_uvw_w1(NNODESL)   ! singular values vectors (DECREASING ordering!)
-      double precision :: D_S_uvw_w2(NNODESL)
-      double precision, allocatable :: S_uvw_w1(:, :)
+      double precision              :: D_S_uvw_w2(NNODESL)
       double precision, allocatable :: S_uvw_w2(:, :)
 #endif
-      double precision :: D_S_uvw_w1w2(NNODESL)
+
+      double precision              :: D_S_uvw_w1(NNODESL)   ! singular values vectors (DECREASING ordering!)
+      double precision, allocatable :: S_uvw_w1(:, :)
+      
+      double precision              :: D_S_uvw_w1w2(NNODESL)
       double precision, allocatable :: S_uvw_w1w2(:, :)
+
+      ! for SVD related routines
+      integer :: lwork, info
+      double precision, allocatable :: work_arr(:)
       
       double precision :: tmpv(1, NNODESL)   ! tmp vec for interfacing, BUG: might be avoided?
 
@@ -524,20 +524,23 @@ contains
 #ifdef __BSA_USE_CACHED_POD_DATA
       nfi_ = size(fi)
       nfj_ = size(fj)
-      if (do_trunc_POD_) then
-         allocate(npodw1(nfi_))
-         allocate(npodw2(nfj_))
-      endif
-      allocate(D_S_uvw_w1(NNODESL, nfi_))
-      allocate(S_uvw_w1  (NNODESL, NNODESL, nfi_))
-      allocate(D_S_uvw_w2(NNODESL, nfj_))
+      if (do_trunc_POD_) allocate(npodw2(nfj_))
+      
+      allocate(D_S_uvw_w2(NNODESL,          nfj_))
       allocate(S_uvw_w2  (NNODESL, NNODESL, nfj_))
       
 #else
-      allocate(S_uvw_w1  (NNODESL, NNODESL))
       allocate(S_uvw_w2  (NNODESL, NNODESL))
 #endif
+      allocate(S_uvw_w1  (NNODESL, NNODESL))
       allocate(S_uvw_w1w2(NNODESL, NNODESL))
+
+
+      ! make a (private) copy of shared WORK array (avoid dependencies!)
+      ! NOTE: at this point, MSHR_SVD_WORK should be allocated.
+      work_arr = MSHR_SVD_WORK
+      lwork    = MSHR_SVD_LWORK
+      info     = 0
 
 
       do itc = 1, NTCOMPS
@@ -549,61 +552,15 @@ contains
 
 
 #ifdef __BSA_USE_CACHED_POD_DATA
-
-         !
-         ! NOTE: we could use OpenMP parallelisation here, 2 separate tasks
-         !
-         do ifi = 1, nfi_
-
-            S_uvw_w1(:, 1:1, ifi) = &
-               reshape(wd%evalPSD(1, [fi(ifi)], NNODESL, struct_data%n_load_, 1, tc), &
-                  [NNODESL, 1])
-         
-            S_uvw_w1(:, :, ifi) = &
-               wd%getFullNodalPSD(NNODESL, struct_data%n_load_, S_uvw_w1(:, 1, ifi), fi(ifi), 1)
-
-            !$omp critical
-#ifdef BSA_USE_SVD_METHOD__
-            call dgesvd(&
-                 'O' &                    ! min(M,N) columns of U are overwritten on array A (saves memory)
-               , 'N' &                    ! no rows of V are computed
-               , NNODESL    &             ! n. of rows M
-               , NNODESL    &             ! n. of cols N
-               , S_uvw_w1(:, :, ifi) &    ! A matrix (overwritten with left-singular vectors)
-               , NNODESL             &
-               , D_S_uvw_w1(:, ifi)  &    ! singular values
-               , tmpv       &    ! U
-               , 1          & 
-               , tmpv       &    ! VT
-               , 1          &
-               , MSHR_SVD_WORK, MSHR_SVD_LWORK, MSHR_SVD_INFO)
-# else
-            call dsyev('V', 'L', &
-               NNODESL, S_uvw_w1(:, :, ifi), NNODESL, D_S_uvw_w1(:, ifi), &
-                  MSHR_SVD_WORK, MSHR_SVD_LWORK, MSHR_SVD_INFO)
-# endif
-            if (MSHR_SVD_INFO /= 0) then
-               print '(1x, a, a, i0)', &
-                  ERRMSG, 'Error applying SVD to S_uvw_w1. Exit code  ', MSHR_SVD_INFO
-               call bsa_Abort()
-            endif
-            !$omp end critical
-
-            if (do_trunc_POD_) npodw1(ifi) = getNPODModesByThreshold_(D_S_uvw_w1(:, ifi), POD_trunc_lim_)
-         enddo  ! nfi
-
-
          do ifj = 1, nfj_
 
             S_uvw_w2(:, 1:1, ifj) = &
-               reshape(wd%evalPSD(1, [fj(ifj)], NNODESL, struct_data%n_load_, 1, tc), &
+               reshape(wd%evalPSD(1, fj(ifj:ifj), NNODESL, struct_data%n_load_, 1, tc), &
                   [NNODESL, 1])
-         
             S_uvw_w2(:, :, ifj) = &
                wd%getFullNodalPSD(NNODESL, struct_data%n_load_, S_uvw_w2(:, 1, ifj), fj(ifj), 1)
          
-            !$omp critical
-#ifdef BSA_USE_SVD_METHOD__
+# ifdef BSA_USE_SVD_METHOD__
             call dgesvd(&
                  'O' &                    ! min(M,N) columns of U are overwritten on array A (saves memory)
                , 'N' &                    ! no rows of V are computed
@@ -616,25 +573,23 @@ contains
                , 1          & 
                , tmpv       &    ! VT
                , 1          &
-               , MSHR_SVD_WORK, MSHR_SVD_LWORK, MSHR_SVD_INFO)
+               , work_arr, lwork, info)
 # else
             call dsyev('V', 'L', &
                NNODESL, S_uvw_w2(:, :, ifj), NNODESL, D_S_uvw_w2(:, ifj), &
-                  MSHR_SVD_WORK, MSHR_SVD_LWORK, MSHR_SVD_INFO)
+                  work_arr, lwork, info)
 # endif
-            if (MSHR_SVD_INFO /= 0) then
+            if (info /= 0) then
                print '(1x, a, a, i0)', &
-                  ERRMSG, 'Error applying SVD to S_uvw_w2. Exit code  ', MSHR_SVD_INFO
+                  ERRMSG, 'Error applying SVD to S_uvw_w2. Exit code  ', info
                call bsa_Abort()
             endif
-            !$omp end critical
          
             if (do_trunc_POD_) npodw2(ifj) = getNPODModesByThreshold_(D_S_uvw_w2(:, ifj), POD_trunc_lim_)
          enddo ! nfj
 
 
-! __BSA_USE_CACHED_POD_DATA  not defined
-#else
+#else  ! __BSA_USE_CACHED_POD_DATA  not defined
 
 
          !
@@ -645,14 +600,14 @@ contains
          S_uvw_w2(:, 1:1) = &
             reshape(wd%evalPSD(1, fj,   NNODESL, struct_data%n_load_, 1, tc), [NNODESL, 1])
 
-#ifdef __BSA_CHECK_NOD_COH_SVD
+# ifdef __BSA_CHECK_NOD_COH_SVD
          if (itc == 1) then
             write(5482, *) fj
             do nmw1 = 1, NNODESL
                write(5482, *) S_uvw_w2(nmw1, 1)
             enddo
          endif
-#endif
+# endif
 
          !
          ! applying spatial nodal coherence
@@ -660,16 +615,16 @@ contains
          S_uvw_w1 = wd%getFullNodalPSD(NNODESL, struct_data%n_load_, S_uvw_w1(:, 1), fi(1), 1)
          S_uvw_w2 = wd%getFullNodalPSD(NNODESL, struct_data%n_load_, S_uvw_w2(:, 1), fj(1), 1)
 
-#ifdef __BSA_CHECK_NOD_COH_SVD
+# ifdef __BSA_CHECK_NOD_COH_SVD
          if (itc == 1) then
             do nmw1 = 1, NNODESL
                write(5483, *) S_uvw_w2(:, nmw1)
             enddo
          endif
-#endif
+# endif
 
-         !$omp critical
-#ifdef BSA_USE_SVD_METHOD__
+
+# ifdef BSA_USE_SVD_METHOD__
          call dgesvd(&
               'O' &           ! min(M,N) columns of U are overwritten on array A (saves memory)
             , 'N' &           ! no rows of V are computed
@@ -682,23 +637,20 @@ contains
             , 1          & 
             , tmpv       &    ! VT
             , 1          &
-            , MSHR_SVD_WORK  &
-            , MSHR_SVD_LWORK &
-            , MSHR_SVD_INFO  &
-         )
-#else
+            , work_arr, lwork, info)
+# else
          call dsyev('V', 'L', &
             NNODESL, S_uvw_w1, NNODESL, D_S_uvw_w1, &
-               MSHR_SVD_WORK, MSHR_SVD_LWORK, MSHR_SVD_INFO)
-#endif
-         if (MSHR_SVD_INFO /= 0) then
+               work_arr, lwork, info)
+# endif
+         if (info /= 0) then
             print '(1x, a, a, i0)', &
-               ERRMSG, 'Error applying SVD to S_uvw_w1. Exit code  ', MSHR_SVD_INFO
+               ERRMSG, 'Error applying SVD to S_uvw_w1. Exit code  ', info
             call bsa_Abort()
          endif
 
 
-#ifdef BSA_USE_SVD_METHOD__
+# ifdef BSA_USE_SVD_METHOD__
          call dgesvd(&
               'O' &           ! min(M,N) columns of U are overwritten on array A (saves memory)
             , 'N' &           ! no rows of V are computed
@@ -711,22 +663,20 @@ contains
             , 1          & 
             , tmpv       &    ! VT
             , 1          &
-            , MSHR_SVD_WORK  &
-            , MSHR_SVD_LWORK &
-            , MSHR_SVD_INFO  &
-         )
-#else
+            , work_arr, lwork, info)
+# else
          call dsyev('V', 'L', &
-            NNODESL, S_uvw_w2, NNODESL, D_S_uvw_w2, MSHR_SVD_WORK, MSHR_SVD_LWORK, MSHR_SVD_INFO)
-#endif
-         if (MSHR_SVD_INFO /= 0) then
+            NNODESL, S_uvw_w2, NNODESL, D_S_uvw_w2, &
+               work_arr, lwork, info)
+# endif
+         if (info /= 0) then
             print '(1x, a, a, i0)', &
-               ERRMSG, 'Error applying SVD to S_uvw_w2. Exit code  ', MSHR_SVD_INFO
+               ERRMSG, 'Error applying SVD to S_uvw_w2. Exit code  ', info
             call bsa_Abort()
          endif
-         !$omp end critical
 
-#ifdef __BSA_CHECK_NOD_COH_SVD
+
+# ifdef __BSA_CHECK_NOD_COH_SVD
          if (itc == 1) then
             write(5484, *) NNODESL
             write(5484, *) D_S_uvw_w2
@@ -734,16 +684,14 @@ contains
                write(5484, *) S_uvw_w2(:, nmw1)
             enddo
          endif
-#endif
+# endif
 
-
-! __BSA_USE_CACHED_POD_DATA
-#endif
-
+#endif  ! __BSA_USE_CACHED_POD_DATA
 
 
 
 #ifdef __BSA_USE_CACHED_POD_DATA
+
    if (.not. do_trunc_POD_) then
       if (nPODmodes_set_) then
          nmw1 = nmodes_POD_
@@ -754,12 +702,43 @@ contains
       endif
    endif
 
-   do ifi = 1, nfi_
-      
-      D_S_uvw_w1_ptr => D_S_uvw_w1(:, ifi)
-      S_uvw_w1_ptr   => S_uvw_w1(:, :, ifi)
-      if (do_trunc_POD_) nmw1 = npodw1(ifi)
 
+   do ifi = 1, nfi_
+
+      S_uvw_w1(:, 1:1) = &
+               reshape(wd%evalPSD(1, fi(ifi:ifi), NNODESL, struct_data%n_load_, 1, tc), &
+                  [NNODESL, 1])
+         
+      S_uvw_w1 = &
+         wd%getFullNodalPSD(NNODESL, struct_data%n_load_, S_uvw_w1(:, 1), fi(ifi), 1)
+
+      
+# ifdef BSA_USE_SVD_METHOD__
+      call dgesvd(&
+            'O' &          ! min(M,N) columns of U are overwritten on array A (saves memory)
+         , 'N' &           ! no rows of V are computed
+         , NNODESL    &    ! n. of rows M
+         , NNODESL    &    ! n. of cols N
+         , S_uvw_w1   &    ! A matrix (overwritten with left-singular vectors)
+         , NNODESL    &
+         , D_S_uvw_w1 &    ! singular values
+         , tmpv       &    ! U
+         , 1          & 
+         , tmpv       &    ! VT
+         , 1          &
+         , work_arr, lwork, info)
+# else
+      call dsyev('V', 'L', &
+         NNODESL, S_uvw_w1, NNODESL, D_S_uvw_w1, &
+            work_arr, lwork, info)
+# endif
+      if (info /= 0) then
+         print '(1x, a, a, i0)', &
+            ERRMSG, 'Error applying SVD to S_uvw_w1. Exit code  ', info
+         call bsa_Abort()
+      endif
+
+      if (do_trunc_POD_) nmw1 = getNPODModesByThreshold_(D_S_uvw_w1, POD_trunc_lim_)
       fi_ = fi(ifi)
 
       do ifj = 1, nfj_
@@ -769,15 +748,14 @@ contains
          if (do_trunc_POD_) nmw2 = npodw2(ifj)
 
          fiPfj_(1) = fi_ + fj(ifj)
-#else
+#else  ! __BSA_USE_CACHED_POD_DATA  not defined
          fiPfj_(1) = fi(1) + fj(1)
-#endif
+#endif ! __BSA_USE_CACHED_POD_DATA
 
          S_uvw_w1w2(:, 1:1) = &
             reshape(wd%evalPSD(1, fiPfj_, NNODESL, struct_data%n_load_, 1, tc), [NNODESL, 1])
          S_uvw_w1w2 = wd%getFullNodalPSD(NNODESL, struct_data%n_load_, S_uvw_w1w2(:, 1), fiPfj_(1), 1)
 
-         !$omp critical
 #ifdef BSA_USE_SVD_METHOD__
          call dgesvd(&
               'O' &             ! min(M,N) columns of U are overwritten on array A (saves memory)
@@ -791,21 +769,17 @@ contains
             , 1            & 
             , tmpv         &    ! VT
             , 1            &
-            , MSHR_SVD_WORK  &
-            , MSHR_SVD_LWORK &
-            , MSHR_SVD_INFO  &
-         )
+            , work_arr, lwork, info)
 #else
          call dsyev('V', 'L', &
             NNODESL, S_uvw_w1w2, NNODESL, D_S_uvw_w1w2, &
-               MSHR_SVD_WORK, MSHR_SVD_LWORK, MSHR_SVD_INFO)
-#endif
-         if (MSHR_SVD_INFO /= 0) then
+               work_arr, lwork, info)
+#endif ! BSA_USE_SVD_METHOD__
+         if (info /= 0) then
             print '(1x, a, a, i0)', &
-               ERRMSG, 'Error applying SVD to S_uvw_w1w2. Exit code  ', MSHR_SVD_INFO
+               ERRMSG, 'Error applying SVD to S_uvw_w1w2. Exit code  ', info
             call bsa_Abort()
          endif
-         !$omp end critical
 
          
 #ifdef __BSA_CHECK_NOD_COH_SVD
@@ -857,7 +831,7 @@ contains
          do p = NNODESL, NNODESL-(nmw1-1), -1
 #endif
 
-            eigvp(:, 1) = __EGVT_w1(:, p)
+            eigvp(:, 1) = S_uvw_w1(:, p)
 
             ! V_lin_w1
             ! tmpm1 = matmul(wd%phi_times_A_ndegw_(:, :, tc), eigvp)
@@ -865,9 +839,7 @@ contains
                tmpm1(q, 1) = sum(wd%phi_times_A_ndegw_(q, :, tc) * eigvp(:, 1))
             enddo 
 
-
-            ! D_p_w1
-            tmpDp = __EGVL_w1(p)
+            tmpDp = D_S_uvw_w1(p) ! D_p_w1
 
 
             ! 5-2-2 (6-3-3, 7-4-4)
@@ -1022,21 +994,7 @@ contains
    enddo ! nfi_
 #endif
 
-
       enddo ! itc = 1, NTCOMPS
-
-      ! !$omp critical
-      ! !$ write(4382, *) omp_get_thread_num()
-      ! write(4383, *) fi, fj
-      ! write(4383, '(21g)') S_uvw_w1
-      ! write(4383, *) ''
-      ! write(4383, '(21g)') S_uvw_w1w2
-      ! write(4383, *) MODES
-      ! !$ write(4384, *) omp_get_thread_num()
-      ! write(4384, '(g)') bfm
-      ! write(4384, *) ''
-      ! !$omp end critical
-
       99 return
    end function getFM_full_tm_scalar_msh_POD_
 

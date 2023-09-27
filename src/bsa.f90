@@ -569,9 +569,9 @@ contains ! utility procedures
       call bsa_setBRMExportDefaultMode(BSA_EXPORT_BRM_MODE_NONE)
       
       call bsa_setBfmMLR(.false.)
-      call bsa_forceBsaClsExecution(.true.)
-
       call bsa_setValidateDeltasPolicy(BSA_VALIDATE_DELTAS_POLICY_NONE)
+      
+      call bsa_forceBsaClsExecution(.true.)
 
       call bsa_setMaxBkgPeakRestriction(.true.)
 

@@ -23,7 +23,8 @@ submodule(BsaLib) BsaLib_MesherImpl
    use BsaLib_Functions, only: prefetchSVDWorkDim_ &
       , NFREQS, NNODES, NNODESL, NLIBS, NLIBSL     &
       , NMODES, NMODES_EFF, MODES                  &
-      , NPSDEL, NTCOMPS, NDIRS, TCOMPS, DIRS
+      , NPSDEL, NTCOMPS, NDIRS, TCOMPS, DIRS       &
+      , MSHR_SVD_INFO, MSHR_SVD_LWORK, MSHR_SVD_WORK
    implicit none
 
    ! to have a local instance to be referenced
@@ -167,9 +168,6 @@ contains
    !> But how can this be more effective?
    !> 
    subroutine PreMesh()
-#ifdef __BSA_CHECK_NOD_COH_SVD
-      use BsaLib_Functions, only: MSHR_SVD_INFO, MSHR_SVD_LWORK, MSHR_SVD_WORK
-#endif
       real(real64), parameter :: cst_sqrt2d2 = sqrt(2._real64) / 2._real64      
       integer(int32) :: NLims, iost
       
@@ -361,13 +359,13 @@ contains
       if (.not. allocated(limits)) goto 998  ! NOTE: BKG zone covers them all, bad..
 
 
+#define __return_debug__ goto 998
 #ifdef __BSA_CHECK_NOD_COH_SVD
-      goto 998
+      __return_debug__
 #endif
 
 
-#define __return_debug__ return
-
+      ! __return_debug__
 
 
       ! ALL OTHER ZONES (IF NOT BKG COVERS EVERYTHING)
@@ -497,7 +495,8 @@ contains
          !$omp          , id_im_last, maxF, NLims, getBFM_msh, pol &
          !$omp          , NFREQS, NNODES, NNODESL, NLIBS, NLIBSL &
          !$omp          , NMODES, NMODES_EFF, MODES &
-         !$omp          , NPSDEL, NTCOMPS, NDIRS, TCOMPS, DIRS &
+         !$omp          , NPSDEL, NTCOMPS, NDIRS, TCOMPS, DIRS          &
+         !$omp          , MSHR_SVD_INFO, MSHR_SVD_LWORK, MSHR_SVD_WORK  &
          !$omp          , do_export_POD_trunc_   &
          !$omp          , msh_NZones, msh_bfmpts_pre_, msh_max_zone_NPts, m3mf_msh_ptr_), &
          !$omp   num_threads(n_dirs_)
@@ -650,7 +649,7 @@ contains
 
 
 
-         goto 998
+         ! __return_debug__
 
 
 
@@ -694,6 +693,7 @@ contains
                !$omp          , NFREQS, NNODES, NNODESL, NLIBS, NLIBSL &
                !$omp          , NMODES, NMODES_EFF, MODES &
                !$omp          , NPSDEL, NTCOMPS, NDIRS, TCOMPS, DIRS &
+               !$omp          , MSHR_SVD_INFO, MSHR_SVD_LWORK, MSHR_SVD_WORK  &
                !$omp          , msh_NZones, msh_bfmpts_pre_, msh_max_zone_NPts, m3mf_msh_ptr_), &
                !$omp   num_threads(n_dirs_)
                do idir = 1, n_dirs_
@@ -853,6 +853,7 @@ contains
             !$omp          , NFREQS, NNODES, NNODESL, NLIBS, NLIBSL &
             !$omp          , NMODES, NMODES_EFF, MODES &
             !$omp          , NPSDEL, NTCOMPS, NDIRS, TCOMPS, DIRS &
+            !$omp          , MSHR_SVD_INFO, MSHR_SVD_LWORK, MSHR_SVD_WORK  &
             !$omp          , msh_NZones, msh_bfmpts_pre_, msh_max_zone_NPts, m3mf_msh_ptr_), &
             !$omp   num_threads(N_THREADS_MIN_)
             do idir = 1, N_THREADS_MIN_
@@ -929,6 +930,7 @@ contains
                !$omp          , NFREQS, NNODES, NNODESL, NLIBS, NLIBSL &
                !$omp          , NMODES, NMODES_EFF, MODES &
                !$omp          , NPSDEL, NTCOMPS, NDIRS, TCOMPS, DIRS &
+               !$omp          , MSHR_SVD_INFO, MSHR_SVD_LWORK, MSHR_SVD_WORK  &
                !$omp          , msh_NZones, msh_bfmpts_pre_, msh_max_zone_NPts, m3mf_msh_ptr_), &
                !$omp   num_threads(N_THREADS_MIN_)
                do idir = 1, N_THREADS_MIN_
@@ -1214,6 +1216,7 @@ contains
             !$omp          , LIM_SIGN_DIRS, LEFT_RZ_SIGNS, max_ext, maxext_sym_     &  
             !$omp          , NFREQS, NNODES, NNODESL, NLIBS, NLIBSL, NMODES, DIRS   &
             !$omp          , NMODES_EFF, MODES, NPSDEL, NTCOMPS, NDIRS, TCOMPS      &
+            !$omp          , MSHR_SVD_INFO, MSHR_SVD_LWORK, MSHR_SVD_WORK           &
             !$omp          , msh_NZones, msh_bfmpts_pre_, msh_max_zone_NPts, m3mf_msh_ptr_), &
             !$omp   num_threads(n_dirs_)
             do idir = 1, n_dirs_
@@ -1279,18 +1282,13 @@ contains
 #endif
       endif
 
-
-      ! NOTE: Ok, now that premesh has finished, before going
-      !       to actual meshing, rewind dump file and rewrite actual
-      !       needed head information.
-      !       This goes with previous note. At the very beginning, where we write 0, 
-      !       we do it because WE DO NOT YET KNOW ACTUAL INFORMATION to dump.
+      ! NOTE: Ok, now that premesh has finished, before going to actual meshing, 
+      !       rewind dump file and rewrite actual needed head information.
       rewind(unit_dump_bfm_)
       write (unit_dump_bfm_) struct_data%modal_%nm_eff_
       write (unit_dump_bfm_) dimM_bisp_
       write (unit_dump_bfm_) msh_NZones
       write (unit_dump_bfm_) msh_max_zone_NPts
-
 
 #ifdef __BSA_DEBUG
       write(unit_debug_, *) ' @BsaMesherImpl::PreMesh() : Init BSA-Mesher pre meshing phase -- ok.'
@@ -1314,20 +1312,9 @@ contains
 #ifdef __BSA_USE_CACHED_POD_DATA
 # define __bfm_undump__
 # define __bfm_undump_interp__
-# define __BRM_EXPORT_DATA__ brm_export_data_
-# define __decl__
 #else
-# ifdef _OPENMP
-#  define __bfm_undump__  ,bfmdata
-#  define __bfm_undump_interp__ bfmdata,
-#  define __BRM_EXPORT_DATA__ brm_export_data_
-#  define __decl__ real(bsa_real_t), allocatable :: bfmdata(:, :)
-# else
-#  define __bfm_undump__
-#  define __bfm_undump_interp__
-#  define __BRM_EXPORT_DATA__
-#  define __decl__ character(len = 256) :: emsg
-# endif
+# define __bfm_undump__  ,bfm_undump
+# define __bfm_undump_interp__ bfm_undump,
 #endif
    subroutine Mesh()
       !! Post meshing phase.
@@ -1338,14 +1325,18 @@ contains
       !!    - HTPC : Head-Tail-Previous-Current
       use BsaLib_MZone, only: MZone_t
       integer(int32) :: izone_id, izone, ival2
-      __decl__
       class(MZone_t), pointer     :: z => null()
       type(MRectZone_t), target   :: rz
       type(MTriangZone_t), target :: tz
 
+#ifndef __BSA_USE_CACHED_POD_DATA
+      real(bsa_real_t), allocatable :: bfm_undump(:, :)
+      character(len = 128)          :: emsg
+#endif
+
       class(*), pointer :: brm_export_data_ => null()
       type(BrmExportBaseData_t), allocatable, target :: brm_export_base_data_
-      logical :: is_base_export_
+      logical :: do_export_brm_base_
       
 
       ! skip them, we already have them stored in module variables
@@ -1367,9 +1358,9 @@ contains
 
 #ifndef __BSA_USE_CACHED_POD_DATA
 # ifndef _OPENMP
-      ! BUG: this might be removed in place of a local (thread) allocation!
-      ! allocate BFM tmp variable to hold data
-      ! for at most the zone with max n. of points.
+      ! allocate BFM tmp variable to hold data for at most the zone with max n. of points.
+      ! NOTE: in case of OMP parallelisation, this allocation will be resized internally if 
+      !       needed. Otherwise, for serial case, at most  msh_max_zone_NPts  memory needed (once).
       allocate(bfm_undump(dimM_bisp_, msh_max_zone_NPts), stat=izone_id, errmsg=emsg)
       if (izone_id /= 0) call allocKOMsg('bfm_undump', izone_id, emsg)
 # endif
@@ -1380,8 +1371,8 @@ contains
       print '(1x, a)', '--------------------    POST - MESH    --------------------'
       print '(1x, a)', '-----------------------------------------------------------'
 
-      is_base_export_ = do_export_brm_ .and. i_brmexport_mode_ == BSA_EXPORT_BRM_MODE_BASE
-      if (is_base_export_) then
+      do_export_brm_base_ = do_export_brm_ .and. i_brmexport_mode_ == BSA_EXPORT_BRM_MODE_BASE
+      if (do_export_brm_base_) then
          allocate(brm_export_base_data_)
          brm_export_base_data_%nm_     =  struct_data%modal_%nm_eff_
          brm_export_base_data_%ncomb_  =  dimM_bisp_
@@ -1399,12 +1390,12 @@ contains
          INFOMSG, 'Interpolating zone n. ', 1, ', with ID=  ', izone_id
       if (do_export_brm_) brm_export_base_data_%idZone_ = izone_id
       call UndumpZone( rz   __bfm_undump__)
-      call rz%interpolate(__bfm_undump_interp__   __BRM_EXPORT_DATA__)
-      if (is_base_export_) brm_export_base_data_%i_doNotPrintGenHeader_ = 1   ! now we can disable gen header print
+      call rz%interpolate(__bfm_undump_interp__   brm_export_data_)
+      if (do_export_brm_base_) brm_export_base_data_%i_doNotPrintGenHeader_ = 1   ! now we can disable gen header print
 
 #ifndef __BSA_USE_CACHED_POD_DATA
 # ifdef _OPENMP
-      deallocate(bfmdata)  !<-- better to copy a null pointer than a whole bunch of memory.
+      deallocate(bfm_undump)  !<-- better to copy a null pointer than a whole bunch of memory.
       if (associated(brm_export_data_)) brm_export_data_ => null()
 # endif
 #endif
@@ -1416,14 +1407,13 @@ contains
       !$omp   firstprivate(brm_export_base_data_, brm_export_data_), &
       !$omp   private(z, rz, tz, izone_id), &
 #ifndef __BSA_USE_CACHED_POD_DATA
-# ifdef _OPENMP
-      !$omp   private(bfmdata), &
-# endif
+      !$omp   private(bfm_undump), &
 #endif
       !$omp   shared(struct_data, wd, settings, logger_debug      &
-      !$omp          , NFREQS, NNODES, NNODESL, NLIBS, NLIBSL     &
-      !$omp          , NMODES, NMODES_EFF, MODES                  &
-      !$omp          , NPSDEL, NTCOMPS, NDIRS, TCOMPS, DIRS       &
+      !$omp          , NFREQS, NNODES, NNODESL, NLIBS, NLIBSL        &
+      !$omp          , NMODES, NMODES_EFF, MODES                     &
+      !$omp          , NPSDEL, NTCOMPS, NDIRS, TCOMPS, DIRS          &
+      !$omp          , MSHR_SVD_INFO, MSHR_SVD_LWORK, MSHR_SVD_WORK  &
       !$omp          , MZone_ID, msh_NZones, m3mr_msh_ptr_        & 
       !$omp          , msh_ZoneLimsInterestModes, do_validate_deltas_      &
       !$omp          , msh_bfmpts_post_, msh_brmpts_post_, unit_dump_bfm_  &
@@ -1448,25 +1438,21 @@ contains
          !$omp end critical
 
          ! brm_export_base_data_%i_doNotPrintZonHeader_ = 0
-         if (is_base_export_) then
+         if (do_export_brm_base_) then
             brm_export_base_data_%idZone_ = izone_id
             if (.not. associated(brm_export_data_)) brm_export_data_ => brm_export_base_data_
          endif
-         call z%interpolate(__bfm_undump_interp__   __BRM_EXPORT_DATA__)
+         call z%interpolate(__bfm_undump_interp__   brm_export_data_)
       enddo ! nZones
       !$omp end parallel do
 
 #ifndef __BSA_USE_CACHED_POD_DATA
-# ifndef _OPENMP
       if (allocated(bfm_undump)) deallocate(bfm_undump)
-# endif
 #endif
       99 return
    end subroutine Mesh
 #undef __bfm_undump__
 #undef __bfm_undump_interp__
-#undef __BRM_EXPORT_DATA__
-#undef __decl__
 
 
 

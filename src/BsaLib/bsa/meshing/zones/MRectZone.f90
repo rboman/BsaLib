@@ -51,31 +51,31 @@ module BsaLib_MRectZone
       logical, private :: deltas_set_ = .false.
 
    contains
-   
-      procedure, pass :: baseI => baseI_rct
-      procedure, pass :: baseJ => baseJ_rct
-      procedure, pass :: deduceDeltas => deduceDeltas_rect
+      private
+      procedure, pass, public :: baseI => baseI_rct
+      procedure, pass, public :: baseJ => baseJ_rct
+      procedure, pass, public :: deduceDeltas => deduceDeltas_rect
 
-      procedure, pass :: getAPoint
-      procedure, pass :: getBPoint
-      procedure, pass :: setDeltas
-      procedure, pass :: deduceRefinements
+      procedure, pass, public :: getAPoint
+      procedure, pass, public :: getBPoint
+      procedure, pass, public :: setDeltas
+      procedure, pass, public :: deduceRefinements
       generic, public :: defineFromDeltas => defineFromDeltas_refinements, defineFromDeltas_maxvalues
-      procedure, pass, private :: defineFromDeltas_refinements, defineFromDeltas_maxvalues
-      generic :: defineFromEndPtCoordAndBase => defineFromEndPtCoordAndBase_norm, defineFromEndPtCoordAndBase_forceDeltas
-      procedure, pass, private :: defineFromEndPtCoordAndBase_norm, defineFromEndPtCoordAndBase_forceDeltas
-      procedure, pass :: define
-      procedure, pass, private :: setIEpts
-      procedure, pass :: validateDeltas
+      procedure, pass :: defineFromDeltas_refinements, defineFromDeltas_maxvalues
+      generic, public :: defineFromEndPtCoordAndBase => defineFromEndPtCoordAndBase_norm, defineFromEndPtCoordAndBase_forceDeltas
+      procedure, pass :: defineFromEndPtCoordAndBase_norm, defineFromEndPtCoordAndBase_forceDeltas
+      procedure, pass, public  :: define
+      procedure, pass :: setIEpts
       procedure, pass :: getOtherBase
       procedure, pass :: getIJfsteps
-      procedure, pass :: reconstructZoneBaseMesh
-      procedure, pass :: compute => compute_s
+      ! procedure, pass :: validateDeltas
+      ! procedure, pass :: reconstructZoneBaseMesh
+      procedure, pass, public  :: compute => compute_s
       procedure, pass, private :: compute_s
-      procedure, pass :: getNthQuadVtx
-      procedure, pass :: dump => dumpRZ
-      procedure, pass :: undump => undumpRZ
-      procedure, pass :: interpolate => interpolateRZ
+      procedure, pass, public  :: getNthQuadVtx
+      procedure, pass, public  :: dump => dumpRZ
+      procedure, pass, public  :: undump => undumpRZ
+      procedure, pass, public  :: interpolate => interpolateRZ
    end type MRectZone_t
 
 
@@ -267,11 +267,11 @@ module BsaLib_MRectZone
 
 
 
-      !> Avoid setting a delta smaller than given limit
-      module elemental impure subroutine validateDeltas(this, lval)
-         class(MRectZone_t), intent(inout) :: this
-         real(bsa_real_t), intent(in) :: lval
-      end subroutine
+      ! !> Avoid setting a delta smaller than given limit
+      ! module elemental impure subroutine validateDeltas(this, lval)
+      !    class(MRectZone_t), intent(inout) :: this
+      !    real(bsa_real_t), intent(in) :: lval
+      ! end subroutine
 
 
       !> Automatically computes the second remaining (unknown) rect base
@@ -289,20 +289,20 @@ module BsaLib_MRectZone
       !> Gets actualised frequency deltas along two main
       !> sides directions (I, J), actualised based on *this
       !> zone rotation w.r.t. GRS.
-      module subroutine getIJfsteps(this, dfIx, dfIy, dfJx, dfJy)
+      module subroutine getIJfsteps(this, dfIi, dfIj, dfJi, dfJj)
          class(MRectZone_t), intent(in) :: this
-         real(bsa_real_t), intent(out)  :: dfIx, dfIy, dfJx, dfJy
+         real(bsa_real_t), intent(out)  :: dfIi, dfIj, dfJi, dfJj
       end subroutine
 
 
 
-      !> Returns the whole zone reconstructed mesh
-      !> Maybe used for visualising.
-      module function reconstructZoneBaseMesh(this) result(msh)
-         class(MRectZone_t), intent(in) :: this
-         !> BUG: might be 2-rank array instead of 3!
-         real(bsa_real_t) :: msh(2, this%nj_, this%ni_)
-      end function
+      ! !> Returns the whole zone reconstructed mesh
+      ! !> Maybe used for visualising.
+      ! module function reconstructZoneBaseMesh(this) result(msh)
+      !    class(MRectZone_t), intent(in) :: this
+      !    !> BUG: might be 2-rank array instead of 3!
+      !    real(bsa_real_t) :: msh(2, this%nj_, this%ni_)
+      ! end function
 
 
       !> Actual zone comutation (pre phase).
@@ -344,26 +344,18 @@ module BsaLib_MRectZone
       end subroutine
 
 
-#if (defined(__BSA_USE_CACHED_POD_DATA)) || (defined(_OPENMP))
-# define __new_interp_proc__
-#endif
 
       !> Implementation of rect zone interpolation methods
       module subroutine interpolateRZ( this &
-#ifdef __new_interp_proc__
-# ifndef __BSA_USE_CACHED_POD_DATA
-      & , bfm   &
-# endif
-      & , pdata &
+#ifndef __BSA_USE_CACHED_POD_DATA
+         & , bfm   &
 #endif
-         & )
+         & , pdata )
          class(MRectZone_t), intent(inout) :: this
-#ifdef __new_interp_proc__
-# ifndef __BSA_USE_CACHED_POD_DATA
+#ifndef __BSA_USE_CACHED_POD_DATA
          real(bsa_real_t), intent(in) :: bfm(:, :)
-# endif
-         class(*), pointer, intent(in) :: pdata
 #endif
+         class(*), pointer, intent(in) :: pdata
       end subroutine
 
 

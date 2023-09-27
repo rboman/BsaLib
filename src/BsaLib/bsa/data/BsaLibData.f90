@@ -142,12 +142,6 @@ module BsaLib_Data
    !
    real(bsa_real_t), pointer :: m3mf_msh_ptr_(:) => null(), m3mr_msh_ptr_(:) => null()
 
-#ifndef _OPENMP
-   !> Shared instance of undumped BFM.
-   !> It holds the max N. of points of all the dumped zones, so that no overflows occur.
-   real(bsa_real_t), allocatable :: bfm_undump(:, :)
-#endif
-
    integer(bsa_int_t), public :: ipre_mesh_type = BSA_PREMESH_TYPE_DIAG_CREST_NO
    integer(bsa_int_t), public :: ipre_mesh_mode = BSA_PREMESH_MODE_ZONE_REFINED
    integer(bsa_int_t), public :: msh_iZone

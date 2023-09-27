@@ -770,53 +770,44 @@ contains
 
 
 
-
-#if (defined(__BSA_USE_CACHED_POD_DATA)) || (defined(_OPENMP))
-# define __new_interp_proc__
-#endif
-
-   module subroutine interpolateTZ( this &
-#ifdef __new_interp_proc__
-# ifndef __BSA_USE_CACHED_POD_DATA
-      & , bfm &
-# endif
-      & , pdata &
-#endif
-      & )
-      !! Implementation of triang zone interpolation methods
-      class(MTriangZone_t), intent(inout) :: this
-#ifdef __new_interp_proc__
-# ifndef __BSA_USE_CACHED_POD_DATA
-      real(bsa_real_t), intent(in)  :: bfm(:, :)
-# endif
-      class(*), pointer, intent(in) :: pdata
-
-      ! NOTE: for the moment only supporting HTPC method
-      call interpolateTZ_HTPC_v3(this &
-# ifndef __BSA_USE_CACHED_POD_DATA
-         & , bfm   &
-# endif
-         & , pdata )
-#else
-      call interpolateTZ_HTPC_v3(this)
-#endif
-   end subroutine
-
-
-
-
-
-   !> Queries Triang zone n of points if it had ni/nj refinements
    elemental function getTriangZoneEquivNPts(ni, nj) result(npt)
+      !! Returns Triang zone n of points if it had ni-nj refinements
       integer(int32), intent(in) :: ni, nj
       integer(int32) :: npt
 
       ! NOTE: for the moment ni==nj
       npt = ni * nj
 
-      ! BUG: do we really need to divide by integer??
+      ! BUG: do we really need to divide by real??
       npt = int((npt + ni) / 2._real32, kind=int32)
    end function
+
+
+
+
+
+#if (defined(__BSA_USE_CACHED_POD_DATA)) || (defined(_OPENMP))
+# define __new_interp_proc__
+#endif
+
+   module subroutine interpolateTZ( this &
+#ifndef __BSA_USE_CACHED_POD_DATA
+# define __bfm_undump__ bfm, 
+      & , bfm &
+#else
+# define __bfm_undump__
+#endif
+      & , pdata )
+      !! Implementation of triang zone interpolation methods
+      class(MTriangZone_t), intent(inout) :: this
+#ifndef __BSA_USE_CACHED_POD_DATA
+      real(bsa_real_t), intent(in)  :: bfm(:, :)
+#endif
+      class(*), pointer, intent(in) :: pdata
+
+      ! NOTE: for the moment only supporting HTPC method
+      call interpolateTZ_HTPC_v3(this, __bfm_undump__  pdata)
+   end subroutine
 
 
 
