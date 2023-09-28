@@ -1613,7 +1613,7 @@
       pIcurr   = size(bfm_new_left, dim=2)
       intg_bfm = intg_bfm - bfm_new_left(:, 1) * __vtx_infl_r_bfm          ! removing overestimation for B point
       ! removing overestimation for last border points
-      intg_bfm = intg_bfm - sum(bfm_new_left(:, 2+nipJ : nipJ+1 : nj-nipJ-1) * __brd_infl_r_bfm, dim=2)
+      intg_bfm = intg_bfm - sum(bfm_new_left(:, 2+nipJ : nj-nipJ-1 : nipJ+1) * __brd_infl_r_bfm, dim=2)
       intg_bfm = intg_bfm - bfm_new_left(:, pIcurr) * __vtx_infl_r_bfm     ! removing overestimation for End point
 # endif
       intg = intg - brm(:, i_brm - nj + 1) * __vtx_infl_r   ! removing overestimation for B point
