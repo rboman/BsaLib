@@ -134,7 +134,7 @@ module BsaLib_CONSTANTS
 
    abstract interface
       subroutine exportBRMinterf_vect_(f1, f2, brm, pdata)
-         import bsa_real_t
+         import :: bsa_real_t
          real(bsa_real_t), intent(in)  :: f1(:), f2(:), brm(:, :)
          class(*), pointer, intent(in) :: pdata
       end subroutine

@@ -199,13 +199,13 @@ module BsaLib_Data
    procedure(getMshBRM), pointer :: getBRM_msh => null()
    abstract interface
       function getMshBFM(fi, fj) result(bfm)
-         import bsa_real_t, dimM_bisp_
+         import :: bsa_real_t, dimM_bisp_
          real(bsa_real_t), intent(in), contiguous :: fi(:), fj(:)
          real(bsa_real_t) :: bfm(dimM_bisp_, size(fi)*size(fj))
       end function
 
       function getMshBRM(fi, fj, bfm) result(brm)
-         import bsa_real_t, dimM_bisp_
+         import :: bsa_real_t, dimM_bisp_
          real(bsa_real_t), intent(in), contiguous :: fi(:), fj(:)
          real(bsa_real_t), intent(in) :: bfm(dimM_bisp_, size(fi)*size(fj))
          real(bsa_real_t) :: brm(dimM_bisp_, size(fi)*size(fj))
@@ -215,7 +215,7 @@ module BsaLib_Data
 
    interface
       module function evaluatePSD(f, nf, itc) result(PSD)
-         import bsa_int_t, bsa_real_t
+         import :: bsa_int_t, bsa_real_t
          integer(bsa_int_t), intent(in) :: nf, itc
          real(bsa_real_t), intent(in)   :: f(nf)
          real(bsa_real_t), allocatable, target :: PSD(:, :)

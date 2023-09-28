@@ -71,18 +71,18 @@ module BsaLib_MZone
 
    abstract interface
       pure function intf_MZoneIntFct_(this) result(res)
-         import MZone_t
+         import :: MZone_t
          class(MZone_t), intent(in) :: this
          integer :: res
       end function
 
       subroutine intf_MZoneGenIn_(this)
-         import MZone_t
+         import :: MZone_t
          class(MZone_t), intent(in) :: this
       end subroutine
 
       subroutine intf_MZoneGenInOut_(this)
-         import MZone_t
+         import :: MZone_t
          class(MZone_t), intent(inout) :: this
       end subroutine
 
@@ -91,7 +91,7 @@ module BsaLib_MZone
          & , bfm &
 #endif
          &, pdata)
-         import MZone_t, bsa_real_t
+         import :: MZone_t, bsa_real_t
          class(MZone_t), intent(inout) :: this
 #ifndef __BSA_USE_CACHED_POD_DATA
          real(bsa_real_t), intent(in)  :: bfm(:, :)
