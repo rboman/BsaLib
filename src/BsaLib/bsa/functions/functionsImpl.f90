@@ -21,7 +21,7 @@ submodule(BsaLib_Functions) BsaLib_FunctionsImpl
    use BsaLib_IO,        only: unit_dump_bfm_, unit_debug_, undebug_fname_
    use BsaLib_Data,      only: bsa_Abort &
       , do_trunc_POD_, POD_trunc_lim_, nPODmodes_set_, nmodes_POD_, do_export_POD_trunc_
-   implicit none
+   implicit none (type, external)
 
    
 contains

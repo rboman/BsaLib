@@ -19,10 +19,10 @@ module BsaLib_MZone
    use BsaLib_Data,      only: bsa_Abort, test_no_bfm_mlr_
    use BsaLib_IO,        only: unit_dump_bfm_
    use BsaLib_MPolicy,   only: MPolicy_t, MPolicy_NULL, assignment(=), operator(==)
-   implicit none
+   implicit none (type, external)
    private
    public :: DefaultInitBaseZone, DumpZone, UndumpZone
-   
+
    type, public :: MZoneEnum_t
       integer(int32) :: NULL      = 0
       integer(int32) :: RECTANGLE = 1

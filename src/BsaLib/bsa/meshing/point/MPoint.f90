@@ -16,7 +16,7 @@
 module BsaLib_MPoint
 
    use BsaLib_CONSTANTS
-   implicit none
+   implicit none (type, external)
    private
    public :: getPointsDistance, MPoint
 

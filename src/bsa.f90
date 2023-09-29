@@ -16,7 +16,7 @@
 module data
 
    use BsaLib
-   implicit none
+   implicit none (type, external)
    public
    integer(int32), parameter :: IUN_BSADATA = 22222
    integer(int32), parameter :: IUN_FINDATA = 22223
@@ -73,7 +73,7 @@ program bsa
 
    use data
 
-   implicit none
+   implicit none (type, external)
 
    ! local, used to retrieve single run BSA results
    real(bsa_real_t), allocatable :: bkg_(:),  res_(:)

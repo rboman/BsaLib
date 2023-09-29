@@ -16,7 +16,7 @@
 submodule(BsaLib) BsaLib_ClassicImpl
 
    use BsaLib_Data
-   implicit none
+   implicit none (type, external)
 
 contains
 

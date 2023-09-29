@@ -16,7 +16,7 @@
 module BsaLib_MPolicy
    
    use BsaLib_CONSTANTS, only: int32
-   implicit none
+   implicit none (type, external)
    private
 
    ! enum, bind(C)

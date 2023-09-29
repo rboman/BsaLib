@@ -17,7 +17,7 @@ submodule(Logging) LoggingImpl
 
    use BsaLib_CONSTANTS, only: INFOMSG, WARNMSG, ERRMSG, MSGCONT, DBGMSG, NOTEMSG, int32
    use BsaLib_Data,      only: bsa_Abort
-   implicit none
+   implicit none (type, external)
    character(len = 256) :: fmt
 
 
@@ -476,7 +476,7 @@ end submodule
 
 
 ! subroutine LogElemWindNodalVel(logger, u1, u2)
-!    implicit none
+!    implicit none (type, external)
 !    class(logger_t), intent(in) :: logger
 !    real, intent(in)    :: u1, u2
 

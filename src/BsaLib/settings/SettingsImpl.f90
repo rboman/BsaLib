@@ -19,7 +19,7 @@ submodule(BsaLib_Settings) BsaLib_SettingsImpl
    use BsaLib_Data,      only:  bsa_Abort
    use BsaLib_CONSTANTS, only:  INFOMSG, WARNMSG, ERRMSG, MSGCONT, DBGMSG &
                               , BSA_SETTS_DATA_DUMPFILE, BSA_SPATIAL_SYM_NONE
-   implicit none
+   implicit none (type, external)
 
 contains
 

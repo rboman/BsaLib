@@ -18,7 +18,7 @@ module BsaLib_MTriangZone
    use BsaLib_CONSTANTS,    only: bsa_real_t, bsa_int_t
    use BsaLib_MPoint,       only: MPoint_t
    use BsaLib_M2DPolygZone, only: M2DPolygZone_t
-   implicit none
+   implicit none (type, external)
    private
    
 

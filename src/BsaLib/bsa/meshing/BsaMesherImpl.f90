@@ -26,7 +26,7 @@ submodule(BsaLib) BsaLib_MesherImpl
       , NMODES, NMODES_EFF, MODES                     &
       , NPSDEL, NTCOMPS, NDIRS, TCOMPS, DIRS          &
       , MSHR_SVD_INFO, MSHR_SVD_LWORK, MSHR_SVD_WORK
-   implicit none
+   implicit none (type, external)
 
    ! to have a local instance to be referenced
    integer(bsa_int_t) :: NM__, NM_EFF__

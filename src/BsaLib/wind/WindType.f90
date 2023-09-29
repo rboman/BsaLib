@@ -19,7 +19,7 @@ module BsaLib_WindData
    use BsaLib_IO, only: unit_dump_bfm_, unit_debug_, undebug_fname_
    use BsaLib_CONSTANTS
    use BsaLib_Settings
-   implicit none
+   implicit none (type, external)
    private
 
 

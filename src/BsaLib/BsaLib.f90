@@ -16,7 +16,7 @@
 module BsaLib
 
    use BsaLib_CONSTANTS
-   implicit none
+   implicit none (type, external)
    public
 
    private :: mainClassic_, mainMesher_

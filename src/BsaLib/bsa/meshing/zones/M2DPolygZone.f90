@@ -19,7 +19,7 @@ module BsaLib_M2DPolygZone
                               , CST_PIGREC, CST_PIt2, CST_PId2, CST_PIt3d2
    use BsaLib_MPoint,    only: MPoint_t
    use BsaLib_MZone,     only: MZone_t
-   implicit none
+   implicit none (type, external)
    private
 
    type, public, abstract, extends(MZone_t) :: M2DPolygZone_t   

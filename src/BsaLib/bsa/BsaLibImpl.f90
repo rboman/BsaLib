@@ -18,7 +18,7 @@ submodule(BsaLib) BsaLib_Impl
    use BsaLib_Data
    use BsaLib_Utility
    use BsaLib_IO
-   implicit none
+   implicit none (type, external)
 
    character(len = :), allocatable :: out_dir_ ! output directory
 

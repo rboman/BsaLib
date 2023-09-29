@@ -17,7 +17,7 @@ module Logging
 
    use BsaLib_IO, only: unit_dump_bfm_, unit_debug_, undebug_fname_
    use BsaLib_CONSTANTS
-   implicit none
+   implicit none (type, external)
    private
 
 ! #ifdef _BSA_ALLOC_DEBUG

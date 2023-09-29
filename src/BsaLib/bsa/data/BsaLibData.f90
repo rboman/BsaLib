@@ -25,7 +25,7 @@ module BsaLib_Data
 #ifdef _BSA_CL
    use BsaCL
 #endif
-   implicit none
+   implicit none (type, external)
    public
 
    

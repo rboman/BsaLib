@@ -16,7 +16,7 @@
 module BsaLib_Timing
 
    use BsaLib_CONSTANTS, only: real64
-   implicit none
+   implicit none (type, external)
    private
 
 

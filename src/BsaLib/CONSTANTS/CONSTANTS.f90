@@ -22,7 +22,7 @@ module BsaLib_CONSTANTS
 #ifndef RK
 # define RK real64
 #endif
-   implicit none
+   implicit none (type, external)
    public
 
 

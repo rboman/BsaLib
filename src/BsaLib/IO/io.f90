@@ -16,7 +16,7 @@
 module BsaLib_IO
 
    use BsaLib_CONSTANTS
-   implicit none
+   implicit none (type, external)
    public
    private :: setDefFileNameFromUnitNum_
 

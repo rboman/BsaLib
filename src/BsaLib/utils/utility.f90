@@ -16,7 +16,7 @@
 module BsaLib_Utility
 
    use BsaLib_CONSTANTS, only: INFOMSG, ERRMSG, MSGCONT, WARNMSG, NOTEMSG, int32
-   implicit none
+   implicit none (type, external)
    public
    
 contains

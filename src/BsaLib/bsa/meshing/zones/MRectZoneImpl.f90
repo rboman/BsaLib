@@ -29,7 +29,7 @@ submodule(BsaLib_MRectZone) BsaLib_MRectZoneImpl
    use BsaLib_IO,       only: unit_dump_bfm_
    use BsaLib_MPoint,   only: MPoint, MPoint_t, getPointsDistance
    use BsaLib_MZone,    only: DefaultInitBaseZone, MZone_ID, DumpZone
-   implicit none
+   implicit none (type, external)
 
 
 contains

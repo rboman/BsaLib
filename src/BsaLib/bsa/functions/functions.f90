@@ -17,7 +17,7 @@ module BsaLib_Functions
    
    use BsaLib_CONSTANTS
    use BsaLib_Data, only: wd, struct_data, settings, dimM_bisp_, dimM_psd_
-   implicit none
+   implicit none (type, external)
    public
 
 

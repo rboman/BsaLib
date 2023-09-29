@@ -16,7 +16,7 @@
 module BsaLib_Structure
    
    use BsaLib_CONSTANTS, only: bsa_int_t, bsa_real_t, int32
-   implicit none
+   implicit none (type, external)
    private
 
 

@@ -14,10 +14,10 @@
 !! You should have received a copy of the GNU General Public License
 !! along with BSA Library.  If not, see <https://www.gnu.org/licenses/>.
 submodule(BsaLib_WindData) BsaLib_WindPSDImpl
-   
+
    use BsaLib_CONSTANTS, only: bsa_int_t, bsa_real_t, real64, int32       &
                               , INFOMSG, WARNMSG, ERRMSG, MSGCONT, DBGMSG
-   implicit none
+   implicit none (type, external)
 
    type :: arr_proc_pointer_t
       procedure(PSDfunc), pointer, nopass :: ptr => null()
