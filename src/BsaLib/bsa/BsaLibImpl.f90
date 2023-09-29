@@ -1921,25 +1921,19 @@ contains
 
 
 
-   module subroutine bsa_exportBispToFile(fname, bisp, varname)
+   module subroutine bsa_exportBispToFile(fname, bisp)
       character(len = *), intent(in) :: fname
       real(bsa_real_t), intent(in)   :: bisp(:, :, :)
-      character(len = *), intent(in), optional :: varname
       
       integer(int32) :: s1, s2, s3, iun, i, j
+
+      iun = io_openExportFileByName(exp_dir_ // fname)
+      if (iun == 0) call bsa_Abort()
 
       s1 = size(bisp, 1)
       s2 = size(bisp, 2)
       if (s2 /= s1) call bsa_Abort('First two dimensions of bisp do not match.')
       s3 = size(bisp, 3)
-
-      iun = io_openExportFileByName(exp_dir_ // fname)
-      if (iun == 0) call bsa_Abort()
-
-! #ifdef _BSA_DEBUG
-!       write(unit_debug_, '(1x, 3a, ", shapes = ", 3i5)') &
-!          INFOMSG, ' writing bisp to file ', fname, shape(bisp)
-! #endif
 
       write(iun, *) s1
       write(iun, *) s2
@@ -1950,12 +1944,6 @@ contains
          enddo
       enddo
       close(iun)
-
-! #ifdef _BSA_DEBUG
-!       if (present(varname)) & 
-!          write(unit_debug_, '(1x, 5a)') &
-!             INFOMSG, '@Utils::bsa_exportBispToFile() : ', varname, ' correctly written to file ', fname
-! #endif
    end subroutine
 
 

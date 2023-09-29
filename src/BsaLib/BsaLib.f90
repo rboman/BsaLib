@@ -519,10 +519,9 @@ module BsaLib
 
 
 
-      module subroutine bsa_exportBispToFile(fname, bisp, varname)
+      module subroutine bsa_exportBispToFile(fname, bisp)
          character(len = *), intent(in) :: fname
-         character(len = *), intent(in), optional :: varname
-         real(bsa_real_t), intent(in) :: bisp(:, :, :)
+         real(bsa_real_t), intent(in)   :: bisp(:, :, :)
       end subroutine
 
 
