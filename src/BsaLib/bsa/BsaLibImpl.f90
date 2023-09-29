@@ -24,9 +24,25 @@ submodule(BsaLib) BsaLib_Impl
 
    logical :: only_diag_elems_ = .false.
    logical :: is_only_msh_     = .false.
-
-
+   logical :: header_called_   = .false.
 contains
+
+
+   module subroutine bsa_printBSAHeader()
+      print *
+      print *
+      print *, '              ____________________________________________ '
+      print *, '             |     _____         ____                     |'
+      print *, '             |      /   \       /              /\         |'
+      print *, '             |     /____/       \___          /  \        |'
+      print *, '             |    /    \            \        /____\       |'
+      print *, '             |   /_____/  .    _____/  .   _/      \_  .  |'
+      print *, '             |____________________________________________|'
+      print *
+      print *
+
+      header_called_ = .true.
+   end subroutine bsa_printBSAHeader
 
 
 

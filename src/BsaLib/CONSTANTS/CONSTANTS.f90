@@ -160,26 +160,4 @@ module BsaLib_CONSTANTS
    real(real64), parameter :: CST_3d2    = 3.0_real64 / 2.0_real64
    real(real64), parameter :: CST_PIt3d2 = CST_PIGREC * CST_3d2
 
-   logical, protected :: header_called_ = .false.
-
-contains
-
-
-   subroutine bsa_printBSAHeader()
-      print *
-      print *
-      print *, '              ____________________________________________ '
-      print *, '             |     _____         ____                     |'
-      print *, '             |      /   \       /              /\         |'
-      print *, '             |     /____/       \___          /  \        |'
-      print *, '             |    /    \            \        /____\       |'
-      print *, '             |   /_____/  .    _____/  .   _/      \_  .  |'
-      print *, '             |____________________________________________|'
-      print *
-      print *
-
-      header_called_ = .true.
-   end subroutine bsa_printBSAHeader
-
-
 end module

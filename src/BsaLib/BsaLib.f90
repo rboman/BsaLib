@@ -65,6 +65,8 @@ module BsaLib
 
 
       ! --------------------------         GENERAL       ---------------------------------
+      module subroutine bsa_printBSAHeader()
+      end subroutine
 
 
       module subroutine bsa_setOutputDirectory(dirname)
