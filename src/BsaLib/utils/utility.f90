@@ -29,21 +29,24 @@ contains
       character(len = *), intent(in)  :: dirname
       character(len = :), allocatable :: cmd
       integer(int32) :: ierr
+
+#ifdef __INTEL_COMPILER
       logical :: lflag
 
-      ierr = 0
       inquire(directory=dirname, exist=lflag)
       if (lflag) then
          print '(1x, a, a)', &
             INFOMSG, 'Directory  "'//dirname//'"  already exists.'
          return
       endif
+#endif
 
 #ifdef _WIN32
       cmd = 'mkdir '//dirname(3:12)  ! BUG: fix this!!
 #else
       cmd = 'mkdir '//dirname
 #endif
+      ierr = 0
       call execute_command_line(cmd, .true., ierr)
       if (ierr == 0) return
       

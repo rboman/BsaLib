@@ -511,8 +511,11 @@ contains
 
    subroutine computeISOTriangle(this)
       use BsaLib_Data, only: &
-         dimM_bisp_, getBFM_msh, settings  &
-         , m3mf_msh_ptr_, msh_NZones, msh_bfmpts_pre_
+         dimM_bisp_, getBFM_msh     &
+#ifdef _BSA_M3MF_ONLY_PREMESH
+         , settings, m3mf_msh_ptr_  &
+#endif
+         , msh_NZones, msh_bfmpts_pre_
       class(MTriangZone_t), intent(inout) :: this
 
 #ifdef _BSA_USE_CACHED_POD_DATA

@@ -713,7 +713,7 @@ contains
    module subroutine bsa_setOutputDirectory(dirname)
       character(len=*), intent(in) :: dirname
 
-      out_dir_ = appendFilesep(dirname)
+      out_dir_ = io_appendFilesep(dirname)
    end subroutine
 
 
@@ -1519,8 +1519,8 @@ contains
       !! BUG: adapt to a more general XSI management..
       character(len = *), intent(in) :: fname
       real(bsa_real_t), intent(in)   :: bkg(:), res(:), xsi(:)
-      integer(int32) :: iun, im, j
-      ! integer(int32) :: s2
+      integer(int32) :: iun, im
+      ! integer(int32) :: s2, j
 
       ! s2  = size(bkg, 2)
       iun = io_openExportFileByName(fname)
@@ -1866,28 +1866,21 @@ contains
 
 
 
-   module subroutine bsa_exportPSDToFile(fname, psd, varname, f)
+   module subroutine bsa_exportPSDToFile(fname, psd, f)
       character(len = *), intent(in) :: fname
-      character(len = *), intent(in), optional :: varname
-      real(bsa_real_t), intent(in), optional   :: f(:)
-      real(bsa_real_t), intent(in)             :: psd(:, :)
-      real(bsa_real_t), allocatable            :: tmp(:)
-      
-      integer(int32) :: s1, s2, iun, j
+      real(bsa_real_t),   intent(in) :: psd(:, :)
+      real(bsa_real_t),   intent(in), optional :: f(:)
 
-      s1 = size(psd, 1)
-      s2 = size(psd, 2)
+      real(bsa_real_t), allocatable :: tmp(:)
+      integer(int32) :: s1, s2, iun, j
 
       iun = io_openExportFileByName(exp_dir_ // fname)
       if (iun == 0) call bsa_Abort()
-! #ifdef _BSA_DEBUG
-!       write(unit_debug_, '(1x, 3a, ", shapes = ", 2i5)') &
-!          INFOMSG//' writing psd  to file ', fname, shape(psd)
-! #endif
 
+      s1 = size(psd, 1)
+      s2 = size(psd, 2)
       write(iun, *) s1
       write(iun, *) s2
-
       
       ! NOTE: different from writing bisp
       ! BUG: need this dummy variable in order to avoid 
@@ -1906,13 +1899,6 @@ contains
       endif
       close(iun)
       deallocate(tmp)
-
-! #ifdef _BSA_DEBUG
-!       if (present(varname)) & 
-!          write(unit_debug_, '(1x, 5a)') &
-!             INFOMSG, '@Utils::bsa_exportPSDToFile() : ', varname, &
-!                ' correctly written to file ', fname
-! #endif
    end subroutine
 
 

@@ -197,7 +197,6 @@ module BsaLib_MRectZone
 
          !> Delta values
          real(bsa_real_t), value :: dfi, dfj
-!DIR$ ATTRIBUTES VALUE :: dfi, dfj
 
          !> Max deltas values
          real(bsa_real_t) :: maxF_i, maxF_j

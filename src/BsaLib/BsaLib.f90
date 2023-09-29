@@ -510,11 +510,10 @@ module BsaLib
 
 
 
-      module subroutine bsa_exportPSDToFile(fname, psd, varname, f)
+      module subroutine bsa_exportPSDToFile(fname, psd, f)
          character(len = *), intent(in) :: fname
-         character(len = *), intent(in), optional :: varname
-         real(bsa_real_t), intent(in),   optional :: f(:)
-         real(bsa_real_t), intent(in) :: psd(:, :)
+         real(bsa_real_t),   intent(in) :: psd(:, :)
+         real(bsa_real_t),   intent(in), optional :: f(:)
       end subroutine
 
 

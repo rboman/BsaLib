@@ -1331,7 +1331,9 @@ contains
 
 #ifndef _BSA_USE_CACHED_POD_DATA
       real(bsa_real_t), allocatable :: bfm_undump(:, :)
+# ifndef _OPENMP
       character(len = 128)          :: emsg
+# endif
 #endif
 
       class(*), pointer :: brm_export_data_ => null()

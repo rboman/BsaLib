@@ -89,9 +89,6 @@ module BsaLib_CONSTANTS
    character(len = *), parameter :: IO_ASYNC_YES = 'YES'
    character(len = *), parameter :: IO_ASYNC_NO  = 'NO'
 
-   character(len = *), parameter :: IO_BUFFERED_YES = 'YES'
-   character(len = *), parameter :: IO_BUFFERED_NO  = 'NO'
-
    character(len = *), parameter :: IO_FORM_FORMATTED   = 'FORMATTED'
    character(len = *), parameter :: IO_FORM_UNFORMATTED = 'UNFORMATTED'
    character(len = *), parameter :: IO_FORM_BINARY      = 'BINARY'

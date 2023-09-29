@@ -19,8 +19,6 @@ submodule(Logging) LoggingImpl
    use BsaLib_Data, only: bsa_Abort
    implicit none
    character(len = 256) :: fmt
-   character(len=0),  parameter :: lev0 = ''
-   character(len=3),  parameter :: lev1 = '   '
 
 
 contains

@@ -258,7 +258,6 @@ contains
 
       !> Delta values
       real(bsa_real_t), value :: dfi, dfj
-!DIR$ ATTRIBUTES VALUE :: dfi, dfj
 
       !> Max deltas values
       real(bsa_real_t) :: maxF_i, maxF_j
@@ -1102,9 +1101,14 @@ contains
    !> Actual zone comutation (pre phase).
    module subroutine compute_s(this)
       use BsaLib_Data, only: &
-         dimM_bisp_, getBFM_msh, settings                &
-         , m3mf_msh_ptr_, msh_NZones, msh_bfmpts_pre_    &
-         , do_export_POD_trunc_
+         dimM_bisp_, getBFM_msh     &
+#ifdef _BSA_M3MF_ONLY_PREMESH
+         , settings, m3mf_msh_ptr_  &
+#endif
+#ifdef _BSA_EXPORT_POD_TRUNC_INFO
+         , do_export_POD_trunc_     &
+#endif
+         , msh_NZones, msh_bfmpts_pre_
 
 #ifdef _BSA_EXPORT_POD_TRUNC_INFO
 # ifdef _OPENMP

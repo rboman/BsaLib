@@ -43,7 +43,6 @@ module BsaLib_IO
    character(len = :), private, allocatable :: export_file_access_
    character(len = :), private, allocatable :: export_file_action_
    character(len = :), private, allocatable :: export_file_async_
-   character(len = :), private, allocatable :: export_file_buffrd_
    character(len = :), private, allocatable :: export_file_form_
    character(len = :), private, allocatable :: export_file_position_
    character(len = :), private, allocatable :: export_file_status_
@@ -67,7 +66,7 @@ contains
       !! Sets export directory to a different path than outdir.
       character(len = *), intent(in) :: dirname
 
-      exp_dir_ = appendFilesep(dirname)
+      exp_dir_ = io_appendFilesep(dirname)
    end subroutine
 
 
@@ -131,7 +130,6 @@ contains
       if (.not. allocated(export_file_access_))   export_file_access_   = IO_ACCESS_SEQUEN
       if (.not. allocated(export_file_action_))   export_file_action_   = IO_ACTION_WRITE
       if (.not. allocated(export_file_async_))    export_file_async_    = IO_ASYNC_NO
-      if (.not. allocated(export_file_buffrd_))   export_file_buffrd_   = IO_BUFFERED_NO
       if (.not. allocated(export_file_form_))     export_file_form_     = IO_FORM_FORMATTED
       if (.not. allocated(export_file_position_)) export_file_position_ = IO_POSITION_ASIS
       if (.not. allocated(export_file_status_))   export_file_status_   = IO_STATUS_UNKNOWN
@@ -144,7 +142,6 @@ contains
       export_file_access_   = IO_ACCESS_SEQUEN
       export_file_action_   = IO_ACTION_WRITE
       export_file_async_    = IO_ASYNC_NO
-      export_file_buffrd_   = IO_BUFFERED_NO
       export_file_form_     = IO_FORM_FORMATTED
       export_file_position_ = IO_POSITION_ASIS
       export_file_status_   = IO_STATUS_UNKNOWN
@@ -164,7 +161,6 @@ contains
          , access=export_file_access_      &
          , action=export_file_action_      &
          , asynchronous=export_file_async_ &
-         , buffered=export_file_buffrd_    &
          , form=export_file_form_          &
          , position=export_file_position_  &
          , status=export_file_status_)
@@ -253,7 +249,7 @@ contains
 
 
 
-   function appendFilesep(path) result(res)
+   function io_appendFilesep(path) result(res)
       character(len = *), intent(in)  :: path
       character(len = :), allocatable :: res
       character(len = 1) :: filesep

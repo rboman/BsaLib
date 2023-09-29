@@ -2491,7 +2491,7 @@ contains
    !>      convention on PULSATION.
    !>      Please, adapt it to the case of convention over FREQUENCIES.
    module pure subroutine getFM_full_tnlm_scalar_cls_(ii, ij, fi, fj, Suvw, Suvw_pad, psd, bisp)
-      integer, intent(in)      :: ii, ij
+      integer(bsa_int_t), intent(in)  :: ii, ij
       real(bsa_real_t), intent(in)    :: fi, fj
       real(bsa_real_t), intent(in)    :: Suvw(NFREQS, NPSDEL)
       real(bsa_real_t), intent(in)    :: Suvw_pad(NPSDEL)
@@ -2742,7 +2742,7 @@ contains
    !>      convention on PULSATION.
    !>      Please, adapt it to the case of convention over FREQUENCIES.
    module pure subroutine getFM_full_tnm_scalar_cls_(ii, ij, fi, fj, Suvw, Suvw_pad, psd, bisp)
-      integer, intent(in)      :: ii, ij
+      integer(bsa_int_t), intent(in)  :: ii, ij
       real(bsa_real_t), intent(in)    :: fi, fj
       real(bsa_real_t), intent(in)    :: Suvw(NFREQS, NPSDEL)
       real(bsa_real_t), intent(in)    :: Suvw_pad(NPSDEL)
@@ -2960,7 +2960,7 @@ contains
 
 
    module subroutine getRM_full_scalar_cls_(ii, ij, fi, fj, psdin, psdout, bispin, bispout)
-      integer, intent(in)      :: ii, ij
+      integer(bsa_int_t), intent(in)  :: ii, ij
       real(bsa_real_t), intent(in)    :: fi, fj
       real(bsa_real_t), intent(in)    :: psdin(dimM_psd_), bispin(dimM_bisp_)
       real(bsa_real_t), intent(out)   :: psdout(dimM_psd_), bispout(dimM_bisp_)
@@ -3091,21 +3091,18 @@ contains
    !>      convention on PULSATION.
    !>      Please, adapt it to the case of convention over FREQUENCIES.
    module pure subroutine getFM_diag_tnlm_scalar_cls_(ii, ij, fi, fj, Suvw, Suvw_pad, psd, bisp)
-      integer, intent(in)      :: ii, ij
+      integer(bsa_int_t), intent(in)  :: ii, ij
       real(bsa_real_t), intent(in)    :: fi, fj
       real(bsa_real_t), intent(in)    :: Suvw(NFREQS, NPSDEL)
       real(bsa_real_t), intent(in)    :: Suvw_pad(NPSDEL)
       real(bsa_real_t), intent(inout) :: psd(dimM_psd_), bisp(dimM_bisp_)
 
-      integer(int32) :: itc, tc, tcP3, iposN, inode, n, imode, posNi
-
+      integer(int32)   :: itc, tc, tcP3, iposN, inode, n, imode, posNi
       real(bsa_real_t) :: Suvw_i
 
       real(bsa_real_t), dimension(NLIBSL, NMODES_EFF) :: phiN_
       real(bsa_real_t), dimension(NLIBSL, NLIBSL) :: PSDF_jk_JJ_w, tmp3, phiIJ_
       real(bsa_real_t), dimension(NLIBSL) :: aNU, aN
-
-      ! logical :: lflag = .false.
 
 
       psd  = 0._bsa_real_t
@@ -3145,11 +3142,8 @@ contains
 
                   psd(imode) = psd(imode) + &
                      sum(phiIJ_ * PSDF_jk_JJ_w)
-
                enddo ! n modes
-
             endif ! ij == 1
-
 
 
             if (settings%i_compute_bisp_ == 1) then
@@ -3207,7 +3201,7 @@ contains
 
 
    module subroutine getRM_diag_scalar_cls_(ii, ij, fi, fj, psdin, psdout, bispin, bispout)
-      integer, intent(in)      :: ii, ij  ! freqs indexes
+      integer(bsa_int_t), intent(in)  :: ii, ij  ! freqs indexes
       real(bsa_real_t), intent(in)    :: fi, fj
       real(bsa_real_t), intent(in)    :: psdin(dimM_psd_), bispin(dimM_bisp_)
       real(bsa_real_t), intent(out)   :: psdout(dimM_psd_), bispout(dimM_bisp_)
@@ -3289,7 +3283,7 @@ contains
    module pure subroutine getBR_SFm_val_(nm, Suvw, fnat, im, m, psd)
       !! BUG: very unoptimised..
       !!      is basically a small copy of "getFM_full_tnlm_scalar_cls_"
-      integer, intent(in)      :: im, m, nm
+      integer(bsa_int_t), intent(in)  :: im, m, nm
       real(bsa_real_t), intent(in)    :: Suvw(nm, NPSDEL), fnat
       real(bsa_real_t), intent(inout) :: psd
 

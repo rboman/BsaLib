@@ -112,7 +112,7 @@ contains
 #ifdef _BSA_DEBUG
       write(unit_debug_, *) INFOMSG, '@BsaClassicImpl::mainClassic_() : computing nodal wind turbulence PSDs -- ok.'
    
-      call bsa_exportPSDToFile('psdS_UVW.txt', S_uvw, 'psdS_UVW', f)
+      call bsa_exportPSDToFile('psd_Suvw.txt', S_uvw, f)
 #endif
 
       block
@@ -142,7 +142,7 @@ contains
             call getBFM_vect_cls(f, S_uvw, psd, bisp)
             if (allocated(S_uvw)) deallocate(S_uvw)
             call intgSpectraVect_(settings%nfreqs_, f, psd=psd, m2=m2mf_cls, bisp=bisp, m3=m3mf_cls)
-            if (settings%i_compute_psd_ == 1) call bsa_exportPSDToFile('psdmf.txt', psd, 'psdmf', f)
+            if (settings%i_compute_psd_ == 1) call bsa_exportPSDToFile('psdmf.txt', psd, f)
 
 
             !===========================================================
@@ -150,7 +150,7 @@ contains
             !
             call getBRM_vect_cls(f, psd, bisp)
             call intgSpectraVect_(settings%nfreqs_, f, psd=psd, m2=m2mr_cls, bisp=bisp, m3=m3mr_cls)
-            if (settings%i_compute_psd_ == 1) call bsa_exportPSDToFile('psdmr.txt', psd, 'psdmr', f)
+            if (settings%i_compute_psd_ == 1) call bsa_exportPSDToFile('psdmr.txt', psd, f)
             
             block
                real(bsa_real_t), allocatable :: omegas(:)

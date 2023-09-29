@@ -96,16 +96,14 @@ module BsaLib_Data
    procedure(getBRMClsVect), pointer :: getBRM_vect_cls => null()
    abstract interface
       subroutine getBFMClsVect(f, Suvw, psd, bisp)
-         import :: bsa_real_t
-         import :: settings, struct_data, wd
+         import :: bsa_real_t, settings, struct_data, wd
          real(bsa_real_t), intent(in) :: f(settings%nfreqs_)
          real(bsa_real_t), intent(in) :: Suvw(settings%nfreqs_, struct_data%nn_load_ * wd%i_ndirs_ * wd%i_ntc_)
          real(bsa_real_t), allocatable, intent(inout) :: psd(:, :), bisp(:, :, :)
       end subroutine
 
       subroutine getBRMClsVect(f, psd, bisp)
-         import :: bsa_real_t
-         import :: settings
+         import :: bsa_real_t, settings
          real(bsa_real_t), intent(in)                 :: f(settings%nfreqs_)
          real(bsa_real_t), allocatable, intent(inout) :: psd(:, :), bisp(:, :, :)
       end subroutine
@@ -116,21 +114,21 @@ module BsaLib_Data
    procedure(getBRMClsScalar), pointer :: getBRM_scalar_cls => null()
    abstract interface
       pure subroutine getBFMClsScalar(ii, ij, fi, fj, Suvw, Suvw_pad, psd, bisp)
-         import :: bsa_real_t, dimM_psd_, dimM_bisp_
+         import :: bsa_int_t, bsa_real_t, dimM_psd_, dimM_bisp_
          import :: settings, struct_data, wd
-         integer, intent(in)   :: ii, ij
-         real(bsa_real_t), intent(in) :: fi, fj
-         real(bsa_real_t), intent(in) :: Suvw(settings%nfreqs_, struct_data%nn_load_ * wd%i_ndirs_ * wd%i_ntc_)
+         integer(bsa_int_t), intent(in)  :: ii, ij
+         real(bsa_real_t), intent(in)    :: fi, fj
+         real(bsa_real_t), intent(in)    :: Suvw(settings%nfreqs_, struct_data%nn_load_ * wd%i_ndirs_ * wd%i_ntc_)
          real(bsa_real_t), intent(in)    :: Suvw_pad(struct_data%nn_load_ * wd%i_ndirs_ * wd%i_ntc_)
          real(bsa_real_t), intent(inout) :: psd(dimM_psd_), bisp(dimM_bisp_)
       end subroutine
 
       subroutine getBRMClsScalar(ii, ij, fi, fj, psdin, psdout, bispin, bispout)
-         import :: bsa_real_t, dimM_psd_, dimM_bisp_
-         integer, intent(in)    :: ii, ij  ! freqs indexes
-         real(bsa_real_t), intent(in)  :: fi, fj
-         real(bsa_real_t), intent(in)  :: psdin(dimM_psd_), bispin(dimM_bisp_)
-         real(bsa_real_t), intent(out) :: psdout(dimM_psd_), bispout(dimM_bisp_)
+         import :: bsa_int_t, bsa_real_t, dimM_psd_, dimM_bisp_
+         integer(bsa_int_t), intent(in) :: ii, ij
+         real(bsa_real_t), intent(in)   :: fi, fj
+         real(bsa_real_t), intent(in)   :: psdin(dimM_psd_), bispin(dimM_bisp_)
+         real(bsa_real_t), intent(out)  :: psdout(dimM_psd_), bispout(dimM_bisp_)
       end subroutine
    end interface
 

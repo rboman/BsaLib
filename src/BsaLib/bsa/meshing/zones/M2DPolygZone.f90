@@ -92,8 +92,7 @@ contains
 
    subroutine setRotation(this, rot, deg)
       class(M2DPolygZone_t), intent(inout) :: this
-      real(bsa_real_t), value :: rot
-!DIR$ ATTRIBUTES VALUE :: rot
+      real(bsa_real_t), value       :: rot
       logical, intent(in), optional :: deg
       logical :: is_deg = .false.
       integer(int32) :: n2pirot = 0
@@ -122,7 +121,7 @@ contains
    elemental function isGRSAligned(this) result(bool)
       class(M2DPolygZone_t), intent(in) :: this
       logical :: bool
-		
+
       bool = .false.
 
       if (this%rot_ == 0._bsa_real_t .or. &
