@@ -16,9 +16,9 @@
 submodule(BsaLib_Structure) BsaLib_StructDataImpl
 
    use Logging
-   use BsaLib_IO, only: INFOMSG, WARNMSG, ERRMSG, MSGCONT, DBGMSG &
-                        , BSA_STRUCT_DATA_DUMPFILE, unit_debug_
-   use BsaLib_Data, only: bsa_Abort
+   use BsaLib_IO,        only: unit_debug_
+   use BsaLib_Data,      only: bsa_Abort
+   use BsaLib_CONSTANTS, only: INFOMSG, WARNMSG, ERRMSG, MSGCONT, DBGMSG, BSA_STRUCT_DATA_DUMPFILE
    implicit none
 
 

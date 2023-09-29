@@ -17,10 +17,10 @@ submodule(BsaLib_Functions) BsaLib_FunctionsImpl
 
    use Logging
    use BsaLib_Utility
-   use BsaLib_Data, only: bsa_Abort, &
-      do_trunc_POD_, POD_trunc_lim_, nPODmodes_set_, nmodes_POD_, do_export_POD_trunc_
-   use BsaLib_IO, only: INFOMSG, WARNMSG, ERRMSG, MSGCONT, DBGMSG, NOTEMSG &
-                        , unit_dump_bfm_, unit_debug_, undebug_fname_
+   use BsaLib_CONSTANTS, only: INFOMSG, WARNMSG, ERRMSG, MSGCONT, DBGMSG, NOTEMSG
+   use BsaLib_IO,        only: unit_dump_bfm_, unit_debug_, undebug_fname_
+   use BsaLib_Data,      only: bsa_Abort &
+      , do_trunc_POD_, POD_trunc_lim_, nPODmodes_set_, nmodes_POD_, do_export_POD_trunc_
    implicit none
 
    

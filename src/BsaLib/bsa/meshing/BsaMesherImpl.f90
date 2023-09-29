@@ -16,14 +16,15 @@
 submodule(BsaLib) BsaLib_MesherImpl
 
    use BsaLib_Data
-   use BsaLib_MPoint
-   use BsaLib_MRectZone
-   use BsaLib_MTriangZone
    use BsaLib_MPolicy
-   use BsaLib_Functions, only: prefetchSVDWorkDim_ &
-      , NFREQS, NNODES, NNODESL, NLIBS, NLIBSL     &
-      , NMODES, NMODES_EFF, MODES                  &
-      , NPSDEL, NTCOMPS, NDIRS, TCOMPS, DIRS       &
+   use BsaLib_IO,          only: unit_dump_bfm_
+   use BsaLib_MPoint,      only: MPoint_t, MPoint
+   use BsaLib_MRectZone,   only: MRectZone_t, MRectZone
+   use BsaLib_MTriangZone, only: MTriangZone_t, MTriangZone
+   use BsaLib_Functions,   only: prefetchSVDWorkDim_  &
+      , NFREQS, NNODES, NNODESL, NLIBS, NLIBSL        &
+      , NMODES, NMODES_EFF, MODES                     &
+      , NPSDEL, NTCOMPS, NDIRS, TCOMPS, DIRS          &
       , MSHR_SVD_INFO, MSHR_SVD_LWORK, MSHR_SVD_WORK
    implicit none
 
@@ -1323,7 +1324,7 @@ contains
       !! BFM data is interpolated based on interpolation method.
       !! Supported methods:
       !!    - HTPC : Head-Tail-Previous-Current
-      use BsaLib_MZone, only: MZone_t
+      use BsaLib_MZone, only: MZone_t, MZone_ID, UndumpZone
       integer(int32) :: izone_id, izone, ival2
       class(MZone_t), pointer     :: z => null()
       type(MRectZone_t), target   :: rz

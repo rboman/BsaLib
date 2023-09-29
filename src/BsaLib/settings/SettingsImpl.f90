@@ -15,10 +15,10 @@
 !! along with BSA Library.  If not, see <https://www.gnu.org/licenses/>.
 submodule(BsaLib_Settings) BsaLib_SettingsImpl
 
-   use BsaLib_IO, only: INFOMSG, WARNMSG, ERRMSG, MSGCONT, DBGMSG &
-                        , BSA_SETTS_DATA_DUMPFILE, unit_debug_
-   use BsaLib_Data, only: bsa_Abort
-   use BsaLib_CONSTANTS, only: BSA_SPATIAL_SYM_NONE
+   use BsaLib_IO,        only:  unit_debug_
+   use BsaLib_Data,      only:  bsa_Abort
+   use BsaLib_CONSTANTS, only:  INFOMSG, WARNMSG, ERRMSG, MSGCONT, DBGMSG &
+                              , BSA_SETTS_DATA_DUMPFILE, BSA_SPATIAL_SYM_NONE
    implicit none
 
 contains

@@ -16,7 +16,6 @@
 module BsaLib
 
    use BsaLib_CONSTANTS
-   use BsaLib_IO
    implicit none
    public
 

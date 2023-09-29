@@ -15,9 +15,8 @@
 !! along with BSA Library.  If not, see <https://www.gnu.org/licenses/>.
 submodule(BsaLib_Data) BsaLib_DataImpl
 
-   use BsaLib_IO, only: &
-      INFOMSG, WARNMSG, ERRMSG, MSGCONT, DBGMSG, &
-      unit_debug_, unit_dump_bfm_, unit_dump_brm_
+   use BsaLib_CONSTANTS, only: INFOMSG, WARNMSG, ERRMSG, MSGCONT, DBGMSG
+   use BsaLib_IO,        only: unit_debug_, unit_dump_bfm_, unit_dump_brm_
    implicit none
 
 contains

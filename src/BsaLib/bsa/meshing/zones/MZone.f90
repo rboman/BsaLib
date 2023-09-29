@@ -15,26 +15,14 @@
 !! along with BSA Library.  If not, see <https://www.gnu.org/licenses/>.
 module BsaLib_MZone
 
-   use BsaLib_CONSTANTS
-   use BsaLib_MPolicy
-   use BsaLib_IO,   only: unit_dump_bfm_, unit_debug_, undebug_fname_
-   use BsaLib_Data, only: bsa_Abort, test_no_bfm_mlr_
+   use BsaLib_CONSTANTS, only: bsa_int_t, bsa_real_t, int32
+   use BsaLib_Data,      only: bsa_Abort, test_no_bfm_mlr_
+   use BsaLib_IO,        only: unit_dump_bfm_
+   use BsaLib_MPolicy,   only: MPolicy_t, MPolicy_NULL, assignment(=), operator(==)
    implicit none
    private
-
    public :: DefaultInitBaseZone, DumpZone, UndumpZone
-
-   ! BUG: make them public to child MZone classes. Not optimal!!
-   public :: unit_debug_, unit_dump_bfm_
-
-   ! BUG: same as before, export constants values
-   public :: CST_2d3, CST_3d2, CST_PId2
-   public :: CST_PIGREC, CST_PIt2, CST_PIt3d2, CST_PIt4
-
-
-   !> Tracks zone with max N. of points
-   integer(int32), public :: msh_max_zone_NPts = 0
-
+   
    type, public :: MZoneEnum_t
       integer(int32) :: NULL      = 0
       integer(int32) :: RECTANGLE = 1

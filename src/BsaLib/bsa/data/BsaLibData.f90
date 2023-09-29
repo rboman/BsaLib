@@ -144,6 +144,9 @@ module BsaLib_Data
    integer(bsa_int_t), public :: ipre_mesh_mode = BSA_PREMESH_MODE_ZONE_REFINED
    integer(bsa_int_t), public :: msh_iZone
 
+   !> Tracks zone with max N. of points
+   integer(bsa_int_t), public :: msh_max_zone_NPts = 0
+
    !> Controls if checking zone's deltas or not.
    logical :: do_validate_deltas_ = .true.
    

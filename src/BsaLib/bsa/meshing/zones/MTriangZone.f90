@@ -15,17 +15,11 @@
 !! along with BSA Library.  If not, see <https://www.gnu.org/licenses/>.
 module BsaLib_MTriangZone
    
-   use BsaLib_CONSTANTS
-   use BsaLib_MPoint
-   use BsaLib_M2DPolygZone
+   use BsaLib_CONSTANTS,    only: bsa_real_t, bsa_int_t
+   use BsaLib_MPoint,       only: MPoint_t
+   use BsaLib_M2DPolygZone, only: M2DPolygZone_t
    implicit none
    private
-
-   ! imported from <- BsaLib_M2DPolygZone <- BsaLib_MZone
-   public :: msh_max_zone_NPts
-
-   ! Make it visible without needing to import Base class module 
-   public :: UndumpZone
    
 
    ! TODO: triang and rect actually share almost everything..

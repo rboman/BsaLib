@@ -25,8 +25,10 @@ submodule(BsaLib_MRectZone) BsaLib_MRectZoneImpl
 ! #endif
 
    use BsaLib_CONSTANTS
-   use BsaLib_Data, only: bsa_Abort
-   use BsaLib_IO, only: INFOMSG, WARNMSG, ERRMSG, MSGCONT, DBGMSG, NOTEMSG
+   use BsaLib_Data,     only: bsa_Abort, msh_max_zone_NPts
+   use BsaLib_IO,       only: unit_dump_bfm_
+   use BsaLib_MPoint,   only: MPoint, MPoint_t, getPointsDistance
+   use BsaLib_MZone,    only: DefaultInitBaseZone, MZone_ID, DumpZone
    implicit none
 
 
@@ -1323,9 +1325,9 @@ contains
          write(iun, '( *(g, 2x) )') dfJi, dfJj
          write(iun, '( *(g, 2x) )') fj_v_save_
          block
-            integer :: i
-            do i = 1, zNp
-               write(iun, '( *(g, 2x) )')  bfm(:, i)
+            integer :: i_
+            do i_ = 1, zNp
+               write(iun, '( *(g, 2x) )')  bfm(:, i_)
             enddo
          end block
          deallocate(fi_v_save_)

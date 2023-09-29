@@ -15,13 +15,14 @@
 !! along with BSA Library.  If not, see <https://www.gnu.org/licenses/>.
 module BsaLib_M2DPolygZone
 
-   use BsaLib_CONSTANTS, only: int32, bsa_real_t, bsa_int_t
-   use BsaLib_MPoint
-   use BsaLib_MZone
+   use BsaLib_CONSTANTS, only: int32, bsa_real_t, bsa_int_t &
+                              , CST_PIGREC, CST_PIt2, CST_PId2, CST_PIt3d2
+   use BsaLib_MPoint,    only: MPoint_t
+   use BsaLib_MZone,     only: MZone_t
    implicit none
-   public
+   private
 
-   type, public, abstract, extends(MZone_t) :: M2DPolygZone_t
+   type, public, abstract, extends(MZone_t) :: M2DPolygZone_t   
 
       !> Refinement (n meshing pts) along I-dir
       integer(int32) :: ni_ = 0

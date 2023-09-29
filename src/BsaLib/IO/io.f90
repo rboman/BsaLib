@@ -29,15 +29,15 @@ module BsaLib_IO
    integer(int32) :: unit_dump_brm_ = 1204_int32
 
    ! debug
-   integer(int32) :: unit_debug_ = 99999_int32
+   integer(int32)                  :: unit_debug_ = 99999_int32
    character(len = :), allocatable :: undebug_fname_
 
 
    !**************************************************************************
    !  EXPORTING STATE VARIABLES
    !**************************************************************************
+   logical                         :: export_in_cwd_ = .true.
    character(len = :), allocatable :: exp_dir_ ! either export, or default (out) if none set.
-   logical :: export_in_cwd_ = .true.
 
    ! NOTE: might be private..
    character(len = :), private, allocatable :: export_file_access_

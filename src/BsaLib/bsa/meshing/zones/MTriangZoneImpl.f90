@@ -24,8 +24,11 @@ submodule(BsaLib_MTriangZone) BsaLib_MTriangZoneImpl
 ! # endif
 ! #endif
 
-   use BsaLib_Data, only: bsa_Abort
-   use BsaLib_IO, only: INFOMSG, WARNMSG, ERRMSG, MSGCONT, DBGMSG, NOTEMSG
+   use BsaLib_CONSTANTS
+   use BsaLib_MPoint,    only: MPoint_t, MPoint, getPointsDistance, assignment(=), operator(==)
+   use BsaLib_MZone,     only: MZone_ID, DUmpZone
+   use BsaLib_Data,      only: bsa_Abort, msh_max_zone_NPts
+   use BsaLib_IO,        only: unit_dump_bfm_
    implicit none
 
 
