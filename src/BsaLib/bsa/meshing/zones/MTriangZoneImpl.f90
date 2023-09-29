@@ -812,6 +812,6 @@ contains
 
 
 #define __triang_zone__
-#include 'zones/_interp_poly2d.fi'
+#include '_interp_poly2d.fi'
 
 end submodule
