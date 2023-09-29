@@ -115,6 +115,9 @@
 # ifdef _BSA_USE_CACHED_POD_DATA
       real(RK), allocatable :: bfm_undump(:, :)
       integer(int32) :: i_bfm
+#   ifdef __triang_zone__
+      integer(int32) :: i_bfm_offs
+#   endif
 # endif
 #endif
 
@@ -553,6 +556,9 @@
 #endif
       
 #ifdef _BSA_USE_CACHED_POD_DATA
+#   ifdef __triang_zone__
+      i_bfm_offs         = 0
+#   endif
       i_bfm              = 1
 #endif
       bfmtail            = bfm_undump(:, 1:1)
@@ -762,15 +768,15 @@
          do i_bfm_ref_i = 1, n_pts_bfm_ref_i_ ! loop on all REF BFM pts between 2 old (I-dir)
 
             ! computing BRM offset from pi_prev and pi_curr J infl lines.
-#ifndef __triang_zone__
-            i_brm_shift  = i_brm + i_brm_offsetJ
-#else
+#ifdef __triang_zone__
             i_brm_shift = i_brm
             njNew_tmp   = njNew_picurr
             do pJhead = 1, nipI
                njNew_tmp   = njNew_tmp - 1
                i_brm_shift = i_brm_shift + njNew_tmp
-            enddo
+            enddo       
+#else
+            i_brm_shift  = i_brm + i_brm_offsetJ
 #endif
             
             i_brm_write_ = i_brm_shift
@@ -1190,6 +1196,10 @@
 
             ! moving right, shift infl-lines.
 #ifdef __triang_zone__
+#  ifdef _BSA_USE_CACHED_POD_DATA
+            i_bfm_offs = i_bfm_offs + 1 
+            i_bfm      = i_bfm + i_bfm_offs
+#  endif
             bfm_new_left(:, 1:njNew_picurr) = bfm_new_right(:, 1:njNew_picurr)
 #else
             bfm_new_left = bfm_new_right
@@ -1205,16 +1215,17 @@
          !
 
          ! computing BRM offset from pi_prev and pi_curr J infl lines.
-#ifndef __triang_zone__
-         i_brm_shift  = i_brm + i_brm_offsetJ
-#else
+#ifdef __triang_zone__
          i_brm_shift  = i_brm
          njNew_tmp    = njNew_picurr
          do pJhead = 1, nipI
             njNew_tmp   = njNew_tmp - 1
             i_brm_shift = i_brm_shift + njNew_tmp
-         enddo
+         enddo    
+#else
+         i_brm_shift  = i_brm + i_brm_offsetJ
 #endif
+
          i_brm_write_ = i_brm_shift
 
          ! again, I bases refer to PREV infl line.
@@ -1575,6 +1586,10 @@
          
 
 #ifdef __triang_zone__
+#  ifdef _BSA_USE_CACHED_POD_DATA
+         i_bfm_offs = i_bfm_offs + 1 
+         i_bfm      = i_bfm + i_bfm_offs
+#  endif
          njOld = njOld - 1
          
          bfm_new_left(:, 1 : njNew_picurr) = bfm_new_right(:, 1 : njNew_picurr)
