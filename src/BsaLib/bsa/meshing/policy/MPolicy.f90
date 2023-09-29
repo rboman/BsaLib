@@ -94,22 +94,14 @@ contains
       integer, intent(in) :: dfi, dfj, interp_bfm_i, interp_bfm_j, interpi, interpj, nlevs, id
       type(MPolicy_t) :: pol
 
-      ! pol = MPolicy_t(&
-      !    int(dfi, kind = 4),          &
-      !    int(dfj, kind = 4),          &
-      !    int(interp_bfm_i, kind = 4), &
-      !    int(interp_bfm_j, kind = 4), &
-      !    int(interpi, kind = 4),      &
-      !    int(interpj, kind = 4),      &
-      !    id)
-      pol%delta_fI_fct_     = int(dfi, kind = int32)
-      pol%delta_fJ_fct_     = int(dfj, kind = int32)
-      pol%interp_bfm_I_fct_ = int(interp_bfm_i, kind = int32)
-      pol%interp_bfm_J_fct_ = int(interp_bfm_j, kind = int32)
-      pol%interp_I_fct_     = int(interpi, kind = int32)
-      pol%interp_J_fct_     = int(interpj, kind = int32)
-      pol%n_interp_bfm_lvs_ = int(nlevs, kind = int32)
-      pol%id_pol_           = int(id, kind = int32)
+      pol%delta_fI_fct_     = int(dfi,          kind=int32)
+      pol%delta_fJ_fct_     = int(dfj,          kind=int32)
+      pol%interp_bfm_I_fct_ = int(interp_bfm_i, kind=int32)
+      pol%interp_bfm_J_fct_ = int(interp_bfm_j, kind=int32)
+      pol%interp_I_fct_     = int(interpi,      kind=int32)
+      pol%interp_J_fct_     = int(interpj,      kind=int32)
+      pol%n_interp_bfm_lvs_ = int(nlevs,        kind=int32)
+      pol%id_pol_           = int(id,           kind=int32)
    end function
 
 

@@ -15,7 +15,7 @@
 !! along with BSA Library.  If not, see <https://www.gnu.org/licenses/>.
 submodule(Logging) LoggingImpl
 
-   use BsaLib_IO, only: INFOMSG, WARNMSG, ERRMSG, MSGCONT, DBGMSG, NOTEMSG
+   use BsaLib_IO, only: INFOMSG, WARNMSG, ERRMSG, MSGCONT, DBGMSG, NOTEMSG, int32
    use BsaLib_Data, only: bsa_Abort
    implicit none
    character(len = 256) :: fmt
@@ -27,8 +27,8 @@ contains
 
 
    module subroutine init(this, iun, fname)
-      class(logger_t),   intent(inout) :: this
-      integer(kind = 4), intent(in)    :: iun
+      class(logger_t),  intent(inout) :: this
+      integer(int32),   intent(in)    :: iun
       character(len=*), intent(in), optional :: fname
 
       this%iun_ = iun

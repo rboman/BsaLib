@@ -53,9 +53,7 @@ module BsaLib_MTriangZone
       procedure, pass :: baseI => baseI_triang
       procedure, pass :: baseJ => baseJ_triang
 
-
       procedure, pass :: deduceDeltas => deduceDeltas_triang
-
 
       !> Returns total N of zone's meshing points.
       !> NOTE: for the moment, ONLY triangles rectangles supported
@@ -74,11 +72,9 @@ module BsaLib_MTriangZone
       !> Gets unary deltas along I and J dirs, based on zone rotation
       procedure, pass :: getRotatedUnaryDF
 
-      !> Completely defines a triang zone.
+      !> Completely defines a triang zone, from points C, A, B.
+      !> (NOTE: Either from refinements, or deltas)
       generic :: define => defineFromPts_norm, defineFromPts_refmtsORdeltas
-
-      !> Completely defines a triang zone from points C, A, B.
-      !> Either from refinements, or deltas
       procedure, pass, private :: defineFromPts_norm, defineFromPts_refmtsORdeltas
 
       !> Computes a finally defined triang zone.
@@ -242,15 +238,15 @@ module BsaLib_MTriangZone
 
       !> Implementation of triang zone interpolation methods
       module subroutine interpolateTZ( this &
-#ifdef __BSA_OMP
-         , bfm, pdata &
+#ifndef __BSA_USE_CACHED_POD_DATA
+         & , bfm   &
 #endif
-         & )
+         & , pdata )
          class(MTriangZone_t), intent(inout) :: this
-#ifdef __BSA_OMP
+#ifndef __BSA_USE_CACHED_POD_DATA
          real(bsa_real_t), intent(in)  :: bfm(:, :)
-         class(*), pointer, intent(in) :: pdata
 #endif
+         class(*), pointer, intent(in) :: pdata
       end subroutine
 
 

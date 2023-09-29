@@ -51,33 +51,35 @@ module BsaLib_Functions
 
 
       module function getFM_full_tnm_scalar_msh_(fi, fj) result(bfm)
-         real(bsa_real_t), intent(in) :: fi, fj
-         real(bsa_real_t) :: bfm(dimM_bisp_)
+         real(bsa_real_t), intent(in), contiguous :: fi(:), fj(:)
+         real(bsa_real_t) :: bfm(dimM_bisp_, size(fi)*size(fj))
       end function
 
 
       module function getFM_full_tm_scalar_msh_POD_(fi, fj) result(bfm)
-         real(bsa_real_t), intent(in) :: fi, fj
-         real(bsa_real_t) :: bfm(dimM_bisp_)
+         real(bsa_real_t), intent(in), contiguous :: fi(:), fj(:)
+         real(bsa_real_t) :: bfm(dimM_bisp_, size(fi)*size(fj))
       end function
 
 
-      module function getRM_full_scalar_msh_(bfm, fi, fj) result(brm)
-         real(bsa_real_t), intent(in) :: bfm(dimM_bisp_), fi, fj
-         real(bsa_real_t) :: brm(dimM_bisp_)
+      module function getRM_full_scalar_msh_(fi, fj, bfm) result(brm)
+         real(bsa_real_t), intent(in), contiguous :: fi(:), fj(:)
+         real(bsa_real_t), intent(in) :: bfm(dimM_bisp_, size(fi)*size(fj))
+         real(bsa_real_t) :: brm(dimM_bisp_, size(fi)*size(fj))
       end function
 
 
 
       module function getFM_diag_tnm_scalar_msh_(fi, fj) result(bfm)
-         real(bsa_real_t), intent(in) :: fi, fj
-         real(bsa_real_t) :: bfm(dimM_bisp_)
+         real(bsa_real_t), intent(in), contiguous :: fi(:), fj(:)
+         real(bsa_real_t) :: bfm(dimM_bisp_, size(fi)*size(fj))
       end function
 
 
-      module function getRM_diag_scalar_msh_(bfm, fi, fj) result(brm)
-         real(bsa_real_t), intent(in) :: bfm(dimM_bisp_), fi, fj
-         real(bsa_real_t) :: brm(dimM_bisp_)
+      module function getRM_diag_scalar_msh_(fi, fj, bfm) result(brm)
+         real(bsa_real_t), intent(in), contiguous :: fi(:), fj(:)
+         real(bsa_real_t), intent(in) :: bfm(dimM_bisp_, size(fi)*size(fj))
+         real(bsa_real_t) :: brm(dimM_bisp_, size(fi)*size(fj))
       end function
 
 

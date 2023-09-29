@@ -52,13 +52,13 @@ module BsaLib_M2DPolygZone
 
    abstract interface
       elemental function RealVoidFct(this) result(res)
-         import M2DPolygZone_t, bsa_real_t
+         import :: M2DPolygZone_t, bsa_real_t
          class(M2DPolygZone_t), intent(in) :: this
          real(bsa_real_t) :: res
       end function
 
       subroutine VoidSub(this)
-         import M2DPolygZone_t
+         import :: M2DPolygZone_t
          class(M2DPolygZone_t), intent(inout) :: this
       end subroutine
    end interface

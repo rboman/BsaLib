@@ -212,13 +212,13 @@ module BsaLib_WindData
 
    abstract interface
       function PSDfunc(wd, nf, freqs, innl, nodes_loaded, idir, itc) result(PSD)
-         import WindData_t, bsa_real_t, bsa_int_t
-         class(WindData_t), intent(in) :: wd
+         import :: WindData_t, bsa_real_t, bsa_int_t
+         class(WindData_t), intent(in)  :: wd
          integer(bsa_int_t), intent(in) :: nf          ! n. frequencies
          integer(bsa_int_t), intent(in) :: innl        ! n. actual nodes loaded
          integer(bsa_int_t), intent(in) :: idir        ! wind direction
          integer(bsa_int_t), intent(in) :: itc         ! turb component id
-         real(bsa_real_t), intent(in) :: freqs(nf)           ! frequencies
+         real(bsa_real_t), intent(in)   :: freqs(nf)           ! frequencies
          integer(bsa_int_t), intent(in) :: nodes_loaded(innl)     ! list of actual loaded nodes
          real(bsa_real_t), dimension(nf, innl) :: PSD
       end function
@@ -380,7 +380,7 @@ module BsaLib_WindData
 
 
       module subroutine SetPSDFunction(this, func)
-         import psd_t
+         import :: psd_t
          class(psd_t) :: this
          procedure(PSDfunc), intent(in), pointer :: func
       end subroutine
