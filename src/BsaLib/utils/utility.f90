@@ -69,7 +69,7 @@ contains
          id = (nj - 1) * tot + ni - int((nj*nj - nj) / 2., kind=int32)
       endif
 
-! #ifdef __BSA_DEBUG
+! #ifdef _BSA_DEBUG
 !       print '(1x, a, 2i5, a, i5)', &
 !          '@BsaLib_Utility::util_getCorrVectIndex() : with (ni - nj) = ', ni, nj, ', result index  -> ', id 
 ! #endif

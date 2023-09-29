@@ -24,12 +24,12 @@
 
 #define RK bsa_real_t
 
-#if (defined(__BSA_USE_CACHED_POD_DATA)) || (!defined(BSA_M3MF_ONLY_PREMESH_))
+#if (defined(_BSA_USE_CACHED_POD_DATA)) || (!defined(_BSA_M3MF_ONLY_PREMESH))
 # define __update_m3mf__
 #endif
    
    subroutine __sub_name( this &
-#ifndef __BSA_USE_CACHED_POD_DATA
+#ifndef _BSA_USE_CACHED_POD_DATA
       & , bfm_undump &
 #endif
       & , pdata )
@@ -55,7 +55,7 @@
 #endif
       !
       class(__this_type), intent(inout) :: this
-#ifndef __BSA_USE_CACHED_POD_DATA
+#ifndef _BSA_USE_CACHED_POD_DATA
       real(RK), intent(in)          :: bfm_undump(:, :)
 #endif
       class(*), pointer, intent(in) :: pdata
@@ -112,7 +112,7 @@
       real(RK) :: fi(1), fj(1), fi_baseptJ(1), fj_baseptJ(1)
 #ifdef __new_interp_proc__
       real(RK), allocatable :: fi_v_(:), fj_v_(:)
-# ifdef __BSA_USE_CACHED_POD_DATA
+# ifdef _BSA_USE_CACHED_POD_DATA
       real(RK), allocatable :: bfm_undump(:, :)
       integer(int32) :: i_bfm
 # endif
@@ -144,7 +144,7 @@
 #endif  ! __update_m3mf__
 
 
-! #if (defined(__BSA_USE_CACHED_POD_DATA)) || (defined(__update_m3mf__))
+! #if (defined(_BSA_USE_CACHED_POD_DATA)) || (defined(__update_m3mf__))
 ! #  define __local_debug_write__
 ! #endif
 
@@ -454,7 +454,7 @@
 
 
 #ifdef __new_interp_proc__
-# ifdef __BSA_USE_CACHED_POD_DATA
+# ifdef _BSA_USE_CACHED_POD_DATA
 
       ! *********************************************************
       ! BUG:  NOTE, this works only if rot=={0, 90, 180, 270} !!!
@@ -491,7 +491,7 @@
 #   endif
       deallocate(fi_v_)
       deallocate(fj_v_)
-# endif  ! __BSA_USE_CACHED_POD_DATA  defined
+# endif  ! _BSA_USE_CACHED_POD_DATA  defined
 
 
       allocate(fi_v_(nPtsPost), stat=ist)
@@ -544,7 +544,7 @@
       fi_baseptJ(1) = fi(1)
       fj_baseptJ(1) = fj(1)
 
-#if (!(defined(__BSA_USE_CACHED_POD_DATA))) && (defined(__local_debug_write__))
+#if (!(defined(_BSA_USE_CACHED_POD_DATA))) && (defined(__local_debug_write__))
       ifj = 1
       fj_v_save_(1) = fj_baseptJ(1)
 
@@ -552,7 +552,7 @@
       fi_v_save_(1) = fi_baseptJ(1)
 #endif
       
-#ifdef __BSA_USE_CACHED_POD_DATA
+#ifdef _BSA_USE_CACHED_POD_DATA
       i_bfm              = 1
 #endif
       bfmtail            = bfm_undump(:, 1:1)
@@ -578,7 +578,7 @@
             ! compute head
             fi_baseptJ(1) = fi_baseptJ(1) + dfJi_bfm_ref_
             fj_baseptJ(1) = fj_baseptJ(1) + dfJj_bfm_ref_
-#ifdef __BSA_USE_CACHED_POD_DATA
+#ifdef _BSA_USE_CACHED_POD_DATA
             i_bfm   = i_bfm + 1
             bfmhead = bfm_undump(:, i_bfm:i_bfm)
 #else
@@ -617,12 +617,12 @@
             fi(1) = fi(1) + dfJi_brm_interp
             fj(1) = fj(1) + dfJj_brm_interp
 
-#if (!(defined(__BSA_USE_CACHED_POD_DATA))) && (defined(__local_debug_write__))
+#if (!(defined(_BSA_USE_CACHED_POD_DATA))) && (defined(__local_debug_write__))
             ifj = ifj + 1
             fj_v_save_(ifj) = fj_baseptJ(1)
 #endif
 
-#ifdef __BSA_DEBUG
+#ifdef _BSA_DEBUG
             ! DEBUG: they should equate fi/fj_baseptI!!
             if (abs(fi(1) - fi_baseptJ(1)) > MACHINE_PRECISION .or. &
                abs(fj(1) - fj_baseptJ(1)) > MACHINE_PRECISION) &
@@ -649,7 +649,7 @@
          !
          ! next head is an OLD BFM (next) mesh point!
          !
-#ifdef __BSA_USE_CACHED_POD_DATA
+#ifdef _BSA_USE_CACHED_POD_DATA
          i_bfm         = i_bfm + 1
          bfmhead(:, 1) = bfm_undump(:, i_bfm)
 #else
@@ -660,7 +660,7 @@
 #endif
          
 
-#ifdef __BSA_DEBUG
+#ifdef _BSA_DEBUG
          if (n_pts_bfm_ref_j_ > 0) then 
             if (abs((fi_baseptI + (dfJi_bfm_lv0_*(pJhead-1))) - (fi_baseptJ(1) + dfJi_bfm_ref_)) > MACHINE_PRECISION .or. &
                   abs((fj_baseptI + (dfJj_bfm_lv0_*(pJhead-1))) - (fj_baseptJ(1) + dfJj_bfm_ref_)) > MACHINE_PRECISION) &
@@ -699,7 +699,7 @@
          fi(1) = fi(1) + dfJi_brm_interp
          fj(1) = fj(1) + dfJj_brm_interp
 
-! #ifdef __BSA_DEBUG
+! #ifdef _BSA_DEBUG
          fi_baseptJ(1) = fi_baseptJ(1) + dfJi_bfm_ref_
          fj_baseptJ(1) = fj_baseptJ(1) + dfJj_bfm_ref_
          if (abs(fi_baseptJ(1) - fi(1)) > MACHINE_PRECISION .or. &
@@ -708,7 +708,7 @@
                      'BAD (3): fi or fj at the end of a BFM ref segment does not coincide with reference.')
 ! #endif
 
-#if (!(defined(__BSA_USE_CACHED_POD_DATA))) && (defined(__local_debug_write__))
+#if (!(defined(_BSA_USE_CACHED_POD_DATA))) && (defined(__local_debug_write__))
          ifj = ifj + 1
          fj_v_save_(ifj) = fj(1)
 #endif
@@ -781,7 +781,7 @@
             fj_baseptJ(1) = fj_baseptI + dfIj_bfm_ref_
             fi(1)         = fi_baseptJ(1)
             fj(1)         = fj_baseptJ(1)
-#ifdef __BSA_USE_CACHED_POD_DATA
+#ifdef _BSA_USE_CACHED_POD_DATA
             i_bfm   = i_bfm + 1
             bfmtail = bfm_undump(:, i_bfm:i_bfm)
 #else
@@ -793,7 +793,7 @@
             bfm_new_right(:, 1) = bfmtail(:, 1)
 
 
-#if (!(defined(__BSA_USE_CACHED_POD_DATA))) && (defined(__local_debug_write__))    
+#if (!(defined(_BSA_USE_CACHED_POD_DATA))) && (defined(__local_debug_write__))    
             ifi = ifi + 1
             fi_v_save_(ifi) = fi_baseptJ(1)
 #endif
@@ -820,7 +820,7 @@
 
                   fi_baseptJ(1) = fi_baseptJ(1) + dfJi_bfm_ref_
                   fj_baseptJ(1) = fj_baseptJ(1) + dfJj_bfm_ref_
-#ifdef __BSA_USE_CACHED_POD_DATA
+#ifdef _BSA_USE_CACHED_POD_DATA
                   i_bfm   = i_bfm + 1
                   bfmhead = bfm_undump(:, i_bfm:i_bfm)
 #else
@@ -866,7 +866,7 @@
                   fj(1) = fj(1) + dfJj_brm_interp
 
 #ifdef __triang_zone__
-# ifdef __BSA_DEBUG
+# ifdef _BSA_DEBUG
                   ! DEBUG:
                   if (abs(fi(1) - fi_baseptJ(1)) > MACHINE_PRECISION .or. &
                      abs(fj(1) - fj_baseptJ(1)) > MACHINE_PRECISION) &
@@ -899,7 +899,7 @@
                ! NOTE: it is a center point, except for the very last one (BORDER)
                fi_baseptJ(1) = fi_baseptJ(1) + dfJi_bfm_ref_
                fj_baseptJ(1) = fj_baseptJ(1) + dfJj_bfm_ref_
-#ifdef __BSA_USE_CACHED_POD_DATA
+#ifdef _BSA_USE_CACHED_POD_DATA
                i_bfm   = i_bfm + 1
                bfmhead = bfm_undump(:, i_bfm:i_bfm)
 #else
@@ -972,7 +972,7 @@
 
                fi_baseptJ(1) = fi_baseptJ(1) + dfJi_bfm_ref_
                fj_baseptJ(1) = fj_baseptJ(1) + dfJj_bfm_ref_
-# ifdef __BSA_USE_CACHED_POD_DATA
+# ifdef _BSA_USE_CACHED_POD_DATA
                i_bfm   = i_bfm + 1
                bfmhead = bfm_undump(:, i_bfm:i_bfm)
 # else
@@ -1223,7 +1223,7 @@
          fi(1)         = fi_baseptJ(1)
          fj(1)         = fj_baseptJ(1)
 
-#ifdef __BSA_USE_CACHED_POD_DATA
+#ifdef _BSA_USE_CACHED_POD_DATA
          i_bfm         = i_bfm + 1
          bfmtail(:, 1) = bfm_undump(:, i_bfm)
 #else
@@ -1235,7 +1235,7 @@
 #endif
          bfm_new_right(:, 1) = bfmtail(:, 1)
 
-#if (!(defined(__BSA_USE_CACHED_POD_DATA))) && (defined(__local_debug_write__))   
+#if (!(defined(_BSA_USE_CACHED_POD_DATA))) && (defined(__local_debug_write__))   
          ifi = ifi + 1
          fi_v_save_(ifi) = fi_baseptJ(1)
 #endif
@@ -1262,7 +1262,7 @@
 
                fi_baseptJ(1) = fi_baseptJ(1) + dfJi_bfm_ref_
                fj_baseptJ(1) = fj_baseptJ(1) + dfJj_bfm_ref_
-#ifdef __BSA_USE_CACHED_POD_DATA
+#ifdef _BSA_USE_CACHED_POD_DATA
                i_bfm   = i_bfm + 1
                bfmhead = bfm_undump(:, i_bfm:i_bfm)
 #else
@@ -1332,7 +1332,7 @@
             fi_baseptJ(1) = fi_baseptJ(1) + dfJi_bfm_ref_
             fj_baseptJ(1) = fj_baseptJ(1) + dfJj_bfm_ref_
             
-#ifdef __BSA_USE_CACHED_POD_DATA
+#ifdef _BSA_USE_CACHED_POD_DATA
             i_bfm         = i_bfm + 1
             bfmhead(:, 1) = bfm_undump(:, i_bfm)
 #else
@@ -1585,7 +1585,7 @@
       enddo ! pIcurr = 2, this%ni_
 
 
-! #ifdef __BSA_DEBUG
+! #ifdef _BSA_DEBUG
       if (i_brm /= nPtsPost) then
 #ifndef __triang_zone__
          print *, ' policy BFM-MLV factors      =  ', pol%interp_bfm_I_fct_, pol%interp_bfm_J_fct_

@@ -52,11 +52,11 @@ contains
       character(len = 256) :: emsg
       logical :: lflag
 
-#ifdef __BSA_DEBUG
+#ifdef _BSA_DEBUG
       write(unit_debug_, *) ' @BsaMesherImpl::mainMesher_() : Init BSA-Mesher main...'
 #endif
 
-#ifdef __BSA_USE_CACHED_POD_DATA
+#ifdef _BSA_USE_CACHED_POD_DATA
       print '(1x, a, a/)', NOTEMSG, 'Using version with POD caching.' 
 #endif
 
@@ -74,11 +74,11 @@ contains
 
       call PreMesh()
       lflag = settings%i_only_diag_ == 0 .and. settings%i_use_svd_ == 1
-#ifndef __BSA_USE_CACHED_POD_DATA
+#ifndef _BSA_USE_CACHED_POD_DATA
       if (lflag .and. test_no_bfm_mlr_) call cleanSVDWorkInfo_()
 #endif
 
-#ifdef __BSA_CHECK_NOD_COH_SVD
+#ifdef _BSA_CHECK_NOD_COH_SVD
       goto 998
 #endif
 
@@ -100,14 +100,14 @@ contains
       print *
       print '(1x, a, a)', &
          INFOMSG, ' Resume of total n. of points in meshing procedure:'
-#ifndef __BSA_USE_CACHED_POD_DATA
+#ifndef _BSA_USE_CACHED_POD_DATA
       print '(1x, a, a, i0)', MSGCONT, ' PRE-MESH   (BFM) : ', msh_bfmpts_pre_
 #endif
       print '(1x, a, a, i0)', MSGCONT, ' POST-MESH  (BFM) : ', msh_bfmpts_post_
       print '(1x, a, a, i0)', MSGCONT, ' POST-MESH  (BRM) : ', msh_brmpts_post_
 
       
-#ifdef __BSA_DEBUG
+#ifdef _BSA_DEBUG
       write(unit_debug_, *) ' @BsaMesherImpl::mainMesher_() : Init BSA-Mesher main -- ok.'
 #endif
    end subroutine mainMesher_
@@ -182,7 +182,7 @@ contains
       character(len = :), allocatable :: zone_title
 
 
-#ifdef __BSA_DEBUG
+#ifdef _BSA_DEBUG
       write(unit_debug_, *) ' @BsaMesherImpl::PreMesh() : Init BSA-Mesher pre meshing phase...'
 #endif
 
@@ -240,7 +240,7 @@ contains
       if (settings%i_only_diag_ == 0 .and. settings%i_use_svd_ == 1) call prefetchSVDWorkDim_()
 
 
-#ifdef __BSA_CHECK_NOD_COH_SVD
+#ifdef _BSA_CHECK_NOD_COH_SVD
       block
          double precision :: tmpv(1, NNODESL)
 
@@ -337,7 +337,7 @@ contains
       if (.not. abs(df_I_ref - df_J_ref) < MACHINE_PRECISION) &
          call bsa_Abort("Freq deltas of BKG peak zone differ. Should be the same.")
 
-#ifdef __BSA_EXPORT_POD_TRUNC_INFO
+#ifdef _BSA_EXPORT_POD_TRUNC_INFO
 
 # ifdef _OPENMP
 #  define __export_POD_trunc_id__  omp_get_thread_num()+1
@@ -351,7 +351,7 @@ contains
 #endif
       
       call bkgz%compute()
-#ifndef __BSA_USE_CACHED_POD_DATA
+#ifndef _BSA_USE_CACHED_POD_DATA
       call logger_debug%logZonePremeshingTotTime(&
          zone_title, timer%time(), msh_bfmpts_pre_, .true.)
 #endif
@@ -360,7 +360,7 @@ contains
 
 
 #define __return_debug__ goto 998
-#ifdef __BSA_CHECK_NOD_COH_SVD
+#ifdef _BSA_CHECK_NOD_COH_SVD
       __return_debug__
 #endif
 
@@ -453,7 +453,7 @@ contains
          limits(NLimsP1)   = maxF
          policies(NLimsP1) = pol
 
-#ifdef __BSA_DEBUG
+#ifdef _BSA_DEBUG
          write(*, *) '  Interest modes : '
          write(*, *) msh_ZoneLimsInterestModes
 #endif
@@ -541,7 +541,7 @@ contains
                   endif
                   int_modes_ = msh_ZoneLimsInterestModes(iim + 1  :  iim + nim)
 
-#ifdef __BSA_DEBUG
+#ifdef _BSA_DEBUG
                   !$omp critical
                   if (idir == 1) print *, int_modes_
                   !$omp end critical
@@ -565,7 +565,7 @@ contains
                end select
 
 
-! #ifdef __BSA_DEBUG
+! #ifdef _BSA_DEBUG
 !                if (idir == 1) then
 !                   write(*, '( 1x, a, i5, l, g16.5, "  ->  ", *(" ", i0) )', advance='yes') &
 !                      ' ilim,  isPeak,  rval,  int_modes_,  policies = ', &
@@ -583,11 +583,11 @@ contains
                endif
 ! #endif
 
-#ifdef __BSA_EXPORT_POD_TRUNC_INFO
+#ifdef _BSA_EXPORT_POD_TRUNC_INFO
                if (idir == 1 .or. idir == 3) do_export_POD_trunc_(__export_POD_trunc_id__) = .true.
 #endif
                call rz%compute()
-#ifndef __BSA_USE_CACHED_POD_DATA
+#ifndef _BSA_USE_CACHED_POD_DATA
                n_bfm_pts_pre_ = n_bfm_pts_pre_ + rz%zoneTotNPts()
 #endif
 
@@ -609,15 +609,15 @@ contains
             endif
 ! #endif
 
-#ifdef __BSA_EXPORT_POD_TRUNC_INFO
+#ifdef _BSA_EXPORT_POD_TRUNC_INFO
             if (idir == 1 .or. idir == 3) do_export_POD_trunc_(__export_POD_trunc_id__) = .true.
 #endif
             call rz%compute()
-#ifndef __BSA_USE_CACHED_POD_DATA
+#ifndef _BSA_USE_CACHED_POD_DATA
             n_bfm_pts_pre_ = n_bfm_pts_pre_ + rz%zoneTotNPts()
 #endif
 
-#ifndef __BSA_USE_CACHED_POD_DATA
+#ifndef _BSA_USE_CACHED_POD_DATA
             !$omp critical
             call logger_debug%logZonePremeshingTotTime(&
                zone_title, timer%time(), n_bfm_pts_pre_, .true.)
@@ -642,7 +642,7 @@ contains
             INFOMSG, 'Done with   ', msh_NZones, '  pre meshing zones.'
 
 
-#ifdef __BSA_EXPORT_POD_TRUNC_INFO
+#ifdef _BSA_EXPORT_POD_TRUNC_INFO
          ! From now on, no need for this anymore.
          do_export_POD_trunc_(:) = .false.
 #endif
@@ -725,12 +725,12 @@ contains
                   call rz%setRefinements(main_refs_, main_refs_)
                   iim = 1
                   call rz%setInterestModeIndexPtr(iim)
-! #ifdef __BSA_DEBUG
+! #ifdef _BSA_DEBUG
 !                   print '(1x, a, 2i5, 4g12.5)', '  @idir, ilim,  ptI,  ptE  =  ', &
 !                      idir, 1, rz%Ipt_%freqI(), rz%Ipt_%freqJ(), rz%Ept_%freqI(), rz%Ept_%freqJ()
 ! #endif
                   call rz%compute()
-#ifndef __BSA_USE_CACHED_POD_DATA
+#ifndef _BSA_USE_CACHED_POD_DATA
                   n_bfm_pts_pre_ = rz%zoneTotNPts()
 #endif
 
@@ -762,12 +762,12 @@ contains
                      call rz%defineFromEndPtCoordAndBase(&
                         ptI, left_sign_ * rlimit_, 'j', &
                         rbase_, left_known_coord_, delta_main_rz_, delta_main_rz_)
-! #ifdef __BSA_DEBUG
+! #ifdef _BSA_DEBUG
 !                      print '(1x, a, 2i5, 4g12.5)', '  @idir, ilim,  ptI,  ptE  =  ', &
 !                         idir, ilim, rz%Ipt_%freqI(), rz%Ipt_%freqJ(), rz%Ept_%freqI(), rz%Ept_%freqJ()
 ! #endif
                      call rz%compute()
-#ifndef __BSA_USE_CACHED_POD_DATA
+#ifndef _BSA_USE_CACHED_POD_DATA
                      n_bfm_pts_pre_ = n_bfm_pts_pre_ + rz%zoneTotNPts()
 #endif
 
@@ -782,12 +782,12 @@ contains
                      call rz%defineFromEndPtCoordAndBase(&
                         ptI, left_sign_ * init_freq_, left_known_coord_, &
                         rbase_, 'i', delta_main_rz_, delta_main_rz_)
-! #ifdef __BSA_DEBUG
+! #ifdef _BSA_DEBUG
 !                      print '(1x, a, 2i5, 4g12.5)', '  @idir, ilim,  ptI,  ptE  =  ', &
 !                         idir, ilim, rz%Ipt_%freqI(), rz%Ipt_%freqJ(), rz%Ept_%freqI(), rz%Ept_%freqJ()
 ! #endif
                      call rz%compute()
-#ifndef __BSA_USE_CACHED_POD_DATA
+#ifndef _BSA_USE_CACHED_POD_DATA
                      n_bfm_pts_pre_ = n_bfm_pts_pre_ + rz%zoneTotNPts()
 #endif
 
@@ -798,18 +798,18 @@ contains
                      call rz%defineFromEndPtCoordAndBase(&
                         ptI, right_sign_ * init_freq_, right_known_coord_, &
                         rbase_, 'j', delta_main_rz_, delta_main_rz_)
-! #ifdef __BSA_DEBUG
+! #ifdef _BSA_DEBUG
 !                      print '(1x, a, 2i5, 4g12.5)', '  @idir, ilim,  ptI,  ptE  =  ', &
 !                         idir, ilim, rz%Ipt_%freqI(), rz%Ipt_%freqJ(), rz%Ept_%freqI(), rz%Ept_%freqJ()
 ! #endif
                      call rz%compute()
-#ifndef __BSA_USE_CACHED_POD_DATA
+#ifndef _BSA_USE_CACHED_POD_DATA
                      n_bfm_pts_pre_ = n_bfm_pts_pre_ + rz%zoneTotNPts()
 #endif
 
                   enddo ! ilim = 2, NLimsP1
 
-#ifndef __BSA_USE_CACHED_POD_DATA
+#ifndef _BSA_USE_CACHED_POD_DATA
 						!$omp critical
                   call logger_debug%logZonePremeshingTotTime(&
                      z_name_, timer%time(), n_bfm_pts_pre_, .true.)
@@ -877,7 +877,7 @@ contains
                   basePts(idir_t2), 'i', df_I, df_J, rtmp, rtmp, force=.true.)
                call rz%compute()
 
-#ifndef __BSA_USE_CACHED_POD_DATA
+#ifndef _BSA_USE_CACHED_POD_DATA
                !$omp critical
                call logger_debug%logZonePremeshingTotTime(&
                   zone_title, timer%time(), rz%zoneTotNPts(), .true.)
@@ -966,7 +966,7 @@ contains
                   call tz%setPolicy(pol)
                   call tz%define(basePts(idir), ptI, ptA)
                   call tz%compute()
-#ifndef __BSA_USE_CACHED_POD_DATA
+#ifndef _BSA_USE_CACHED_POD_DATA
                   n_bfm_pts_pre_ = n_bfm_pts_pre_ + tz%zoneTotNPts()
 #endif
 
@@ -1032,7 +1032,7 @@ contains
                         call rz%defineFromEndPtCoordAndBase(&
                            ptI, - lim * LIM_SIGN_DIRS(idir_t2), 'j', base_i, 'i', called=.false.)
                         call rz%compute()
-#ifndef __BSA_USE_CACHED_POD_DATA
+#ifndef _BSA_USE_CACHED_POD_DATA
                         n_bfm_pts_pre_ = n_bfm_pts_pre_ + rz%zoneTotNPts()
 #endif
 
@@ -1068,7 +1068,7 @@ contains
                         call tz%setPolicy(pol)
                         call tz%define(ptI, ptA, rz%Ipt_)
                         call tz%compute()
-#ifndef __BSA_USE_CACHED_POD_DATA
+#ifndef _BSA_USE_CACHED_POD_DATA
                         n_bfm_pts_pre_ = n_bfm_pts_pre_ + tz%zoneTotNPts()
 #endif
                         rtmp = tz%baseI()
@@ -1081,7 +1081,7 @@ contains
                            rz%Ipt_, lim_J, 'j', rtmp, 'i', &
                            deltas(2, ilim) * pol%delta_fI_fct_, deltas(2, ilim) * pol%delta_fJ_fct_)
                         call rz%compute()
-#ifndef __BSA_USE_CACHED_POD_DATA
+#ifndef _BSA_USE_CACHED_POD_DATA
                         n_bfm_pts_pre_ = n_bfm_pts_pre_ + rz%zoneTotNPts()
 #endif
 
@@ -1094,7 +1094,7 @@ contains
                         ptI = MPoint(ptB%freqI(), - lim * LIM_SIGN_DIRS(idir_t2))
                         call tz%define(ptI, ptB, ptE)
                         call tz%compute()
-#ifndef __BSA_USE_CACHED_POD_DATA
+#ifndef _BSA_USE_CACHED_POD_DATA
                         n_bfm_pts_pre_ = n_bfm_pts_pre_ + tz%zoneTotNPts()
 #endif
 
@@ -1109,7 +1109,7 @@ contains
                            deltas(2, ilim) * pol%delta_fI_fct_, deltas(2, ilim) * pol%delta_fJ_fct_)
                         
                         call rz%compute()
-#ifndef __BSA_USE_CACHED_POD_DATA
+#ifndef _BSA_USE_CACHED_POD_DATA
                         n_bfm_pts_pre_ = n_bfm_pts_pre_ + rz%zoneTotNPts()
 #endif
 
@@ -1141,13 +1141,13 @@ contains
 
                         call tz%define(ptI, ptA, ptB)
                         call tz%compute()
-#ifndef __BSA_USE_CACHED_POD_DATA
+#ifndef _BSA_USE_CACHED_POD_DATA
                         n_bfm_pts_pre_ = n_bfm_pts_pre_ + tz%zoneTotNPts()
 #endif
 
                      endif ! closing triangle, if not warn_zone_over_limits
 
-#ifndef __BSA_USE_CACHED_POD_DATA
+#ifndef _BSA_USE_CACHED_POD_DATA
                      !$omp critical
                      call logger_debug%logZonePremeshingTotTime(&
                         zone_title, timer%time(), n_bfm_pts_pre_, .true.)
@@ -1234,7 +1234,7 @@ contains
 
                call rz%compute()
 
-#ifndef __BSA_USE_CACHED_POD_DATA
+#ifndef _BSA_USE_CACHED_POD_DATA
                !$omp critical
                call logger_debug%logZonePremeshingTotTime(&
                   zone_title, timer%time(), rz%zoneTotNPts(), .true.)
@@ -1277,7 +1277,7 @@ contains
          write(unit_dump_bfm_) &
             struct_data%modal_%Km_(struct_data%modal_%modes_)
 
-#ifdef __BSA_DEBUG
+#ifdef _BSA_DEBUG
          print '(1x, a, a)', INFOMSG, 'Modal info dumped -- ok.'
 #endif
       endif
@@ -1290,7 +1290,7 @@ contains
       write (unit_dump_bfm_) msh_NZones
       write (unit_dump_bfm_) msh_max_zone_NPts
 
-#ifdef __BSA_DEBUG
+#ifdef _BSA_DEBUG
       write(unit_debug_, *) ' @BsaMesherImpl::PreMesh() : Init BSA-Mesher pre meshing phase -- ok.'
 #endif
    end subroutine PreMesh
@@ -1309,7 +1309,7 @@ contains
 
 
 
-#ifdef __BSA_USE_CACHED_POD_DATA
+#ifdef _BSA_USE_CACHED_POD_DATA
 # define __bfm_undump__
 # define __bfm_undump_interp__
 #else
@@ -1329,7 +1329,7 @@ contains
       type(MRectZone_t), target   :: rz
       type(MTriangZone_t), target :: tz
 
-#ifndef __BSA_USE_CACHED_POD_DATA
+#ifndef _BSA_USE_CACHED_POD_DATA
       real(bsa_real_t), allocatable :: bfm_undump(:, :)
       character(len = 128)          :: emsg
 #endif
@@ -1348,7 +1348,7 @@ contains
       read(unit_dump_bfm_) ival2    ! n. of meshing zones
       read(unit_dump_bfm_) ival2    ! msh_max_zone_PTS
 
-#ifdef __BSA_DEBUG
+#ifdef _BSA_DEBUG
       if (.not. izone == dimM_bisp_) &
          call bsa_Abort('First undumped value does not match BISP dimension.')
       if (.not. ival2 == msh_max_zone_NPts) &
@@ -1356,7 +1356,7 @@ contains
 #endif
 
 
-#ifndef __BSA_USE_CACHED_POD_DATA
+#ifndef _BSA_USE_CACHED_POD_DATA
 # ifndef _OPENMP
       ! allocate BFM tmp variable to hold data for at most the zone with max n. of points.
       ! NOTE: in case of OMP parallelisation, this allocation will be resized internally if 
@@ -1393,7 +1393,7 @@ contains
       call rz%interpolate(__bfm_undump_interp__   brm_export_data_)
       if (do_export_brm_base_) brm_export_base_data_%i_doNotPrintGenHeader_ = 1   ! now we can disable gen header print
 
-#ifndef __BSA_USE_CACHED_POD_DATA
+#ifndef _BSA_USE_CACHED_POD_DATA
 # ifdef _OPENMP
       deallocate(bfm_undump)  !<-- better to copy a null pointer than a whole bunch of memory.
       if (associated(brm_export_data_)) brm_export_data_ => null()
@@ -1406,7 +1406,7 @@ contains
       !$omp parallel do &
       !$omp   firstprivate(brm_export_base_data_, brm_export_data_), &
       !$omp   private(z, rz, tz, izone_id), &
-#ifndef __BSA_USE_CACHED_POD_DATA
+#ifndef _BSA_USE_CACHED_POD_DATA
       !$omp   private(bfm_undump), &
 #endif
       !$omp   shared(struct_data, wd, settings, logger_debug      &
@@ -1446,7 +1446,7 @@ contains
       enddo ! nZones
       !$omp end parallel do
 
-#ifndef __BSA_USE_CACHED_POD_DATA
+#ifndef _BSA_USE_CACHED_POD_DATA
       if (allocated(bfm_undump)) deallocate(bfm_undump)
 #endif
       99 return

@@ -29,7 +29,7 @@ contains
       real(bsa_real_t), allocatable :: S_uvw(:, :), f(:)
       integer :: itc_, idir_, idxi, idxe
 
-#ifdef __BSA_DEBUG
+#ifdef _BSA_DEBUG
       write(unit_debug_, *) INFOMSG, '@BsaClassicImpl::mainClassic_() : Init BSA-Classic main...'
 #endif
 
@@ -58,7 +58,7 @@ contains
       endif
 
 
-#ifdef __BSA_DEBUG
+#ifdef _BSA_DEBUG
       print '(1x, a, a, i0)', INFOMSG, 'n. of frequencies to be computed=', settings%nfreqs_
       print '(1x, a, a, i0)', INFOMSG, 'PSD  modal extension=', dimM_psd_
       print '(1x, a, a, i0)', INFOMSG, 'BISP modal extension=', dimM_bisp_
@@ -86,7 +86,7 @@ contains
       enddo ! i turb comp
 
 
-#ifdef __BSA_CL
+#ifdef _BSA_CL
       block
          real(bsa_real_t), allocatable :: S_uvw_T_(:, :)
          
@@ -109,7 +109,7 @@ contains
 
       997 continue
 
-#ifdef __BSA_DEBUG
+#ifdef _BSA_DEBUG
       write(unit_debug_, *) INFOMSG, '@BsaClassicImpl::mainClassic_() : computing nodal wind turbulence PSDs -- ok.'
    
       call bsa_exportPSDToFile('psdS_UVW.txt', S_uvw, 'psdS_UVW', f)
@@ -289,7 +289,7 @@ contains
       998 continue
       if (allocated(f)) deallocate(f)
 
-#ifdef __BSA_DEBUG
+#ifdef _BSA_DEBUG
       write(unit_debug_, *) &
          INFOMSG, '@BsaClassicImpl::mainClassic_() : Init BSA-Classic main -- ok.'
 #endif
@@ -374,7 +374,7 @@ contains
          call bsa_Abort('Either NFREQs or DF are == 0.')
 
 
-! #ifdef __BSA_DEBUG
+! #ifdef _BSA_DEBUG
 !       write(unit_debug_, *) INFOMSG, '@BsaClassicImpl::computeFreqsVect_() : computing frequencies...'
 ! #endif
 
@@ -473,7 +473,7 @@ contains
 
       endif
 
-#ifdef __BSA_DEBUG
+#ifdef _BSA_DEBUG
       write(unit_debug_, *) INFOMSG, '@BsaClassicImpl::computeFreqsVect_() : computing frequencies -- ok.' 
 #endif
    end subroutine computeFreqsVect_

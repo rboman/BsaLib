@@ -40,7 +40,7 @@ contains
          , form=IO_FORM_FORMATTED    &
          , action=IO_ACTION_WRITE )
 
-#ifdef __BSA_EXPORT_POD_TRUNC_INFO
+#ifdef _BSA_EXPORT_POD_TRUNC_INFO
       open(unit=iun_POD_trunc_, file=iun_POD_trunc_fname_  &
          , status=IO_STATUS_REPLACE  &
          , form=IO_FORM_UNFORMATTED  &
@@ -64,7 +64,7 @@ contains
       call bsa_openFileHandles_()
 
 
-#ifdef __BSA_DEBUG
+#ifdef _BSA_DEBUG
       write(unit_debug_, *) INFOMSG//'@BsaLib::bsa_Init() : bsa initialisation...'
 #endif
    
@@ -96,7 +96,7 @@ contains
       call logger_debug%init(unit_debug_, undebug_fname_)
       
 
-#ifdef __BSA_DEBUG
+#ifdef _BSA_DEBUG
       write(unit_debug_, *) INFOMSG//'@BsaLib::bsa_Init() : bsa initialisation -- ok.'
 #endif
    end subroutine
@@ -144,7 +144,7 @@ contains
          m2mf_cls, m2mr_cls, m2o2mr_cls, m3mf_msh, m3mr_msh, m3mf_cls, m3mr_cls
 
 
-#ifdef __BSA_DEBUG
+#ifdef _BSA_DEBUG
       write(unit_debug_, *) INFOMSG//'@BsaLibImpl::run() : MAIN...'
 #endif
 
@@ -170,8 +170,8 @@ contains
          call setBsaFunctionLocalVars()
 
 
-#ifdef __BSA_CL
-# ifdef __BSA_USE_CUDA
+#ifdef _BSA_CL
+# ifdef _BSA_USE_CUDA
          call bsacl_AcquirePSDId(wd%i_psd_type_)
 # endif
          call bsacl_AcquireStructModMat(struct_data%modal_%phi_, struct_data%modal_%nat_freqs_)
@@ -257,13 +257,13 @@ contains
             write_brm_fptr_ => exportBRM_void_internal_
 
 
-#ifdef __BSA_CL
+#ifdef _BSA_CL
          settings%i_suban_type_   = 1  ! force CLS execution
          settings%i_compute_bisp_ = 1
          settings%i_compute_psd_  = 0
 #endif
 
-#ifdef __BSA_CHECK_NOD_COH_SVD
+#ifdef _BSA_CHECK_NOD_COH_SVD
          settings%i_suban_type_   = 2  ! force MSH execution
 #endif
 
@@ -271,7 +271,7 @@ contains
          if (is_only_msh_ .or. settings%i_suban_type_ == 3) &
             call mainMesher_(m3mf_msh, m3mr_msh)
 
-#ifdef __BSA_CHECK_NOD_COH_SVD
+#ifdef _BSA_CHECK_NOD_COH_SVD
          goto 998
 #endif
          
@@ -286,7 +286,7 @@ contains
       end block
 
       998 continue
-#ifdef __BSA_CL
+#ifdef _BSA_CL
       call bsacl_Finalise()
       if (ierr_cl_ /= BSACL_PROBLEM_DIMENSIONS_TOO_SMALL) then
          if (ierr_cl_ == 0) then
@@ -297,7 +297,7 @@ contains
       endif
 #endif
 
-#ifdef __BSA_DEBUG
+#ifdef _BSA_DEBUG
       write(unit_debug_, *) INFOMSG//'@BsaLibImpl::run() : MAIN -- ok.'
 #endif
    end subroutine bsa_Run
@@ -310,7 +310,7 @@ contains
    subroutine validateAll_()
       ! character(len=64) :: msg
 
-! #ifdef __BSA_DEBUG
+! #ifdef _BSA_DEBUG
       character(len=64) :: fmt
       character(len=64) :: fmt2
       integer(int32) :: i
@@ -328,7 +328,7 @@ contains
       ! ======================
       ! SETTINGS
       ! ======================
-! #ifdef __BSA_DEBUG
+! #ifdef _BSA_DEBUG
       write(fmt, '(a)') '("    - ", a, i10)'
 
       write(unit_debug_, *) '### settings:'
@@ -390,7 +390,7 @@ contains
 
       if (do_validate_modal_) call validateModalInfo_()
 
-! #ifdef __BSA_DEBUG
+! #ifdef _BSA_DEBUG
       write(unit_debug_, *) '### structure:'
       write(unit_debug_, fmt) 'NLIBS         = ', struct_data%nlibs_
       write(unit_debug_, fmt) 'NNODES        = ', struct_data%nn_
@@ -467,7 +467,7 @@ contains
          call setPhitimesCLocalInstance_()
       endif
 
-! #ifdef __BSA_DEBUG
+! #ifdef _BSA_DEBUG
       write(unit_debug_, fmt) 'WIND ZONES  = ', wd%nz_
       write(unit_debug_, fmt) 'PSD TYPE    = ', wd%i_psd_type_
       write(unit_debug_, fmt) 'EQ. NOD. VEL= ', wd%i_eq_nod_wind_speed_
@@ -665,7 +665,7 @@ contains
          enddo
       enddo
 
-! #ifdef __BSA_DEBUG
+! #ifdef _BSA_DEBUG
 !       do id = 1, ndegw
 !          do im = 1, struct_data%modal_%nm_eff_
 !             write(unit=1372, fmt='(*(1x, f12.5))') & 
@@ -1582,7 +1582,7 @@ contains
 
 
    function computeSkewness_(dim, m2, m3, only_diag) result(sk)
-#ifdef __BSA_DEBUG
+#ifdef _BSA_DEBUG
       use, intrinsic :: ieee_arithmetic
 #endif
       integer(bsa_int_t), intent(in) :: dim
@@ -1631,7 +1631,7 @@ contains
 
                   sk(pm3) = m3(pm3) / (denJ * sigm(ii))
 
-#ifdef __BSA_DEBUG
+#ifdef _BSA_DEBUG
                   if (ieee_is_nan(sk(pm3))) then
                      print '(1x, a, a, 2i6)', &
                         ERRMSG, 'SK is NaN at indexes   ', pm3, l
@@ -1682,7 +1682,7 @@ contains
       enddo
       close(iun)
       
-! #ifdef __BSA_DEBUG
+! #ifdef _BSA_DEBUG
 !       write(unit_debug_, '(1x, a, 2a, " -- ok.")') &
 !          INFOMSG, '@::exportSkewness_() : writing to file   ', fname
 ! #endif
@@ -1880,7 +1880,7 @@ contains
 
       iun = io_openExportFileByName(exp_dir_ // fname)
       if (iun == 0) call bsa_Abort()
-! #ifdef __BSA_DEBUG
+! #ifdef _BSA_DEBUG
 !       write(unit_debug_, '(1x, 3a, ", shapes = ", 2i5)') &
 !          INFOMSG//' writing psd  to file ', fname, shape(psd)
 ! #endif
@@ -1907,7 +1907,7 @@ contains
       close(iun)
       deallocate(tmp)
 
-! #ifdef __BSA_DEBUG
+! #ifdef _BSA_DEBUG
 !       if (present(varname)) & 
 !          write(unit_debug_, '(1x, 5a)') &
 !             INFOMSG, '@Utils::bsa_exportPSDToFile() : ', varname, &
@@ -1933,7 +1933,7 @@ contains
       iun = io_openExportFileByName(exp_dir_ // fname)
       if (iun == 0) call bsa_Abort()
 
-! #ifdef __BSA_DEBUG
+! #ifdef _BSA_DEBUG
 !       write(unit_debug_, '(1x, 3a, ", shapes = ", 3i5)') &
 !          INFOMSG, ' writing bisp to file ', fname, shape(bisp)
 ! #endif
@@ -1948,7 +1948,7 @@ contains
       enddo
       close(iun)
 
-! #ifdef __BSA_DEBUG
+! #ifdef _BSA_DEBUG
 !       if (present(varname)) & 
 !          write(unit_debug_, '(1x, 5a)') &
 !             INFOMSG, '@Utils::bsa_exportBispToFile() : ', varname, ' correctly written to file ', fname

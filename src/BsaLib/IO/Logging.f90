@@ -20,7 +20,7 @@ module Logging
    implicit none
    private
 
-! #ifdef __BSA_ALLOC_DEBUG
+! #ifdef _BSA_ALLOC_DEBUG
 !    interface allocOKMsg
 !       module procedure allocOKMsg_scalar_
 !       module procedure allocOKMsg_array_

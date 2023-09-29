@@ -118,7 +118,7 @@ contains
 !*****************************************************************************************
 
 
-! #ifdef __BSA_ALLOC_DEBUG
+! #ifdef _BSA_ALLOC_DEBUG
 !    module subroutine allocOKMsg_scalar_(name_, iloc, nbytes)
 !       character(len = *), intent(in) :: name_
 !       integer(kind = 8), intent(in), optional  :: iloc, nbytes

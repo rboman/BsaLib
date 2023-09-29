@@ -59,7 +59,7 @@ contains
       real(real64) :: dt_tmp
       real(real64) :: dt
 
-! #ifdef __BSA_DEBUG
+! #ifdef _BSA_DEBUG
 !       write(unit_debug_, *), ' @BsaLib_Timing::ClockTimer() : save partial time...'
 ! #endif
 
@@ -72,7 +72,7 @@ contains
       ! update last cpu_time call
       this%t_last_ = dt_tmp
 
-! #ifdef __BSA_DEBUG
+! #ifdef _BSA_DEBUG
 !       write(unit_debug_, *), ' @BsaLib_Timing::ClockTimer() : save partial time -- ok.'
 ! #endif
    end function ClockTimer
@@ -85,13 +85,13 @@ contains
       class(timer_t), intent(in) :: this
       real(real64) :: tot
 
-! #ifdef __BSA_DEBUG
+! #ifdef _BSA_DEBUG
 !       write(unit_debug_, *), ' @BsaLib_Timing::GetTimerTotal() : getting timer total time...'
 ! #endif
 
       tot = this%t_tot_
 
-! #ifdef __BSA_DEBUG
+! #ifdef _BSA_DEBUG
 !       write(unit_debug_, *), ' @BsaLib_Timing::GetTimerTotal() : getting timer total time -- ok.'
 ! #endif
    end function GetTimerTotal
@@ -102,7 +102,7 @@ contains
    subroutine ResetTimer(this)
       class(timer_t) :: this
 
-! #ifdef __BSA_DEBUG
+! #ifdef _BSA_DEBUG
 !       write(unit_debug_, *), ' @BsaLib_Timing::ResetTimer() : Reset timer...'
 ! #endif
 
@@ -111,7 +111,7 @@ contains
       this%t_tot_      = 0._real64
       this%t_tot_prev_ = 0._real64
 
-! #ifdef __BSA_DEBUG
+! #ifdef _BSA_DEBUG
 !       write(unit_debug_, *), ' @BsaLib_Timing::ResetTimer() : Reset timer -- ok.'
 ! #endif
    end subroutine ResetTimer

@@ -15,12 +15,12 @@
 !! along with BSA Library.  If not, see <https://www.gnu.org/licenses/>.
 submodule(BsaLib_MRectZone) BsaLib_MRectZoneImpl
 
-! #ifndef BSA_M3MF_ONLY_PREMESH_
-! # define BSA_M3MF_ONLY_PREMESH_ 0
+! #ifndef _BSA_M3MF_ONLY_PREMESH
+! # define _BSA_M3MF_ONLY_PREMESH 0
 ! #else
-! # if (BSA_M3MF_ONLY_PREMESH_ != 0 && BSA_M3MF_ONLY_PREMESH_ != 1)
-! #  undef BSA_M3MF_ONLY_PREMESH_
-! #  define BSA_M3MF_ONLY_PREMESH_ 0
+! # if (_BSA_M3MF_ONLY_PREMESH != 0 && _BSA_M3MF_ONLY_PREMESH != 1)
+! #  undef _BSA_M3MF_ONLY_PREMESH
+! #  define _BSA_M3MF_ONLY_PREMESH 0
 ! # endif
 ! #endif
 
@@ -205,7 +205,7 @@ contains
       integer, value :: ni, nj
 
       if (.not. this%isGRSAligned()) call bsa_Abort('Rect zone is not GRS aligned.')
-! #ifdef __BSA_DEBUG
+! #ifdef _BSA_DEBUG
 !       write(unit_debug_, *) ' @MRectZoneImpl::defineFromDeltas_refinements() : init...'
 ! #endif
 
@@ -230,7 +230,7 @@ contains
       this%deltaf_J_   = dfj
 
       call this%define(pt, loc=loc)
-! #ifdef __BSA_DEBUG
+! #ifdef _BSA_DEBUG
 !       write(unit_debug_, *) ' @MRectZoneImpl::defineFromDeltas_refinements() : init -- ok.'
 ! #endif
    end subroutine
@@ -276,7 +276,7 @@ contains
          call bsa_Abort(&
             'Cannot define deltas from max values if given point location is not "i" (Init).')
 
-! #ifdef __BSA_DEBUG
+! #ifdef _BSA_DEBUG
 !       write(unit_debug_, *) ' @MRectZoneImpl::defineFromDeltas_maxvalues() : init...'
 ! #endif
 
@@ -533,7 +533,7 @@ contains
          call this%define(pt, loc, bi, bj)
       end block
 
-! #ifdef __BSA_DEBUG
+! #ifdef _BSA_DEBUG
 !       write(unit_debug_, *) ' @MRectZoneImpl::defineFromDeltas_maxvalues() : init -- ok.'
 ! #endif
    end subroutine
@@ -564,7 +564,7 @@ contains
          call bsa_Abort('Unvalid base direction identifier. Must be one of "i"/"j".')
 
 
-! #ifdef __BSA_DEBUG
+! #ifdef _BSA_DEBUG
 !       write(unit_debug_, *) ' @MRectZoneImpl::defineFromEndPtCoordAndBase_norm() : init...'
 ! #endif
 
@@ -604,7 +604,7 @@ contains
       ! NOTE: this assumes refinements have been already set
       call this%deduceDeltas()
 
-! #ifdef __BSA_DEBUG
+! #ifdef _BSA_DEBUG
 !       write(unit_debug_, *) ' @MRectZoneImpl::defineFromEndPtCoordAndBase_norm() : init -- ok.'
 ! #endif
    end subroutine defineFromEndPtCoordAndBase_norm
@@ -623,7 +623,7 @@ contains
       character(len = 1), intent(in)    :: base_dir
       real(bsa_real_t), intent(in)      :: dfi, dfj
 
-! #ifdef __BSA_DEBUG
+! #ifdef _BSA_DEBUG
 !       write(unit_debug_, *) ' @MRectZoneImpl::defineFromEndPtCoordAndBase_forceDeltas() : init...'
 ! #endif
 
@@ -633,7 +633,7 @@ contains
       ! forcing deltas
       call this%setDeltas(dfi, dfj, .true.)
 
-! #ifdef __BSA_DEBUG
+! #ifdef _BSA_DEBUG
 !       write(unit_debug_, *) ' @MRectZoneImpl::defineFromEndPtCoordAndBase_forceDeltas() : init -- ok.'
 ! #endif
    end subroutine defineFromEndPtCoordAndBase_forceDeltas
@@ -839,7 +839,7 @@ contains
             ! BUG: forcing it to zero if below some precision
             if (kd < MACHINE_PRECISION) then
 
-#ifdef __BSA_DEBUG
+#ifdef _BSA_DEBUG
                write(unit_debug_, '(a, a)') &
                   WARNMSG, '(1) kd < machine precision. Assuming kd == 0.'
 #endif
@@ -871,7 +871,7 @@ contains
             ! BUG: forcing it to zero if below some precision
             if (kd < MACHINE_PRECISION) then
                
-#ifdef __BSA_DEBUG
+#ifdef _BSA_DEBUG
                write(unit_debug_, '(a, a)') &
                   WARNMSG, '(2) kd < machine precision. Assuming kd == 0.'
 #endif
@@ -911,7 +911,7 @@ contains
             ! BUG: forcing it to zero if below some precision
             if (kd < MACHINE_PRECISION) then
                
-#ifdef __BSA_DEBUG
+#ifdef _BSA_DEBUG
                write(unit_debug_, '(a, a)') &
                   WARNMSG, '(3) kd < machine precision. Assuming kd == 0.'
 #endif
@@ -944,7 +944,7 @@ contains
             ! BUG: forcing it to zero if below some precision
             if (kd < MACHINE_PRECISION) then
                
-#ifdef __BSA_DEBUG
+#ifdef _BSA_DEBUG
                write(unit_debug_, '(a, a)') &
                   WARNMSG, '(4) kd < machine precision. Assuming kd == 0.'
 #endif
@@ -1106,7 +1106,7 @@ contains
          , m3mf_msh_ptr_, msh_NZones, msh_bfmpts_pre_    &
          , do_export_POD_trunc_
 
-#ifdef __BSA_EXPORT_POD_TRUNC_INFO
+#ifdef _BSA_EXPORT_POD_TRUNC_INFO
 # ifdef _OPENMP
          !$ use omp_lib, only: omp_get_thread_num
 #  define __export_POD_trunc_id__  omp_get_thread_num()+1
@@ -1115,7 +1115,7 @@ contains
 # endif
 #endif
 
-#ifdef __BSA_USE_CACHED_POD_DATA
+#ifdef _BSA_USE_CACHED_POD_DATA
 # define __bfm_dump__ 
 #else
 # define __bfm_dump__  ,bfm
@@ -1139,7 +1139,7 @@ contains
 
          
       block
-#ifndef __BSA_USE_CACHED_POD_DATA
+#ifndef _BSA_USE_CACHED_POD_DATA
          real(bsa_real_t) :: dfIi, dfIj, dfJi, dfJj
          real(bsa_real_t) :: base_fi, base_fj
          real(bsa_real_t), target :: fi(1), fj(1)
@@ -1148,7 +1148,7 @@ contains
 
          real(bsa_real_t), allocatable :: bfm(:, :)
 
-# ifdef BSA_M3MF_ONLY_PREMESH_
+# ifdef _BSA_M3MF_ONLY_PREMESH
          real(bsa_real_t) :: dwI, dwJ
          real(bsa_real_t) :: ctr_infl, brd_infl, vtx_infl
          real(bsa_real_t), allocatable :: intg(:)
@@ -1163,7 +1163,7 @@ contains
          call this%getIJfsteps(dfIi, dfIj, dfJi, dfJj)
 
       
-# ifdef BSA_M3MF_ONLY_PREMESH_
+# ifdef _BSA_M3MF_ONLY_PREMESH
          ! deltas in [rad/s] (to compute influence areas)
          dwI = this%deltaf_I_ * CST_PIt2
          dwJ = this%deltaf_J_ * CST_PIt2
@@ -1212,7 +1212,7 @@ contains
          fi(1) = base_fi
          fj(1) = base_fj
          bfm(:, 1:1) = getBFM_msh(fi, fj)
-# ifdef BSA_M3MF_ONLY_PREMESH_
+# ifdef _BSA_M3MF_ONLY_PREMESH
          intg = bfm(:, 1) * vtx_infl
 #   ifdef __local_debug_write__
          fi_v_save_(1) = fi(1)
@@ -1220,7 +1220,7 @@ contains
 #   endif
 # endif
 
-# ifdef __BSA_CHECK_NOD_COH_SVD
+# ifdef _BSA_CHECK_NOD_COH_SVD
          return
 # endif
 
@@ -1231,7 +1231,7 @@ contains
             fj(1) = fj(1) + dfJj
 
             bfm(:, j:j) = getBFM_msh(fi, fj)
-# ifdef BSA_M3MF_ONLY_PREMESH_
+# ifdef _BSA_M3MF_ONLY_PREMESH
             intg = intg + bfm(:, j) * brd_infl
 #   ifdef __local_debug_write__
             fj_v_save_(j) = fj(1)
@@ -1242,12 +1242,12 @@ contains
          i_bfm = this%nj_
 
          ! removing excess integral
-# ifdef BSA_M3MF_ONLY_PREMESH_
+# ifdef _BSA_M3MF_ONLY_PREMESH
          intg = intg - bfm(:, i_bfm) * vtx_infl
 # endif
 
 
-# ifdef __BSA_EXPORT_POD_TRUNC_INFO
+# ifdef _BSA_EXPORT_POD_TRUNC_INFO
          do_export_POD_trunc_(__export_POD_trunc_id__) = .false.
 # undef __export_POD_trunc_id__
 # endif
@@ -1266,7 +1266,7 @@ contains
 
             i_bfm = i_bfm + 1
             bfm(:, i_bfm:i_bfm) = getBFM_msh(fi, fj)
-# ifdef BSA_M3MF_ONLY_PREMESH_
+# ifdef _BSA_M3MF_ONLY_PREMESH
             intg = intg + bfm(:, i_bfm) * brd_infl
 #   ifdef __local_debug_write__
             fi_v_save_(i) = fi(1)
@@ -1281,25 +1281,25 @@ contains
 
                i_bfm = i_bfm + 1
                bfm(:, i_bfm:i_bfm) = getBFM_msh(fi, fj)
-# ifdef BSA_M3MF_ONLY_PREMESH_
+# ifdef _BSA_M3MF_ONLY_PREMESH
                intg = intg + bfm(:, i_bfm) * ctr_infl
 # endif
             enddo
 
-# ifdef BSA_M3MF_ONLY_PREMESH_
+# ifdef _BSA_M3MF_ONLY_PREMESH
             intg = intg - bfm(:, i_bfm) * brd_infl
 # endif
          enddo ! i = 2, this % ni_
 
 
-! # ifdef __BSA_DEBUG
+! # ifdef _BSA_DEBUG
          if (i_bfm /= zNp) then
             print *, 'i_bfm , zNp  =  ', i_bfm, zNp
             call bsa_Abort('"i_bfm" does not equally tot N of Rect zone''s points.')
          endif
 ! # endif
 
-# ifdef BSA_M3MF_ONLY_PREMESH_
+# ifdef _BSA_M3MF_ONLY_PREMESH
          intg = intg - bfm(:, i_bfm - this%nj_ + 1) * vtx_infl
          intg = intg - sum(bfm(:, i_bfm - this%nj_ + 1 : i_bfm-1) * brd_infl, dim=2)
          intg = intg - bfm(:, i_bfm) * vtx_infl
@@ -1307,7 +1307,7 @@ contains
 
 
          !$omp critical
-# ifdef BSA_M3MF_ONLY_PREMESH_
+# ifdef _BSA_M3MF_ONLY_PREMESH
          m3mf_msh_ptr_   = m3mf_msh_ptr_ + (intg * settings%i_bisp_sym_) ! update main integral
 
 #   ifdef __local_debug_write__
@@ -1333,7 +1333,7 @@ contains
          ! eventually, update zone with max N of points
          if (zNp > msh_max_zone_NPts) msh_max_zone_NPts = zNp
 
-#else  ! __BSA_USE_CACHED_POD_DATA  defined
+#else  ! _BSA_USE_CACHED_POD_DATA  defined
          !$omp critical
 #endif
          msh_NZones = msh_NZones + 1            ! update n. of zones count
@@ -1347,7 +1347,7 @@ contains
       this%refmts_set_ = .false.
       this%deltas_set_ = .false.
 
-! #ifdef __BSA_DEBUG
+! #ifdef _BSA_DEBUG
 !       write(unit_debug_, *) ' @MRectZoneImpl::compute_s() : init -- ok.'
 ! #endif
    end subroutine compute_s
@@ -1495,7 +1495,7 @@ contains
       ! NOTE: maybe useless ?
       write(unit_dump_bfm_) this%ni_, this%nj_
 
-#ifdef __BSA_ZONE_DEBUG
+#ifdef _BSA_ZONE_DEBUG
       write(unit=4533, fmt=*) &
          'Refms at  RZ=', trim(this%name_), this%ni_, this%nj_, &
 			'thread id= ', omp_get_thread_num()
@@ -1537,12 +1537,12 @@ contains
 
 
 
-#if (defined(__BSA_USE_CACHED_POD_DATA)) || (defined(_OPENMP))
+#if (defined(_BSA_USE_CACHED_POD_DATA)) || (defined(_OPENMP))
 # define __new_interp_proc__
 #endif
 
    module subroutine interpolateRZ( this &
-#ifndef __BSA_USE_CACHED_POD_DATA
+#ifndef _BSA_USE_CACHED_POD_DATA
 # define __bfm_undump__ bfm, 
       & , bfm &
 #else
@@ -1551,7 +1551,7 @@ contains
       & , pdata )
       !! Implementation of rect zone interpolation wrapper routine
       class(MRectZone_t), intent(inout) :: this
-#ifndef __BSA_USE_CACHED_POD_DATA
+#ifndef _BSA_USE_CACHED_POD_DATA
       real(bsa_real_t), intent(in)  :: bfm(:, :)
 #endif
       class(*), pointer, intent(in) :: pdata

@@ -15,12 +15,12 @@
 !! along with BSA Library.  If not, see <https://www.gnu.org/licenses/>.
 submodule(BsaLib_MTriangZone) BsaLib_MTriangZoneImpl
 
-! #ifndef BSA_M3MF_ONLY_PREMESH_
-! # define BSA_M3MF_ONLY_PREMESH_ 0
+! #ifndef _BSA_M3MF_ONLY_PREMESH
+! # define _BSA_M3MF_ONLY_PREMESH 0
 ! #else
-! # if (BSA_M3MF_ONLY_PREMESH_ != 0 && BSA_M3MF_ONLY_PREMESH_ != 1)
-! #  undef BSA_M3MF_ONLY_PREMESH_
-! #  define BSA_M3MF_ONLY_PREMESH_ 0
+! # if (_BSA_M3MF_ONLY_PREMESH != 0 && _BSA_M3MF_ONLY_PREMESH != 1)
+! #  undef _BSA_M3MF_ONLY_PREMESH
+! #  define _BSA_M3MF_ONLY_PREMESH 0
 ! # endif
 ! #endif
 
@@ -515,7 +515,7 @@ contains
          , m3mf_msh_ptr_, msh_NZones, msh_bfmpts_pre_
       class(MTriangZone_t), intent(inout) :: this
 
-#ifdef __BSA_USE_CACHED_POD_DATA
+#ifdef _BSA_USE_CACHED_POD_DATA
 # define __bfm_dump__ 
 #else
 # define __bfm_dump__  ,bfm
@@ -525,7 +525,7 @@ contains
          call bsa_Abort('Different sides'' refinements not yet allowed. Aborting.')
 
       block
-#ifndef __BSA_USE_CACHED_POD_DATA
+#ifndef _BSA_USE_CACHED_POD_DATA
          integer(int32)   :: Np, Np_m1, Nj_m1
          real(bsa_real_t) :: df_CA, df_CST, dfMAJi, dfMAJj, dfMINi, dfMINj
 
@@ -535,7 +535,7 @@ contains
          integer(int32) :: tot
          real(bsa_real_t), allocatable :: bfm(:, :)
 
-# ifdef BSA_M3MF_ONLY_PREMESH_
+# ifdef _BSA_M3MF_ONLY_PREMESH
          real(bsa_real_t) :: dw, ctr_infl, brd_infl, vtx_infl_rect, vtx_infl_triang
          real(bsa_real_t), allocatable :: intg(:)
 # endif
@@ -566,7 +566,7 @@ contains
          dfMINi = dfMINi * df_CST
          dfMINj = dfMINj * df_CST
 
-# ifdef BSA_M3MF_ONLY_PREMESH_
+# ifdef _BSA_M3MF_ONLY_PREMESH
          ! influences for integration
          dw = df_CST * CST_PIt2
          ctr_infl = dw * dw
@@ -592,7 +592,7 @@ contains
          fi(1) = base_fi(1)
          fj(1) = base_fj(1)
          bfm(:, 1:1) = getBFM_msh(fi, fj)
-# ifdef BSA_M3MF_ONLY_PREMESH_
+# ifdef _BSA_M3MF_ONLY_PREMESH
          intg = bfm(:, 1) * vtx_infl_rect
 # endif
 
@@ -604,7 +604,7 @@ contains
             fi(1) = fi(1) + dfMAJi
             fj(1) = fj(1) + dfMAJj
             bfm(:, j:j) = getBFM_msh(fi, fj)
-# ifdef BSA_M3MF_ONLY_PREMESH_
+# ifdef _BSA_M3MF_ONLY_PREMESH
             intg = intg + bfm(:, j) * brd_infl
 # endif
          enddo
@@ -619,7 +619,7 @@ contains
 
          id = j
          bfm(:, id:id) = getBFM_msh(fi, fj)
-# ifdef BSA_M3MF_ONLY_PREMESH_
+# ifdef _BSA_M3MF_ONLY_PREMESH
          intg = intg + bfm(:, id) * vtx_infl_triang
 # endif
 
@@ -641,7 +641,7 @@ contains
             fi(1) = base_fi(1)
             fj(1) = base_fj(1)
             bfm(:, id:id) = getBFM_msh(fi, fj)
-# ifdef BSA_M3MF_ONLY_PREMESH_
+# ifdef _BSA_M3MF_ONLY_PREMESH
             intg = intg + bfm(:, id) * brd_infl
 # endif
 
@@ -652,7 +652,7 @@ contains
                fi(1) = fi(1) + dfMAJi
                fj(1) = fj(1) + dfMAJj
                bfm(:, id:id) = getBFM_msh(fi, fj)
-# ifdef BSA_M3MF_ONLY_PREMESH_
+# ifdef _BSA_M3MF_ONLY_PREMESH
                intg = intg + bfm(:, id) * ctr_infl
 # endif
             enddo
@@ -662,7 +662,7 @@ contains
             fi(1) = fi(1) + dfMAJi
             fj(1) = fj(1) + dfMAJj
             bfm(:, id:id) = getBFM_msh(fi, fj)
-# ifdef BSA_M3MF_ONLY_PREMESH_
+# ifdef _BSA_M3MF_ONLY_PREMESH
             intg = intg + bfm(:, id) * brd_infl
 # endif
          enddo ! i
@@ -681,18 +681,18 @@ contains
 
          id = id + 1
          bfm(:, id:id) = getBFM_msh(base_fi, base_fj)
-# ifdef BSA_M3MF_ONLY_PREMESH_
+# ifdef _BSA_M3MF_ONLY_PREMESH
          intg = intg + bfm(:, id) * vtx_infl_triang
 # endif
 
 
-! # ifdef __BSA_DEBUG
+! # ifdef _BSA_DEBUG
          if (.not. id == tot) &
             call bsa_Abort('"id" does not equal tot N of Triang zone''s points.')
 ! # endif
 
          !$omp critical
-# ifdef BSA_M3MF_ONLY_PREMESH_
+# ifdef _BSA_M3MF_ONLY_PREMESH
          m3mf_msh_ptr_   = m3mf_msh_ptr_ + (intg * settings%i_bisp_sym_) ! update main integral
 # endif
          msh_bfmpts_pre_ = msh_bfmpts_pre_ + tot ! update tot num of meshing points
@@ -701,7 +701,7 @@ contains
          if (tot > msh_max_zone_NPts) msh_max_zone_NPts = tot
 
 
-!  __BSA_USE_CACHED_POD_DATA  is defined
+!  _BSA_USE_CACHED_POD_DATA  is defined
 #else
          !$omp critical
 #endif
@@ -712,7 +712,7 @@ contains
 #undef __bfm_dump__
       end block
 
-! #ifdef __BSA_DEBUG
+! #ifdef _BSA_DEBUG
 !       write(unit_debug_, *) ' @MTriangZoneImpl::computeISOTriangle() : init -- ok.'
 ! #endif
    end subroutine computeISOTriangle
@@ -738,7 +738,7 @@ contains
       write(unit_dump_bfm_) this%rot_
       write(unit_dump_bfm_) this%ni_, this%nj_
 
-#ifdef __BSA_ZONE_DEBUG
+#ifdef _BSA_ZONE_DEBUG
       write(unit=4533, fmt=*) &
          'Refms at  TZ=', trim(this%name_), this%ni_, this%nj_, &
          'thread id= ', omp_get_thread_num()
@@ -786,12 +786,12 @@ contains
 
 
 
-#if (defined(__BSA_USE_CACHED_POD_DATA)) || (defined(_OPENMP))
+#if (defined(_BSA_USE_CACHED_POD_DATA)) || (defined(_OPENMP))
 # define __new_interp_proc__
 #endif
 
    module subroutine interpolateTZ( this &
-#ifndef __BSA_USE_CACHED_POD_DATA
+#ifndef _BSA_USE_CACHED_POD_DATA
 # define __bfm_undump__ bfm, 
       & , bfm &
 #else
@@ -800,7 +800,7 @@ contains
       & , pdata )
       !! Implementation of triang zone interpolation methods
       class(MTriangZone_t), intent(inout) :: this
-#ifndef __BSA_USE_CACHED_POD_DATA
+#ifndef _BSA_USE_CACHED_POD_DATA
       real(bsa_real_t), intent(in)  :: bfm(:, :)
 #endif
       class(*), pointer, intent(in) :: pdata

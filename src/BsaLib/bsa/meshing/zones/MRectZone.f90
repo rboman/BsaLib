@@ -347,12 +347,12 @@ module BsaLib_MRectZone
 
       !> Implementation of rect zone interpolation methods
       module subroutine interpolateRZ( this &
-#ifndef __BSA_USE_CACHED_POD_DATA
+#ifndef _BSA_USE_CACHED_POD_DATA
          & , bfm   &
 #endif
          & , pdata )
          class(MRectZone_t), intent(inout) :: this
-#ifndef __BSA_USE_CACHED_POD_DATA
+#ifndef _BSA_USE_CACHED_POD_DATA
          real(bsa_real_t), intent(in) :: bfm(:, :)
 #endif
          class(*), pointer, intent(in) :: pdata

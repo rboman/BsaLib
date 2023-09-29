@@ -22,7 +22,7 @@ module BsaLib_Data
    use BsaLib_Structure
    use BsaLib_WindData
    !$ use omp_lib
-#ifdef __BSA_CL
+#ifdef _BSA_CL
    use BsaCL
 #endif
    implicit none
@@ -72,12 +72,12 @@ module BsaLib_Data
    end type
 
 
-#ifdef __BSA_CL
+#ifdef _BSA_CL
    integer, target :: ierr_cl_
 #endif
 
 
-#ifdef __BSA_CHECK_NOD_COH_SVD
+#ifdef _BSA_CHECK_NOD_COH_SVD
    real(bsa_real_t), allocatable :: nod_corr_full_(:, :)
    real(bsa_real_t), allocatable :: nod_corr_EVLs_(:), nod_corr_EVTs_(:, :)
 #endif
@@ -185,7 +185,7 @@ module BsaLib_Data
    logical        :: nPODmodes_set_ = .false.
    integer(int32) :: nmodes_POD_    = 0_int32
    logical, allocatable :: do_export_POD_trunc_(:)    !<-- BUG: this is because of OMP.
-#ifdef __BSA_EXPORT_POD_TRUNC_INFO
+#ifdef _BSA_EXPORT_POD_TRUNC_INFO
    integer(int32),     parameter :: iun_POD_trunc_ = 659_int32
    character(len = *), parameter :: iun_POD_trunc_fname_ = 'POD_trunc_info.txt'
 #endif

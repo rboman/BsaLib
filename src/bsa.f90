@@ -101,13 +101,13 @@ program bsa
    character(len = :), allocatable :: fname, cmb_sffx
 
    
-#ifdef __BSA_CL
-#  define BSACL_SFFX_ //'_CL'
+#ifdef _BSA_CL
+#  define __bsacl_sffx__ //'_CL'
 #else
-# ifdef __BSA_CUDA
-#   define BSACL_SFFX_ //'_CUDA'
+# ifdef _BSA_CUDA
+#   define __bsacl_sffx__ //'_CUDA'
 #  else
-#   define BSACL_SFFX_
+#   define __bsacl_sffx__
 # endif
 #endif
 
@@ -142,9 +142,9 @@ program bsa
 
 
       if (i_onlyd) then
-         cmb_sffx = 'diag'  BSACL_SFFX_
+         cmb_sffx = 'diag'  __bsacl_sffx__
       else
-         cmb_sffx = 'full'  BSACL_SFFX_
+         cmb_sffx = 'full'  __bsacl_sffx__
       endif
 
       block
@@ -676,7 +676,7 @@ contains ! utility procedures
          call releaseMemory(5)
       endif
 
-#ifdef __BSA_DEBUG
+#ifdef _BSA_DEBUG
       print '(1x, a, a)', &
          INFOMSG, ' BSA   data read correctly.'
 #endif
@@ -891,7 +891,7 @@ contains ! utility procedures
 
       fin_data_read_ = .true.
       close(IUN_FINDATA)
-#ifdef __BSA_DEBUG
+#ifdef _BSA_DEBUG
       print '(1x, a, a)', &
          INFOMSG, 'FINELG data read correctly.'
 #endif

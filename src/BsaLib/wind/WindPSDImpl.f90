@@ -53,7 +53,7 @@ contains
 
       call this%psd_%SetPSDFunction(psd_funcs(ipsd)%ptr)
 
-#ifdef __BSA_DEBUG
+#ifdef _BSA_DEBUG
       print *, INFOMSG, '@WindImpl::SetPSDType() : PSD type set to ', this%i_psd_type_
 #endif
    end subroutine
@@ -108,13 +108,13 @@ contains
       class(psd_t) :: this
       procedure(PSDfunc), intent(in), pointer :: func
 
-! #ifdef __BSA_DEBUG
+! #ifdef _BSA_DEBUG
 !       write(unit_debug_, '(1x, a, a)') INFOMSG, '@WindPSDImpl::SetPSDFunction() : setting PSD function pointer...'
 ! #endif
 
       this%psd_fct_ptr => func
 
-#ifdef __BSA_DEBUG
+#ifdef _BSA_DEBUG
       write(unit_debug_, '(1x, a, a)') INFOMSG, '@WindPSDImpl::SetPSDFunction() : setting PSD function pointer -- ok.'
 #endif
    end subroutine SetPSDFunction
@@ -163,7 +163,7 @@ contains
       integer(int32) :: i
 
 
-! #ifdef __BSA_DEBUG
+! #ifdef _BSA_DEBUG
 !       write(unit_debug_, '(1x, a, a)') INFOMSG, '@WindPSDImpl::vonKarmanPSD_() : computing PSD...'
 ! #endif
 
@@ -210,7 +210,7 @@ contains
          end block
       endif
 
-! #ifdef __BSA_DEBUG
+! #ifdef _BSA_DEBUG
 !       write(unit_debug_, '(1x, a, a)') INFOMSG, '@WindPSDImpl::vonKarmanPSD_() : computing PSD -- ok.'
 ! #endif
    end function vonKarmanPSD_
@@ -228,13 +228,13 @@ contains
       real(bsa_real_t), intent(in)  :: freqs(nf)   ! frequencies
       real(bsa_real_t) :: PSD(nf, innl)
 
-#ifdef __BSA_DEBUG
+#ifdef _BSA_DEBUG
       write(unit_debug_, '(1x, a, a)') INFOMSG, '@WindPSDImpl::kaimalPSD_() : computing PSD.. [NOT YET IMPLEMENTED]'
 #endif
 
       PSD = 0._bsa_real_t
 
-! #ifdef __BSA_DEBUG
+! #ifdef _BSA_DEBUG
 !       write(unit_debug_, '(1x, a, a)') &
 !             INFOMSG, '@WindPSDImpl::kaimalPSD_() : computing PSD -- ok.'
 ! #endif
@@ -256,7 +256,7 @@ contains
       integer   :: i, n
       real(bsa_real_t) :: PSD(nf, innl)
 
-! #ifdef __BSA_DEBUG
+! #ifdef _BSA_DEBUG
 !       write(unit_debug_, '(1x, a, a)') INFOMSG, '@WindPSDImpl::davenportPSD_Greisch_() : computing PSD...'
 ! #endif
 
@@ -269,7 +269,7 @@ contains
             (1 + (cst1 * freqs / wd%u_mean_ref_wz_(wd%wz_node_(n)))**2._bsa_real_t)**(5._bsa_real_t / 6._bsa_real_t)
       enddo
 
-! #ifdef __BSA_DEBUG
+! #ifdef _BSA_DEBUG
 !       write(unit_debug_, '(1x, a, a)') INFOMSG, '@WindPSDImpl::davenportPSD_Greisch_() : computing PSD -- ok.'
 ! #endif
    end function davenportPSD_Greisch_
@@ -309,7 +309,7 @@ contains
             ((1.d0 + (cstFL_U(:, i)**2))**(4.d0 / 3.d0))
       enddo
 
-! #ifdef __BSA_DEBUG
+! #ifdef _BSA_DEBUG
 !       write(unit_debug_, '(1x, a, a)') INFOMSG, '@WindPSDImpl::davenportPSD_Uliege_() : computing PSD -- ok.'
 ! #endif
    end function davenportPSD_Uliege_
