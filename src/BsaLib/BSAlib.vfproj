@@ -42,7 +42,7 @@
 				<Tool Name="VFPostBuildEventTool"/></Configuration></Configurations>
 	<Files>
 		<Filter Name="Header Files" Filter="fi;fd">
-		<File RelativePath=".\bsa\meshing\zones\_interp_poly2d.fi"/></Filter>
+		<File RelativePath=".\bsa\meshing\zones\_shared_poly2d.fi"/></Filter>
 		<Filter Name="Resource Files" Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"/>
 		<Filter Name="Source Files" Filter="f90;for;f;fpp;ftn;def;odl;idl">
 		<File RelativePath=".\bsa\classic\BsaClassicImpl.f90"/>

@@ -509,7 +509,7 @@ contains
          call bsa_Abort('Triangle must be "isosceles". Aborting.')
       endif
    end subroutine compute
-   
+
 
 
 
@@ -603,6 +603,6 @@ contains
 
 
 #define __triang_zone__
-#include '_interp_poly2d.fi'
+#include '_shared_poly2d.fi'
 
 end submodule
