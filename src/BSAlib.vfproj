@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<VisualStudioProject ProjectType="typeStaticLibrary" ProjectCreator="Intel Fortran" Keyword="Static Library" Version="11.0" ProjectIdGuid="{FA4C5412-70FD-4A98-9A97-758D8F0FE907}">
+	<Platforms>
+		<Platform Name="Win32"/>
+		<Platform Name="x64"/></Platforms>
+	<Configurations>
+		<Configuration Name="Debug|Win32" OutputDirectory="$(SolutionDir)\build\$(Configuration)_$(Platform)\lib\" IntermediateDirectory="$(SolutionDir)\build\$(Configuration)_$(Platform)\$(ProjectName)\" BuildLogFile="$(IntDir)\BuildLog.html" ConfigurationType="typeStaticLibrary">
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" MultiProcessorCompilation="true" InlineFunctionExpansion="expandOnlyInline" Parallelization="true" HeapArrays="0" Preprocess="preprocessYes" PreprocessorDefinitions="_BSA_DEBUG;BSA_USE_SVD_METHOD__;" OpenMP="OpenMPParallelCode" StandardWarnings="standardWarningsF18" Diagnostics="diagnosticsShowAll" WarnInterfaces="true" ModulePath="$(SolutionDir)\build\$(Configuration)_$(Platform)\mods" PdbFile="$(SolutionDir)\build\$(Configuration)_$(Platform)\vc160.pdb" SourceListingFile="$(SolutionDir)\build\$(Configuration)_$(Platform)\$(InputName).lst" BuildDependenciesFile="$(SolutionDir)\build\$(Configuration)_$(Platform)\$(TargetName).dep" ProfileDirectory="$(SolutionDir)\build\$(Configuration)_$(Platform)" Traceback="true" RuntimeChecks="rtChecksAll" BoundsCheck="true" StackFrameCheck="true" RuntimeLibrary="rtMultiThreadedDebug"/>
+				<Tool Name="VFLibrarianTool" IgnoreDefaultLibraryNames="MSVCRTD" LinkLibraryDependencies="true"/>
+				<Tool Name="VFResourceCompilerTool"/>
+				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
+				<Tool Name="VFCustomBuildTool"/>
+				<Tool Name="VFPreLinkEventTool"/>
+				<Tool Name="VFPreBuildEventTool"/>
+				<Tool Name="VFPostBuildEventTool"/></Configuration>
+		<Configuration Name="Debug|x64" OutputDirectory="$(SolutionDir)\build\$(Configuration)_$(Platform)\lib\" IntermediateDirectory="$(SolutionDir)\build\$(Configuration)_$(Platform)\$(ProjectName)\" BuildLogFile="$(IntDir)\BuildLog.html" ConfigurationType="typeStaticLibrary">
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" MultiProcessorCompilation="true" Optimization="optimizeDisabled" InlineFunctionExpansion="expandOnlyInline" Parallelization="true" HeapArrays="0" Preprocess="preprocessYes" PreprocessorDefinitions="_BSA_DEBUG;BSA_USE_SVD_METHOD__;" OpenMP="OpenMPParallelCode" StandardWarnings="standardWarningsF18" Diagnostics="diagnosticsShowAll" WarnInterfaces="true" ModulePath="$(SolutionDir)\build\$(Configuration)_$(Platform)\mods" PdbFile="$(SolutionDir)\build\$(Configuration)_$(Platform)\vc160.pdb" SourceListingFile="$(SolutionDir)\build\$(Configuration)_$(Platform)\$(InputName).lst" BuildDependenciesFile="$(SolutionDir)\build\$(Configuration)_$(Platform)\$(TargetName).dep" ProfileDirectory="$(SolutionDir)\build\$(Configuration)_$(Platform)" Traceback="true" NullPointerCheck="true" BoundsCheck="true" ArrayShapeCheck="true" StackFrameCheck="true" RuntimeLibrary="rtMultiThreadedDebug" UseMkl="mklParallel"/>
+				<Tool Name="VFLibrarianTool" IgnoreDefaultLibraryNames="MSVCRTD" LinkLibraryDependencies="true"/>
+				<Tool Name="VFResourceCompilerTool"/>
+				<Tool Name="VFMidlTool" WarningLevel="midlWarningLevel_3" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64" ErrorCheckAllocations="true" ErrorCheckBounds="true" ErrorCheckRefPointers="true"/>
+				<Tool Name="VFCustomBuildTool"/>
+				<Tool Name="VFPreLinkEventTool"/>
+				<Tool Name="VFPreBuildEventTool"/>
+				<Tool Name="VFPostBuildEventTool"/></Configuration>
+		<Configuration Name="Release|Win32" OutputDirectory="$(SolutionDir)\build\$(Configuration)_$(Platform)\lib\" IntermediateDirectory="$(SolutionDir)\build\$(Configuration)_$(Platform)\$(ProjectName)\" BuildLogFile="$(IntDir)\BuildLog.html" ConfigurationType="typeStaticLibrary">
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" Optimization="optimizeDisabled" InlineFunctionExpansion="expandOnlyInline" Parallelization="true" HeapArrays="0" Preprocess="preprocessYes" PreprocessorDefinitions="BSA_USE_SVD_METHOD__;" OpenMP="OpenMPParallelCode" StandardWarnings="standardWarningsF18" Diagnostics="diagnosticsShowAll" ModulePath="$(SolutionDir)\build\$(Configuration)_$(Platform)\mods" PdbFile="$(SolutionDir)\build\$(Configuration)_$(Platform)\vc160.pdb" SourceListingFile="$(SolutionDir)\build\$(Configuration)_$(Platform)\$(InputName).lst" BuildDependenciesFile="$(SolutionDir)\build\$(Configuration)_$(Platform)\$(TargetName).dep" ProfileDirectory="$(SolutionDir)\build\$(Configuration)_$(Platform)" RuntimeChecks="rtChecksNone" UseMkl="mklParallel"/>
+				<Tool Name="VFLibrarianTool" LinkLibraryDependencies="true"/>
+				<Tool Name="VFResourceCompilerTool"/>
+				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
+				<Tool Name="VFCustomBuildTool"/>
+				<Tool Name="VFPreLinkEventTool"/>
+				<Tool Name="VFPreBuildEventTool"/>
+				<Tool Name="VFPostBuildEventTool"/></Configuration>
+		<Configuration Name="Release|x64" OutputDirectory="$(SolutionDir)\build\$(Configuration)_$(Platform)\lib\" IntermediateDirectory="$(SolutionDir)\build\$(Configuration)_$(Platform)\$(ProjectName)\" BuildLogFile="$(IntDir)\BuildLog.html" ConfigurationType="typeStaticLibrary">
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" MultiProcessorCompilation="true" Optimization="optimizeFull" InlineFunctionExpansion="expandOnlyInline" Parallelization="true" HeapArrays="0" Preprocess="preprocessYes" PreprocessorDefinitions="BSA_USE_SVD_METHOD__;" OpenMP="OpenMPParallelCode" StandardWarnings="standardWarningsF18" Diagnostics="diagnosticsShowAll" ModulePath="$(SolutionDir)\build\$(Configuration)_$(Platform)\mods" PdbFile="$(SolutionDir)\build\$(Configuration)_$(Platform)\vc160.pdb" SourceListingFile="$(SolutionDir)\build\$(Configuration)_$(Platform)\$(InputName).lst" BuildDependenciesFile="$(SolutionDir)\build\$(Configuration)_$(Platform)\$(TargetName).dep" ProfileDirectory="$(SolutionDir)\build\$(Configuration)_$(Platform)" RuntimeChecks="rtChecksNone" UseMkl="mklParallel"/>
+				<Tool Name="VFLibrarianTool" LinkLibraryDependencies="true"/>
+				<Tool Name="VFResourceCompilerTool"/>
+				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64"/>
+				<Tool Name="VFCustomBuildTool"/>
+				<Tool Name="VFPreLinkEventTool"/>
+				<Tool Name="VFPreBuildEventTool"/>
+				<Tool Name="VFPostBuildEventTool"/></Configuration></Configurations>
+	<Files>
+		<Filter Name="Header Files" Filter="fi;fd">
+		<File RelativePath=".\bsa\meshing\zones\_shared_poly2d.fi"/></Filter>
+		<Filter Name="Resource Files" Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"/>
+		<Filter Name="Source Files" Filter="f90;for;f;fpp;ftn;def;odl;idl">
+		<File RelativePath=".\bsa\classic\BsaClassicImpl.f90"/>
+		<File RelativePath=".\BsaLib.f90"/>
+		<File RelativePath=".\bsa\data\BsaLibData.f90"/>
+		<File RelativePath=".\bsa\data\BsaLibDataImpl.f90"/>
+		<File RelativePath=".\bsa\BsaLibImpl.f90"/>
+		<File RelativePath=".\bsa\meshing\BsaMesherImpl.f90"/>
+		<File RelativePath=".\CONSTANTS\CONSTANTS.f90"/>
+		<File RelativePath=".\bsa\functions\functions.f90"/>
+		<File RelativePath=".\bsa\functions\functionsImpl.f90"/>
+		<File RelativePath=".\IO\io.f90"/>
+		<File RelativePath=".\IO\Logging.f90"/>
+		<File RelativePath=".\IO\LoggingImpl.f90"/>
+		<File RelativePath=".\bsa\meshing\zones\M2DPolygZone.f90"/>
+		<File RelativePath=".\bsa\meshing\point\MPoint.f90"/>
+		<File RelativePath=".\bsa\meshing\policy\MPolicy.f90"/>
+		<File RelativePath=".\bsa\meshing\zones\MRectZone.f90"/>
+		<File RelativePath=".\bsa\meshing\zones\MRectZoneImpl.f90"/>
+		<File RelativePath=".\bsa\meshing\zones\MTriangZone.f90"/>
+		<File RelativePath=".\bsa\meshing\zones\MTriangZoneImpl.f90"/>
+		<File RelativePath=".\bsa\meshing\zones\MZone.f90"/>
+		<File RelativePath=".\settings\Settings.f90"/>
+		<File RelativePath=".\settings\SettingsImpl.f90"/>
+		<File RelativePath=".\structure\StructureData.f90"/>
+		<File RelativePath=".\structure\StructureImpl.f90"/>
+		<File RelativePath=".\timing\Timer.f90"/>
+		<File RelativePath=".\utils\utility.f90"/>
+		<File RelativePath=".\wind\WindPSDImpl.f90"/>
+		<File RelativePath=".\wind\WindSetImpl.f90"/>
+		<File RelativePath=".\wind\WindType.f90"/></Filter></Files>
+	<Globals/></VisualStudioProject>
