@@ -65,8 +65,8 @@ module BsaLib_MRectZone
       procedure, pass :: getIJfsteps
       ! procedure, pass :: validateDeltas
       ! procedure, pass :: reconstructZoneBaseMesh
-      procedure, pass, public  :: compute => compute_s
-      procedure, pass, private :: compute_s
+      procedure, pass, public  :: compute => compute_rz_
+      procedure, pass, private :: compute_rz_
       procedure, pass, public  :: getNthQuadVtx
       procedure, pass, public  :: dump => dumpRZ
       procedure, pass, public  :: undump => undumpRZ
@@ -300,7 +300,7 @@ module BsaLib_MRectZone
 
 
       !> Actual zone comutation (pre phase).
-      module subroutine compute_s(this)
+      module subroutine compute_rz_(this)
          class(MRectZone_t), intent(inout) :: this
       end subroutine
 

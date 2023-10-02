@@ -15,20 +15,434 @@
 !! along with BSA Library.  If not, see <https://www.gnu.org/licenses/>.
 
 #ifdef __triang_zone__
-# define __sub_name  interpolateTZ_HTPC_v3
+# define __sub_name_compute compute_TZ_iso_
+# define __sub_name_interp  interpolateTZ_HTPC_v3
+# define __mod_sub_compute  
 # define __this_type MTriangZone_t
 #else
-# define __sub_name  interpolateRZ_HTPC_v3
+# define __sub_name_compute compute_rz_
+# define __sub_name_interp  interpolateRZ_HTPC_v3
+# define __mod_sub_compute  module
 # define __this_type MRectZone_t
 #endif
 
+
 #define RK bsa_real_t
+
+
+
+__mod_sub_compute subroutine __sub_name_compute(this)
+   !! Zone computation (pre-meshing phase).
+   use BsaLib_Data, only: &
+      dimM_bisp_, getBFM_msh     &
+#ifdef _BSA_M3MF_ONLY_PREMESH
+      , settings, m3mf_msh_ptr_  &
+#endif
+#ifdef _BSA_EXPORT_POD_TRUNC_INFO
+      , do_export_POD_trunc_     &
+#endif
+      , msh_NZones, msh_bfmpts_pre_
+
+#ifdef __triang_zone__
+   use BsaLib_MPoint, only: MPoint_t
+#endif
+
+#undef __mod_sub_compute
+
+#ifdef _BSA_EXPORT_POD_TRUNC_INFO
+# ifdef _OPENMP
+      !$ use omp_lib, only: omp_get_thread_num
+#  define __export_POD_trunc_id__  omp_get_thread_num()+1
+# else
+#  define __export_POD_trunc_id__  1
+# endif
+#endif
+
+#ifdef _BSA_USE_CACHED_POD_DATA
+# define __bfm_dump__ 
+#else
+# define __bfm_dump__  ,bfm
+#endif
+   class(__this_type), intent(inout) :: this
+
+
+#ifdef __triang_zone__
+   if (this%ni_ /= this%nj_) &
+      call bsa_Abort('Different sides'' refinements not yet allowed. Aborting.')
+#else
+   if (.not. (this%refmts_set_ .or. this%deltas_set_)) &
+      call bsa_Abort('Either deltas or refinements must be set before computing a zone.')
+
+   
+   if (this%base_I_ <= MACHINE_PRECISION .or. this%base_J_ <= MACHINE_PRECISION) then
+      print '(1x, 4a)', &
+         WARNMSG, 'One sub-zone at   ', &
+            this%name_(1 : len_trim(this%name_)), '   is empty.'
+      goto 998
+   endif
+
+   if (this%deltaf_I_ <= MACHINE_PRECISION .or. this%deltaf_J_ <= MACHINE_PRECISION) &
+      call bsa_Abort("At least one delta freq is zero.")
+#endif
+      
+
+   block
+#ifndef _BSA_USE_CACHED_POD_DATA
+
+
+! === Common declarations
+      integer(int32) :: i, j
+      real(RK)       :: ctr_infl, brd_infl, vtx_infl
+
+#  ifdef _BSA_M3MF_ONLY_PREMESH
+#    ifdef __triang_zone__
+      real(RK) :: dw, vtx_infl_t
+#    else
+      real(RK) :: dwI, dwJ
+#    endif
+
+      real(RK), allocatable :: intg(:)
+
+! #    define __local_debug_write__
+#    ifdef __local_debug_write__
+      integer(int32), save  :: iun = 430000
+      real(RK), allocatable :: fi_v_save_(:), fj_v_save_(:)
+#    endif
+#  endif  ! _BSA_M3MF_ONLY_PREMESH
+
+      integer(int32) :: i_bfm, zNp
+      
+      real(RK), dimension(1), target :: base_fi, base_fj, fi, fj
+      real(RK), allocatable          :: bfm(:, :)
+
+      real(RK) :: dfIi, dfIj, dfJi, dfJj
+! === Common declarations
+
+
+#  ifdef __triang_zone__
+
+      type(MPoint_t) :: pt
+      integer(int32) :: Np, Np_m1, Nj_m1, id
+      real(RK)       :: df_CA, df_CST
+
+      ! caching
+      Np    = this%ni_
+
+      ! tot = (Np*Np + Np) / 2
+      zNp   = Np*Np
+      zNp   = zNp + Np
+      zNp   = zNp / 2
+      
+      Np_m1 = Np - 1
+      Nj_m1 = Np_m1
+
+
+      ! get unary delta freq increments in both I and J directions
+      ! get (full) deltas in straight directions
+      df_CA  = getPointsDistance(this%Cpt_, this%Apt_) ! base J
+      df_CST = df_CA / Np_m1
+      call this%getRotatedUnaryDF(dfJi, dfJj, dfIi, dfIj)
+
+      ! get actualised values
+      dfJi = dfJi * df_CST
+      dfJj = dfJj * df_CST
+      dfIi = dfIi * df_CST
+      dfIj = dfIj * df_CST
+
+#  else
+
+      call this%getIJfsteps(dfIi, dfIj, dfJi, dfJj)
+
+      zNp = this%nj_ * this%ni_
+#  endif  ! __triang_zone__
+
+   
+
+#  ifdef _BSA_M3MF_ONLY_PREMESH
+#    ifdef __triang_zone__
+      dw = df_CST * CST_PIt2
+      ctr_infl = dw * dw
+      brd_infl = ctr_infl / 2._bsa_real_t
+      vtx_infl = brd_infl / 2._bsa_real_t
+      vtx_infl_t = vtx_infl / 2._bsa_real_t
+#    else
+      dwI = this%deltaf_I_ * CST_PIt2  ! deltas in [rad/s] (to compute influence areas)
+      dwJ = this%deltaf_J_ * CST_PIt2
+      ctr_infl = dwI * dwJ
+      brd_infl = ctr_infl / 2
+      vtx_infl = brd_infl / 2
+#    endif
+
+      allocate(intg(dimM_bisp_))
+#    ifdef __local_debug_write__
+      allocate(fi_v_save_(this%ni_))
+      allocate(fj_v_save_(this%nj_))
+#    endif
+#  endif
+
+
+      ! allocate memory
+      ! NOTE: but dimBISP as 1st dimensions, since
+      !       we are gonna calling getBFM for each 
+      !       couple of nodal indexes, returning a 
+      !       dimBISP 1D vector, so better memory access.
+      !       However, later maybe better invert.
+      allocate(bfm(dimM_bisp_, zNp))
+
+
+      !============================================================
+      ! FIRST COLUMN (along J-dir, from I to A) (CA side in Triang)
+      !
+#  ifdef __triang_zone__
+      base_fi(1) = this%Cpt_%freqI()
+      base_fj(1) = this%Cpt_%freqJ()
+#  else
+      base_fi(1) = this%Ipt_%freqI()
+      base_fj(1) = this%Ipt_%freqJ()
+#  endif
+      block
+         real(RK) :: rtmp
+
+         if     (this%rot_ < CST_PId2)   then  ! < 90
+         elseif (this%rot_ < CST_PIGREC) then  ! < 180
+            rtmp       = base_fj(1)
+            base_fj(1) = base_fi(1)
+            base_fi(1) = rtmp
+         elseif (this%rot_ < CST_PIt3d2) then  ! < 270
+         elseif (this%rot_ < CST_PIt2)   then  ! < 360
+            rtmp       = base_fj(1)
+            base_fj(1) = base_fi(1)
+            base_fi(1) = rtmp
+         endif
+      end block
+
+      fi(1) = base_fi(1)
+      fj(1) = base_fj(1)
+      bfm(:, 1:1) = getBFM_msh(fi, fj)
+#  ifdef _BSA_M3MF_ONLY_PREMESH
+      intg = bfm(:, 1) * vtx_infl
+#    ifdef __local_debug_write__
+      fi_v_save_(1) = fi(1)
+      fj_v_save_(1) = fj(1)
+#    endif
+#  endif
+
+#  ifdef _BSA_CHECK_NOD_COH_SVD
+      return
+#  endif
+
+      ! internal lines
+# ifdef __triang_zone__
+      do j = 2, Nj_m1
+# else
+      do j = 2, this%nj_
+# endif
+
+         fi(1) = fi(1) + dfJi
+         fj(1) = fj(1) + dfJj
+
+         bfm(:, j:j) = getBFM_msh(fi, fj)
+# ifdef _BSA_M3MF_ONLY_PREMESH
+         intg = intg + bfm(:, j) * brd_infl
+#   ifdef __local_debug_write__
+         fj_v_save_(j) = fj(1)
+#   endif
+# endif
+      enddo
+
+# ifdef __triang_zone__
+      fi(1) = fi(1) + dfJi
+      fj(1) = fj(1) + dfJj
+      pt    = MPoint(fi(1), fj(1))
+      if (.not. pt == this%Apt_) &
+         call bsa_Abort('First end point does not match triang A point. Aborting.')
+
+      i_bfm = j
+      bfm(:, i_bfm:i_bfm) = getBFM_msh(fi, fj)
+#   ifdef _BSA_M3MF_ONLY_PREMESH
+      intg = intg + bfm(:, i_bfm) * vtx_infl_t
+#   endif
+# endif
+
+
+      ! removing excess integral
+      i_bfm = this%nj_
+# ifdef _BSA_M3MF_ONLY_PREMESH
+      intg = intg - bfm(:, i_bfm) * vtx_infl
+# endif
+
+
+# ifndef __triang_zone__
+#   ifdef _BSA_EXPORT_POD_TRUNC_INFO
+      do_export_POD_trunc_(__export_POD_trunc_id__) = .false.
+#   undef __export_POD_trunc_id__
+#   endif
+# endif
+
+
+      ! *********************************************************
+      ! Moving along I dir  (Parallel to CA in Triang)
+      !
+# ifdef __triang_zone__
+      do i = 2, Np_m1
+
+         Nj_m1 = Nj_m1 - 1
+
+# else
+      do i = 2, this%ni_
+# endif
+
+         ! update base freqs moving along I local direction (X)
+         base_fi(1) = base_fi(1) + dfIi
+         base_fj(1) = base_fj(1) + dfIj
+         fi(1)      = base_fi(1)
+         fj(1)      = base_fj(1)
+
+         i_bfm = i_bfm + 1
+         bfm(:, i_bfm:i_bfm) = getBFM_msh(fi, fj)
+# ifdef _BSA_M3MF_ONLY_PREMESH
+         intg = intg + bfm(:, i_bfm) * brd_infl
+#   ifdef __local_debug_write__
+         fi_v_save_(i) = fi(1)
+#   endif
+# endif
+
+         ! internal lines
+# ifdef __triang_zone__
+         do j = 2, Nj_m1
+# else
+         do j = 2, this%nj_
+# endif
+
+            fi(1) = fi(1) + dfJi
+            fj(1) = fj(1) + dfJj
+
+            i_bfm = i_bfm + 1
+            bfm(:, i_bfm:i_bfm) = getBFM_msh(fi, fj)
+# ifdef _BSA_M3MF_ONLY_PREMESH
+            intg = intg + bfm(:, i_bfm) * ctr_infl
+# endif
+         enddo
+
+# ifdef __triang_zone__
+
+         ! last line
+         fi(1) = fi(1) + dfJi
+         fj(1) = fj(1) + dfJj
+
+         i_bfm = i_bfm + 1
+         bfm(:, id:id) = getBFM_msh(fi, fj)
+#   ifdef _BSA_M3MF_ONLY_PREMESH
+         intg = intg + bfm(:, id) * brd_infl
+#   endif
+
+# else
+#   ifdef _BSA_M3MF_ONLY_PREMESH
+         intg = intg - bfm(:, i_bfm) * brd_infl
+#   endif
+# endif
+      enddo  ! i
+
+
+# ifdef __triang_zone__
+      !=======================================================
+      !
+      ! LAST COLUMN (B point !!)
+      !
+      base_fi(1) = base_fi(1) + dfIi
+      base_fj(1) = base_fj(1) + dfIj
+
+      pt = MPoint(base_fi(1), base_fj(1))
+      if (.not. pt == this%Bpt_) &
+         call bsa_Abort('End point does not match B triang point. Aborting.')
+
+      i_bfm = i_bfm + 1
+      bfm(:, i_bfm:i_bfm) = getBFM_msh(base_fi, base_fj)
+#   ifdef _BSA_M3MF_ONLY_PREMESH
+      intg = intg + bfm(:, i_bfm) * vtx_infl_t
+#   endif
+# endif
+
+
+
+! # ifdef _BSA_DEBUG
+      if (i_bfm /= zNp) then
+         print *, 'i_bfm , zNp  =  ', i_bfm, zNp
+         call bsa_Abort('"i_bfm" does not equal tot N of zone''s points.')
+      endif
+! # endif
+
+
+# ifndef __triang_zone__
+#   ifdef _BSA_M3MF_ONLY_PREMESH
+      intg = intg - bfm(:, i_bfm - this%nj_ + 1) * vtx_infl
+      intg = intg - sum(bfm(:, i_bfm - this%nj_ + 1 : i_bfm-1) * brd_infl, dim=2)
+      intg = intg - bfm(:, i_bfm) * vtx_infl
+#   endif
+# endif
+
+
+      !$omp critical
+# ifdef _BSA_M3MF_ONLY_PREMESH
+      m3mf_msh_ptr_   = m3mf_msh_ptr_ + (intg * settings%i_bisp_sym_) ! update main integral
+
+#   ifdef __local_debug_write__
+      iun = iun + 1
+      write(iun, '(  (g) )') 0
+      write(iun, '(  (g) )') this%rot_ / CST_PIGREC * 180._bsa_real_t
+      write(iun, '( *(g, 2x) )') dfIi, dfIj
+      write(iun, '( *(g, 2x) )') fi_v_save_
+      write(iun, '( *(g, 2x) )') dfJi, dfJj
+      write(iun, '( *(g, 2x) )') fj_v_save_
+      block
+         integer :: i_
+         do i_ = 1, zNp
+            write(iun, '( *(g, 2x) )')  bfm(:, i_)
+         enddo
+      end block
+      deallocate(fi_v_save_)
+      deallocate(fj_v_save_)
+#   endif
+# endif
+      msh_bfmpts_pre_ = msh_bfmpts_pre_ + zNp   ! update tot num of meshing points
+      
+      ! eventually, update zone with max N of points
+      if (zNp > msh_max_zone_NPts) msh_max_zone_NPts = zNp
+
+#else  ! _BSA_USE_CACHED_POD_DATA  defined
+      !$omp critical
+#endif
+      msh_NZones = msh_NZones + 1            ! update n. of zones count
+      call DumpZone(this  __bfm_dump__ )     ! dump zone info
+      !$omp end critical
+   end block
+#undef __bfm_dump__
+
+
+# ifndef __triang_zone__
+   ! NOTE: reset them to 0 for ensuring next zone correct setup
+   998 continue
+   this%refmts_set_ = .false.
+   this%deltas_set_ = .false.
+# endif
+
+end subroutine __sub_name_compute
+
+
+
+
+
+
+
+
+
+
 
 #if (defined(_BSA_USE_CACHED_POD_DATA)) || (!defined(_BSA_M3MF_ONLY_PREMESH))
 # define __update_m3mf__
 #endif
    
-   subroutine __sub_name( this &
+   subroutine __sub_name_interp( this &
 #ifndef _BSA_USE_CACHED_POD_DATA
       & , bfm_undump &
 #endif
