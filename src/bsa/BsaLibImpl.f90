@@ -52,13 +52,15 @@ contains
       ! DEBUG unit
       if (.not. allocated(undebug_fname_)) undebug_fname_ = 'bsadebug.bsa'
       call io_getVerifiedFile(unit_debug_, undebug_fname_)
-      open(unit=unit_debug_, file=undebug_fname_  &
+      open(unit=unit_debug_          & 
+         , file=undebug_fname_       &
          , status=IO_STATUS_REPLACE  &
          , form=IO_FORM_FORMATTED    &
          , action=IO_ACTION_WRITE )
 
 #ifdef _BSA_EXPORT_POD_TRUNC_INFO
-      open(unit=iun_POD_trunc_, file=iun_POD_trunc_fname_  &
+      open(unit=iun_POD_trunc_       &
+         , file=iun_POD_trunc_fname_ &
          , status=IO_STATUS_REPLACE  &
          , form=IO_FORM_UNFORMATTED  &
          , access=IO_ACCESS_STREAM   &
