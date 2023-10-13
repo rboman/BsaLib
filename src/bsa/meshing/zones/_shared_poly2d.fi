@@ -98,8 +98,12 @@ __mod_sub_compute subroutine __sub_name_compute(this)
 
 ! === Common declarations
       integer(int32) :: i, j
+      integer(int32) :: i_bfm, zNp
       real(RK)       :: ctr_infl, brd_infl, vtx_infl
-
+      real(RK)       :: dfIi, dfIj, dfJi, dfJj
+      real(RK), dimension(1), target :: base_fi, base_fj, fi, fj
+      real(RK), allocatable          :: bfm(:, :)
+      
 #  ifdef _BSA_M3MF_ONLY_PREMESH
 #    ifdef __triang_zone__
       real(RK) :: dw, vtx_infl_t
@@ -115,31 +119,19 @@ __mod_sub_compute subroutine __sub_name_compute(this)
       real(RK), allocatable :: fi_v_save_(:), fj_v_save_(:)
 #    endif
 #  endif  ! _BSA_M3MF_ONLY_PREMESH
-
-      integer(int32) :: i_bfm, zNp
-      
-      real(RK), dimension(1), target :: base_fi, base_fj, fi, fj
-      real(RK), allocatable          :: bfm(:, :)
-
-      real(RK) :: dfIi, dfIj, dfJi, dfJj
 ! === Common declarations
 
 
-#  ifdef __triang_zone__
 
+#  ifdef __triang_zone__
       type(MPoint_t) :: pt
-      integer(int32) :: Np, Np_m1, Nj_m1, id
+      integer(int32) :: Np_m1, Nj_m1
       real(RK)       :: df_CA, df_CST
 
-      ! caching
-      Np    = this%ni_
-
-      ! tot = (Np*Np + Np) / 2
-      zNp   = Np*Np
-      zNp   = zNp + Np
-      zNp   = zNp / 2
+      Np_m1 = this%ni_
+      zNp   = (Np_m1 * (Np_m1+1)) / 2
       
-      Np_m1 = Np - 1
+      Np_m1 = Np_m1 - 1
       Nj_m1 = Np_m1
 
 
@@ -157,7 +149,14 @@ __mod_sub_compute subroutine __sub_name_compute(this)
 
 #  else
 
-      call this%getIJfsteps(dfIi, dfIj, dfJi, dfJj)
+      call this%getUnaryDeltas(dfIi, dfIj, dfJi, dfJj)
+
+      ! actualise values
+      dfIi = dfIi * this%deltaf_I_
+      dfIj = dfIj * this%deltaf_I_
+      dfJi = dfJi * this%deltaf_J_
+      dfJj = dfJj * this%deltaf_J_
+
 
       zNp = this%nj_ * this%ni_
 #  endif  ! __triang_zone__
@@ -340,9 +339,9 @@ __mod_sub_compute subroutine __sub_name_compute(this)
          fj(1) = fj(1) + dfJj
 
          i_bfm = i_bfm + 1
-         bfm(:, id:id) = getBFM_msh(fi, fj)
+         bfm(:, i_bfm:i_bfm) = getBFM_msh(fi, fj)
 #   ifdef _BSA_M3MF_ONLY_PREMESH
-         intg = intg + bfm(:, id) * brd_infl
+         intg = intg + bfm(:, i_bfm) * brd_infl
 #   endif
 
 # else
@@ -697,8 +696,13 @@ end subroutine __sub_name_compute
 
       ! get original (pre-meshing) deltas (LEVEL 0)
       ! NOTE: keep them in memory unchanged since they might serve later on.
-      call this%getIJfsteps(dfIi_bfm_lv0_, dfIj_bfm_lv0_, dfJi_bfm_lv0_, dfJj_bfm_lv0_)
+      call this%getUnaryDeltas(dfIi_bfm_lv0_, dfIj_bfm_lv0_, dfJi_bfm_lv0_, dfJj_bfm_lv0_)
+      dfIi_bfm_lv0_ = dfIi_bfm_lv0_ * this%deltaf_I_
+      dfIj_bfm_lv0_ = dfIj_bfm_lv0_ * this%deltaf_I_
+      dfJi_bfm_lv0_ = dfJi_bfm_lv0_ * this%deltaf_J_
+      dfJj_bfm_lv0_ = dfJj_bfm_lv0_ * this%deltaf_J_
 
+      
       ! get n. of BFM refinement segments (between two old ones)
       n_segs_bfm_ref_i_ = 1 ! original
       n_segs_bfm_ref_j_ = 1

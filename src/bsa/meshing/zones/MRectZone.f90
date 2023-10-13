@@ -62,7 +62,7 @@ module BsaLib_MRectZone
       procedure, pass, public  :: define
       procedure, pass :: setIEpts
       procedure, pass :: getOtherBase
-      procedure, pass :: getIJfsteps
+      ! procedure, pass :: getIJfsteps
       ! procedure, pass :: validateDeltas
       ! procedure, pass :: reconstructZoneBaseMesh
       procedure, pass, public  :: compute => compute_rz_
@@ -280,13 +280,13 @@ module BsaLib_MRectZone
 
 
 
-      !> Gets actualised frequency deltas along two main
-      !> sides directions (I, J), actualised based on *this
-      !> zone rotation w.r.t. GRS.
-      module subroutine getIJfsteps(this, dfIi, dfIj, dfJi, dfJj)
-         class(MRectZone_t), intent(in) :: this
-         real(bsa_real_t), intent(out)  :: dfIi, dfIj, dfJi, dfJj
-      end subroutine
+      ! !> Gets actualised frequency deltas along two main
+      ! !> sides directions (I, J), actualised based on *this
+      ! !> zone rotation w.r.t. GRS.
+      ! module subroutine getIJfsteps(this, dfIi, dfIj, dfJi, dfJj)
+      !    class(MRectZone_t), intent(in) :: this
+      !    real(bsa_real_t), intent(out)  :: dfIi, dfIj, dfJi, dfJj
+      ! end subroutine
 
 
 

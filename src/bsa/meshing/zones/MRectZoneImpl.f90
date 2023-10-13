@@ -985,64 +985,64 @@ contains
 
 
 
-   !> Gets actualised frequency deltas along two main
-   !> sides directions (I, J), actualised based on *this
-   !> zone rotation w.r.t. GRS.
-   module subroutine getIJfsteps(this, dfIi, dfIj, dfJi, dfJj)
-      class(MRectZone_t), intent(in) :: this
-      real(bsa_real_t), intent(out)  :: dfIi, dfIj, dfJi, dfJj
+   ! !> Gets actualised frequency deltas along two main
+   ! !> sides directions (I, J), actualised based on *this
+   ! !> zone rotation w.r.t. GRS.
+   ! module subroutine getIJfsteps(this, dfIi, dfIj, dfJi, dfJj)
+   !    class(MRectZone_t), intent(in) :: this
+   !    real(bsa_real_t), intent(out)  :: dfIi, dfIj, dfJi, dfJj
 
-      real(bsa_real_t) :: c, s, ang
+   !    real(bsa_real_t) :: c, s, ang
 
-      if (this%rot_ < CST_PId2) then ! FIRST quadrant
+   !    if (this%rot_ < CST_PId2) then ! FIRST quadrant
 
-         c = cos(this%rot_)
-         s = sin(this%rot_)
+   !       c = cos(this%rot_)
+   !       s = sin(this%rot_)
 
-         dfIi =   this%deltaf_I_ * c
-         dfIj = - this%deltaf_I_ * s
+   !       dfIi =   this%deltaf_I_ * c
+   !       dfIj = - this%deltaf_I_ * s
 
-         dfJi = this%deltaf_J_ * s
-         dfJj = this%deltaf_J_ * c
+   !       dfJi = this%deltaf_J_ * s
+   !       dfJj = this%deltaf_J_ * c
 
-      elseif (this%rot_ < CST_PIGREC) then ! SECOND quadrant
+   !    elseif (this%rot_ < CST_PIGREC) then ! SECOND quadrant
 
-         ang = this%rot_ - CST_PId2
-         c   = cos(ang)
-         s   = sin(ang)
+   !       ang = this%rot_ - CST_PId2
+   !       c   = cos(ang)
+   !       s   = sin(ang)
 
-         dfIi = - this%deltaf_I_ * c   ! - this%deltaf_I_ * s
-         dfIj = - this%deltaf_I_ * s   ! - this%deltaf_I_ * c
+   !       dfIi = - this%deltaf_I_ * c   ! - this%deltaf_I_ * s
+   !       dfIj = - this%deltaf_I_ * s   ! - this%deltaf_I_ * c
 
-         dfJi = - this%deltaf_J_ * s   !   this%deltaf_J_ * c
-         dfJj =   this%deltaf_J_ * c   ! - this%deltaf_J_ * s
+   !       dfJi = - this%deltaf_J_ * s   !   this%deltaf_J_ * c
+   !       dfJj =   this%deltaf_J_ * c   ! - this%deltaf_J_ * s
 
-      elseif (this%rot_ < CST_PIt3d2) then ! THIRD quadrant
+   !    elseif (this%rot_ < CST_PIt3d2) then ! THIRD quadrant
 
-         ang = this%rot_ - CST_PIGREC
-         c   = cos(ang)
-         s   = sin(ang)
+   !       ang = this%rot_ - CST_PIGREC
+   !       c   = cos(ang)
+   !       s   = sin(ang)
 
-         dfIi = - this%deltaf_I_ * c
-         dfIj =   this%deltaf_I_ * s
+   !       dfIi = - this%deltaf_I_ * c
+   !       dfIj =   this%deltaf_I_ * s
 
-         dfJi = - this%deltaf_J_ * s
-         dfJj = - this%deltaf_J_ * c
+   !       dfJi = - this%deltaf_J_ * s
+   !       dfJj = - this%deltaf_J_ * c
 
-      elseif (this%rot_ < CST_PIt2) then ! FOURTH quadrant
+   !    elseif (this%rot_ < CST_PIt2) then ! FOURTH quadrant
 
-         ang = this%rot_ - CST_PIt3d2
-         c   = cos(ang)
-         s   = sin(ang)
+   !       ang = this%rot_ - CST_PIt3d2
+   !       c   = cos(ang)
+   !       s   = sin(ang)
 
-         dfIi =   this%deltaf_I_ * c   ! this%deltaf_I_ * s
-         dfIj =   this%deltaf_I_ * s   ! this%deltaf_I_ * c
+   !       dfIi =   this%deltaf_I_ * c   ! this%deltaf_I_ * s
+   !       dfIj =   this%deltaf_I_ * s   ! this%deltaf_I_ * c
 
-         dfJi =   this%deltaf_J_ * s   ! - this%deltaf_J_ * c
-         dfJj = - this%deltaf_J_ * c   !   this%deltaf_J_ * s
+   !       dfJi =   this%deltaf_J_ * s   ! - this%deltaf_J_ * c
+   !       dfJj = - this%deltaf_J_ * c   !   this%deltaf_J_ * s
 
-      endif
-   end subroutine
+   !    endif
+   ! end subroutine
 
 
 

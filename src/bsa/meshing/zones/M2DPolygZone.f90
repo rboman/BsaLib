@@ -30,8 +30,7 @@ module BsaLib_M2DPolygZone
       !> Refinement (n meshing pts) along J-dir
       integer(int32) :: nj_ = 0
 
-      !> Rotation angle w.r.t to XY plane axes
-      !> CLOCKWISE
+      !> Rotation angle w.r.t to XY plane axes (CLOCKWISE)
       real(bsa_real_t) :: rot_ = 0._bsa_real_t
 
    contains
@@ -43,6 +42,8 @@ module BsaLib_M2DPolygZone
       procedure, pass :: setRotation
       procedure, pass :: isGRSAligned
       procedure, pass :: setRefinements
+
+      procedure, pass :: getUnaryDeltas
 
       procedure(VoidSub),     pass, deferred :: deduceDeltas
       procedure(RealVoidFct), pass, deferred :: baseI
@@ -158,6 +159,67 @@ contains
 
       endif
       call this%deduceDeltas()
+   end subroutine
+
+
+
+
+
+   subroutine getUnaryDeltas(this, dfIi, dfIj, dfJi, dfJj)
+      class(M2DPolygZone_t), intent(inout) :: this
+      real(bsa_real_t), intent(out) :: dfIi, dfIj
+      real(bsa_real_t), intent(out) :: dfJi, dfJj
+
+      real(bsa_real_t) :: ang, c, s
+      real(bsa_real_t), intrinsic :: sin, cos
+
+      if (this%rot_ < CST_PId2) then ! FIRST quadrant
+
+         c = cos(this%rot_)
+         s = sin(this%rot_)
+
+         dfJi =  s
+         dfJj =  c
+
+         dfIi =  c
+         dfIj = -s
+
+      elseif (this%rot_ < CST_PIGREC) then ! SECOND quadrant
+
+         ang = this%rot_ - CST_PId2
+         c   = cos(ang)
+         s   = sin(ang)
+
+         dfJi = -s   !  c
+         dfJj =  c   ! -s
+
+         dfIi =  c   ! -s
+         dfIj =  s   ! -c
+
+      elseif (this%rot_ < CST_PIt3d2) then ! THIRD quadrant
+
+         ang = this%rot_ - CST_PIGREC
+         c   = cos(ang)
+         s   = sin(ang)
+
+         dfJi = -s
+         dfJj = -c
+
+         dfIi = -c
+         dfIj =  s
+
+      elseif (this%rot_ < CST_PIt2) then ! FOURTH quadrant
+
+         ang = this%rot_ - CST_PIt3d2
+         c   = cos(ang)
+         s   = sin(ang)
+
+         dfJi =  s   ! -c
+         dfJj = -c   !  s
+
+         dfIi =  c   !  s
+         dfIj =  s   !  c
+      endif
    end subroutine
 
 

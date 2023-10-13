@@ -208,8 +208,7 @@ contains
    !>   - df_cst : total delta along CB side (I-dir in LRS)
    module subroutine getRotatedUnaryDF(this, df_I_var, df_J_var, df_I_cst, df_J_cst)
       class(MTriangZone_t), intent(inout) :: this
-      real(bsa_real_t), intent(out) :: df_I_var, df_J_var
-      ! logical, intent(in), optional    :: invert
+      real(bsa_real_t), intent(out)       :: df_I_var, df_J_var
       real(bsa_real_t), intent(out), optional :: df_I_cst, df_J_cst
 
       logical :: do_invert = .false.
