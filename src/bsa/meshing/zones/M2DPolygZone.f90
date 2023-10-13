@@ -193,8 +193,8 @@ contains
          dfJi = -s   !  c
          dfJj =  c   ! -s
 
-         dfIi =  c   ! -s
-         dfIj =  s   ! -c
+         dfIi = -c   ! -s
+         dfIj = -s   ! -c
 
       elseif (this%rot_ < CST_PIt3d2) then ! THIRD quadrant
 
