@@ -16,15 +16,26 @@
 module BsaLib_CONSTANTS
 
    use, intrinsic :: iso_fortran_env
-#ifndef IK
-# define IK int32
-#endif
-#ifndef RK
-# define RK real64
-#endif
    implicit none (type, external)
    public
 
+#ifdef INT32
+   integer, parameter, public :: IK = int32
+#elif INT64
+   integer, parameter, public :: IK = int64
+#else
+   integer, parameter, public :: IK = int32
+#endif
+
+#ifdef REAL32
+   integer, parameter, public :: RK = real32
+#elif REAL64
+   integer, parameter, public :: RK = real64
+#elif REAL128
+   integer, parameter, public :: RK = real128
+#else
+   integer, parameter, public :: RK = real64
+#endif
 
    !**************************************************************************************
    !   BSA  integer/real types selected kinds
