@@ -15,6 +15,8 @@
 !! along with BSA Library.  If not, see <https://www.gnu.org/licenses/>.
 submodule(BsaLib_WindData) BsaLib_WindPSDImpl
 
+#define __use_concurrent_loops__
+
    use BsaLib_CONSTANTS, only: bsa_int_t, bsa_real_t, real64, int32       &
                               , INFOMSG, WARNMSG, ERRMSG, MSGCONT, DBGMSG
    implicit none (type, external)
@@ -76,24 +78,18 @@ contains
 
       absf = abs(f)
 
-      ! do concurrent (i = 1 : innl) shared(PSDvec)
-      !    PSDmat(:, i) = sqrt(PSDvec * PSDvec(i))
-      !    ni = nodesl(i)
-      !    do concurrent (j = 1 : innl) shared(this, i)
-      !       nj           = nodesl(j)
-      !       id           = util_getCorrVectIndex(nj, ni, struct_data%nn_)
-      !       PSDmat(j, i) = PSDmat(j, i) * &
-      !          this%nod_corr_(id, idir)**(absf)
-      !    enddo
-      ! enddo
+#ifdef __use_concurrent_loops__
+      do concurrent (i = 1 : innl) &
+            local(ni, nj, id) shared(PSDvec, nodesl, innl, struct_data, this, absf)
+#else
       do i = 1, innl
+#endif
          PSDmat(:, i) = sqrt(PSDvec * PSDvec(i))
          ni = nodesl(i)
          do j = 1, innl
             nj           = nodesl(j)
             id           = util_getCorrVectIndex(nj, ni, struct_data%nn_)
-            PSDmat(j, i) = PSDmat(j, i) * &
-               this%nod_corr_(id, idir)**(absf)
+            PSDmat(j, i) = PSDmat(j, i) * (this%nod_corr_(id, idir)**(absf))
          enddo
       enddo
    end function
@@ -165,8 +161,11 @@ contains
          PSD   = (1 + 70.7_bsa_real_t * PSD)**(5._bsa_real_t/6._bsa_real_t)
          
 
-         ! BUG: LOCAL(i) is superflous (should be error..)
-         do concurrent (i = 1 : innl) local(i)
+#ifdef __use_concurrent_loops__
+         do concurrent (i = 1 : innl) shared(innl, rtmp1)
+#else
+         do i = 1, innl
+#endif
             PSD(:, i) = 4._bsa_real_t * rtmp1(1, i) / PSD(:, i)
          enddo
 
@@ -259,13 +258,12 @@ contains
       cstL_U(1, :) = wd%turb_scales_wz_(itc, idir, wd%wz_node_(nnl)) / wd%u_node_(nnl)
       cstFL_U      = matmul(reshape(abs(freqs), [nf, 1]), cstL_U)
 
-      ! do i = 1, innl
-      !    PSD(:, i) = &
-      !       (CST_2d3 * cstFL_U(:, i) * cstL_U(1, i) * wd%sigmaUVW_wz_(itc, wd%wz_node_(i))**2) / &
-      !       ((1.d0 + (cstFL_U(:, i)**2))**(4.d0 / 3.d0))
-      ! enddo
-      do concurrent (i = 1 : innl) shared(cstFL_U, cstL_U, itc, wd) local(n)
-
+#ifdef __use_concurrent_loops__
+      do concurrent (i = 1 : innl) &
+            shared(cstFL_U, innl, nnl, cstL_U, itc, wd) local(n)
+#else
+      do i = 1, innl
+#endif
          n = nnl(i)
 
          PSD(:, i) = &
