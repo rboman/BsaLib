@@ -15,7 +15,9 @@
 !! along with BSA Library.  If not, see <https://www.gnu.org/licenses/>.
 submodule(BsaLib_WindData) BsaLib_WindPSDImpl
 
-#define __use_concurrent_loops__
+#ifndef _BSA_DEBUG
+#  define __use_concurrent_loops__
+#endif
 
    use BsaLib_CONSTANTS, only: bsa_int_t, bsa_real_t, real64, int32       &
                               , INFOMSG, WARNMSG, ERRMSG, MSGCONT, DBGMSG
