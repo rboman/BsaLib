@@ -1325,7 +1325,7 @@ contains
       !! Supported methods:
       !!    - HTPC : Head-Tail-Previous-Current
       use BsaLib_MZone, only: MZone_t, MZone_ID, UndumpZone
-      integer(int32) :: izone_id, izone, ival2
+      integer(int32) :: izone_id, izone_, izone, ival2
       class(MZone_t), pointer     :: z => null()
       type(MRectZone_t), target   :: rz
       type(MTriangZone_t), target :: tz
@@ -1403,6 +1403,7 @@ contains
 # endif
 #endif
 
+      izone = 1
 
       ! NOTE: no need to check for EOF. We know how many zones we have dumped.
       !
@@ -1412,22 +1413,21 @@ contains
 #ifndef _BSA_USE_CACHED_POD_DATA
       !$omp   private(bfm_undump), &
 #endif
-      !$omp   shared(struct_data, wd, settings, logger_debug      &
-      !$omp          , NFREQS, NNODES, NNODESL, NLIBS, NLIBSL        &
-      !$omp          , NMODES, NMODES_EFF, MODES                     &
-      !$omp          , NPSDEL, NTCOMPS, NDIRS, TCOMPS, DIRS          &
-      !$omp          , MSHR_SVD_INFO, MSHR_SVD_LWORK, MSHR_SVD_WORK  &
-      !$omp          , MZone_ID, msh_NZones, m3mr_msh_ptr_        & 
-      !$omp          , msh_ZoneLimsInterestModes, do_validate_deltas_      &
-      !$omp          , msh_bfmpts_post_, msh_brmpts_post_, unit_dump_bfm_  &
-      !$omp          , bkg_peakw_ &
-      !$omp          , dimM_bisp_, getBFM_msh, getBRM_msh, write_brm_fptr_),       &
+      !$omp   shared(struct_data, wd, settings, logger_debug                   &
+      !$omp          , NFREQS, NNODES, NNODESL, NLIBS, NLIBSL, NMODES_EFF      &
+      !$omp          , NPSDEL, NTCOMPS, NDIRS, TCOMPS, DIRS, NMODES, MODES     &
+      !$omp          , MSHR_SVD_INFO, MSHR_SVD_LWORK, MSHR_SVD_WORK            &
+      !$omp          , bkg_peakw_, izone, MZone_ID, msh_NZones, m3mr_msh_ptr_  & 
+      !$omp          , msh_ZoneLimsInterestModes, do_validate_deltas_          &
+      !$omp          , msh_bfmpts_post_, msh_brmpts_post_, unit_dump_bfm_      &
+      !$omp          , dimM_bisp_, getBFM_msh, getBRM_msh, write_brm_fptr_),   &
       !$omp   num_threads(8)
-      do izone = 2, msh_NZones
+      do izone_ = 2, msh_NZones
 
          !$omp critical
          read(unit_dump_bfm_) izone_id   ! fetch zone type ID
 
+         izone = izone + 1
          print '(1x, a, a, i6, a, i0 )', &
             INFOMSG, 'Interpolating zone n. ', izone, ', with ID=  ', izone_id
             
