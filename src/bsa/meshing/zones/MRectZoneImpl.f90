@@ -26,7 +26,7 @@ submodule(BsaLib_MRectZone) BsaLib_MRectZoneImpl
 
    use BsaLib_CONSTANTS
    use BsaLib_Data,     only: bsa_Abort, msh_max_zone_NPts
-   use BsaLib_IO,       only: unit_dump_bfm_
+   use BsaLib_IO,       only: unit_debug_, unit_dump_bfm_
    use BsaLib_MPoint,   only: MPoint, MPoint_t, getPointsDistance
    use BsaLib_MZone,    only: DefaultInitBaseZone, MZone_ID, DumpZone
    implicit none (type, external)

@@ -16,6 +16,9 @@
 submodule(BsaLib) BsaLib_ClassicImpl
 
    use BsaLib_Data
+#ifdef _BSA_DEBUG
+   use BsaLib_IO,   only: unit_debug_
+#endif
    implicit none (type, external)
 
 contains

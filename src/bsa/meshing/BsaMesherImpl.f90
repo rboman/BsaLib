@@ -17,7 +17,7 @@ submodule(BsaLib) BsaLib_MesherImpl
 
    use BsaLib_Data
    use BsaLib_MPolicy
-   use BsaLib_IO,          only: unit_dump_bfm_
+   use BsaLib_IO,          only: unit_debug_, unit_dump_bfm_
    use BsaLib_MPoint,      only: MPoint_t, MPoint
    use BsaLib_MRectZone,   only: MRectZone_t, MRectZone
    use BsaLib_MTriangZone, only: MTriangZone_t, MTriangZone
