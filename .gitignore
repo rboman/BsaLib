@@ -67,3 +67,5 @@ compile.bat
 plotter/
 build/
 .fortls*
+images/
+My *
