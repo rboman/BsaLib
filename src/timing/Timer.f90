@@ -15,10 +15,9 @@
 !! along with BSA Library.  If not, see <https://www.gnu.org/licenses/>.
 module BsaLib_Timing
 
-   use BsaLib_CONSTANTS, only: real64
+   use, intrinsic :: iso_fortran_env, only: real64
    implicit none (type, external)
    private
-
 
    type, public :: timer_t
       private
@@ -34,21 +33,14 @@ module BsaLib_Timing
    end type timer_t
 
 
-
-
 contains
-
 
 
    subroutine InitTimer(this)
       class(timer_t) :: this
 
-      ! write(unit_debug_, *), ' @BsaLib_Timing::InitTimer() : Init timer...'
-      
       call cpu_time(this%t_init_)
       this%t_last_ = this%t_init_
-
-      ! write(unit_debug_, *), ' @BsaLib_Timing::InitTimer() : Init timer -- ok.'
    end subroutine InitTimer
 
 
@@ -59,10 +51,6 @@ contains
       real(real64) :: dt_tmp
       real(real64) :: dt
 
-! #ifdef _BSA_DEBUG
-!       write(unit_debug_, *), ' @BsaLib_Timing::ClockTimer() : save partial time...'
-! #endif
-
       call cpu_time(dt_tmp)
       dt = dt_tmp - this%t_last_
 
@@ -71,10 +59,6 @@ contains
 
       ! update last cpu_time call
       this%t_last_ = dt_tmp
-
-! #ifdef _BSA_DEBUG
-!       write(unit_debug_, *), ' @BsaLib_Timing::ClockTimer() : save partial time -- ok.'
-! #endif
    end function ClockTimer
 
 
@@ -85,15 +69,7 @@ contains
       class(timer_t), intent(in) :: this
       real(real64) :: tot
 
-! #ifdef _BSA_DEBUG
-!       write(unit_debug_, *), ' @BsaLib_Timing::GetTimerTotal() : getting timer total time...'
-! #endif
-
       tot = this%t_tot_
-
-! #ifdef _BSA_DEBUG
-!       write(unit_debug_, *), ' @BsaLib_Timing::GetTimerTotal() : getting timer total time -- ok.'
-! #endif
    end function GetTimerTotal
 
 
@@ -102,18 +78,10 @@ contains
    subroutine ResetTimer(this)
       class(timer_t) :: this
 
-! #ifdef _BSA_DEBUG
-!       write(unit_debug_, *), ' @BsaLib_Timing::ResetTimer() : Reset timer...'
-! #endif
-
       this%t_init_     = 0._real64
       this%t_last_     = 0._real64
       this%t_tot_      = 0._real64
       this%t_tot_prev_ = 0._real64
-
-! #ifdef _BSA_DEBUG
-!       write(unit_debug_, *), ' @BsaLib_Timing::ResetTimer() : Reset timer -- ok.'
-! #endif
    end subroutine ResetTimer
 
 

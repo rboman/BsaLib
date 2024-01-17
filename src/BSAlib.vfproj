@@ -51,7 +51,7 @@
 		<File RelativePath=".\bsa\data\BsaLibDataImpl.f90"/>
 		<File RelativePath=".\bsa\BsaLibImpl.f90"/>
 		<File RelativePath=".\bsa\meshing\BsaMesherImpl.f90"/>
-		<File RelativePath=".\CONSTANTS\CONSTANTS.f90"/>
+		<File RelativePath=".\CONSTANTS\constants.f90"/>
 		<File RelativePath=".\bsa\functions\functions.f90"/>
 		<File RelativePath=".\bsa\functions\functionsImpl.f90"/>
 		<File RelativePath=".\IO\io.f90"/>

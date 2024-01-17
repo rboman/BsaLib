@@ -15,9 +15,11 @@
 !! along with BSA Library.  If not, see <https://www.gnu.org/licenses/>.
 module BsaLib
 
-   use BsaLib_CONSTANTS
+   use, intrinsic :: iso_fortran_env
    implicit none (type, external)
    public
+
+#include "./CONSTANTS/_CONSTANTS.f90"
 
    private :: mainClassic_, mainMesher_
 
@@ -46,7 +48,7 @@ module BsaLib
          real(bsa_real_t), allocatable :: &
             m2mf_cls(:), m2mr_cls(:), m2o2mr_cls(:), m3mf_cls(:), m3mr_cls(:)
       end subroutine
-      
+
 
       module subroutine mainMesher_(m3mf_msh, m3mr_msh)
          real(bsa_real_t), target, allocatable :: m3mf_msh(:), m3mr_msh(:)
@@ -82,7 +84,7 @@ module BsaLib
       module subroutine bsa_setOutUnit(iunit)
          integer(bsa_int_t), intent(in) :: iunit
       end subroutine
-      
+
 
       module subroutine bsa_closeUnitsAtEnd()
       end subroutine
@@ -213,33 +215,33 @@ module BsaLib
       module subroutine bsa_setSpectraExtension(ionlydiag)
          integer(bsa_int_t), intent(in) :: ionlydiag
       end subroutine 
-   
+
 
 
       module subroutine bsa_setTestMode(itest)
          integer(bsa_int_t), intent(in) :: itest
       end subroutine 
-   
+
 
       module subroutine bsa_setSymmetries(ibispsym, i3dsym)
          integer(bsa_int_t), intent(in) :: ibispsym, i3dsym
       end subroutine 
 
-   
+
       module subroutine bsa_setupClassic(nfreqs, df)
          integer(bsa_int_t), intent(in) :: nfreqs
          real(bsa_real_t), intent(in) :: df
       end subroutine 
-   
+
 
 
       module subroutine bsa_setupMesher(isvd, bkgrfmt, bkgaext, genpaext, maxaext, ifcov, idumpmod)
          integer(bsa_int_t), intent(in) :: isvd, bkgrfmt, maxaext
          integer(bsa_int_t), intent(in) :: bkgaext, genpaext, ifcov, idumpmod
       end subroutine 
-   
-   
-   
+
+
+
 
       ! --------------------------         WIND       ---------------------------------
 
@@ -254,87 +256,87 @@ module BsaLib
          integer(bsa_int_t), intent(in) :: tc(:)
          integer(bsa_int_t), intent(in), optional :: ntc
       end subroutine
-   
-   
+
+
       module subroutine bsa_setWindVertProf(iwprof)
          integer(bsa_int_t), intent(in) :: iwprof
       end subroutine 
-   
 
-   
+
+
       module subroutine bsa_setPSDType(ipsd)
          integer(bsa_int_t), intent(in) :: ipsd
       end subroutine 
-   
 
-   
+
+
       module subroutine bsa_setWindAltDir(ivert)
          integer(bsa_int_t), intent(in) :: ivert
       end subroutine 
-   
 
-   
+
+
       module subroutine bsa_setWindZoneLimits(lim, ilim)
          real(bsa_real_t), intent(in) :: lim(..)
          integer(bsa_int_t), intent(in), optional :: ilim(..)
       end subroutine 
-   
 
-   
+
+
       module subroutine bsa_setAirDensity(aird)
          real(bsa_real_t), intent(in) :: aird
       end subroutine 
-   
 
-   
+
+
       module subroutine bsa_setGlobalRotMatW2G(rotW2G)
          real(bsa_real_t), intent(in) :: rotW2G(3, 3)
       end subroutine 
-   
 
-   
+
+
       module subroutine bsa_setWZMeanWindVel(mat)
          real(bsa_real_t), target, intent(in) :: mat(:)
       end subroutine 
-   
 
-   
+
+
       module subroutine bsa_setWZRefAlt(Zref)
          real(bsa_real_t), target, intent(in) :: Zref(:)
       end subroutine 
-   
 
-   
+
+
       module subroutine bsa_setTurbWindScales(L)
          real(bsa_real_t), target, intent(in) :: L(3, 3, *)
       end subroutine 
-   
 
-   
+
+
       module subroutine bsa_setTurbWindSDT(sigma)
          real(bsa_real_t), target, intent(in) :: sigma(3, *)
       end subroutine 
-   
 
-   
+
+
       module subroutine bsa_setWindCorrCoeffs(ccoeffs)
          real(bsa_real_t), target, intent(in) :: ccoeffs(3, 3, *)
       end subroutine 
-   
 
-   
+
+
       module subroutine bsa_setWindCorrExpnts(cexpn)
          real(bsa_real_t), target, intent(in) :: cexpn(3, 3, *)
       end subroutine 
-   
 
-   
+
+
       module subroutine bsa_setIncidenceAngles(incang)
          real(bsa_real_t), target, intent(in) :: incang(:)
       end subroutine 
-   
 
-   
+
+
       module subroutine bsa_setWZRotMatW2G(rotW2G_L)
          real(bsa_real_t), target, intent(in) :: rotW2G_L(3, 3, *)
       end subroutine 
@@ -344,7 +346,7 @@ module BsaLib
       module subroutine bsa_setNodalVel(Unod)
          real(bsa_real_t), target, intent(in) :: Unod(:)
       end subroutine
-   
+
 
 
       module subroutine bsa_setNodalWindZones(NodWZ)
@@ -373,19 +375,19 @@ module BsaLib
          real(bsa_real_t), target, intent(in) :: phiTc(:, :, :)
       end subroutine
 
-   
+
 
 
 
       ! --------------------------         STRUCTURAL       ---------------------------------
-   
+
       module subroutine bsa_setNodalCoords(nn, coords)
          integer(bsa_int_t), intent(in)   :: nn
          real(bsa_real_t), target, allocatable  :: coords(:, :)
       end subroutine
-   
 
-   
+
+
       module subroutine bsa_setNodalNOfDOFs(nlibs)
          integer(bsa_int_t), intent(in) :: nlibs
       end subroutine 
@@ -396,20 +398,20 @@ module BsaLib
          integer(bsa_int_t), intent(in) :: nn
       end subroutine
 
-   
-   
+
+
       module subroutine bsa_setLoadedNodalDOFs(libs_l, nlibs_l)
          integer(bsa_int_t), intent(in), target, allocatable :: libs_l(:)
          integer(bsa_int_t), intent(in), optional :: nlibs_l
       end subroutine 
-   
-   
-   
+
+
+
       module subroutine bsa_setLoadedNodes(nodes_l, nn_l)
          integer(bsa_int_t), intent(in), target, allocatable :: nodes_l(:)
          integer(bsa_int_t), intent(in), optional :: nn_l
       end subroutine
-   
+
 
 
       module subroutine bsa_setModalInfo(ndofs, nm, Phi, natf)
@@ -422,17 +424,17 @@ module BsaLib
       module subroutine bsa_setKeptModalShapes(modes)
          integer(bsa_int_t), intent(in) :: modes(:)
       end subroutine
-   
 
-   
+
+
       module subroutine bsa_setModalMatrices(nm, Mgen, Kgen, Cgen)
          integer(bsa_int_t), intent(in) :: nm
          real(bsa_real_t), intent(in), target, dimension(nm) :: Mgen, Kgen
          real(bsa_real_t), intent(in), target :: Cgen(nm, nm)
       end subroutine 
-   
 
-   
+
+
       module subroutine bsa_setTotDamping(xsi)
          real(bsa_real_t), target, intent(in) :: xsi(:)
       end subroutine 
@@ -466,7 +468,7 @@ module BsaLib
       end subroutine
 
 
-      
+
 
 
 
