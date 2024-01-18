@@ -34,38 +34,29 @@
 # after pre-processor
 *.i90
 
-# custom
-**/*_help.txt
-
 # Visual Studio
+.vs/
 **/*.suo
 **/*.u2d
 **/*.pdb
 **/*BuildLog*
 **/*.manifest
 
-# VS hidden (local) folder
-.vs/
-.vscode/
 
 # CUSTOM
-#specific subfolder, keep it as backup
-src/x64
-src/x86
+.vscode/
+**/*_help.txt
 **/*.lnk
 **/*.user
 **/*.help
 **/fort.*
-deps/
-lapack/
-build/
 *.exp
 **/*.ilk
 **/*.idb
 **/__pycache__
 compile.bat
 plotter/
-build/
+build*/
 .fortls*
 images/
 My *
