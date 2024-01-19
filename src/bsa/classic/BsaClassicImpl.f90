@@ -89,7 +89,7 @@ contains
       enddo ! i turb comp
 
 
-#ifdef _BSA_CL
+#ifdef _BSA_USE_GPU
       block
          real(bsa_real_t), allocatable :: S_uvw_T_(:, :)
          

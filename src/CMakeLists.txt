@@ -39,6 +39,12 @@ set_target_properties( ${project}
 )
 
 
+# TODO: see if we can manage this better
+# NOTE: disabling anoying -O2 default release flag...
+set( CMAKE_Fortran_FLAGS_RELEASE-default ${CMAKE_Fortran_FLAGS_RELEASE} PARENT_SCOPE )
+set( CMAKE_Fortran_FLAGS_RELEASE "" )
+
+
 # optional compile flags
 if (enable-par-compilation)
    message( STATUS "NOTE: Enabling parallel sources compilation" )
@@ -86,21 +92,25 @@ else()
    message( STATUS "NOTE: Using 'dsyev'  method")
 endif()
 
+if (enable-gpu-code)
+   target_compile_definitions( ${project} PRIVATE _BSA_USE_GPU )
+   if (enable-cuda)
+      target_compile_definitions( ${project} PRIVATE _BSA_USE_CUDA )
+   endif()
+   target_link_libraries( ${project} BsaCL_Fortran )
+endif()
+
 
 # Set module directory
 set(LIB_MOD_DIR ${CMAKE_CURRENT_BINARY_DIR}/modules)
 if(NOT EXISTS "${LIB_MOD_DIR}")
   make_directory("${LIB_MOD_DIR}")
 endif()
-set_target_properties( ${project}
-   PROPERTIES
-   Fortran_MODULE_DIRECTORY ${LIB_MOD_DIR}
-)
+set_target_properties( ${project} PROPERTIES Fortran_MODULE_DIRECTORY ${LIB_MOD_DIR} )
 
 # target_include_directories(${project} 
 #    PUBLIC
 #    $<BUILD_INTERFACE:${LIB_MOD_DIR}>
 #    $<INSTALL_INTERFACE:${CMAKE_INSTALL_MODULEDIR}>
 # )
-
 

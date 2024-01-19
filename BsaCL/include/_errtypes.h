@@ -1,0 +1,12 @@
+#ifndef BSACL_ERRTYPES_H_
+#define BSACL_ERRTYPES_H_
+
+
+#define BSACL_VALUE_MISMATCH_ERROR_           -1 
+#define BSACL_PLATFORM_FIND_ERROR_            -2 
+#define BSACL_DEF_PLATFORM_ACQUIRE_ERROR_     -3 
+#define BSACL_CQUEUES_CREATION_ERROR_         -4
+#define BSACL_INVALID_DEVICE_TYPE_            -5
+#define BSACL_PROBLEM_DIMENSIONS_TOO_SMALL_   -100
+
+#endif // BSACL_ERRTYPES_H_

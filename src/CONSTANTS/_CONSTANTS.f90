@@ -67,10 +67,12 @@
    character(len = *), parameter :: BSA_SETTS_DATA_DUMPFILE          = 'dumpsetts'
    character(len = *), parameter :: BSA_WIND_DATA_DUMPFILE           = 'dumpwind'
 
-#if   defined(_BSA_CL)
-   character(len = *), parameter :: BSA_FILE_NAME_CL_SUFFIX = '_CL'
-#elif defined(_BSA_CUDA)
+#ifdef _BSA_USE_GPU
+#  ifdef _BSA_USE_CUDA
    character(len = *), parameter :: BSA_FILE_NAME_CL_SUFFIX = '_CUDA'
+#  else
+   character(len = *), parameter :: BSA_FILE_NAME_CL_SUFFIX = '_CL'
+#  endif
 #else
    character(len = 0), parameter :: BSA_FILE_NAME_CL_SUFFIX = ''
 #endif

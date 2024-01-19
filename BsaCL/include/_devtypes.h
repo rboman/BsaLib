@@ -1,0 +1,9 @@
+#ifndef BSACL_DEVTYPES_H_
+#define BSACL_DEVTYPES_H_
+
+#define BSACL_DEVICE_TYPE_CPU_ 0
+#define BSACL_DEVICE_TYPE_GPU_ 1
+#define BSACL_DEVICE_TYPE_ACC_ 2
+#define BSACL_DEVICE_TYPE_DEF_ 3
+
+#endif

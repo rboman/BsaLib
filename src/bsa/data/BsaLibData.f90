@@ -14,7 +14,7 @@
 !! You should have received a copy of the GNU General Public License
 !! along with BSA Library.  If not, see <https://www.gnu.org/licenses/>.
 module BsaLib_Data
-   
+
    use Logging
    use BsaLib_Timing
    use BsaLib_CONSTANTS
@@ -22,13 +22,13 @@ module BsaLib_Data
    use BsaLib_Structure
    use BsaLib_WindData
    !$ use omp_lib
-#ifdef _BSA_CL
+#ifdef _BSA_USE_GPU
    use BsaCL
 #endif
    implicit none (type, external)
    public
 
-   
+
    !====================================
    ! MODULE VARIABLES
    !====================================
@@ -46,7 +46,7 @@ module BsaLib_Data
    integer(bsa_int_t) :: dimNf_psd_ = 0, dimNf_bisp_ = 0
    integer(bsa_int_t) :: dimNr_psd_ = 0, dimNr_bisp_ = 0
    integer(bsa_int_t) :: dimM_psd_  = 0, dimM_bisp_  = 0
-   
+
    real(bsa_real_t), allocatable, target :: PHItimesC_local_(:, :, :)
 
    real(bsa_real_t), allocatable :: peak_exts_(:)
@@ -57,7 +57,7 @@ module BsaLib_Data
    character(len = *), parameter :: brm_export_file_name_ = 'bsaexport.brm'
    procedure(exportBRMinterf_vect_), pointer :: write_brm_fptr_  => null()
    type, public :: BrmExportBaseData_t
-      
+
       integer(bsa_int_t) :: i_doNotPrintGenHeader_ = 0   ! == 0  means DO PRINT !!
       integer(bsa_int_t) :: nm_     = 0
       integer(bsa_int_t) :: ncomb_  = 0
@@ -72,7 +72,7 @@ module BsaLib_Data
    end type
 
 
-#ifdef _BSA_CL
+#ifdef _BSA_USE_GPU
    integer, target :: ierr_cl_
 #endif
 
@@ -91,7 +91,7 @@ module BsaLib_Data
    integer(bsa_int_t) :: ifr = 0, jfr = 0
    ! real(RDP), pointer :: m2mf_cls_ptr_(:), m2mr_cls_ptr_(:)   ! 2nd order moments
    ! real(RDP), pointer :: m3mf_cls_ptr_(:), m3mr_cls_ptr_(:)   ! 3rd order moments
-   
+
    procedure(getBFMClsVect), pointer :: getBFM_vect_cls => null()
    procedure(getBRMClsVect), pointer :: getBRM_vect_cls => null()
    abstract interface
@@ -149,10 +149,10 @@ module BsaLib_Data
 
    !> Controls if checking zone's deltas or not.
    logical :: do_validate_deltas_ = .true.
-   
+
    integer(bsa_int_t), public :: I_BKG_PEAK_DELTAF_BFM_REFMT_FCT_ = 2
    integer(bsa_int_t), public :: I_RES_PEAK_DELTAF_BFM_REFMT_FCT_ = 3
-   
+
    ! Total pre-mesh/post-mesh phase points
    integer(bsa_int_t), public :: msh_bfmpts_pre_
    integer(bsa_int_t), public :: msh_bfmpts_post_
@@ -161,7 +161,7 @@ module BsaLib_Data
    !> Code "-1" means that interest modes have to be read from the NEXT (right)
    !> limit only, since this is the first limit in the list
    integer(bsa_int_t), public, parameter :: CODE_PRE_PEAK_OK = -1_bsa_int_t
-   
+
    !> Code "-2" means that interest modes have to be read from 
    !> NEXT (right) limit only, since this is the first limit in the list.
    !> However, info is MISSING from the left side (BKG) peak
@@ -173,7 +173,7 @@ module BsaLib_Data
 
    !> Limit zones interest modes indexes
    integer(bsa_int_t), public, allocatable :: msh_ZoneLimsInterestModes(:)
-   
+
    !> Tot n. of zones counter.
    integer(bsa_int_t), public, target :: msh_NZones = 0
 
@@ -229,7 +229,6 @@ module BsaLib_Data
          character(len = *), intent(in), optional :: emsg
       end subroutine
    end interface
-
 
 
 end module BsaLib_Data

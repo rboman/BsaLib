@@ -189,7 +189,7 @@ contains
          call setBsaFunctionLocalVars()
 
 
-#ifdef _BSA_CL
+#ifdef _BSA_USE_GPU
 # ifdef _BSA_USE_CUDA
          call bsacl_AcquirePSDId(wd%i_psd_type_)
 # endif
@@ -276,7 +276,7 @@ contains
             write_brm_fptr_ => exportBRM_void_internal_
 
 
-#ifdef _BSA_CL
+#ifdef _BSA_USE_GPU
          settings%i_suban_type_   = 1  ! force CLS execution
          settings%i_compute_bisp_ = 1
          settings%i_compute_psd_  = 0
@@ -305,7 +305,7 @@ contains
       end block
 
       998 continue
-#ifdef _BSA_CL
+#ifdef _BSA_USE_GPU
       call bsacl_Finalise()
       if (ierr_cl_ /= BSACL_PROBLEM_DIMENSIONS_TOO_SMALL) then
          if (ierr_cl_ == 0) then
