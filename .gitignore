@@ -61,3 +61,4 @@ build*/
 images/
 My *
 app/
+compile_flags.txt
