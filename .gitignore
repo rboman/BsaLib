@@ -41,7 +41,9 @@
 **/*.pdb
 **/*BuildLog*
 **/*.manifest
-
+*.sln
+*.vfproj*
+*.vcxproj*
 
 # CUSTOM
 .vscode/
@@ -62,3 +64,4 @@ images/
 My *
 app/
 compile_flags.txt
+resources/cmake/
