@@ -23,25 +23,25 @@ submodule(BsaLib_Functions) BsaLib_FunctionsImpl
       , do_trunc_POD_, POD_trunc_lim_, nPODmodes_set_, nmodes_POD_, do_export_POD_trunc_
    implicit none (type, external)
 
-   
+
 contains
 
 
    module subroutine setBsaFunctionLocalVars()
 
       NFREQS  = settings%nfreqs_
-      
+
       ! nodal
       NNODES  = struct_data%nn_
       NNODESL = struct_data%nn_load_
       NLIBS   = struct_data%nlibs_    ! tot n. of LIBs per node
       NLIBSL  = struct_data%nlibs_load_    ! actual n. of loaded LIBs
-      
+
       ! modal
       NMODES     = struct_data%modal_%nm_
       NMODES_EFF = struct_data%modal_%nm_eff_
       MODES      = struct_data%modal_%modes_
-      
+
       ! wind
       NTCOMPS = wd%i_ntc_
       TCOMPS  = wd%tc_
@@ -98,7 +98,7 @@ contains
 
 
       ! NOTE: preinitalise to 0, to avoid uninitialised precision errors
-		!       Like using memset() in C.
+      !       Like using memset() in C.
       bfm = 0._bsa_real_t
 
       do itc = 1, NTCOMPS
@@ -108,9 +108,9 @@ contains
 
          ! prefetch wind turbulence PSDs for all loaded nodes
          S_IJK_fi = wd%evalPSD(1, fi, NNODESL, struct_data%n_load_, 1, tc)
-         
+
          S_IJK_fj = wd%evalPSD(1, fj, NNODESL, struct_data%n_load_, 1, tc)
-         
+
          S_IJK_fiPfj = wd%evalPSD(1, fiPfj, NNODESL, struct_data%n_load_, 1, tc)
 
 
@@ -118,7 +118,7 @@ contains
          do ink = 1, NNODESL
 
             nk = struct_data%n_load_(ink)
-            
+
             ! BUG: must be this because of anoher bug ahead..
             posKi = (nk - 1) * NLIBS
             ! posKi = (nk - 1) * NLIBSL + 1
@@ -146,7 +146,7 @@ contains
             do inj = 1, NNODESL
 
                nj = struct_data%n_load_(inj)
-               
+
                posJi = (nj - 1) * NLIBS
                ! posJi = (nj - 1) * NLIBSL + 1
                ! posJe = nj * NLIBSL
@@ -172,7 +172,7 @@ contains
                do ini = 1, NNODESL
 
                   ni = struct_data%n_load_(ini)
-            
+
                   posIi = (ni - 1) * NLIBS
                   ! posIi = (ni - 1) * NLIBSL + 1
                   ! posIe = ni * NLIBSL
@@ -231,7 +231,7 @@ contains
 
                      iposM = 1
                      do imk = 1, NMODES_EFF
-                        
+
                         phiK = phiK_(imk)
 
                         do imj = 1, NMODES_EFF
@@ -244,7 +244,7 @@ contains
 
                               ! bfm(iposM) = bfm(iposM) + &
                               !    sum(BF_IJK_ijk(:, :, :) * (matmul(phiI, phiJ) * phiK(:, :, :)))
-                           
+
                               bfm(iposM, 1) = bfm(iposM, 1) + &
                                  sum(BF_IJK_ijk(:, :) * (matmul(phiI, phiJ) * phiK))
 
@@ -314,13 +314,13 @@ contains
          END SUBROUTINE
 #endif
       end interface
-      
-      
+
+
       if (.not. allocated(MSHR_SVD_INFO)) then
          allocate(MSHR_SVD_INFO, stat=istat, errmsg=emsg)
          if (istat /= 0) call allocKOMsg('MSHR_SVD_INFO', istat, emsg)
       endif
-      
+
       MSHR_SVD_INFO = 0
 #ifdef _BSA_USE_SVD_METHOD
       call dgesvd(&
@@ -345,13 +345,13 @@ contains
 #endif
 
       if (MSHR_SVD_INFO == 0) then
-         
+
          MSHR_SVD_LWORK = int(optWork(1))
 ! #ifdef _BSA_DEBUG
          print '(1x, a, a, i0 /)', &
             INFOMSG, 'WORK query ok. Optimal work dimension = ', MSHR_SVD_LWORK
 ! #endif
-         
+
          if (allocated(MSHR_SVD_WORK)) then
             if (size(MSHR_SVD_WORK) /= MSHR_SVD_LWORK) then
                deallocate(MSHR_SVD_WORK)
@@ -445,7 +445,7 @@ contains
 #endif
       real(bsa_real_t), intent(in), contiguous :: fi(:), fj(:)
       real(bsa_real_t) :: bfm(dimM_bisp_, size(fi)*size(fj))
-      
+
 #ifdef _BSA_USE_CACHED_POD_DATA
 
 # define __EGVL_w2 D_S_uvw_w2_ptr
@@ -471,20 +471,20 @@ contains
 
       double precision              :: D_S_uvw_w1(NNODESL)   ! singular values vectors (DECREASING ordering!)
       double precision, allocatable :: S_uvw_w1(:, :)
-      
+
       double precision              :: D_S_uvw_w1w2(NNODESL)
       double precision, allocatable :: S_uvw_w1w2(:, :)
 
       ! for SVD related routines
       integer :: lwork, info
       double precision, allocatable :: work_arr(:)
-      
+
       double precision :: tmpv(1, NNODESL)   ! tmp vec for interfacing, BUG: might be avoided?
 
       double precision, dimension(NNODESL, 1)    :: eigvp, eigvq
       double precision, dimension(NMODES_EFF, 1) :: tmpm1, tmpm2, tmpm3
       double precision :: tmpDp, tmpTq, tmpo, tmpn
-      
+
       ! wind turbulent comps indexes
       integer(int32) :: itc, tc, tcP3
 
@@ -525,10 +525,10 @@ contains
       nfi_ = size(fi)
       nfj_ = size(fj)
       if (do_trunc_POD_) allocate(npodw2(nfj_))
-      
+
       allocate(D_S_uvw_w2(NNODESL,          nfj_))
       allocate(S_uvw_w2  (NNODESL, NNODESL, nfj_))
-      
+
 #else
       allocate(S_uvw_w2  (NNODESL, NNODESL))
 #endif
@@ -559,7 +559,7 @@ contains
                   [NNODESL, 1])
             S_uvw_w2(:, :, ifj) = &
                wd%getFullNodalPSD(NNODESL, struct_data%n_load_, S_uvw_w2(:, 1, ifj), fj(ifj), 1)
-         
+
 # ifdef _BSA_USE_SVD_METHOD
             call dgesvd(&
                  'O' &                    ! min(M,N) columns of U are overwritten on array A (saves memory)
@@ -584,7 +584,7 @@ contains
                   ERRMSG, 'Error applying SVD to S_uvw_w2. Exit code  ', info
                call bsa_Abort()
             endif
-         
+
             if (do_trunc_POD_) npodw2(ifj) = getNPODModesByThreshold_(D_S_uvw_w2(:, ifj), POD_trunc_lim_)
          enddo ! nfj
 
@@ -708,11 +708,11 @@ contains
       S_uvw_w1(:, 1:1) = &
                reshape(wd%evalPSD(1, fi(ifi:ifi), NNODESL, struct_data%n_load_, 1, tc), &
                   [NNODESL, 1])
-         
+
       S_uvw_w1 = &
          wd%getFullNodalPSD(NNODESL, struct_data%n_load_, S_uvw_w1(:, 1), fi(ifi), 1)
 
-      
+
 # ifdef _BSA_USE_SVD_METHOD
       call dgesvd(&
             'O' &          ! min(M,N) columns of U are overwritten on array A (saves memory)
@@ -781,7 +781,7 @@ contains
             call bsa_Abort()
          endif
 
-         
+
 #ifdef _BSA_CHECK_NOD_COH_SVD
          goto 99
 #endif
@@ -877,11 +877,9 @@ contains
                               tmpn * &
                               tmpo * tmpDp * tmpTq)
 
-                        posm = posm + 1                        
+                        posm = posm + 1
                      enddo ! m modes
-
                   enddo ! n modes
-
                enddo ! o modes
 
             enddo ! q = 1, nmw2
@@ -925,12 +923,10 @@ contains
                         posm = posm + 1
                      enddo ! m modes
                   enddo ! n modes
-
                enddo ! o modes
+
             enddo ! q = 1, nmw1w2
-
          enddo ! p = 1, nmw1
-
 
 
          ! 2-5-2 (3-6-3, 4-7-4)
@@ -1149,7 +1145,7 @@ contains
          do inode = 1, NNODESL
 
             node = int(struct_data%n_load_(inode), 4)
-            
+
             posi = (node - 1) * NLIBS
             phi_ = struct_data%modal_%phi_(posi + struct_data%libs_load_, MODES)
 
@@ -1198,7 +1194,7 @@ contains
             enddo ! libs loaded (k)
          enddo ! nodes loaded
       enddo ! n turb comps
-      
+
    end function getFM_diag_tnm_scalar_msh_
 
 
@@ -1449,7 +1445,7 @@ contains
             S_uvw_k = Suvw(:, tc_pk)
             ! if (settings%i_only_psd_ == 0) S_uvw_pad_k(iin : ien) = S_uvw_k
 
-            
+
             i_pos_nj = 1
             do inj = 1, NNODESL
 
@@ -1486,7 +1482,7 @@ contains
 
                      aiU(:) = wd%wfc_(struct_data%libs_load_, tc,   ini)
                      ai (:) = wd%wfc_(struct_data%libs_load_, tcP3, ini)
-      
+
                      corrIK = wd%nod_corr_(util_getCorrVectIndex(ni, nk, NNODES), tc)
                      corrIJ = wd%nod_corr_(util_getCorrVectIndex(ni, nj, NNODES), tc)
 
@@ -1520,7 +1516,7 @@ contains
 
                                  ! li   = struct_data%libs_load_(ili)
 
-                                 
+
                                  BF_ijk_IJK_w_w2 = 2 * (&
                                     ai (ili) * ajU(ilj) * akU(ilk) * (S_uvw_IJ * S_uvw_IK(ifrj)) + &
                                     aiU(ili) * aj (ilj) * akU(ilk) * (S_uvw_IJ_w1w2(ifrj : itmp) * S_uvw_JK(ifrj)) + &
@@ -1594,7 +1590,7 @@ contains
 
                      ! PSD f
                      PSDF_jk_JK_w = ajU(ilj) * akU(ilk) * S_uvw_JK
-                     
+
                      ! if (all(PSDF_jk_JK_w == 0.0_bsa_real_t)) cycle
 
 
@@ -1831,7 +1827,7 @@ contains
             phik_(:, 2) = wd%phi_times_A_ndegw_(:, ink, tcP3)
 
             S_uvw_k = Suvw(:, tc_pk)
-            
+
             i_pos_nj = 1
             do inj = 1, NNODESL
 
@@ -1860,7 +1856,7 @@ contains
 
                      phii_(:, 1) = wd%phi_times_A_ndegw_(:, ini, tc  )
                      phii_(:, 2) = wd%phi_times_A_ndegw_(:, ini, tcP3)
-      
+
                      corrIK = wd%nod_corr_(util_getCorrVectIndex(ni, nk, NNODES), tc)
                      corrIJ = wd%nod_corr_(util_getCorrVectIndex(ni, nj, NNODES), tc)
 
@@ -1984,7 +1980,7 @@ contains
 
       integer(int32) :: ifrj
       integer(int32) :: posm_psd = 1, posm_bisp = 1
-      
+
       ! modal indexed
       integer(int32) :: imi, imj, imk, mi
 
@@ -2019,7 +2015,7 @@ contains
          return
       endif
 
-      
+
       ! TRANSFER FUNCTION COMPUTATION
 
       omegas(:, 1) = f * CST_PIt2
@@ -2225,7 +2221,7 @@ contains
                do ifrj = 1, NFREQS
 
                   Suvw_N_w1w2(:, ifrj) = Suvw_N_pad(ifrj : NFREQS+itmp)
-                  
+
                   tmp1(:, ifrj) = Suvw_N_w1w2(:, ifrj) * Suvw_N_T(1, ifrj)
                   tmp2(:, ifrj) = Suvw_N_w1w2(:, ifrj) * Suvw(:, tc_pos)
                   ! tmp3(:, ifrj) = Suvw(:, tc_pos) * Suvw_N_T(1, ifrj)
@@ -2354,7 +2350,7 @@ contains
 
       integer(int32) :: ifrj
       integer(int32) :: pos = 1
-      
+
       ! modal indexed
       integer(int32) :: imi, mi
 
@@ -2390,7 +2386,7 @@ contains
          return
       endif
 
-      
+
       ! TRANSFER FUNCTION COMPUTATION
 
       ! pulsations
@@ -2579,7 +2575,7 @@ contains
             akU(:, 1) = wd%wfc_(struct_data%libs_load_, tc,   ink)
             ak (:, 1) = wd%wfc_(struct_data%libs_load_, tcP3, ink)
 
-            
+
             i_pos_nj = 1
             do inj = 1, NNODESL
 
@@ -2617,7 +2613,7 @@ contains
                      tc_pi  = tc_posN + i_pos_ni
 
                      phii_  = struct_data%modal_%phi_(pos_ni + struct_data%libs_load_, MODES)
-      
+
                      corrIK = wd%nod_corr_(util_getCorrVectIndex(ni, nk, NNODES), tc)
                      corrIJ = wd%nod_corr_(util_getCorrVectIndex(ni, nj, NNODES), tc)
 
@@ -2647,7 +2643,7 @@ contains
 
                         phik = phik_(ilk, :)
 
-                              
+
                         BF_ijk_IJK_w_w2 = 2 * (&
                            tmp1 * akU(ilk, 1) + &
                            tmp2 * akU(ilk, 1) + &
@@ -2817,7 +2813,7 @@ contains
             S_uvw_k_j  = Suvw(ij, tc_pk)
             S_uvw_k_ij = Suvw_pad(tc_pk)
 
-            
+
             i_pos_nj = 1
             do inj = 1, NNODESL
 
@@ -2865,7 +2861,7 @@ contains
 
                         phii_(:, 1) = wd%phi_times_A_ndegw_(:, ini, tc  )
                         phii_(:, 2) = wd%phi_times_A_ndegw_(:, ini, tcP3)
-         
+
                         corrIK = wd%nod_corr_(util_getCorrVectIndex(ni, nk, NNODES), tc)
                         corrIJ = wd%nod_corr_(util_getCorrVectIndex(ni, nj, NNODES), tc)
 
@@ -3122,7 +3118,7 @@ contains
             posNi = (n - 1) * NLIBS
 
             phiN_ = struct_data%modal_%phi_(posNi + struct_data%libs_load_, MODES)
-            
+
             aNU   = wd%wfc_(struct_data%libs_load_, tc,   inode)
             an    = wd%wfc_(struct_data%libs_load_, tcP3, inode)
 
@@ -3228,7 +3224,7 @@ contains
       H1r   =   rpart / htmp
       H1i   = - ipart / htmp
 
-      
+
       if (ij == 1) psdout = psdin * (H1r * H1r + H1i * H1i)
 
 
@@ -3237,7 +3233,7 @@ contains
          real(bsa_real_t), dimension(NMODES_EFF) :: H2r, H2i
          real(bsa_real_t), dimension(NMODES_EFF) :: H12r, H12i
          real(bsa_real_t) :: H12k_r, H12k_i, H2j_r, H2j_i
-         
+
 
          wj    = fj * CST_PIt2
          wiPwj = wi + wj
@@ -3266,7 +3262,7 @@ contains
          )
 
       end block
-      
+
    end subroutine getRM_diag_scalar_cls_
 
 
@@ -3301,7 +3297,7 @@ contains
 
       ! local nodal correlations
       real(bsa_real_t) :: corrJK
-      
+
       integer(int32) :: tc, imk, imj
       real(bsa_real_t), dimension(NLIBSL, 1) :: akU, phij_
       real(bsa_real_t), dimension(1, NLIBSL) :: ajU, phik_
@@ -3338,11 +3334,11 @@ contains
             phik_  = transpose(struct_data%modal_%phi_(pos_nk + struct_data%libs_load_, m:m))
 
             akU(:, 1) = wd%wfc_(struct_data%libs_load_, tc,   ink)
-            
+
             S_uvw_k_i = Suvw(im, tc_pk)
 
 
-            
+
             i_pos_nj = 1
             do inj = 1, NNODESL
 
