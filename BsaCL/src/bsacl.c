@@ -2,6 +2,7 @@
 //-------------------------------------
 // General  MACROs
 //-------------------------------------
+#include "_base.h"
 #ifndef BSACL_OPT_N_WORK_ITEMS_PER_WORK_GROUP
 #  define BSACL_OPT_N_WORK_ITEMS_PER_WORK_GROUP 64
 #endif
@@ -31,10 +32,15 @@
 #include <string.h>
 
 
+#ifndef BASE_DIRECTORY
+# define BASE_DIRECTORY "./"  // By default, current binary directory.
+#endif
+
+
 #include "bsacl.h"
 #ifdef BSACL_USE_CUDA__
 # ifdef BSACL_PASS_PARAMS_BY_MACRO
-#   undef BSACL_PASS_PARAMS_BY_MACRO  // in CUDA, we pass always by kernel param!
+#  undef BSACL_PASS_PARAMS_BY_MACRO  // in CUDA, we pass always by kernel param!
 # endif
 
 # define BSACL_CONV_PULSATION
@@ -46,7 +52,7 @@
 #   undef  NULL
 #   define NULL 0
 # endif
-#else
+#else // using OpenCL
 # define CL_USE_DEPRECATED_OPENCL_1_2_APIS
 # pragma message("   --- [NOTE]:  Using  OpenCL  specification!")
 # define __CL_ENABLE_EXCEPTIONS
@@ -99,7 +105,6 @@ cl_program program__;
 char     **clSourceStrings__ = NULL;
 char     **evalFctStrings__  = NULL;
 cl_kernel  kernel_bfm__;
-unsigned   prog_string_pos__ = 0;
 char       prog_compile_opts__[BUFSIZ] = {' '};
 
 #else
@@ -155,10 +160,6 @@ REAL *fi__ = NULL;
 REAL *fj__ = NULL;
 REAL *S_uvw__       = NULL;
 REAL *S_uvw_fiPfj__ = NULL;
-
-#ifndef BSACL_USE_CUDA__
-const char * _base_lib_path__ = "D:\\BSA\\BSACL\\\0";
-#endif
 
 unsigned short has_halted__  = 0U;
 unsigned short has_cleaned__ = 0U;
@@ -842,14 +843,13 @@ void initCreateDeviceBuffers_() {
 
 #ifndef BSACL_USE_CUDA__
 size_t readFileContent_(char ** buf_, const char * fname_) {
-   char ffp_[256];
    FILE *fp;
    errno_t nbytes_;
-   long  fsize_ = 0L;
+   long fsize_ = 0L;
+   char ffp_[256];
 
-   fsize_ = (long)(strlen(_base_lib_path__) + strlen(fname_));
-   // nbytes_ = strcpy_s(ffp_, strlen(_base_lib_path__), _base_lib_path__);
-   strcpy(ffp_, _base_lib_path__);
+   fsize_ = (long)(strlen(BASE_DIRECTORY) + strlen(fname_));
+   strcpy(ffp_, BASE_DIRECTORY);
    nbytes_ = strcat_s(ffp_, fsize_ + 1, fname_);
 
    nbytes_ = fopen_s(&fp, ffp_, (const char *)"r");
@@ -909,70 +909,78 @@ size_t assembleFinalCLSource_(char **clBaseStrings, char **evalFctStrings) {
 
 
 
-void assembleProgramBuildOptsString_() {
+void assembleProgramBuildOptsString_()
+{
+   char *buf = prog_compile_opts__;
+
+   strcpy(buf, "-D BSACL_BASE_DIR=\"");
+   buf += 19;
+   strcpy(buf, BASE_DIRECTORY);
+   buf += strlen(BASE_DIRECTORY);
+   strcpy(buf, "\" \0");
+   buf += 2;
 
    // BUG: user defined !
-   strcpy((prog_compile_opts__), "-D BSACL_CONV_PULSATION ");
-   prog_string_pos__ += 24;
+   strcpy(buf, "-D BSACL_CONV_PULSATION ");
+   buf += 24;
 
-   strcpy((prog_compile_opts__ + prog_string_pos__), "-D BSACL_WIpWG=");
-   prog_string_pos__ += 15;
-   strcpy((prog_compile_opts__ + prog_string_pos__), STRINGIFYMACRO_VALUE(BSACL_OPT_N_WORK_ITEMS_PER_WORK_GROUP));
-   prog_string_pos__ += strlen(STRINGIFYMACRO_VALUE(BSACL_OPT_N_WORK_ITEMS_PER_WORK_GROUP));
+   strcpy(buf, "-D BSACL_WIpWG=");
+   buf += 15;
+   strcpy(buf, STRINGIFYMACRO_VALUE(BSACL_OPT_N_WORK_ITEMS_PER_WORK_GROUP));
+   buf += strlen(STRINGIFYMACRO_VALUE(BSACL_OPT_N_WORK_ITEMS_PER_WORK_GROUP));
 
-   strcpy((prog_compile_opts__ + prog_string_pos__), " -D BSACL_KERNEL_ID=");
-   prog_string_pos__ += 20;
-   strcpy((prog_compile_opts__ + prog_string_pos__), STRINGIFYMACRO_VALUE(BSACL_KERNEL_ID));
-   ++prog_string_pos__;
+   strcpy(buf, " -D BSACL_KERNEL_ID=");
+   buf += 20;
+   strcpy(buf, STRINGIFYMACRO_VALUE(BSACL_KERNEL_ID));
+   ++buf;
+
 
 #if (BSACL_KERNEL_ID==2) || (BSACL_KERNEL_ID==3)
-   strcpy((prog_compile_opts__ + prog_string_pos__), " -D BSACL_WIND_PSD_ID=");
-   prog_string_pos__ += 22;
-   strcpy((prog_compile_opts__ + prog_string_pos__), STRINGIFYMACRO_VALUE(BSACL_PSD_TYPE_DAVENPORT));
-   ++prog_string_pos__;
+   strcpy(buf, " -D BSACL_WIND_PSD_ID=");
+   buf += 22;
+   strcpy(buf, STRINGIFYMACRO_VALUE(BSACL_PSD_TYPE_DAVENPORT));
+   ++buf;
 
 # ifdef BSACL_PASS_PARAMS_BY_MACRO
+   strcpy(buf, " -D BSACL_PASS_PARAMS_BY_MACRO");
+   buf += 30;
 
-   strcpy((prog_compile_opts__ + prog_string_pos__), " -D BSACL_PASS_PARAMS_BY_MACRO");
-   prog_string_pos__ += 30;
+   strcpy(buf, " -D NTC__=");
+   buf += 10;
+   sprintf(buf, "%-1u", extdata__.NTC__);
+   ++buf;
 
-   strcpy((prog_compile_opts__ + prog_string_pos__), " -D NTC__=");
-   prog_string_pos__ += 10;
-   sprintf((prog_compile_opts__ + prog_string_pos__), "%-1u", extdata__.NTC__);
-   ++prog_string_pos__;
+   strcpy(buf, " -D NNL__=");
+   buf += 10;
+   sprintf(buf, "%-10u", extdata__.NNODES_LOAD__);
+   buf += 10;
 
-   strcpy((prog_compile_opts__ + prog_string_pos__), " -D NNL__=");
-   prog_string_pos__ += 10;
-   sprintf((prog_compile_opts__ + prog_string_pos__), "%-10u", extdata__.NNODES_LOAD__);
-   prog_string_pos__ += 10;
+   strcpy(buf, " -D NN__=");
+   buf += 9;
+   sprintf(buf, "%-10u", extdata__.NN__);
+   buf += 10;
 
-   strcpy((prog_compile_opts__ + prog_string_pos__), " -D NN__=");
-   prog_string_pos__ += 9;
-   sprintf((prog_compile_opts__ + prog_string_pos__), "%-10u", extdata__.NN__);
-   prog_string_pos__ += 10;
-
-   strcpy((prog_compile_opts__ + prog_string_pos__), " -D NM_EFF__=");
-   prog_string_pos__ += 13;
-   sprintf((prog_compile_opts__ + prog_string_pos__), "%-5u", extdata__.NMODES_EFF__);
-   prog_string_pos__ += 5;
+   strcpy(buf, " -D NM_EFF__=");
+   buf += 13;
+   sprintf(buf, "%-5u", extdata__.NMODES_EFF__);
+   buf += 5;
 
 // # if (BSACL_KERNEL_ID==3)
-//    strcpy((prog_compile_opts__ + prog_string_pos__), " -D NFI__=");
-//    prog_string_pos__ += 10;
-//    sprintf((prog_compile_opts__ + prog_string_pos__), "%-10u", nfi__);
-//    prog_string_pos__ += 10;
+//    strcpy(buf, " -D NFI__=");
+//    buf += 10;
+//    sprintf(buf, "%-10u", nfi__);
+//    buf += 10;
 
-//    strcpy((prog_compile_opts__ + prog_string_pos__), " -D NFJ__=");
-//    prog_string_pos__ += 10;
-//    sprintf((prog_compile_opts__ + prog_string_pos__), "%-10u", nfj__);
-//    prog_string_pos__ += 10;
+//    strcpy(buf, " -D NFJ__=");
+//    buf += 10;
+//    sprintf(buf, "%-10u", nfj__);
+//    buf += 10;
 // # endif
 
 # endif // defined BSACL_PASS_PARAMS_BY_MACRO
+#endif // (BSACL_KERNEL_ID==2) || (BSACL_KERNEL_ID==3)
 
-#endif
-
-   prog_compile_opts__[prog_string_pos__] = '\0';
+   *buf = '\0';
 
 #ifdef BSACLC_DEBUG
    printf("\n%s\n", prog_compile_opts__);
@@ -990,7 +998,7 @@ BSACL_INT buildCLProgram_() {
    char *clSource_;
 
    /** Create and build program. */
-   size_ = readFileContent_(&clSource_, "src\\bsacl.cl");
+   size_ = readFileContent_(&clSource_, "bsacl.cl");
    size_ = assembleFinalCLSource_(&clSource_, evalFctStrings__);
    if (clSourceStrings__ == NULL) ABORT_INTERNAL_RETURN_IERR(-324, "Failed to assemble CL source strings.");
    free(clSource_), clSource_ = NULL;
@@ -1290,7 +1298,11 @@ void bsaclRun(int *__EXT_PTR_CONST ierr) {
 #endif
 
 
-   if (has_halted__ == 1U) return;
+   if (has_halted__ == 1U) {
+      ierr_ = (ierr_t)-1;
+      goto ret_;
+   }
+
    if (fi__ == NULL || fj__ == NULL) 
       { ierr_ = (ierr_t)-20; printMsg_(ERRR_MSG, "No computation frequencies acquired."); goto ret_; }
 
@@ -1550,6 +1562,7 @@ void bsaclRun(int *__EXT_PTR_CONST ierr) {
       }
    }
    free(rtmp_);
+   rtmp_ = NULL;
 #endif
 
 
@@ -1575,18 +1588,12 @@ void bsaclRun(int *__EXT_PTR_CONST ierr) {
       abortInternal_(ierr_, "Failed to release program.");
 #endif
 
-   ret_: *ierr = (int)ierr_;
+ret_: *ierr = (int)ierr_;
 #ifndef BSACL_USE_CUDA__
-   if (clSource_ != NULL) free(clSource_);
+   if (clSource_) free(clSource_);
 #endif
    return;
 }
-
-
-
-
-
-
 
 
 

@@ -92,7 +92,7 @@ contains
 #ifdef _BSA_USE_GPU
       block
          real(bsa_real_t), allocatable :: S_uvw_T_(:, :)
-         
+
          call bsacl_AcquireResultBFMVect(m3mf_cls)
          call bsacl_AcquireComputationFreqs(NFREQS, f, NFREQS, f)
          S_uvw_T_ = transpose(S_uvw)  ! n_dim_ x n_freqs
@@ -114,7 +114,7 @@ contains
 
 #ifdef _BSA_DEBUG
       write(unit_debug_, *) INFOMSG, '@BsaClassicImpl::mainClassic_() : computing nodal wind turbulence PSDs -- ok.'
-   
+
       call bsa_exportPSDToFile('psd_Suvw.txt', S_uvw, f)
 #endif
 
@@ -154,7 +154,7 @@ contains
             call getBRM_vect_cls(f, psd, bisp)
             call intgSpectraVect_(settings%nfreqs_, f, psd=psd, m2=m2mr_cls, bisp=bisp, m3=m3mr_cls)
             if (settings%i_compute_psd_ == 1) call bsa_exportPSDToFile('psdmr.txt', psd, f)
-            
+
             block
                real(bsa_real_t), allocatable :: omegas(:)
                integer :: i
@@ -170,7 +170,7 @@ contains
             block
                real(bsa_real_t), allocatable :: psd_r(:, :)
                integer(int32) :: im, jm, idx
-               
+
                allocate(psd_r(settings%nfreqs_, dimNr_psd_))
                psd_r = 0._bsa_real_t
 
@@ -319,10 +319,10 @@ contains
          if (settings%i_scalar_vers_ == 0) then
 
             if (itmp > MAX_VECT_ALLOC_ELEMS) then
-               
+
                print '( /, 1x, a, a, i0, ")" )', WARNMSG, 'Too high allocation size for VECTORISED BSA version (', itmp
                print '( 1x, a, a, / )', MSGCONT, 'Switching to SCALAR version.'
-               
+
                settings%i_scalar_vers_ = 1
             endif
 
@@ -333,7 +333,7 @@ contains
 
                ! Still, check, better.
                if (settings%nfreqs_ * dimM_psd_ < MAX_VECT_ALLOC_ELEMS) then
-                  
+
                   print '( /, 1x, a, a )', NOTEMSG, 'Requested SCALAR BSA version, but for only PSDs computation.' 
                   print '(1x, a, a)', MSGCONT, 'Switching to VECTORISED for perf.'
                   settings%i_scalar_vers_ = 0
@@ -342,7 +342,7 @@ contains
             else ! BISPs as well -> just warn, do not force changing..
 
                if (itmp < MAX_VECT_ALLOC_ELEMS) then
-                  
+
                   print '( /, 1x, a, a )', NOTEMSG, 'Running SCALAR BSA version, but VECTORISED (preferable) is possible.'
                   print '(1x, a, a)', MSGCONT, 'Consider changing setting.'
                endif
@@ -407,9 +407,9 @@ contains
 
          max_freq     = setts%df_ * nfreqs_1
          max_freq_ref = maxval(struct%modal_%nat_freqs_)
-         
+
          if (max_freq < max_freq_ref) then
-            
+
             if (l_df_big) then ! try with suggested one
 
                max_freq = df_ref * nfreqs_1

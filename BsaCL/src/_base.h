@@ -12,9 +12,12 @@
 # define BSACLC_DEBUG
 #endif
 
-#define STRINGIFYMACRO_LITERAL(X) #X
-#define xstr(s) STRINGIFYMACRO_LITERAL(s)
-#define STRINGIFYMACRO_VALUE(X) xstr(X)
+
+#ifndef STRINGIFYMACRO_LITERAL
+#  define STRINGIFYMACRO_LITERAL(X) #X
+#  define xstr(s) STRINGIFYMACRO_LITERAL(s)
+#  define STRINGIFYMACRO_VALUE(X) xstr(X)
+#endif
 
 
 // Wind PSDs
@@ -72,7 +75,7 @@
 
 #else  // OpenCL
 
-# define BSACL_PI CL_M_PI
+# define BSACL_PI      3.14159265358979323846
 # define ierr_t cl_int
 # define BSACL_SUCCESS CL_SUCCESS
 # define BSACL_DEVICE_FREE_MEM(X) clReleaseMemObject(X)

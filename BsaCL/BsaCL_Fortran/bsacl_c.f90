@@ -18,7 +18,7 @@ module BsaCL_c
          import c_int
          integer(c_int), value :: psdid
       end subroutine
-      
+
 
       subroutine bsaclAcquireStructModMat__(modmat, natf, ndofs, nmodes) bind(c, name="bsaclAcquireStructModMat")
          import c_ptr, c_int
@@ -76,18 +76,18 @@ module BsaCL_c
          import c_ptr
          type(c_ptr), value :: nod_vel
       end subroutine
-      
+
       subroutine bsaclAcquireWindNodalWindZones__(nod_wz) bind(c, name="bsaclAcquireWindNodalWindZones")
          import c_ptr
          type(c_ptr), value :: nod_wz
       end subroutine
-      
+
       subroutine bsaclAcquireWindTurbScales__(wt_scl, nwz) bind(c, name="bsaclAcquireWindTurbScales")
          import c_ptr, c_int
          type(c_ptr), value    :: wt_scl
          integer(c_int), value :: nwz
       end subroutine
-      
+
       subroutine bsaclAcquireWindTurbStd__(wt_std, nwz) bind(c, name="bsaclAcquireWindTurbStd")
          import c_ptr, c_int
          type(c_ptr), value    :: wt_std

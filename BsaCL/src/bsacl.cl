@@ -1,11 +1,20 @@
+#define STRINGIFYMACRO_LITERAL(X) #X
+#define xstr(s) STRINGIFYMACRO_LITERAL(s)
+#define STRINGIFYMACRO_VALUE(X) xstr(X)
+
 #ifdef BSACL_USE_CUDA__
 #  include "_base.h"
-#else // If OpenCL, change macro definition
-#  include "D:\\BSA\\BSACL\\src\\_base.h"
+#else
 #  ifdef BSACL_PI
-#    undef BSACL_PI
+#    undef  BSACL_PI
 #    define BSACL_PI M_PI
 #  endif
+#  ifndef BSACL_BASE_DIR
+#    define BSACL_BASE_DIR ./
+#  endif
+#  define concatenate(X, Y) X/Y
+#  define INC concatenate(BSACL_BASE_DIR, _base.h)
+#  include STRINGIFYMACRO_VALUE(INC)
 #endif
 
 
@@ -172,7 +181,7 @@ KERNEL void bfm_kernel(
       itmp_ = tc[itc_] - 1;
       UINT nod_corr_offs_ = itmp_ * NNOD_CORR;
       UINT tc_offs_phiTc_ = itmp_ * (NM_EFF * NNL);
-      
+
       itmp_ = itmp_ + 3U;
       UINT tcP3_offs_ = itmp_ * (NM_EFF * NNL);
 
@@ -217,7 +226,7 @@ KERNEL void bfm_kernel(
 
                UINT ini_offs_ = ini_ * NM_EFF;
                UINT       ni_ = nodes_load[ini_] - 1;
-               
+
                nodcorrID_IJ_ = getCorrId(ni_, nj_, NN);
                nodcorrID_IK_ = getCorrId(ni_, nk_, NN);
                coorIJ        = nod_corr[nodcorrID_IJ_ + nod_corr_offs_];
@@ -254,7 +263,7 @@ KERNEL void bfm_kernel(
                         phiTc[imj_ + inj_offs_ + tc_offs_phiTc_  ] * 
                            phiTc[imk_ + ink_offs_ + tcP3_offs_] * (S_uvw_JK_i  * S_uvw_IK_ij))
                   );
-               
+
 
                // printf("\n  BF_ijk_IJK_  =  %f", BF_ijk_IJK_);
 
@@ -262,7 +271,7 @@ KERNEL void bfm_kernel(
                // Integral update (global)
                m3mf[id_] += BF_ijk_IJK_ * dInfl;
 
-            
+
             } // ni
          } // nj
 
@@ -348,7 +357,7 @@ DEVICE REAL evalFct(
       rtmp = cFL_U*cFL_U + 1.f;
       rtmp = POWR(rtmp, (REAL)(4.f/3.f));
       rtmp = 1.f / rtmp;
-      
+
       res  = (2.f/3.f * cFL_U * cL_U * w_std*w_std) * rtmp;
 # ifdef BSACL_USE_CUDA__
    }
@@ -449,7 +458,7 @@ KERNEL void bfm_kernel(
 {
    const size_t gid0_  = GLOBAL_ID_X_DIM0;
    const size_t lid0_  = LOCAL_ID_X_DIM0;
-   
+
    UINT itmp_ = (NNL__ * NNL__ * NNL__) - 1;
    if (gid0_ > itmp_) return;
 
@@ -498,7 +507,7 @@ KERNEL void bfm_kernel(
    LOCAL  REAL  phiTc_[6 * 3 * BSACL_WIpWG];
 
    const UINT phiTc_offst_ = 18U * (UINT)lid0_;
-   
+
    itmp_ = NM_EFF__ * NNL__;
    phiTc_[0 + phiTc_offst_] = phiTc[mi_ + (ini_*NM_EFF__)];                // Uu
    phiTc_[1 + phiTc_offst_] = phiTc[mi_ + (ini_*NM_EFF__) + (1 * itmp_)];  // Uv
@@ -516,22 +525,22 @@ KERNEL void bfm_kernel(
    phiTc_[9  + phiTc_offst_] = phiTc[mi_ + (ini_*NM_EFF__) + (3 * itmp_)]; // u^2
    phiTc_[10 + phiTc_offst_] = phiTc[mi_ + (ini_*NM_EFF__) + (4 * itmp_)]; // v^2
    phiTc_[11 + phiTc_offst_] = phiTc[mi_ + (ini_*NM_EFF__) + (5 * itmp_)]; // w^2
-   
+
    phiTc_[12 + phiTc_offst_] = phiTc[mj_ + (inj_*NM_EFF__) + (3 * itmp_)]; // u^2
    phiTc_[13 + phiTc_offst_] = phiTc[mj_ + (inj_*NM_EFF__) + (4 * itmp_)]; // v^2
    phiTc_[14 + phiTc_offst_] = phiTc[mj_ + (inj_*NM_EFF__) + (5 * itmp_)]; // w^2
-   
+
    phiTc_[15 + phiTc_offst_] = phiTc[mk_ + (ink_*NM_EFF__) + (3 * itmp_)]; // u^2
    phiTc_[16 + phiTc_offst_] = phiTc[mk_ + (ink_*NM_EFF__) + (4 * itmp_)]; // v^2
    phiTc_[17 + phiTc_offst_] = phiTc[mk_ + (ink_*NM_EFF__) + (5 * itmp_)]; // w^2
-   
+
 
    REAL S_uvw_IJ_i, S_uvw_IJ_ij;
    REAL S_uvw_IK_j, S_uvw_IK_ij;
    REAL S_uvw_JK_i, S_uvw_JK_j;
 
    for (UINT itc_ = 0; itc_ < NTC__; ++itc_) {
-      
+
       UINT tc_   = tc[itc_] - 1;
 
       REAL wstd_ = wind_turb_std[tc_];  // BUG: account for multiple wind zones!!
@@ -581,7 +590,7 @@ KERNEL void bfm_kernel(
             S_uvw_JK_i  *= evalFct(fi_,  PSD_ID_ARG   wscl_, wstd_, ubnk_);
             S_uvw_JK_i   = sqrt(S_uvw_JK_i);
             S_uvw_JK_i  *= POWR(corrJK_, (REAL)(fabs(fi_)));
-      
+
 
             m3mf_wg_x_[lid0_] += 2.f * (
                  phiTc_[9+phiTc_offst_+tc_] * phiTc_[3 +phiTc_offst_+tc_] * phiTc_[6 +phiTc_offst_+tc_] 

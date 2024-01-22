@@ -31,7 +31,7 @@
 
 
 ! #define __zone_layout_validation__
-#if defined(__BSA_DEBUG) && !(defined(__zone_layout_validation__))
+#if defined(_BSA_DEBUG) && !(defined(__zone_layout_validation__))
 #  define __zone_layout_validation__
 #endif
 
