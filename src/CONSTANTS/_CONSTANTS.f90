@@ -21,12 +21,8 @@
    integer, parameter, public :: IK = int32
 #endif
 
-#ifdef REAL32
+#ifdef BSA_SINGLE_FLOATING_PRECISION
    integer, parameter, public :: RK = real32
-#elif REAL64
-   integer, parameter, public :: RK = real64
-#elif REAL128
-   integer, parameter, public :: RK = real128
 #else
    integer, parameter, public :: RK = real64
 #endif

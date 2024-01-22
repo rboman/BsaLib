@@ -18,9 +18,20 @@
 #ifndef BSACL_BASE_H_
 #define BSACL_BASE_H_
 
-#ifndef REAL
+#ifdef BSA_SINGLE_FLOATING_PRECISION
+# define REAL float
+#else
 # define REAL double
-# define REAL_IS_DOUBLE
+# pragma message("  --[NOTE]:  enabling OpenCL double (f64) floating point precision.")
+# ifdef BSACL_INCLUDE
+#  ifdef cl_khr_fp64
+#    pragma OPENCL EXTENSION cl_khr_fp64 : enable
+#  elif defined(cl_amd_fp64)
+#    pragma OPENCL EXTENSION cl_amd_fp64 : enable
+#  else
+#    error "Double precision floating point not supported by OpenCL implementation."
+#  endif
+# endif
 #endif
 #define real REAL
 
@@ -78,10 +89,10 @@
 # define CONSTANT
 # define KERNEL __global__
 # define EXTERN_C extern "C"
-#ifdef REAL_IS_DOUBLE
-# define POWR pow
-#else
+#ifdef BSA_SINGLE_FLOATING_PRECISION
 # define POWR powf
+#else
+# define POWR pow
 #endif
 # define LOCAL_ID_X_DIM0 threadIdx.x
 # define LOCAL_ID_Y_DIM1 threadIdx.y
@@ -139,10 +150,10 @@
 #endif
 
 
-#ifdef REAL_IS_DOUBLE
-# define REAL_MIN DBL_MIN
-#else
+#ifdef BSA_SINGLE_FLOATING_PRECISION
 # define REAL_MIN FLT_MIN
+#else
+# define REAL_MIN DBL_MIN
 #endif
 
 

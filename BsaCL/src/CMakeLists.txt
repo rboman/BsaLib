@@ -6,6 +6,10 @@ if (enable-ocl-ptx-code-gen)
    target_compile_definitions( BsaCL PRIVATE BSACL_GENERATE_PTX_BINARY )
 endif()
 
+if (enable-const-ptr-def)
+   target_compile_definitions( BsaCL PRIVATE BSACL_USE_CONST_EXT_POINTERS )
+endif()
+
 target_compile_definitions( BsaCL PRIVATE "BASE_DIRECTORY=\"${CMAKE_CURRENT_SOURCE_DIR}/\"" )
 
 target_link_libraries( BsaCL OpenCL::OpenCL )

@@ -69,7 +69,6 @@
 #   define NULL 0
 # endif
 #else // using OpenCL
-# pragma message("   --- [NOTE]:  Using  OpenCL  specification!")
 # define CL_USE_DEPRECATED_OPENCL_1_2_APIS
 # define __CL_ENABLE_EXCEPTIONS
 # include <CL/cl.h>
@@ -928,12 +927,20 @@ void assembleProgramBuildOptsString_()
 {
    char *buf = prog_compile_opts__;
 
+   strcpy(buf, "-D BSACL_INCLUDE ");
+   buf += 17;
+
    strcpy(buf, "-D BSACL_BASE_DIR=\"");
    buf += 19;
    strcpy(buf, BASE_DIRECTORY);
    buf += strlen(BASE_DIRECTORY);
    strcpy(buf, "\" \0");
    buf += 2;
+
+#ifdef BSA_SINGLE_FLOATING_PRECISION
+   strcpy(buf, "-D BSA_SINGLE_FLOATING_PRECISION ");
+   buf += 33;
+#endif
 
    // BUG: user defined !
    strcpy(buf, "-D BSACL_CONV_PULSATION ");

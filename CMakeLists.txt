@@ -49,21 +49,24 @@ include(CheckFortranSourceRuns)
 # Options
 ###########################################################
 option(enable-sequential-code  "Disable any code parallelisation"                   OFF)
-option(enable-single           "Enable single precision real kind"                  OFF)
+option(enable-single           "Enable single floating precision"                   OFF)
 option(enable-heap-arrays      "Allocatable arrays are put on the heap"             ON)
 option(enable-shared-runtime   "Link to shared Fortran runtime libraries"           OFF)
 option(enable-openmp           "Enable OpenMP parallelisation"                      ON)
 option(enable-mkl              "Enable Intel MKL libraries (Intel compilers only)"  ON)
 option(enable-sym-ev-routine   "Enable usage of 'dsyev' instead of 'dgesvd'"        ON)
 option(enable-par-compilation  "Enable parallelisation of sources compilation"      ON)
+
+# GPU options
 option(enable-gpu-code         "Enable GPU kernel code with OpenCL (defaulr) or CUDA backends"  OFF)
+option(enable-const-ptr-def    "In GPU related code, declare internal pointers `const`"         ON)
 option(enable-ocl-ptx-code-gen "Enable OpenCL PTX debug code generation"                        ON)
 option(enable-cuda             "IF GPU code enabled, use CUDA instead of OpenCL (default)"      OFF)
+
 
 if (WIN32)
    set( CMAKE_DEBUG_POSTFIX "d" )
 endif()
-
 
 
 ###########################################################
@@ -119,6 +122,10 @@ endif()
 
 add_compile_definitions( $<$<CONFIG:DEBUG>:_BSA_DEBUG> )
 
+if (enable-single)
+   message( STATUS "NOTE: enabling single precision floating point arithmetic")
+   add_compile_definitions( BSA_SINGLE_FLOATING_PRECISION )
+endif()
 
 
 ###########################################################
