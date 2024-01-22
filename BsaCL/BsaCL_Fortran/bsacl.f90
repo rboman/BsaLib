@@ -14,8 +14,8 @@ module BsaCL
          real(kind = 8), allocatable, target :: res(:, :)
       end function
    end interface
-   
-   
+
+
    integer(kind = 4), parameter :: BSACL_DEVICE_TYPE_CPU              = BSACL_DEVICE_TYPE_CPU_
    integer(kind = 4), parameter :: BSACL_DEVICE_TYPE_GPU              = BSACL_DEVICE_TYPE_GPU_
    integer(kind = 4), parameter :: BSACL_DEVICE_TYPE_ACC              = BSACL_DEVICE_TYPE_ACC_
@@ -26,7 +26,7 @@ module BsaCL
    integer(kind = 4), parameter :: BSACL_CQUEUES_CREATION_ERROR       = BSACL_CQUEUES_CREATION_ERROR_
    integer(kind = 4), parameter :: BSACL_INVALID_DEVICE_TYPE          = BSACL_INVALID_DEVICE_TYPE_
    integer(kind = 4), parameter :: BSACL_PROBLEM_DIMENSIONS_TOO_SMALL = BSACL_PROBLEM_DIMENSIONS_TOO_SMALL_
-   
+
 
    interface
       module subroutine bsacl_Init(ierr)
@@ -79,16 +79,16 @@ module BsaCL
       module subroutine bsacl_AcquireWindNodalVelocities(nod_vel)
          real(kind = 8), intent(in), target :: nod_vel(:)
       end subroutine
-      
+
       module subroutine bsacl_AcquireWindNodalWindZones(nod_wz)
          integer(kind = 4), intent(in), target :: nod_wz(:)
       end subroutine
-      
+
       module subroutine bsacl_AcquireWindTurbScales(wt_scl, nwz)
          real(kind = 8), intent(in), target :: wt_scl(:, :, :)
          integer(kind = 4), intent(in)      :: nwz
       end subroutine
-      
+
       module subroutine bsacl_AcquireWindTurbStd(wt_std, nwz)
          real(kind = 8), intent(in), target :: wt_std(:, :)
          integer(kind = 4), intent(in)      :: nwz

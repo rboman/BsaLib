@@ -1,7 +1,23 @@
-
-//-------------------------------------
-// General  MACROs
-//-------------------------------------
+/**
+ * This file is part of BSA Library.
+ * Copyright (C) 2023  Michele Esposito Marzino 
+ *
+ * BSA Library is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * BSA Library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with BSA Library.  If not, see <https://www.gnu.org/licenses/>.
+ * */
+#include "_devtypes.h"
+#include "_msgtypes.h"
+#include "_errtypes.h"
 #include "_base.h"
 #ifndef BSACL_OPT_N_WORK_ITEMS_PER_WORK_GROUP
 #  define BSACL_OPT_N_WORK_ITEMS_PER_WORK_GROUP 64
@@ -53,11 +69,10 @@
 #   define NULL 0
 # endif
 #else // using OpenCL
-# define CL_USE_DEPRECATED_OPENCL_1_2_APIS
 # pragma message("   --- [NOTE]:  Using  OpenCL  specification!")
+# define CL_USE_DEPRECATED_OPENCL_1_2_APIS
 # define __CL_ENABLE_EXCEPTIONS
 # include <CL/cl.h>
-# define BSACL_GENERATE_PTX_BINARY
 #endif
 
 
@@ -222,7 +237,7 @@ void freeMem_(void) {
    if (platform_all__ != NULL) free(platform_all__);
    platform_all__ = NULL;
    platform__     = NULL;
-   
+
    if (devices__ != NULL) free(devices__);
    devices__ = NULL;
 
@@ -394,7 +409,7 @@ BSACL_INT getCLPlatformFromInfo_(
       }
       ierr_ = clGetPlatformInfo(
          *selected_platform, CL_PLATFORM_NAME, 1024, &buf_, &param_size_);
-      
+
       buf_[param_size_] = '\0'; // BUG: make sure string is NULL terminated
       printf("\n%sPlatform with info   %s   NOT FOUND.", WARN_MSG, pinfo_val);
       printf("\n%sSelecting first by default (name: %s)", CONT_MSG, buf_);
@@ -668,14 +683,14 @@ void initCreateDeviceBuffers_() {
    d_fi_abs__ = clCreateBuffer(context__, CL_MEM_READ_ONLY, sz_, NULL, &ierr_);
 #endif
    if (ierr_ != BSACL_SUCCESS) ABORT_INTERNAL_RETURN_VOID(ierr_, "Failed to create d_fi_abs__ device buffer");
-   
+
 #ifdef BSACL_USE_CUDA__
    ierr_ = cudaMalloc((void**)&d_fj_abs__, sz_);
 #else
    d_fj_abs__ = clCreateBuffer(context__, CL_MEM_READ_ONLY, sz_, NULL, &ierr_);
 #endif
    if (ierr_ != BSACL_SUCCESS) ABORT_INTERNAL_RETURN_VOID(ierr_, "Failed to create d_fj_abs__ device buffer");
-   
+
 #ifdef BSACL_USE_CUDA__
    ierr_ = cudaMalloc((void**)&d_fiPfj_abs__, sz_);
 #else
@@ -1021,7 +1036,7 @@ BSACL_INT buildCLProgram_() {
 #ifdef BSACL_GENERATE_PTX_BINARY
    FILE *ptxfile_ = NULL;
    char *buffer;
-   
+
    size_  = 0llu;
    buffer = (char *)malloc(sizeof(char) * 1024 * 1000); // NOTE: need to allocate enough memory!
    ierr_  = clGetProgramInfo(program__, CL_PROGRAM_BINARIES, 20480, &buffer, &size_);
@@ -1056,7 +1071,7 @@ BSACL_INT setBfmKernelArgs_(void)
    ierr_ |= clSetKernelArg(kernel_bfm__, iarg_++,  sizeof(unsigned int), &extdata__.NNODES_LOAD__);
 #endif
    ierr_ |= clSetKernelArg(kernel_bfm__, iarg_++,  sizeof(cl_mem),       &d_nodes_load__);
-   
+
 #if (BSACL_KERNEL_ID==1)
    ierr_ |= clSetKernelArg(kernel_bfm__, iarg_++,  sizeof(cl_mem), &d_S_uvw_fi__);
    ierr_ |= clSetKernelArg(kernel_bfm__, iarg_++,  sizeof(cl_mem), &d_fi_abs__);
@@ -1151,7 +1166,7 @@ ierr_t getOptKernelDims_() {
 
    n_work_groups__[0] = nwg_;
    n_work_groups__[1] = global_dims_ie_NTWI__[1];
-   
+
    global_dims_ie_NTWI__[0] = BSACL_OPT_N_WORK_ITEMS_PER_WORK_GROUP * nwg_;
 
    local_dims_ie_WIpWG__[0] = BSACL_OPT_N_WORK_ITEMS_PER_WORK_GROUP;
@@ -1325,7 +1340,7 @@ void bsaclRun(int *__EXT_PTR_CONST ierr) {
    if (ierr_ != BSACL_SUCCESS) 
       ABORT_INTERNAL_GOTO_RET_(ierr_, "Failed to create CL kernel object.", ret_);
 #endif // not def BSACL_USE_CUDA__
-   
+
 
 #if (BSACL_KERNEL_ID==1)
    if (BASE_PSD_ALLOC_SIZE__ == 0U)
@@ -1410,7 +1425,7 @@ void bsaclRun(int *__EXT_PTR_CONST ierr) {
          if (ierr_ != BSACL_SUCCESS) 
             ABORT_INTERNAL_GOTO_RET_(ierr_, "Failed to write device buffer  d_S_uvw_fi__.", ret_);
 
-         
+
          fi_abs_ = fabs(fi_);
 #ifdef BSACL_USE_CUDA__
          ierr_ = cudaMemcpy(d_fi_abs__, &fi_abs_, sizeof(REAL), cudaMemcpyHostToDevice);
@@ -1517,7 +1532,7 @@ void bsaclRun(int *__EXT_PTR_CONST ierr) {
 
 #if (BSACL_KERNEL_ID!=3)
          ++icount_;
-      
+
       } // nfi__
 
 
@@ -1539,7 +1554,7 @@ void bsaclRun(int *__EXT_PTR_CONST ierr) {
 # endif
 
 #elif (BSACL_KERNEL_ID==2) || (BSACL_KERNEL_ID==3)
-   
+
    REAL *rtmp_;
    size_ = sizeof(REAL) * extdata__.DIM_M3_M__*n_work_groups__[0];
    rtmp_ = (REAL *)malloc(size_);

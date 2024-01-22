@@ -1,3 +1,20 @@
+/**
+ * This file is part of BSA Library.
+ * Copyright (C) 2023  Michele Esposito Marzino 
+ *
+ * BSA Library is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * BSA Library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with BSA Library.  If not, see <https://www.gnu.org/licenses/>.
+ * */
 #ifndef BSACL_EXTDATA__H_
 #define BSACL_EXTDATA__H_
 
@@ -8,11 +25,11 @@
 typedef void (*evalFct_t)(int, int, const double*, int, double*);
 
 typedef struct extdata_t {
-   
+
    int          *nodes_load__;  // list of loaded nodes in the structural model
    unsigned int NNODES_LOAD__;
    unsigned int NN__;
-   
+
    unsigned int PSD_ID__;
 
    unsigned int NLIBS__;
@@ -31,10 +48,10 @@ typedef struct extdata_t {
 
    double       *modmat__;
    double       *natfreqs__;
-   
+
    int *modes_eff__;    // list of effective modes used
    int *tc__;           // list of effective turbulent components
-   
+
    double *wfc__;       // wind force coefficients
 
    double *phi_T_c__;   // Phi x C matrix
