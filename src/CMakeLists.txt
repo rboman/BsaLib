@@ -115,7 +115,7 @@ endif()
 
 if (NOT enable-sym-ev-routine)
    message( STATUS "NOTE: Using 'dgesvd' method")
-   target_compile_definitions( ${project} PRIVATE "-DBSA_USE_SVD_METHOD__" )
+   target_compile_definitions( ${project} PRIVATE "-D_BSA_USE_SVD_METHOD" )
 else()
    message( STATUS "NOTE: Using 'dsyev'  method")
 endif()

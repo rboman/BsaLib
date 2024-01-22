@@ -292,7 +292,7 @@ contains
       character(len = 256) :: emsg
 
       interface
-#ifdef BSA_USE_SVD_METHOD__
+#ifdef _BSA_USE_SVD_METHOD
          SUBROUTINE DGESVD( JOBU, JOBVT, M, N, A, LDA, S, U, LDU, &
                VT, LDVT, WORK, LWORK, INFO )
             !    .. Scalar Arguments ..
@@ -322,7 +322,7 @@ contains
       endif
       
       MSHR_SVD_INFO = 0
-#ifdef BSA_USE_SVD_METHOD__
+#ifdef _BSA_USE_SVD_METHOD
       call dgesvd(&
            'O' &        ! min(M,N) columns of U are returned in array U
          , 'N' &        ! no rows of V are computed
@@ -408,7 +408,7 @@ contains
       real(real64), intent(in) :: rlim
       real(real64) :: limval
 
-#ifdef BSA_USE_SVD_METHOD__
+#ifdef _BSA_USE_SVD_METHOD
 # define __IDX 1
 # define __OP  +
 #else
@@ -496,7 +496,7 @@ contains
       real(bsa_real_t) :: fiPfj_(1)
 
       interface
-#ifdef BSA_USE_SVD_METHOD__
+#ifdef _BSA_USE_SVD_METHOD
          SUBROUTINE DGESVD( JOBU, JOBVT, M, N, A, LDA, S, U, LDU, &
                VT, LDVT, WORK, LWORK, INFO )
             !    .. Scalar Arguments ..
@@ -560,7 +560,7 @@ contains
             S_uvw_w2(:, :, ifj) = &
                wd%getFullNodalPSD(NNODESL, struct_data%n_load_, S_uvw_w2(:, 1, ifj), fj(ifj), 1)
          
-# ifdef BSA_USE_SVD_METHOD__
+# ifdef _BSA_USE_SVD_METHOD
             call dgesvd(&
                  'O' &                    ! min(M,N) columns of U are overwritten on array A (saves memory)
                , 'N' &                    ! no rows of V are computed
@@ -624,7 +624,7 @@ contains
 # endif
 
 
-# ifdef BSA_USE_SVD_METHOD__
+# ifdef _BSA_USE_SVD_METHOD
          call dgesvd(&
               'O' &           ! min(M,N) columns of U are overwritten on array A (saves memory)
             , 'N' &           ! no rows of V are computed
@@ -650,7 +650,7 @@ contains
          endif
 
 
-# ifdef BSA_USE_SVD_METHOD__
+# ifdef _BSA_USE_SVD_METHOD
          call dgesvd(&
               'O' &           ! min(M,N) columns of U are overwritten on array A (saves memory)
             , 'N' &           ! no rows of V are computed
@@ -713,7 +713,7 @@ contains
          wd%getFullNodalPSD(NNODESL, struct_data%n_load_, S_uvw_w1(:, 1), fi(ifi), 1)
 
       
-# ifdef BSA_USE_SVD_METHOD__
+# ifdef _BSA_USE_SVD_METHOD
       call dgesvd(&
             'O' &          ! min(M,N) columns of U are overwritten on array A (saves memory)
          , 'N' &           ! no rows of V are computed
@@ -756,7 +756,7 @@ contains
             reshape(wd%evalPSD(1, fiPfj_, NNODESL, struct_data%n_load_, 1, tc), [NNODESL, 1])
          S_uvw_w1w2 = wd%getFullNodalPSD(NNODESL, struct_data%n_load_, S_uvw_w1w2(:, 1), fiPfj_(1), 1)
 
-#ifdef BSA_USE_SVD_METHOD__
+#ifdef _BSA_USE_SVD_METHOD
          call dgesvd(&
               'O' &             ! min(M,N) columns of U are overwritten on array A (saves memory)
             , 'N' &             ! no rows of V are computed
@@ -774,7 +774,7 @@ contains
          call dsyev('V', 'L', &
             NNODESL, S_uvw_w1w2, NNODESL, D_S_uvw_w1w2, &
                work_arr, lwork, info)
-#endif ! BSA_USE_SVD_METHOD__
+#endif ! _BSA_USE_SVD_METHOD
          if (info /= 0) then
             print '(1x, a, a, i0)', &
                ERRMSG, 'Error applying SVD to S_uvw_w1w2. Exit code  ', info
@@ -825,7 +825,7 @@ contains
 
 
          ! 5-2-2, 2-2-5 (6-3-3, 3-3-6) (7-4-4, 4-4-7)
-#ifdef BSA_USE_SVD_METHOD__
+#ifdef _BSA_USE_SVD_METHOD
          do p = 1, nmw1
 #else
          do p = NNODESL, NNODESL-(nmw1-1), -1
@@ -843,7 +843,7 @@ contains
 
 
             ! 5-2-2 (6-3-3, 7-4-4)
-#ifdef BSA_USE_SVD_METHOD__
+#ifdef _BSA_USE_SVD_METHOD
             do q = 1, nmw2
 #else
             do q = NNODESL, NNODESL-(nmw2-1), -1
@@ -889,7 +889,7 @@ contains
 
 
             ! 2-2-5 (3-3-6, 4-4-7)
-#ifdef BSA_USE_SVD_METHOD__
+#ifdef _BSA_USE_SVD_METHOD
             do q = 1, nmw1w2
 #else
             do q = NNODESL, NNODESL-(nmw1w2-1), -1
@@ -934,7 +934,7 @@ contains
 
 
          ! 2-5-2 (3-6-3, 4-7-4)
-#ifdef BSA_USE_SVD_METHOD__
+#ifdef _BSA_USE_SVD_METHOD
          do p = 1, nmw1w2
 #else
          do p = NNODESL, NNODESL-(nmw1w2-1), -1
@@ -947,7 +947,7 @@ contains
 
             tmpDp = D_S_uvw_w1w2(p)
 
-#ifdef BSA_USE_SVD_METHOD__
+#ifdef _BSA_USE_SVD_METHOD
             do q = 1, nmw2
 #else
             do q = NNODESL, NNODESL-(nmw2-1), -1
