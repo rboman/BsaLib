@@ -37,7 +37,7 @@
 #endif
 #define real REAL
 
-#if (defined _DEBUG) && !(defined BSACLC_DEBUG)
+#if ((defined _DEBUG) || defined(_BSA_DEBUG)) && !(defined BSACLC_DEBUG)
 # define BSACLC_DEBUG
 #endif
 

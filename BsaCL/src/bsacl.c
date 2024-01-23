@@ -282,7 +282,7 @@ void freeMem_(void) {
 
 
 void printMsg_(const char *const msgtype, const char *const msg) {
-   printf("\n%s%s.", msgtype, msg);
+   printf("%s%s.\n", msgtype, msg);
 }
 void printMsgWithIerr_(const char *const msgtype, const char *const msg, const int ierr) {
    printMsg_(msgtype, msg);
@@ -446,7 +446,7 @@ void getCLDevicesInfo_() {
    for (unsigned int i = 0; i < n_devices__; ++i) {
 
 #ifdef BSACLC_DEBUG
-      printf("\n\n%sCritical info for device   #%d\n", INFO_MSG, i+1);
+      printf("\n\n%sRelevant info for device   #%d\n", INFO_MSG, i+1);
 #endif
 
       clGetDeviceInfo(*(devices__ + i), CL_DEVICE_GLOBAL_MEM_SIZE, sizeof(cl_ulong), (void*)&(dev_glob_mem_size__[i]), 
@@ -472,7 +472,6 @@ void getCLDevicesInfo_() {
 #ifdef BSACLC_DEBUG
       printf("%s - max mem alloc size  =   %llu\n", CONT_MSG, dev_max_mem_alloc_size__[i]);
 #endif
-
 
       clGetDeviceInfo(*(devices__ + i), CL_DEVICE_MAX_COMPUTE_UNITS, sizeof(cl_uint), 
          (void*)&dev_n_compute_units__[i], &info_len_);
@@ -1000,7 +999,8 @@ void assembleProgramBuildOptsString_()
    *buf = '\0';
 
 #ifdef BSACLC_DEBUG
-   printf("\n%s\n", prog_compile_opts__);
+   printf("%sBuild options:\n", INFO_MSG);
+   printf("%s\t%s\n", CONT_MSG, prog_compile_opts__);
 #endif
    return;
 }
@@ -1366,7 +1366,9 @@ void bsaclRun(int *__EXT_PTR_CONST ierr) {
    //            MAIN LOOP
    // ----------------------------
 
-   printf("\n\n%sReady to perform  %12llu  iterations.\n", INFO_MSG, n_freqs_tot_);
+#ifdef BSACLC_DEBUG
+   printf("%sReady to perform  %12llu  iterations.\n", INFO_MSG, n_freqs_tot_);
+#endif
 
 #if (BSACL_KERNEL_ID!=3)
    // for (unsigned int j_ = 0; j_ < 1; ++j_) {
