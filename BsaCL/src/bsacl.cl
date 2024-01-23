@@ -15,10 +15,6 @@
  * You should have received a copy of the GNU General Public License
  * along with BSA Library.  If not, see <https://www.gnu.org/licenses/>.
  * */
-#define STRINGIFYMACRO_LITERAL(X) #X
-#define xstr(s) STRINGIFYMACRO_LITERAL(s)
-#define STRINGIFYMACRO_VALUE(X) xstr(X)
-
 #ifdef BSACL_USE_CUDA__
 #  include "_base.h"
 #else
@@ -29,15 +25,12 @@
 #  ifndef BSACL_BASE_DIR
 #    define BSACL_BASE_DIR ./
 #  endif
+#  define STRINGIFYMACRO_LITERAL(X) #X
+#  define xstr(s) STRINGIFYMACRO_LITERAL(s)
+#  define STRINGIFYMACRO_VALUE(X) xstr(X)
 #  define concatenate(X, Y) X/Y
 #  define INC concatenate(BSACL_BASE_DIR, _base.h)
 #  include STRINGIFYMACRO_VALUE(INC)
-#endif
-
-
-#ifndef REAL
-# define REAL double
-# define REAL_IS_DOUBLE
 #endif
 
 
@@ -47,6 +40,7 @@
 #else
 # ifdef REAL_IS_DOUBLE
 #  pragma OPENCL EXTENSION cl_khr_fp64 : enable
+#  undef REAL_IS_DOUBLE
 # endif
 #endif
 
@@ -62,10 +56,11 @@
 #endif
 
 
+
 DEVICE UINT getCorrId(
-   PRIVATE UINT ni, 
-   PRIVATE UINT nj,
-   const   UINT NTOT
+      PRIVATE UINT ni,
+      PRIVATE UINT nj,
+      const   UINT NTOT
 )
 {
    BOOL invert_ = (BOOL)(nj < ni);
@@ -80,7 +75,6 @@ DEVICE UINT getCorrId(
    res_ = res_ - (UINT)((ni*ni - ni) / 2.f);
    return res_;
 }
-
 
 
 
@@ -308,19 +302,12 @@ KERNEL void bfm_kernel(
 
 #endif // not defined TEST
 }
-
 #endif // BSACL_KERNEL_ID==1
 
 
 
 
-
-
-
-
-
 #if (BSACL_KERNEL_ID==2) || (BSACL_KERNEL_ID==3)
-
 
 
 #ifdef BSACL_USE_CUDA__
@@ -335,23 +322,22 @@ KERNEL void bfm_kernel(
 
 
 
-
 DEVICE REAL evalFct(
       const REAL f,
-# ifdef BSACL_USE_CUDA__
+#ifdef BSACL_USE_CUDA__
       const UINT BSACL_WIND_PSD_ID,
-# endif
+#endif
       const REAL w_scl,
       const REAL w_std,
       const REAL w_nodvel
-) 
+)
 {
    REAL rtmp, res = (REAL)0;
 
    const REAL cL_U  = w_scl / w_nodvel;
    const REAL cFL_U = f * cL_U;
 
-#if (defined BSACL_USE_CUDA__) || (BSACL_WIND_PSD_ID==BSACL_PSD_TYPE_VONKARMAN)
+#if (defined(BSACL_USE_CUDA__)) || (BSACL_WIND_PSD_ID==BSACL_PSD_TYPE_VONKARMAN)
 # ifdef BSACL_USE_CUDA__
    if (BSACL_WIND_PSD_ID==BSACL_PSD_TYPE_VONKARMAN) {
 # endif
@@ -391,36 +377,27 @@ DEVICE REAL evalFct(
 
 
 
-# ifdef BSACL_PASS_PARAMS_BY_MACRO
-#   ifndef NTC__
-#    error NTC__  is not defined!
-#   endif
-#   ifndef NNL__
-#    error NNL__  is not defined!
-#   endif
-#   ifndef NN__
-#    error NN__  is not defined!
-#   endif
-#   ifndef NM_EFF__
-#    error NM_EFF__  is not defined!
-#   endif
-# endif // BSACL_PASS_PARAMS_BY_MACRO
-
-// # if (BSACL_KERNEL_ID==3)
-// #  ifndef NFI__
-// #   error NFI__  is not defined!
-// #  endif
-// #  ifndef NFJ__
-// #   error NFJ__  is not defined!
-// #  endif
-// # endif
+#ifdef BSACL_PASS_PARAMS_BY_MACRO
+#  ifndef NTC__
+#   error NTC__  is not defined!
+#  endif
+#  ifndef NNL__
+#   error NNL__  is not defined!
+#  endif
+#  ifndef NN__
+#   error NN__  is not defined!
+#  endif
+#  ifndef NM_EFF__
+#   error NM_EFF__  is not defined!
+#  endif
+#endif // BSACL_PASS_PARAMS_BY_MACRO
 
 
-# ifdef BSACL_USE_CUDA__
-#  define PSD_ID_ARG BSACL_WIND_PSD_ID,
-# else 
-#  define PSD_ID_ARG
-# endif
+#ifdef BSACL_USE_CUDA__
+# define PSD_ID_ARG BSACL_WIND_PSD_ID,
+#else 
+# define PSD_ID_ARG
+#endif
 
 
 /**
@@ -436,42 +413,42 @@ DEVICE REAL evalFct(
 */
 KERNEL void bfm_kernel(
 #ifdef BSACL_USE_CUDA__
-      const    UINT              BSACL_WIND_PSD_ID,
+      const    UINT          BSACL_WIND_PSD_ID,
 #endif
 #ifndef BSACL_PASS_PARAMS_BY_MACRO
-      const    UINT              NTC__, 
+      const    UINT          NTC__,
 #endif
-      CONSTANT UINT             *tc,
+      CONSTANT UINT          *tc,
 #ifndef BSACL_PASS_PARAMS_BY_MACRO
-      const    UINT              NNL__, 
+      const    UINT          NNL__,
 #endif
-      GLOBAL   UINT             *nodes_load,
-# if (BSACL_KERNEL_ID==2)
+      GLOBAL   UINT          *nodes_load,
+#if (BSACL_KERNEL_ID==2)
       const    REAL          fi_,
       const    REAL          fj_,
-# else
-      GLOBAL   REAL         *fi,
+#else
+      GLOBAL   REAL          *fi,
       const    UINT          NFI__,
-      GLOBAL   REAL         *fj,
+      GLOBAL   REAL          *fj,
       const    UINT          NFJ__,
 # endif
       const    REAL          dInfl,
 #ifndef BSACL_PASS_PARAMS_BY_MACRO
-      const    UINT              NM_EFF__,
-      const    UINT              NDEGW__, 
+      const    UINT          NM_EFF__,
+      const    UINT          NDEGW__,
 #endif
-      const    GLOBAL   REAL    *phiTc,
+      const    GLOBAL   REAL *phiTc,
 #ifndef BSACL_PASS_PARAMS_BY_MACRO
-      const    UINT              NN__,
-      const    UINT              NNOD_CORR__,   // BUG: NOT used
+      const    UINT          NN__,
+      const    UINT          NNOD_CORR__,   // BUG: NOT used
 #endif
-      const    GLOBAL   REAL    *nod_corr,
-      const    GLOBAL   REAL  *wind_nod_vel,
-      const    GLOBAL   REAL  *wind_turb_scl,
-      const    GLOBAL   REAL  *wind_turb_std,
-      const    GLOBAL   int   *wind_nod_winz,
+      const    GLOBAL   REAL *nod_corr,
+      const    GLOBAL   REAL *wind_nod_vel,
+      const    GLOBAL   REAL *wind_turb_scl,
+      const    GLOBAL   REAL *wind_turb_std,
+      const    GLOBAL   int  *wind_nod_winz,
       GLOBAL REAL *m3mf
-) 
+)
 {
    const size_t gid0_  = GLOBAL_ID_X_DIM0;
    const size_t lid0_  = LOCAL_ID_X_DIM0;
@@ -628,7 +605,7 @@ KERNEL void bfm_kernel(
    // Multiply by reference area
    m3mf_wg_x_[lid0_] *= dInfl;
 
-   // NOTE: apparently, removing this barrier leads to wrong results..
+   // BUG: apparently, removing this barrier leads to wrong results..
    LOCAL_WORKGROUP_BARRIER;
 
 
@@ -648,4 +625,3 @@ KERNEL void bfm_kernel(
 }
 
 #endif // (BSACL_KERNEL_ID==2) || (BSACL_KERNEL_ID==3)
-

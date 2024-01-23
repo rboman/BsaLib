@@ -59,7 +59,6 @@
 #  undef BSACL_PASS_PARAMS_BY_MACRO  // in CUDA, we pass always by kernel param!
 # endif
 
-# define BSACL_CONV_PULSATION
 
 // # define __CUDACC_RTC__
 # pragma message("   --- [NOTE]:  Using  CUDA  in place of  OpenCL  specification!")
@@ -941,10 +940,6 @@ void assembleProgramBuildOptsString_()
    strcpy(buf, "-D BSA_SINGLE_FLOATING_PRECISION ");
    buf += 33;
 #endif
-
-   // BUG: user defined !
-   strcpy(buf, "-D BSACL_CONV_PULSATION ");
-   buf += 24;
 
    strcpy(buf, "-D BSACL_WIpWG=");
    buf += 15;

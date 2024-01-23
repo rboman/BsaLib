@@ -22,7 +22,6 @@
 # define REAL float
 #else
 # define REAL double
-# pragma message("  --[NOTE]:  enabling OpenCL double (f64) floating point precision.")
 # ifdef BSACL_INCLUDE
 #  ifdef cl_khr_fp64
 #    pragma OPENCL EXTENSION cl_khr_fp64 : enable
@@ -31,10 +30,12 @@
 #  else
 #    error "Double precision floating point not supported by OpenCL implementation."
 #  endif
+#  define REAL_IS_DOUBLE
+# else
+#  pragma message("  --[NOTE]:  enabling OpenCL double (f64) floating point precision.")
 # endif
 #endif
 #define real REAL
-
 
 #if (defined _DEBUG) && !(defined BSACLC_DEBUG)
 # define BSACLC_DEBUG
@@ -60,7 +61,8 @@
 #define BSACL_PSD_TYPE_VONKARMAN 1
 #define BSACL_PSD_TYPE_KAIMAL    2
 #define BSACL_PSD_TYPE_DAVENPORT 5
-
+// BUG: control (user defined)
+#define BSACL_CONV_PULSATION
 
 
 #ifdef BSACL_USE_CUDA__
