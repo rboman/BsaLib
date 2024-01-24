@@ -56,8 +56,10 @@ option(enable-mkl              "Enable Intel MKL libraries (Intel compilers only
 option(enable-sym-ev-routine   "Enable usage of 'dsyev' instead of 'dgesvd'"        ON)
 option(enable-par-compilation  "Enable parallelisation of sources compilation"      ON)
 
+# GPU options
 option(enable-gpu-code         "Enable GPU kernel code with OpenCL (defaulr) or CUDA backends"  OFF)
 option(enable-const-ptr-def    "In GPU related code, declare internal pointers `const`"         ON)
+option(enable-ocl-ptx-code-gen "Enable OpenCL PTX debug code generation"                        ON)
 option(enable-cuda             "IF GPU code enabled, use CUDA instead of OpenCL (default)"      OFF)
 
 
