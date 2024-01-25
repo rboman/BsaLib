@@ -50,9 +50,15 @@
 
 
 #ifdef BSACL_USE_CONST_EXT_POINTERS
-#  define __EXT_PTR_CONST const
+# define __EXT_PTR_CONST const
 #else
-#  define __EXT_PTR_CONST
+# define __EXT_PTR_CONST
+#endif
+
+
+// GPU kernel ID
+#ifndef BSACL_KERNEL_ID
+# define BSACL_KERNEL_ID 4
 #endif
 
 
@@ -61,6 +67,7 @@
 #define BSACL_PSD_TYPE_VONKARMAN 1
 #define BSACL_PSD_TYPE_KAIMAL    2
 #define BSACL_PSD_TYPE_DAVENPORT 5
+
 // BUG: control (user defined)
 #define BSACL_CONV_PULSATION
 

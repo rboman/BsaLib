@@ -51,10 +51,6 @@
 #  define BSACL_WIpWG 64
 #endif
 
-#ifndef BSACL_KERNEL_ID
-#  define BSACL_KERNEL_ID 4
-#endif
-
 
 
 DEVICE UINT getCorrId(

@@ -35,9 +35,6 @@
 #  define BSACL_MAX_GPU_COUNT 8
 #endif
 
-#ifndef BSACL_KERNEL_ID
-# define BSACL_KERNEL_ID 4
-#endif
 
 
 #if (BSACL_KERNEL_ID==4)
