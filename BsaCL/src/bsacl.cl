@@ -52,7 +52,7 @@
 #endif
 
 #ifndef BSACL_KERNEL_ID
-#  define BSACL_KERNEL_ID 3
+#  define BSACL_KERNEL_ID 4
 #endif
 
 
@@ -307,8 +307,7 @@ KERNEL void bfm_kernel(
 
 
 
-#if (BSACL_KERNEL_ID==2) || (BSACL_KERNEL_ID==3)
-
+#if (BSACL_KERNEL_ID!=1)
 
 #ifdef BSACL_USE_CUDA__
 # ifdef BSACL_WIND_PSD_ID
@@ -319,7 +318,6 @@ KERNEL void bfm_kernel(
 #  define BSACL_WIND_PSD_ID 1
 # endif
 #endif
-
 
 
 DEVICE REAL evalFct(
@@ -376,7 +374,6 @@ DEVICE REAL evalFct(
 
 
 
-
 #ifdef BSACL_PASS_PARAMS_BY_MACRO
 #  ifndef NTC__
 #   error NTC__  is not defined!
@@ -399,6 +396,14 @@ DEVICE REAL evalFct(
 # define PSD_ID_ARG
 #endif
 
+
+#endif // #if (BSACL_KERNEL_ID!=1)
+
+
+
+
+
+#if (BSACL_KERNEL_ID==2) || (BSACL_KERNEL_ID==3)
 
 /**
  * BFM kernel using a total of NN^3 WI organised into NWGs.
@@ -625,3 +630,229 @@ KERNEL void bfm_kernel(
 }
 
 #endif // (BSACL_KERNEL_ID==2) || (BSACL_KERNEL_ID==3)
+
+
+
+
+#if (BSACL_KERNEL_ID==4)
+
+/**
+ * BFM kernel using a total of NF^2 x NM^3 work items.
+ * Each work group is a 1D column-like vector, i.e. takes only 
+ * one column. So that, each work group has a unique set of modes.
+ * Each work group will iterate through all combinations of loaded nodes.
+ */
+KERNEL void bfm_kernel(
+#ifdef BSACL_USE_CUDA__
+      const    UINT          BSACL_WIND_PSD_ID,
+#endif
+#ifndef BSACL_PASS_PARAMS_BY_MACRO
+      const    UINT          NTC__,
+#endif
+      CONSTANT UINT          *tc,
+#ifndef BSACL_PASS_PARAMS_BY_MACRO
+      const    UINT          NNL__,
+#endif
+      GLOBAL   UINT          *nodes_load,
+      GLOBAL   REAL          *fi,
+#ifndef BSACL_PASS_PARAMS_BY_MACRO
+      const    UINT          NFI__,
+#endif
+      GLOBAL   REAL          *fj,
+#ifndef BSACL_PASS_PARAMS_BY_MACRO
+      const    UINT          NFJ__,
+      const    UINT          NM_EFF__,
+      const    UINT          NDEGW__,
+#endif
+      const    GLOBAL   REAL *phiTc,
+#ifndef BSACL_PASS_PARAMS_BY_MACRO
+      const    UINT          NN__,
+      const    UINT          NNOD_CORR__,   // BUG: NOT used
+#endif
+      const    GLOBAL   REAL *nod_corr,
+      const    GLOBAL   REAL *wind_nod_vel,
+      const    GLOBAL   REAL *wind_turb_scl,
+      const    GLOBAL   REAL *wind_turb_std,
+      const    GLOBAL   int  *wind_nod_winz,
+      GLOBAL REAL *m3mf
+)
+{
+   const size_t gid0_  = GLOBAL_ID_X_DIM0; // this determines the pair of freqs
+   UINT itmp_ = (NFI__ * NFJ__) - 1;
+   if (gid0_ > itmp_) return;
+
+   const size_t lid0_ = LOCAL_ID_X_DIM0;
+
+   LOCAL  REAL  m3mf_mno_wg[BSACL_WIpWG];
+   m3mf_mno_wg[lid0_] = 0.f;
+
+   /** determine which combination (M, N, O) of modal indexes apply to this WG. */
+   const size_t wgid1_ = BLOCK_ID_Y_DIM1;
+   itmp_ = NM_EFF__ * NM_EFF__;
+   const UINT mk_ = (UINT)wgid1_ / itmp_;
+   itmp_          = (UINT)wgid1_ - (mk_ * itmp_);
+   const UINT mj_ = itmp_ / NM_EFF__;
+   const UINT mi_ = itmp_ - (mj_ * NM_EFF__);
+
+
+   /**
+    * Prefetch phiTc_ for this WG m-n-o modal indexes.
+    * phiTc_mno_ will be grouped by Nodal info.
+    * [ [], [] ] where each inner [] contains everything at the nodal level.
+    * Then, each inner [] will be itself divided as:
+    *     [ [6 coeffs mode m], [6 coeffs mode n], [6 coeffs mode o]  ]
+    * */
+   LOCAL REAL phiTc_mno_[3 * 6 * NNL__]; // 6 : Uu, Uv, Uw, u2, v2, w2; 3 modes
+   const UINT phiTc_offst_ = NM_EFF__ * NNL__;
+   if (BSACL_WIpWG < NNL__) {
+      const BSACL_USHORT n_reps = NNL__ / BSACL_WIpWG;
+      // full BSACL_WIpWG batches
+      for (BSACL_USHORT r=0; r < n_reps; ++r) {
+         for (BSACL_USHORT d=0; d < 6; ++d) {
+            UINT nid = lid0_ + r*BSACL_WIpWG;
+            phiTc_mno_[18*nid +      d] = phiTc[mi_ + (nid * NM_EFF__) + (d * phiTc_offst_)];
+            phiTc_mno_[18*nid +  6 + d] = phiTc[mj_ + (nid * NM_EFF__) + (d * phiTc_offst_)];
+            phiTc_mno_[18*nid + 12 + d] = phiTc[mk_ + (nid * NM_EFF__) + (d * phiTc_offst_)];
+         }
+      }
+      // last batch covering (NNL__-(BSACL_WIpWG * n_reps))
+      if (lid0_ < (NNL__ - (BSACL_WIpWG * n_reps))) {
+         for (BSACL_USHORT d=0; d < 6; ++d) {
+            UINT nid = lid0_ + n_reps*BSACL_WIpWG;
+            phiTc_mno_[18*nid +      d] = phiTc[mi_ + (nid * NM_EFF__) + (d * phiTc_offst_)];
+            phiTc_mno_[18*nid +  6 + d] = phiTc[mj_ + (nid * NM_EFF__) + (d * phiTc_offst_)];
+            phiTc_mno_[18*nid + 12 + d] = phiTc[mk_ + (nid * NM_EFF__) + (d * phiTc_offst_)];
+         }
+      }
+   } else { // NWI > NNL
+      if (lid0_ < NNL__) {
+         UINT nid = 18*lid0_;
+         for (BSACL_USHORT d=0; d < 6; ++d) {
+            phiTc_mno_[nid +      d] = phiTc[mi_ + (lid0_ * NM_EFF__) + (d * phiTc_offst_)];
+            phiTc_mno_[nid +  6 + d] = phiTc[mj_ + (lid0_ * NM_EFF__) + (d * phiTc_offst_)];
+            phiTc_mno_[nid + 12 + d] = phiTc[mk_ + (lid0_ * NM_EFF__) + (d * phiTc_offst_)];
+         }
+      }
+   }
+   LOCAL_WORKGROUP_BARRIER;
+
+
+   // Compute pair of frequencies
+   itmp_ = gid0_ / NFI__;
+   const REAL fj_ = fj[itmp_];
+   itmp_ = gid0_ - (itmp_ * NFI__);
+   const REAL fi_ = fi[itmp_];
+
+   const REAL fiPfj_ = fi_ + fj_;
+
+
+   LOCAL REAL m3mf_loc_[BSACL_WIpWG];
+   m3mf_loc_[lid0_] = 0.;
+
+   REAL S_uvw_IJ_i, S_uvw_IJ_ij;
+   REAL S_uvw_IK_j, S_uvw_IK_ij;
+   REAL S_uvw_JK_i, S_uvw_JK_j;
+
+   for (UINT itc_ = 0; itc_ < NTC__; ++itc_) {
+
+      UINT tc_   = tc[itc_] - 1;
+
+      REAL wstd_ = wind_turb_std[tc_];  // BUG: account for multiple wind zones!!
+      REAL wscl_ = wind_turb_scl[tc_];  // BUG: account for multiple wind zones!!
+
+      for (UINT ink_=0; ink_ < NNL__; ++ink_) {
+
+         UINT nk_offs_ = 18*ink_;
+         UINT nk_   = nodes_load[ink_]-1;
+         REAL ubnk_ = wind_nod_vel[nk_];
+
+         for (UINT inj_=0; inj_ < NNL__; ++inj_) {
+            UINT nj_offs_ = 18*inj_;
+            UINT nj_   = nodes_load[inj_]-1;
+            REAL ubnj_ = wind_nod_vel[nj_];
+            REAL corrJK_ = nod_corr[getCorrId(nj_, nk_, NN__)] < REAL_MIN ? REAL_MIN : nod_corr[getCorrId(nj_, nk_, NN__)];
+
+            S_uvw_JK_i   = evalFct(fi_,  PSD_ID_ARG   wscl_, wstd_, ubnj_);
+            S_uvw_JK_i  *= evalFct(fi_,  PSD_ID_ARG   wscl_, wstd_, ubnk_);
+            S_uvw_JK_i   = sqrt(S_uvw_JK_i);
+            S_uvw_JK_i  *= POWR(corrJK_, (REAL)(fabs(fi_)));
+
+            S_uvw_JK_j   = evalFct(fj_,  PSD_ID_ARG   wscl_, wstd_, ubnj_);
+            S_uvw_JK_j  *= evalFct(fj_,  PSD_ID_ARG   wscl_, wstd_, ubnk_);
+            S_uvw_JK_j   = sqrt(S_uvw_JK_j);
+            S_uvw_JK_j  *= POWR(corrJK_, (REAL)(fabs(fj_)));
+
+            for (UINT ini_=0; ini_ < NNL__; ++ini_) {
+               UINT ni_offs_ = 18*ini_;
+               UINT ni_ = nodes_load[ini_]-1;
+               REAL ubni_ = wind_nod_vel[ni_];
+               REAL corrIK_ = nod_corr[getCorrId(ni_, nk_, NN__)] < REAL_MIN ? REAL_MIN : nod_corr[getCorrId(ni_, nk_, NN__)];
+               REAL corrIJ_ = nod_corr[getCorrId(ni_, nj_, NN__)] < REAL_MIN ? REAL_MIN : nod_corr[getCorrId(ni_, nj_, NN__)];
+
+               S_uvw_IK_j   = evalFct(fj_,  PSD_ID_ARG   wscl_, wstd_, ubni_);
+               S_uvw_IK_j  *= evalFct(fj_,  PSD_ID_ARG   wscl_, wstd_, ubnk_);
+               S_uvw_IK_j   = sqrt(S_uvw_IK_j);
+               S_uvw_IK_j  *= POWR(corrIK_, (REAL)(fabs(fj_)));
+
+               S_uvw_IK_ij  = evalFct(fiPfj_,  PSD_ID_ARG   wscl_, wstd_, ubni_);
+               S_uvw_IK_ij *= evalFct(fiPfj_,  PSD_ID_ARG   wscl_, wstd_, ubnk_);
+               S_uvw_IK_ij  = sqrt(S_uvw_IK_ij);
+               S_uvw_IK_ij *= POWR(corrIK_, (REAL)(fabs(fiPfj_)));
+
+               S_uvw_IJ_i   = evalFct(fi_,  PSD_ID_ARG   wscl_, wstd_, ubni_);
+               S_uvw_IJ_i  *= evalFct(fi_,  PSD_ID_ARG   wscl_, wstd_, ubnj_);
+               S_uvw_IJ_i   = sqrt(S_uvw_IJ_i);
+               S_uvw_IJ_i  *= POWR(corrIJ_, (REAL)(fabs(fi_)));
+
+               S_uvw_IJ_ij  = evalFct(fiPfj_,  PSD_ID_ARG   wscl_, wstd_, ubni_);
+               S_uvw_IJ_ij *= evalFct(fiPfj_,  PSD_ID_ARG   wscl_, wstd_, ubnj_);
+               S_uvw_IJ_ij  = sqrt(S_uvw_IJ_ij);
+               S_uvw_IJ_ij *= POWR(corrIJ_, (REAL)(fabs(fiPfj_)));
+
+               m3mf_loc_[lid0_] += 2.f * (
+                    phiTc_mno_[ni_offs_ + 3 + tc_] * phiTc_mno_[nj_offs_ + 6 +     tc_] * phiTc_mno_[nk_offs_ + 12 +     tc_] * (S_uvw_IJ_i  * S_uvw_IK_j )
+                  + phiTc_mno_[ni_offs_ +     tc_] * phiTc_mno_[nj_offs_ + 6 + 3 + tc_] * phiTc_mno_[nk_offs_ + 12 +     tc_] * (S_uvw_IJ_ij * S_uvw_JK_j )
+                  + phiTc_mno_[ni_offs_ +     tc_] * phiTc_mno_[nj_offs_ + 6 +     tc_] * phiTc_mno_[nk_offs_ + 12 + 3 + tc_] * (S_uvw_JK_i  * S_uvw_IK_ij)
+               );
+            }
+         }
+      }
+   }
+
+   // WG reduction
+   UINT alive = BSACL_WIpWG;
+   while (alive > 1) {
+      LOCAL_WORKGROUP_BARRIER;
+      alive /= 2;
+      if (lid0_ < alive) {
+         m3mf_loc_[lid0_] += m3mf_loc_[lid0_+alive];
+      }
+   }
+   // Then store sum into global variable
+   const size_t wgid0_ = BLOCK_ID_X_DIM0;
+   const size_t nwgd0_ = get_num_groups(0);
+   if (0 == lid0_) {
+      m3mf[wgid1_*nwgd0_ + wgid0_] = m3mf_loc_[0];
+   }
+
+   // // BUG: unoptimal reduction scheme !!
+   // if (0 == lid0_) {
+
+   //    /** Reduce among all WI of current WG. */
+   //    for (itmp_ = 1; itmp_ < BSACL_WIpWG; ++itmp_)
+   //       m3mf_loc_[0] += m3mf_loc_[itmp_];
+
+   //    // Then store sum into global variable
+   //    const size_t wgid0_ = BLOCK_ID_X_DIM0;
+   //    const size_t nwgd0_ = get_num_groups(0);
+   //    m3mf[wgid1_*nwgd0_ + wgid0_] = m3mf_loc_[0];
+   // }
+
+   LOCAL_WORKGROUP_BARRIER;
+}
+
+#endif // (BSACL_KERNEL_ID==4)
+
+
+
+

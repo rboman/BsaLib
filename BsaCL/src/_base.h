@@ -112,14 +112,14 @@
 
 #else  // OpenCL
 
-# define BSACL_PI      3.14159265358979323846
+# define BSACL_PI 3.14159265358979323846
 # define ierr_t cl_int
 # define BSACL_SUCCESS CL_SUCCESS
 # define BSACL_DEVICE_FREE_MEM(X) clReleaseMemObject(X)
 # define BSACL_MEM cl_mem
-# define BSACL_INT cl_int
+# define BSACL_INT int
 # define BSACL_UINT cl_uint
-# define BSACL_USHORT cl_uint
+# define BSACL_USHORT ushort
 # define INT int
 # define UINT uint
 # define USHORT ushort
