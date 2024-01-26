@@ -53,6 +53,18 @@
 
 
 
+#ifndef BSACL_KERNEL_ID
+# define BSACL_KERNEL_ID 4
+#endif
+
+#if (BSACL_KERNEL_ID==4)
+# ifndef BSACL_PASS_PARAMS_BY_MACRO
+#  define BSACL_PASS_PARAMS_BY_MACRO
+# endif
+#endif
+
+
+
 DEVICE UINT getCorrId(
       PRIVATE UINT ni,
       PRIVATE UINT nj,
@@ -77,233 +89,6 @@ DEVICE UINT getCorrId(
 
 
 
-
-
-#if (BSACL_KERNEL_ID==1)
-
-/**
- * BFM kernel using NWG work-groups (1D)
- * Each work-group takes a slice NM_EFF^3 / NWG of global result array.
- *
- * I.e. each work item will loop on:
- *   - n. of turb. components  (NTC)
- *   - 3-loops on n. of loaded nodes (NNL)
- *
- * This kernel uses pre-computed Phi x C matrix product, 
- *  for avoiding explicit loops on nodal degrees of freedom (LIBs)
-*/
-KERNEL void bfm_kernel(
-      const    UINT       NTC,
-      CONSTANT UINT      *tc,
-      const    UINT       NNL,
-      GLOBAL   UINT      *nodes_load,
-      const    GLOBAL   REAL  *S_uvw_fi,
-      CONSTANT REAL           *fi_abs,
-      const    GLOBAL   REAL  *S_uvw_fj,
-      CONSTANT REAL           *fj_abs,
-      const    GLOBAL   REAL  *S_uvw_fiPfj,
-      CONSTANT REAL           *fiPfj_abs,
-      const    REAL            dInfl,
-      const    UINT              NM_EFF,
-      const    UINT              NDEGW,
-      const    GLOBAL   REAL    *phiTc,
-      const    UINT              NN,
-      const    UINT              NNOD_CORR,
-      const    GLOBAL   REAL    *nod_corr,
-      const    GLOBAL   REAL  *wind_nod_vel,
-      const    GLOBAL   REAL  *wind_turb_scl,
-      const    GLOBAL   REAL  *wind_turb_std,
-      const    GLOBAL   REAL  *wind_nod_winz,
-      GLOBAL REAL *m3mf
-) 
-{
-
-   const size_t id_ = GLOBAL_ID_X_DIM0;
-   UINT itmp_ = (NM_EFF * NM_EFF * NM_EFF) - 1;
-   if (id_ > itmp_) return;
-
-#ifndef TEST
-
-   LOCAL REAL  S_uvw_K_i;
-   LOCAL REAL  S_uvw_K_j;
-   LOCAL REAL  S_uvw_K_ij;
-   LOCAL REAL  coorJK;
-   LOCAL REAL  S_uvw_J_i;
-   LOCAL REAL  S_uvw_J_j;
-   LOCAL REAL  S_uvw_J_ij;
-   LOCAL REAL  S_uvw_JK_i;
-   LOCAL REAL  S_uvw_JK_j;
-   LOCAL REAL  coorIJ;
-   LOCAL REAL  coorIK;
-   LOCAL REAL  S_uvw_I_i;
-   LOCAL REAL  S_uvw_I_j;
-   LOCAL REAL  S_uvw_I_ij;
-   LOCAL REAL  S_uvw_IJ_i;
-   LOCAL REAL  S_uvw_IJ_ij;
-   LOCAL REAL  S_uvw_IK_j;
-   LOCAL REAL  S_uvw_IK_ij;
-   LOCAL REAL  BF_ijk_IJK_;
-
-   itmp_ = NM_EFF * NM_EFF;
-
-   UINT imk_ = (UINT)id_ / itmp_;
-   itmp_ = (UINT)id_ - (imk_ * itmp_);
-   UINT imj_ = itmp_ / NM_EFF;
-   UINT imi_ = itmp_ - (imj_ * NM_EFF);
-
-
-   // if (id_ != 0) return;
-   // if (id_ != (NM_EFF*NM_EFF - 1)) return;
-
-   // printf("\n imk - imj - imi =   %d - %d - %d", imk_, imj_, imi_);
-   // printf("\n NTC       = %d", NTC);
-   // printf("\n NNL       = %d", NNL);
-   // printf("\n NN        = %d", NN);
-   // printf("\n NM_EFF    = %d", NM_EFF);
-   // printf("\n NDEGW     = %d", NDEGW);
-   // printf("\n NNOD_CORR = %d", NNOD_CORR);
-   // printf("\n fi_abs    = %f", (float)*fi_abs);
-   // printf("\n fj_abs    = %f", (float)*fj_abs);
-   // printf("\n fiPfj_abs = %f", (float)*fiPfj_abs);
-   // printf("\n dInfl     = %f", dInfl);
-
-   // printf("\n\n TCs:\n");
-   // for (BSACL_USHORT i = 0; i < NTC; ++i)
-   //    printf("  %d", tc[i]);
-
-   // printf("\n\n NODES LOAD:\n");
-   // for (BSACL_USHORT i = 0; i < NNL; ++i)
-   //    printf("  %d", nodes_load[i]);
-
-
-   UINT nodcorrID_IJ_;
-   UINT nodcorrID_IK_;
-   UINT nodcorrID_JK_;
-
-
-   for (UINT itc_ = 0; itc_ < NTC; ++itc_) {
-
-      UINT tc_offs_ = itc_ * NNL;
-
-      itmp_ = tc[itc_] - 1;
-      UINT nod_corr_offs_ = itmp_ * NNOD_CORR;
-      UINT tc_offs_phiTc_ = itmp_ * (NM_EFF * NNL);
-
-      itmp_ = itmp_ + 3U;
-      UINT tcP3_offs_ = itmp_ * (NM_EFF * NNL);
-
-      for (UINT ink_ = 0; ink_ < NNL; ++ink_) {
-
-         UINT ink_offs_ = ink_ * NM_EFF;
-         UINT       nk_ = nodes_load[ink_] - 1;
-
-         S_uvw_K_i  = S_uvw_fi[   ink_ + tc_offs_];
-         S_uvw_K_j  = S_uvw_fj[   ink_ + tc_offs_];
-         S_uvw_K_ij = S_uvw_fiPfj[ink_ + tc_offs_];
-
-         // printf("\n Accessing   S_uvw_fiPfj[%d]  =  %f .", ink_ + tc_offs_, S_uvw_fiPfj[ink_ + tc_offs_]);
-
-         for (UINT inj_ = 0; inj_ < NNL; ++inj_) {
-
-            UINT inj_offs_ = inj_ * NM_EFF;
-            UINT       nj_ = nodes_load[inj_] - 1;
-
-            nodcorrID_JK_  = getCorrId(nj_, nk_, NN);
-            coorJK         = nod_corr[nodcorrID_JK_ + nod_corr_offs_];
-
-
-            // if (itc_ == 0)
-            //    printf("\n Accessing   nod_corr[%d]  (inj - ink) = (%d-%d)  =  %f", 
-            //       nodcorrID_JK_ + itmp_, inj_+1, ink_+1, nod_corr[nodcorrID_JK_ + itmp_]);
-
-
-            S_uvw_J_i  = S_uvw_fi[   inj_ + tc_offs_];
-            S_uvw_J_j  = S_uvw_fj[   inj_ + tc_offs_];
-            S_uvw_J_ij = S_uvw_fiPfj[inj_ + tc_offs_];
-
-            S_uvw_JK_i = pow(coorJK, *fi_abs) * sqrt(S_uvw_J_i * S_uvw_K_i);
-            S_uvw_JK_j = pow(coorJK, *fj_abs) * sqrt(S_uvw_J_j * S_uvw_K_j);
-
-
-            // if (inj_ == 0 && ink_ == 0)
-            //    printf("\n  S_uvw_K_ij  =  %f", S_uvw_JK_i);
-
-
-            for (UINT ini_ = 0; ini_ < NNL; ++ini_) {
-
-               UINT ini_offs_ = ini_ * NM_EFF;
-               UINT       ni_ = nodes_load[ini_] - 1;
-
-               nodcorrID_IJ_ = getCorrId(ni_, nj_, NN);
-               nodcorrID_IK_ = getCorrId(ni_, nk_, NN);
-               coorIJ        = nod_corr[nodcorrID_IJ_ + nod_corr_offs_];
-               coorIK        = nod_corr[nodcorrID_IK_ + nod_corr_offs_];
-
-               S_uvw_I_i  = S_uvw_fi[   ini_ + tc_offs_];
-               S_uvw_I_j  = S_uvw_fj[   ini_ + tc_offs_];
-               S_uvw_I_ij = S_uvw_fiPfj[ini_ + tc_offs_];
-
-               S_uvw_IJ_i  = pow(coorIJ, *fi_abs   ) * sqrt(S_uvw_I_i  * S_uvw_J_i );
-               S_uvw_IJ_ij = pow(coorIJ, *fiPfj_abs) * sqrt(S_uvw_I_ij * S_uvw_J_ij);
-
-               S_uvw_IK_j  = pow(coorIK, *fj_abs   ) * sqrt(S_uvw_I_j  * S_uvw_K_j );
-               S_uvw_IK_ij = pow(coorIK, *fiPfj_abs) * sqrt(S_uvw_I_ij * S_uvw_K_ij);
-
-
-               // if (ink_ == 0 && inj_ == 0 && ini_ == 0) {
-               //    printf("\n phiTc_U[%d]  =  %f", imk_ + ink_offs_ + tc_offs_phiTc_, phiTc[imk_ + ink_offs_ + tc_offs_phiTc_]);
-               //    printf("\n phiTc_u[%d]  =  %f", imk_ + ink_offs_ + tcP3_offs_, phiTc[imk_ + ink_offs_ + tcP3_offs_]);
-               // }
-
-
-
-               // BUG: prefetch phiTc in local work-group memory
-               BF_ijk_IJK_ = 
-                  2. * (
-                     (phiTc[imi_ + ini_offs_ + tcP3_offs_] * 
-                        phiTc[imj_ + inj_offs_ + tc_offs_phiTc_  ] * 
-                           phiTc[imk_ + ink_offs_ + tc_offs_phiTc_  ] * (S_uvw_IJ_i  * S_uvw_IK_j ))
-                  +  (phiTc[imi_ + ini_offs_ + tc_offs_phiTc_  ] * 
-                        phiTc[imj_ + inj_offs_ + tcP3_offs_] * 
-                           phiTc[imk_ + ink_offs_ + tc_offs_phiTc_  ] * (S_uvw_IJ_ij * S_uvw_JK_j ))
-                  +  (phiTc[imi_ + ini_offs_ + tc_offs_phiTc_  ] * 
-                        phiTc[imj_ + inj_offs_ + tc_offs_phiTc_  ] * 
-                           phiTc[imk_ + ink_offs_ + tcP3_offs_] * (S_uvw_JK_i  * S_uvw_IK_ij))
-                  );
-
-
-               // printf("\n  BF_ijk_IJK_  =  %f", BF_ijk_IJK_);
-
-
-               // Integral update (global)
-               m3mf[id_] += BF_ijk_IJK_ * dInfl;
-
-
-            } // ni
-         } // nj
-
-      } // nk
-
-
-      // printf("\n");
-
-
-   } // ntc
-
-
-#else
-
-   // printf("\n  id  =  %llu", id_);
-   m3mf[id_] += (REAL)(id_ + 1);
-
-#endif // not defined TEST
-}
-#endif // BSACL_KERNEL_ID==1
-
-
-
-
-#if (BSACL_KERNEL_ID!=1)
 
 #ifdef BSACL_USE_CUDA__
 # ifdef BSACL_WIND_PSD_ID
@@ -370,6 +155,7 @@ DEVICE REAL evalFct(
 
 
 
+
 #ifdef BSACL_PASS_PARAMS_BY_MACRO
 #  ifndef NTC__
 #   error NTC__  is not defined!
@@ -391,9 +177,6 @@ DEVICE REAL evalFct(
 #else 
 # define PSD_ID_ARG
 #endif
-
-
-#endif // #if (BSACL_KERNEL_ID!=1)
 
 
 

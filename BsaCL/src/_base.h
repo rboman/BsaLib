@@ -56,12 +56,6 @@
 #endif
 
 
-// GPU kernel ID
-#ifndef BSACL_KERNEL_ID
-# define BSACL_KERNEL_ID 4
-#endif
-
-
 // Wind PSDs
 #define BSACL_PSD_TYPE_UNKNOWN   0
 #define BSACL_PSD_TYPE_VONKARMAN 1
