@@ -65,12 +65,36 @@ contains
       print '(1x, a, a, i0)', INFOMSG, 'n. of frequencies to be computed=', settings%nfreqs_
       print '(1x, a, a, i0)', INFOMSG, 'PSD  modal extension=', dimM_psd_
       print '(1x, a, a, i0)', INFOMSG, 'BISP modal extension=', dimM_bisp_
+#endif
 
 
+#ifdef _BSA_USE_GPU
+      block
+         ! real(bsa_real_t), allocatable :: S_uvw_T_(:, :)
+
+         call bsacl_AcquireResultBFMVect(m3mf_cls)
+         call bsacl_AcquireComputationFreqs(NFREQS, f, NFREQS, f)
+         ! S_uvw_T_ = transpose(S_uvw)  ! n_dim_ x n_freqs
+         ! deallocate(S_uvw)
+         ! call bsacl_AcquireBaseWindTurbPSD(S_uvw_T_)
+         call bsacl_Run(ierr_cl_)
+         if (ierr_cl_ == BSACL_PROBLEM_DIMENSIONS_TOO_SMALL) then
+            print '(1x, 2a)', WARNMSG, &
+               'Problem dimensions are too small for GPU parallelisation. Using CPU.'
+            ! S_uvw = transpose(S_uvw_T_)
+            ! deallocate(S_uvw_T_)
+            goto 997  ! CPU computation
+         endif
+      end block
+      goto 998
+#endif
+
+      997 continue
+#ifdef _BSA_DEBUG
       write(unit_debug_, *) INFOMSG, '@BsaClassicImpl::mainClassic_() : computing nodal wind turbulence PSDs...'
 #endif
 
-      idim2 = struct_data%nn_load_ * wd%i_ntc_  * wd%i_ndirs_      
+      idim2 = struct_data%nn_load_ * wd%i_ntc_  * wd%i_ndirs_
       allocate(S_uvw(settings%nfreqs_, idim2))
       idxi = 1
       idxe = struct_data%nn_load_
@@ -88,29 +112,6 @@ contains
          enddo ! i direction
       enddo ! i turb comp
 
-
-#ifdef _BSA_USE_GPU
-      block
-         real(bsa_real_t), allocatable :: S_uvw_T_(:, :)
-
-         call bsacl_AcquireResultBFMVect(m3mf_cls)
-         call bsacl_AcquireComputationFreqs(NFREQS, f, NFREQS, f)
-         S_uvw_T_ = transpose(S_uvw)  ! n_dim_ x n_freqs
-         deallocate(S_uvw)
-         call bsacl_AcquireBaseWindTurbPSD(S_uvw_T_)
-         call bsacl_Run(ierr_cl_)
-         if (ierr_cl_ == BSACL_PROBLEM_DIMENSIONS_TOO_SMALL) then
-            print '(1x, 2a)', WARNMSG, &
-               'Problem dimensions are too small for GPU parallelisation. Using CPU.'
-            S_uvw = transpose(S_uvw_T_)
-            deallocate(S_uvw_T_)
-            goto 997  ! CPU computation
-         endif
-      end block
-      goto 998
-#endif
-
-      997 continue
 
 #ifdef _BSA_DEBUG
       write(unit_debug_, *) INFOMSG, '@BsaClassicImpl::mainClassic_() : computing nodal wind turbulence PSDs -- ok.'
@@ -200,7 +201,7 @@ contains
                enddo
                close(idx)
             end block
-#endif            
+#endif
 
             if (allocated(psd))  deallocate(psd)
             if (allocated(bisp)) deallocate(bisp)
