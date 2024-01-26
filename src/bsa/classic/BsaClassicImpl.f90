@@ -77,6 +77,12 @@ contains
          ! S_uvw_T_ = transpose(S_uvw)  ! n_dim_ x n_freqs
          ! deallocate(S_uvw)
          ! call bsacl_AcquireBaseWindTurbPSD(S_uvw_T_)
+         if (bsacl_SetKernelID(4) /= 0) then
+            print '(1x, a, a)', ERRMSG, &
+               'Error in setting kernel identifier.'
+            ierr_cl_ = -1
+            goto 998
+         endif
          call bsacl_Run(ierr_cl_)
          if (ierr_cl_ == BSACL_PROBLEM_DIMENSIONS_TOO_SMALL) then
             print '(1x, 2a)', WARNMSG, &

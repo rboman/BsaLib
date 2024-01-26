@@ -21,6 +21,15 @@ contains
    end subroutine
 
 
+   module function bsacl_SetKernelID(kid) result(ierr)
+      integer, value, intent(in) :: kid
+      integer :: ierr
+
+      ierr = int(bsaclSetKernelID__(int(kid, c_int)))
+   end function
+
+
+
    module subroutine bsacl_AcquirePSDId(psdid)
       integer(kind = 4), intent(in) :: psdid
       call bsaclAcquirePSDId__(int(psdid, c_int))

@@ -13,6 +13,11 @@ module BsaCL_c
          type(c_ptr), value :: ierr
       end subroutine
 
+      function bsaclSetKernelID__(kid) result(ierr) bind(c, name="bsaclSetKernelID")
+         import c_int
+         integer(c_int), value :: kid
+         integer(c_int) :: ierr
+      end function
 
       subroutine bsaclAcquirePSDId__(psdid) bind(c, name="bsaclAcquirePSDId")
          import c_int

@@ -37,6 +37,11 @@ module BsaCL
          integer, intent(inout), target :: ierr
       end subroutine
 
+      module function bsacl_SetKernelID(kid) result(ierr)
+         integer, value, intent(in) :: kid
+         integer :: ierr
+      end function
+
       module subroutine bsacl_AcquirePSDId(psdid)
          integer(kind = 4), intent(in) :: psdid
       end subroutine

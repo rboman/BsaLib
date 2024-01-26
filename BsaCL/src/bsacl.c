@@ -1345,8 +1345,16 @@ ret_: *ierr = (int)ierr_;
 
 
 
-
-
+BSACL_INT bsaclSetKernelID(unsigned kid)
+{
+   ierr_t ret = 0;
+   if (kid < 2 || kid > 4) {
+      ret = 1;
+   } else {
+      kernel_id_ = kid;
+   }
+   return ret;
+}
 
 
 
