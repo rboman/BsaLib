@@ -190,7 +190,7 @@ contains
 
 
 #ifdef BSA_USE_GPU
-# ifdef _BSA_USE_CUDA
+# ifdef BSA_USE_CUDA
          call bsacl_AcquirePSDId(wd%i_psd_type_)
 # endif
          call bsacl_AcquireStructModMat(struct_data%modal_%phi_, struct_data%modal_%nat_freqs_)

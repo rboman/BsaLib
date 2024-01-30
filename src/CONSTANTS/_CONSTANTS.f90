@@ -64,7 +64,7 @@
    character(len = *), parameter :: BSA_WIND_DATA_DUMPFILE           = 'dumpwind'
 
 #ifdef BSA_USE_GPU
-#  ifdef _BSA_USE_CUDA
+#  ifdef BSA_USE_CUDA
    character(len = *), parameter :: BSA_FILE_NAME_CL_SUFFIX = '_CUDA'
 #  else
    character(len = *), parameter :: BSA_FILE_NAME_CL_SUFFIX = '_CL'
