@@ -521,18 +521,17 @@ KERNEL void bfm_kernel(
    const REAL fj_ = fj[itmp_];
    itmp_ = gid0_ - (itmp_ * NFI__);
    const REAL fi_ = fi[itmp_];
-
    const REAL fiPfj_ = fi_ + fj_;
 
 
    LOCAL REAL m3mf_loc_[BSACL_WIpWG];
-   m3mf_loc_[lid0_] = 0.;
+   m3mf_loc_[lid0_] = (REAL)0.f;
 
    REAL S_uvw_IJ_i, S_uvw_IJ_ij;
    REAL S_uvw_IK_j, S_uvw_IK_ij;
    REAL S_uvw_JK_i, S_uvw_JK_j;
 
-   for (UINT itc_ = 0; itc_ < NTC__; ++itc_) {
+   for (UINT itc_=0; itc_ < NTC__; ++itc_) {
 
       UINT tc_   = tc[itc_] - 1;
 
@@ -545,46 +544,56 @@ KERNEL void bfm_kernel(
          UINT nk_   = nodes_load[ink_]-1;
          REAL ubnk_ = wind_nod_vel[nk_];
 
+         REAL S_uvw_K_i_  = evalFct(fi_,  PSD_ID_ARG   wscl_, wstd_, ubnk_);
+         REAL S_uvw_K_j_  = evalFct(fj_,  PSD_ID_ARG   wscl_, wstd_, ubnk_);
+         REAL S_uvw_K_ij_ = evalFct(fiPfj_,  PSD_ID_ARG   wscl_, wstd_, ubnk_);
+
          for (UINT inj_=0; inj_ < NNL__; ++inj_) {
+
             UINT nj_offs_ = 18*inj_;
             UINT nj_   = nodes_load[inj_]-1;
             REAL ubnj_ = wind_nod_vel[nj_];
+
             REAL corrJK_ = nod_corr[getCorrId(nj_, nk_, NN__)] < REAL_MIN ? REAL_MIN : nod_corr[getCorrId(nj_, nk_, NN__)];
 
-            S_uvw_JK_i   = evalFct(fi_,  PSD_ID_ARG   wscl_, wstd_, ubnj_);
-            S_uvw_JK_i  *= evalFct(fi_,  PSD_ID_ARG   wscl_, wstd_, ubnk_);
+            REAL S_uvw_J_i_   = evalFct(fi_,  PSD_ID_ARG   wscl_, wstd_, ubnj_);
+            S_uvw_JK_i   = S_uvw_J_i_ * S_uvw_K_i_;
             S_uvw_JK_i   = sqrt(S_uvw_JK_i);
             S_uvw_JK_i  *= POWR(corrJK_, (REAL)(fabs(fi_)));
 
             S_uvw_JK_j   = evalFct(fj_,  PSD_ID_ARG   wscl_, wstd_, ubnj_);
-            S_uvw_JK_j  *= evalFct(fj_,  PSD_ID_ARG   wscl_, wstd_, ubnk_);
+            S_uvw_JK_j  *= S_uvw_K_j_;
             S_uvw_JK_j   = sqrt(S_uvw_JK_j);
             S_uvw_JK_j  *= POWR(corrJK_, (REAL)(fabs(fj_)));
 
+            REAL S_uvw_J_ij_  = evalFct(fiPfj_,  PSD_ID_ARG   wscl_, wstd_, ubnj_);
+
             for (UINT ini_=0; ini_ < NNL__; ++ini_) {
+
                UINT ni_offs_ = 18*ini_;
-               UINT ni_ = nodes_load[ini_]-1;
+               UINT ni_   = nodes_load[ini_]-1;
                REAL ubni_ = wind_nod_vel[ni_];
+
                REAL corrIK_ = nod_corr[getCorrId(ni_, nk_, NN__)] < REAL_MIN ? REAL_MIN : nod_corr[getCorrId(ni_, nk_, NN__)];
                REAL corrIJ_ = nod_corr[getCorrId(ni_, nj_, NN__)] < REAL_MIN ? REAL_MIN : nod_corr[getCorrId(ni_, nj_, NN__)];
 
                S_uvw_IK_j   = evalFct(fj_,  PSD_ID_ARG   wscl_, wstd_, ubni_);
-               S_uvw_IK_j  *= evalFct(fj_,  PSD_ID_ARG   wscl_, wstd_, ubnk_);
+               S_uvw_IK_j  *= S_uvw_K_j_;
                S_uvw_IK_j   = sqrt(S_uvw_IK_j);
                S_uvw_IK_j  *= POWR(corrIK_, (REAL)(fabs(fj_)));
 
                S_uvw_IK_ij  = evalFct(fiPfj_,  PSD_ID_ARG   wscl_, wstd_, ubni_);
-               S_uvw_IK_ij *= evalFct(fiPfj_,  PSD_ID_ARG   wscl_, wstd_, ubnk_);
+               S_uvw_IK_ij *= S_uvw_K_ij_;
                S_uvw_IK_ij  = sqrt(S_uvw_IK_ij);
                S_uvw_IK_ij *= POWR(corrIK_, (REAL)(fabs(fiPfj_)));
 
                S_uvw_IJ_i   = evalFct(fi_,  PSD_ID_ARG   wscl_, wstd_, ubni_);
-               S_uvw_IJ_i  *= evalFct(fi_,  PSD_ID_ARG   wscl_, wstd_, ubnj_);
+               S_uvw_IJ_i  *= S_uvw_J_i_;
                S_uvw_IJ_i   = sqrt(S_uvw_IJ_i);
                S_uvw_IJ_i  *= POWR(corrIJ_, (REAL)(fabs(fi_)));
 
                S_uvw_IJ_ij  = evalFct(fiPfj_,  PSD_ID_ARG   wscl_, wstd_, ubni_);
-               S_uvw_IJ_ij *= evalFct(fiPfj_,  PSD_ID_ARG   wscl_, wstd_, ubnj_);
+               S_uvw_IJ_ij *= S_uvw_J_ij_;
                S_uvw_IJ_ij  = sqrt(S_uvw_IJ_ij);
                S_uvw_IJ_ij *= POWR(corrIJ_, (REAL)(fabs(fiPfj_)));
 
