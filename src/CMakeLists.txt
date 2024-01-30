@@ -121,7 +121,7 @@ else()
 endif()
 
 if (enable-gpu-code)
-   target_compile_definitions( ${project} PRIVATE _BSA_USE_GPU )
+   target_compile_definitions( ${project} PRIVATE BSA_USE_GPU )
    if (enable-cuda)
       target_compile_definitions( ${project} PRIVATE _BSA_USE_CUDA )
    endif()

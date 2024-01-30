@@ -22,7 +22,7 @@ module BsaLib_Data
    use BsaLib_Structure
    use BsaLib_WindData
    !$ use omp_lib
-#ifdef _BSA_USE_GPU
+#ifdef BSA_USE_GPU
    use BsaCL
 #endif
    implicit none (type, external)
@@ -72,7 +72,7 @@ module BsaLib_Data
    end type
 
 
-#ifdef _BSA_USE_GPU
+#ifdef BSA_USE_GPU
    integer, target :: ierr_cl_
 #endif
 
