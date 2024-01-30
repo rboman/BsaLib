@@ -54,7 +54,7 @@
 
 
 #ifndef BSACL_KERNEL_ID
-# define BSACL_KERNEL_ID 3
+# define BSACL_KERNEL_ID 4
 #endif
 
 #if (BSACL_KERNEL_ID==4)
