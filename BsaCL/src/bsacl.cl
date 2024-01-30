@@ -459,6 +459,7 @@ KERNEL void bfm_kernel(
    const size_t gid0_ = GLOBAL_ID_X_DIM0; // this determines the pair of freqs
    const size_t lid0_ = LOCAL_ID_X_DIM0;
 
+   /* NOTE: do set local variable to 0 for all WIs, avoids getting garbage in reduction op. */
    LOCAL REAL m3mf_loc_[BSACL_WIpWG];
    m3mf_loc_[lid0_] = (REAL)0.f;
 
