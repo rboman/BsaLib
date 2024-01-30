@@ -54,7 +54,7 @@
 
 
 #ifndef BSACL_KERNEL_ID
-# define BSACL_KERNEL_ID 4
+# define BSACL_KERNEL_ID 3
 #endif
 
 #if (BSACL_KERNEL_ID==4)
@@ -392,7 +392,22 @@ KERNEL void bfm_kernel(
    // BUG: apparently, removing this barrier leads to wrong results..
    LOCAL_WORKGROUP_BARRIER;
 
-
+#if 1
+   // WG reduction
+   UINT alive = BSACL_WIpWG;
+   while (alive > 1) {
+      LOCAL_WORKGROUP_BARRIER;
+      alive /= 2;
+      if (lid0_ < alive) {
+         m3mf_wg_x_[lid0_] += m3mf_wg_x_[lid0_+alive];
+      }
+   }
+   // Then store sum into global variable
+   if (0 == lid0_) {
+      itmp_ = (UINT)BLOCK_ID_X_DIM0;
+      m3mf[(itmp_*NM_EFF__*NM_EFF__*NM_EFF__) + wgid1_] += m3mf_wg_x_[0];
+   }
+#else
    // BUG: unoptimal reduction scheme !!
    if (0 == lid0_) {
 
@@ -405,6 +420,7 @@ KERNEL void bfm_kernel(
       /** Reduce on global result array */
       m3mf[(itmp_*NM_EFF__*NM_EFF__*NM_EFF__) + wgid1_] += m3mf_wg_x_[0];
    }
+#endif
    LOCAL_WORKGROUP_BARRIER;
 }
 
