@@ -96,7 +96,7 @@ contains
       nnodes_l_ = size(phi_T_c, 2, c_int)
       ndegw_    = size(phi_T_c, 3, c_int)
       call bsaclAcquirePhiTimesCMat__(c_loc(phi_T_c), nm_eff_, nnodes_l_, ndegw_)
-! #ifdef _BSA_DEBUG
+! #ifdef BSA_DEBUG
 !       block
 !          integer :: m, n, d
 !          integer :: id = 0
@@ -117,7 +117,7 @@ contains
       integer(c_int) :: nnod_corr
       nnod_corr = size(nod_corr, dim=1)
       call bsaclAcquireNodalCorrelation__(c_loc(nod_corr), nnod_corr)
-! #ifdef _BSA_DEBUG
+! #ifdef BSA_DEBUG
 !       print '(/1x, 2a, i/)', INFO_MSG, 'n. nod_corr  = ', nnod_corr
 ! #endif
    end subroutine
@@ -176,7 +176,7 @@ contains
       do i_ = 1, innl
          res((i_-1)*nf_ + 1 : (i_*nf_)) = real(res_(:, i_), kind=c_double)
       enddo
-! #ifdef _BSA_DEBUG
+! #ifdef BSA_DEBUG
 !       write(9542, *) "  Evaluation result is (Fortran) :"
 !       do itc_ = 1, nf_
 !          write(9542, fmt='(2x, i0, 2x, f10.4, *(2x, f12.5))', advance='no') itc, f_(itc_), res(1 : innl)

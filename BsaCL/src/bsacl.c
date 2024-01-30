@@ -90,7 +90,7 @@ cl_uint         n_platforms__  = 0;
 cl_platform_id *platform_all__ = NULL; // array of all available platforms
 cl_platform_id  platform__     = NULL; // final selected platform
 
-#  ifdef BSACLC_DEBUG
+#  ifdef BSA_DEBUG
 cl_device_type device_type__ = CL_DEVICE_TYPE_CPU;
 #  else
 cl_device_type device_type__ = CL_DEVICE_TYPE_DEFAULT;
@@ -298,7 +298,7 @@ void abortInternal_(const int ierr, const char *const emsg) {
 BSACL_INT getNumPlatforms_(cl_uint *const npltfms) {
    BSACL_INT ierr_;
 
-#ifdef BSACLC_DEBUG
+#ifdef BSA_DEBUG
    printMsg_(INFO_MSG, "Init querying for n. of available platforms...");
 #endif
 
@@ -307,7 +307,7 @@ BSACL_INT getNumPlatforms_(cl_uint *const npltfms) {
       printMsg_(ERRR_MSG, "N<=0. OpenCL platform could not be correctly found.");
       return BSACL_PLATFORM_FIND_ERROR_;
    }
-#ifdef BSACLC_DEBUG
+#ifdef BSA_DEBUG
    printf("\n%sFound  %d  platforms.", INFO_MSG, *npltfms);
 #endif
    return ierr_;
@@ -331,7 +331,7 @@ BSACL_INT getAllPlatforms_() {
       printf("\n%sCannot acquire  %d  available platforms. Aborting.", ERRR_MSG, n_platforms__);
       return ierr_;
    }
-#ifdef BSACLC_DEBUG
+#ifdef BSA_DEBUG
    printf("\n%s%d  platforms acquired -- ok.", INFO_MSG, n_platforms__);
 #endif
    return ierr_;
@@ -430,49 +430,49 @@ void getCLDevicesInfo_() {
 
    for (unsigned int i = 0; i < n_devices__; ++i) {
 
-#ifdef BSACLC_DEBUG
+#ifdef BSA_DEBUG
       printf("%sRelevant info for device   #%d\n", INFO_MSG, i+1);
 #endif
 
       clGetDeviceInfo(*(devices__ + i), CL_DEVICE_GLOBAL_MEM_SIZE, sizeof(cl_ulong), (void*)&(dev_glob_mem_size__[i]), 
          &info_len_);
-#ifdef BSACLC_DEBUG
+#ifdef BSA_DEBUG
       printf("%s - glob mem size       =   %llu\n", CONT_MSG, dev_glob_mem_size__[i]);
 #endif
 
       clGetDeviceInfo(*(devices__ + i), CL_DEVICE_GLOBAL_MEM_CACHE_SIZE, sizeof(cl_ulong), 
          (void*)&dev_glob_mem_cache_size__[i], &info_len_);
-#ifdef BSACLC_DEBUG
+#ifdef BSA_DEBUG
       printf("%s - glob mem cache size =   %llu\n", CONT_MSG, dev_glob_mem_cache_size__[i]);
 #endif
 
       clGetDeviceInfo(*(devices__ + i), CL_DEVICE_LOCAL_MEM_SIZE, sizeof(cl_ulong), 
          (void*)&dev_local_mem_size__[i], &info_len_);
-#ifdef BSACLC_DEBUG
+#ifdef BSA_DEBUG
       printf("%s - local mem size      =   %llu\n", CONT_MSG, dev_local_mem_size__[i]);
 #endif
 
       clGetDeviceInfo(*(devices__ + i), CL_DEVICE_MAX_MEM_ALLOC_SIZE, sizeof(cl_ulong), 
          (void*)&dev_max_mem_alloc_size__[i], &info_len_);
-#ifdef BSACLC_DEBUG
+#ifdef BSA_DEBUG
       printf("%s - max mem alloc size  =   %llu\n", CONT_MSG, dev_max_mem_alloc_size__[i]);
 #endif
 
       clGetDeviceInfo(*(devices__ + i), CL_DEVICE_MAX_COMPUTE_UNITS, sizeof(cl_uint), 
          (void*)&dev_n_compute_units__[i], &info_len_);
-#ifdef BSACLC_DEBUG
+#ifdef BSA_DEBUG
       printf("%s - max compute units   =   %u\n", CONT_MSG, dev_n_compute_units__[i]);
 #endif
 
       clGetDeviceInfo(*(devices__ + i), CL_DEVICE_MAX_WORK_GROUP_SIZE, sizeof(size_t), 
          (void*)&dev_max_work_group_size__[i], &info_len_);
-#ifdef BSACLC_DEBUG
+#ifdef BSA_DEBUG
       printf("%s - max work-group size =   %llu\n", CONT_MSG, dev_max_work_group_size__[i]);
 #endif
 
       clGetDeviceInfo(*(devices__ + i), CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS, sizeof(cl_uint), 
          (void*)&dev_max_work_items_n_dims__[i], &info_len_);
-#ifdef BSACLC_DEBUG
+#ifdef BSA_DEBUG
       printf("%s - max work-item dims  =   %u\n", CONT_MSG, dev_max_work_items_n_dims__[i]);
 #endif
 
@@ -482,7 +482,7 @@ void getCLDevicesInfo_() {
       clGetDeviceInfo(*(devices__ + i), CL_DEVICE_MAX_WORK_ITEM_SIZES, 
          sizeof(size_t) * dev_max_work_items_n_dims__[i], 
          (void*)dev_max_work_item_sizes__[i], &info_len_);
-#ifdef BSACLC_DEBUG
+#ifdef BSA_DEBUG
       printf("%s - max work-item sizes =   ", CONT_MSG);
       for (unsigned int j = 0; j < dev_max_work_items_n_dims__[i] - 1; ++j)
          printf("%llu - ", dev_max_work_item_sizes__[i][j]);
@@ -510,7 +510,7 @@ cl_int getCLDevicesByType_(
    cl_int ierr_ = 0;
    cl_uint num_devices_of_type_ = 0;
 
-#ifdef BSACLC_DEBUG
+#ifdef BSA_DEBUG
    printMsg_(INFO_MSG, "Init querying devices by type..");
 #endif
 
@@ -533,7 +533,7 @@ cl_int getCLDevicesByType_(
       printf("\n\n%sFailed to acquire type of devices for platform. Aborting (%d).", ERRR_MSG, ierr_);
       return -3;
    }
-#ifdef BSACLC_DEBUG
+#ifdef BSA_DEBUG
    printf("%sFound  %d  device(s) of given type.\n", INFO_MSG, num_devices_of_type_);
 #endif
    return num_devices_of_type_;
@@ -878,7 +878,7 @@ void assembleProgramBuildOptsString_()
 
    *buf = '\0';
 
-#ifdef BSACLC_DEBUG
+#ifdef BSA_DEBUG
    printf("%sBuild options:\n", INFO_MSG);
    printf("%s\t%s\n", CONT_MSG, prog_compile_opts__);
 #endif
@@ -1046,7 +1046,7 @@ ierr_t getOptKernelDims_() {
    ntot_ *= extdata__.NTC__;
 
 
-#ifdef BSACLC_DEBUG
+#ifdef BSA_DEBUG
    printf("\n%sEnqueueing kernel using:", INFO_MSG);
    printf("\n%s - local grid dims  : %llu - %llu - %llu", 
       CONT_MSG, local_dims_ie_WIpWG__[0], local_dims_ie_WIpWG__[1], local_dims_ie_WIpWG__[2]);
@@ -1162,9 +1162,9 @@ void bsaclRun(int *__EXT_PTR_CONST ierr) {
    dInfl_ = dInfl_ * dInfl_;  // infl area
 #endif
 
-#ifdef BSACLC_DEBUG
+#ifdef BSA_DEBUG
    printf("%sUsing kernel ID  %u\n", INFO_MSG, kernel_id_);
-#endif /* ifdef BSACLC_DEBUG */
+#endif /* ifdef BSA_DEBUG */
 
    if (fi__ == NULL || fj__ == NULL)
       { ierr_ = (ierr_t)-20; printMsg_(ERRR_MSG, "No computation frequencies acquired."); goto ret_; }
@@ -1207,7 +1207,7 @@ void bsaclRun(int *__EXT_PTR_CONST ierr) {
    //            MAIN LOOP
    // ----------------------------
 
-// #ifdef BSACLC_DEBUG
+// #ifdef BSA_DEBUG
 //    printf("%sReady to perform  %12llu  iterations.\n", INFO_MSG, n_freqs_tot_);
 // #endif
 
@@ -1386,7 +1386,7 @@ void bsaclAcquireStructModMat(
    extdata__.natfreqs__ = natf;
    extdata__.NDOFS__    = ndofs;
    extdata__.NMODES__   = nmodes;
-// #ifdef BSACLC_DEBUG
+// #ifdef BSA_DEBUG
 //    for (unsigned i = 0; i < ndofs; ++i) {
 //       printf("\n");
 //       for (unsigned j = 0; j < nmodes; ++j) {
@@ -1410,7 +1410,7 @@ void bsaclAcquireLoadedNodesList(int *__EXT_PTR_CONST nodes_load, const uint32_t
       ABORT_INTERNAL_RETURN_VOID(BSACL_VALUE_MISMATCH_ERROR_, "N. of loaded nodes does not match.");
    extdata__.nodes_load__  = nodes_load;
    extdata__.NNODES_LOAD__ = nnodes_l;
-// #ifdef BSACLC_DEBUG
+// #ifdef BSA_DEBUG
 //    printf("\n");
 //    for (unsigned i = 0; i < nnodes_l; ++i) printf("  %4d", extdata__.nodes_load__[i]);
 // #endif
@@ -1438,7 +1438,7 @@ void bsaclAcquireUsedModesList(int *__EXT_PTR_CONST modes, const uint32_t nmodes
       ABORT_INTERNAL_RETURN_VOID(BSACL_VALUE_MISMATCH_ERROR_, "N. of effective modes does not match.");
    extdata__.modes_eff__  = modes;
    extdata__.NMODES_EFF__ = nmodes_eff;
-// #ifdef BSACLC_DEBUG
+// #ifdef BSA_DEBUG
 //    printf("\n");
 //    for (unsigned i = 0; i < nmodes_eff; ++i) printf("  %4d", extdata__.modes_eff__[i]);
 // #endif

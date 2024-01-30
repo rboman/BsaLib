@@ -119,7 +119,7 @@ else()
    )
 endif()
 
-add_compile_definitions( $<$<CONFIG:DEBUG>:_BSA_DEBUG> )
+add_compile_definitions( $<$<CONFIG:DEBUG>:BSA_DEBUG> )
 
 if (enable-single)
    message( STATUS "NOTE: enabling single precision floating point arithmetic")

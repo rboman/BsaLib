@@ -207,7 +207,7 @@ contains
       integer, value :: ni, nj
 
       if (.not. this%isGRSAligned()) call bsa_Abort('Rect zone is not GRS aligned.')
-! #ifdef _BSA_DEBUG
+! #ifdef BSA_DEBUG
 !       write(unit_debug_, *) ' @MRectZoneImpl::defineFromDeltas_refinements() : init...'
 ! #endif
 
@@ -232,7 +232,7 @@ contains
       this%deltaf_J_   = dfj
 
       call this%define(pt, loc=loc)
-! #ifdef _BSA_DEBUG
+! #ifdef BSA_DEBUG
 !       write(unit_debug_, *) ' @MRectZoneImpl::defineFromDeltas_refinements() : init -- ok.'
 ! #endif
    end subroutine
@@ -277,7 +277,7 @@ contains
          call bsa_Abort(&
             'Cannot define deltas from max values if given point location is not "i" (Init).')
 
-! #ifdef _BSA_DEBUG
+! #ifdef BSA_DEBUG
 !       write(unit_debug_, *) ' @MRectZoneImpl::defineFromDeltas_maxvalues() : init...'
 ! #endif
 
@@ -534,7 +534,7 @@ contains
          call this%define(pt, loc, bi, bj)
       end block
 
-! #ifdef _BSA_DEBUG
+! #ifdef BSA_DEBUG
 !       write(unit_debug_, *) ' @MRectZoneImpl::defineFromDeltas_maxvalues() : init -- ok.'
 ! #endif
    end subroutine
@@ -565,7 +565,7 @@ contains
          call bsa_Abort('Unvalid base direction identifier. Must be one of "i"/"j".')
 
 
-! #ifdef _BSA_DEBUG
+! #ifdef BSA_DEBUG
 !       write(unit_debug_, *) ' @MRectZoneImpl::defineFromEndPtCoordAndBase_norm() : init...'
 ! #endif
 
@@ -605,7 +605,7 @@ contains
       ! NOTE: this assumes refinements have been already set
       call this%deduceDeltas()
 
-! #ifdef _BSA_DEBUG
+! #ifdef BSA_DEBUG
 !       write(unit_debug_, *) ' @MRectZoneImpl::defineFromEndPtCoordAndBase_norm() : init -- ok.'
 ! #endif
    end subroutine defineFromEndPtCoordAndBase_norm
@@ -624,7 +624,7 @@ contains
       character(len = 1), intent(in)    :: base_dir
       real(bsa_real_t), intent(in)      :: dfi, dfj
 
-! #ifdef _BSA_DEBUG
+! #ifdef BSA_DEBUG
 !       write(unit_debug_, *) ' @MRectZoneImpl::defineFromEndPtCoordAndBase_forceDeltas() : init...'
 ! #endif
 
@@ -634,7 +634,7 @@ contains
       ! forcing deltas
       call this%setDeltas(dfi, dfj, .true.)
 
-! #ifdef _BSA_DEBUG
+! #ifdef BSA_DEBUG
 !       write(unit_debug_, *) ' @MRectZoneImpl::defineFromEndPtCoordAndBase_forceDeltas() : init -- ok.'
 ! #endif
    end subroutine defineFromEndPtCoordAndBase_forceDeltas
@@ -840,7 +840,7 @@ contains
             ! BUG: forcing it to zero if below some precision
             if (kd < MACHINE_PRECISION) then
 
-#ifdef _BSA_DEBUG
+#ifdef BSA_DEBUG
                write(unit_debug_, '(a, a)') &
                   WARNMSG, '(1) kd < machine precision. Assuming kd == 0.'
 #endif
@@ -872,7 +872,7 @@ contains
             ! BUG: forcing it to zero if below some precision
             if (kd < MACHINE_PRECISION) then
                
-#ifdef _BSA_DEBUG
+#ifdef BSA_DEBUG
                write(unit_debug_, '(a, a)') &
                   WARNMSG, '(2) kd < machine precision. Assuming kd == 0.'
 #endif
@@ -912,7 +912,7 @@ contains
             ! BUG: forcing it to zero if below some precision
             if (kd < MACHINE_PRECISION) then
                
-#ifdef _BSA_DEBUG
+#ifdef BSA_DEBUG
                write(unit_debug_, '(a, a)') &
                   WARNMSG, '(3) kd < machine precision. Assuming kd == 0.'
 #endif
@@ -945,7 +945,7 @@ contains
             ! BUG: forcing it to zero if below some precision
             if (kd < MACHINE_PRECISION) then
                
-#ifdef _BSA_DEBUG
+#ifdef BSA_DEBUG
                write(unit_debug_, '(a, a)') &
                   WARNMSG, '(4) kd < machine precision. Assuming kd == 0.'
 #endif

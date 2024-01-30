@@ -347,7 +347,7 @@ contains
       if (MSHR_SVD_INFO == 0) then
 
          MSHR_SVD_LWORK = int(optWork(1))
-! #ifdef _BSA_DEBUG
+! #ifdef BSA_DEBUG
          print '(1x, a, a, i0 /)', &
             INFOMSG, 'WORK query ok. Optimal work dimension = ', MSHR_SVD_LWORK
 ! #endif
@@ -393,7 +393,7 @@ contains
          if (istat /= 0) call deallocKOMsg('MSHR_SVD_WORK', istat, emsg)
       endif
 
-#ifdef _BSA_DEBUG
+#ifdef BSA_DEBUG
       print '(1x, a, a)', &
          INFOMSG, 'SVD related data cleaned -- ok.'
 #endif
@@ -1344,7 +1344,7 @@ contains
       !========================================================================                                 
 
 
-#ifdef _BSA_DEBUG
+#ifdef BSA_DEBUG
       write(unit_debug_, '(2a)') &
          INFOMSG, '@BsaClassicImpl::getFM_full_tnlm_vect_cls_() : computing modal forces spectra...'
 #endif
@@ -1364,7 +1364,7 @@ contains
       i_pad_len = itmp + NFREQS
 
 
-#ifdef _BSA_DEBUG
+#ifdef BSA_DEBUG
       print '(1x, a, i5)', '@BsaClassicImpl::getFM_full_tnlm_vect_cls_() : i pad length = ', i_pad_len
       print '(1x, a, i5)', '@BsaClassicImpl::getFM_full_tnlm_vect_cls_() : init index   = ', iin
       print '(1x, a, i5)', '@BsaClassicImpl::getFM_full_tnlm_vect_cls_() : end  index   = ', ien
@@ -1564,7 +1564,7 @@ contains
                      i_pos_ni = i_pos_ni + 1
                   enddo ! i node
 
-#ifdef _BSA_DEBUG
+#ifdef BSA_DEBUG
                   i_ncycles = i_ncycles + NNODESL
                   print '(1x, a, a, f10.4, " %")', &
                      INFOMSG, 'getFM_full_tnlm_vect_cls_() :   done  ', &
@@ -1610,7 +1610,7 @@ contains
                            psd(:, posm_) = psd(:, posm_) + &
                               phik * phij * PSDF_jk_JK_w
 
-! #ifdef _BSA_DEBUG
+! #ifdef BSA_DEBUG
 !                            write(unit_debug_, &
 ! 										   '(1x, a, 5(i0, ", "), i0,  "  ; ",  2(2x, g0, " - ", g0) )') &
 ! 										'  nk, nj, lk, lj, mk, mj :  ', &
@@ -1654,7 +1654,7 @@ contains
       if (allocated(S_uvw_IJ_w1w2)) deallocate(S_uvw_IJ_w1w2)
       if (allocated(BF_ijk_IJK_w_w2)) deallocate(BF_ijk_IJK_w_w2)
 
-#ifdef _BSA_DEBUG
+#ifdef BSA_DEBUG
       write(unit_debug_, '(2a)') &
          INFOMSG, '@BsaClassicImpl::getFM_full_tnlm_vect_cls_() : computing modal forces spectra -- ok.'
 #endif
@@ -1721,7 +1721,7 @@ contains
       !========================================================================                                 
 
 
-#ifdef _BSA_DEBUG
+#ifdef BSA_DEBUG
       write(unit_debug_, '(2a)') &
          INFOMSG, '@BsaClassicImpl::getFM_full_tnm_vect_cls_() : computing modal forces spectra...'
 #endif
@@ -1741,7 +1741,7 @@ contains
       i_pad_len = itmp + NFREQS
 
 
-#ifdef _BSA_DEBUG
+#ifdef BSA_DEBUG
       print '(1x, a, i5)', '@BsaClassicImpl::getFM_full_tnm_vect_cls_() : i pad length = ', i_pad_len
       print '(1x, a, i5)', '@BsaClassicImpl::getFM_full_tnm_vect_cls_() : init index   = ', iin
       print '(1x, a, i5)', '@BsaClassicImpl::getFM_full_tnm_vect_cls_() : end  index   = ', ien
@@ -1910,7 +1910,7 @@ contains
                      i_pos_ni = i_pos_ni + 1
                   enddo ! i node
 
-! #ifdef _BSA_DEBUG
+! #ifdef BSA_DEBUG
                   i_ncycles = i_ncycles + NNODESL
                   print '(1x, a, a, f10.4, " %")', &
                      INFOMSG, 'getFM_full_tnm_vect_cls_() :   done  ', &
@@ -1959,7 +1959,7 @@ contains
       if (allocated(S_uvw_IJ_w1w2)) deallocate(S_uvw_IJ_w1w2)
       if (allocated(BF_ijk_IJK_w_w2)) deallocate(BF_ijk_IJK_w_w2)
 
-#ifdef _BSA_DEBUG
+#ifdef BSA_DEBUG
       write(unit_debug_, '(2a)') &
          INFOMSG, '@BsaClassicImpl::getFM_full_tnm_vect_cls_() : computing modal forces spectra -- ok.'
 #endif
@@ -1990,7 +1990,7 @@ contains
       real(bsa_real_t), allocatable :: Hr_w1w2(:, :, :), Hi_w1w2(:, :, :)
 
 
-#ifdef _BSA_DEBUG
+#ifdef BSA_DEBUG
       write(unit_debug_, '(2a)') &
          INFOMSG, '@BsaClassicImpl::getRM_full_vect_cls_() : computing modal responses spectra...'
 #endif
@@ -2107,7 +2107,7 @@ contains
       endif
 
 
-#ifdef _BSA_DEBUG
+#ifdef BSA_DEBUG
       write(unit_debug_, '(2a)') &
          INFOMSG, '@BsaClassicImpl::getRM_full_vect_cls_() : computing modal responses spectra -- ok.'
 #endif
@@ -2156,7 +2156,7 @@ contains
       real(bsa_real_t), allocatable :: PSDF_jk_JJ_w(:)
 
 
-#ifdef _BSA_DEBUG
+#ifdef BSA_DEBUG
       write(unit_debug_, '(2a)') &
          INFOMSG, '@BsaClassicImpl::getFM_diag_tnlm_vect_cls_() : computing modal forces spectra...'
 #endif
@@ -2319,7 +2319,7 @@ contains
             enddo ! k lib
 
 
-#ifdef _BSA_DEBUG
+#ifdef BSA_DEBUG
             print '(1x, 2a, f10.4, " %")', &
                INFOMSG, 'getFM_diag_tnlm_vect_cls_() :   done  ', real(in, bsa_real_t) / NNODESL * 100
 #endif
@@ -2336,7 +2336,7 @@ contains
       if (allocated(tmp3))            deallocate(tmp3)
       if (allocated(BF_ijk_III_w1w2)) deallocate(BF_ijk_III_w1w2)
 
-#ifdef _BSA_DEBUG
+#ifdef BSA_DEBUG
       write(unit_debug_, '(2a)') &
          INFOMSG, '@BsaClassicImpl::getFM_diag_tnlm_vect_cls_() : computing modal forces spectra -- ok.'
 #endif
@@ -2361,7 +2361,7 @@ contains
       real(bsa_real_t), allocatable :: Hr_w1w2(:, :), Hi_w1w2(:, :)
 
 
-#ifdef _BSA_DEBUG
+#ifdef BSA_DEBUG
       write(unit_debug_, '(2a)') &
          INFOMSG, '@BsaClassicImpl::getRM_diag_vect_cls_() : computing modal responses spectra...'
 #endif
@@ -2466,7 +2466,7 @@ contains
       endif
 
 
-#ifdef _BSA_DEBUG
+#ifdef BSA_DEBUG
       write(unit_debug_, '(2a)') &
          INFOMSG, '@BsaClassicImpl::getRM_diag_vect_cls_() : computing modal responses spectra -- ok.'
 #endif

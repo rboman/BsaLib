@@ -53,7 +53,7 @@ contains
       character(len = 256) :: emsg
       logical :: lflag
 
-#ifdef _BSA_DEBUG
+#ifdef BSA_DEBUG
       write(unit_debug_, *) ' @BsaMesherImpl::mainMesher_() : Init BSA-Mesher main...'
 #endif
 
@@ -108,7 +108,7 @@ contains
       print '(1x, a, a, i0)', MSGCONT, ' POST-MESH  (BRM) : ', msh_brmpts_post_
 
       
-#ifdef _BSA_DEBUG
+#ifdef BSA_DEBUG
       write(unit_debug_, *) ' @BsaMesherImpl::mainMesher_() : Init BSA-Mesher main -- ok.'
 #endif
    end subroutine mainMesher_
@@ -183,7 +183,7 @@ contains
       character(len = :), allocatable :: zone_title
 
 
-#ifdef _BSA_DEBUG
+#ifdef BSA_DEBUG
       write(unit_debug_, *) ' @BsaMesherImpl::PreMesh() : Init BSA-Mesher pre meshing phase...'
 #endif
 
@@ -454,7 +454,7 @@ contains
          limits(NLimsP1)   = maxF
          policies(NLimsP1) = pol
 
-#ifdef _BSA_DEBUG
+#ifdef BSA_DEBUG
          write(*, *) '  Interest modes : '
          write(*, *) msh_ZoneLimsInterestModes
 #endif
@@ -542,7 +542,7 @@ contains
                   endif
                   int_modes_ = msh_ZoneLimsInterestModes(iim + 1  :  iim + nim)
 
-#ifdef _BSA_DEBUG
+#ifdef BSA_DEBUG
                   !$omp critical
                   if (idir == 1) print *, int_modes_
                   !$omp end critical
@@ -566,7 +566,7 @@ contains
                end select
 
 
-! #ifdef _BSA_DEBUG
+! #ifdef BSA_DEBUG
 !                if (idir == 1) then
 !                   write(*, '( 1x, a, i5, l, g16.5, "  ->  ", *(" ", i0) )', advance='yes') &
 !                      ' ilim,  isPeak,  rval,  int_modes_,  policies = ', &
@@ -726,7 +726,7 @@ contains
                   call rz%setRefinements(main_refs_, main_refs_)
                   iim = 1
                   call rz%setInterestModeIndexPtr(iim)
-! #ifdef _BSA_DEBUG
+! #ifdef BSA_DEBUG
 !                   print '(1x, a, 2i5, 4g12.5)', '  @idir, ilim,  ptI,  ptE  =  ', &
 !                      idir, 1, rz%Ipt_%freqI(), rz%Ipt_%freqJ(), rz%Ept_%freqI(), rz%Ept_%freqJ()
 ! #endif
@@ -763,7 +763,7 @@ contains
                      call rz%defineFromEndPtCoordAndBase(&
                         ptI, left_sign_ * rlimit_, 'j', &
                         rbase_, left_known_coord_, delta_main_rz_, delta_main_rz_)
-! #ifdef _BSA_DEBUG
+! #ifdef BSA_DEBUG
 !                      print '(1x, a, 2i5, 4g12.5)', '  @idir, ilim,  ptI,  ptE  =  ', &
 !                         idir, ilim, rz%Ipt_%freqI(), rz%Ipt_%freqJ(), rz%Ept_%freqI(), rz%Ept_%freqJ()
 ! #endif
@@ -783,7 +783,7 @@ contains
                      call rz%defineFromEndPtCoordAndBase(&
                         ptI, left_sign_ * init_freq_, left_known_coord_, &
                         rbase_, 'i', delta_main_rz_, delta_main_rz_)
-! #ifdef _BSA_DEBUG
+! #ifdef BSA_DEBUG
 !                      print '(1x, a, 2i5, 4g12.5)', '  @idir, ilim,  ptI,  ptE  =  ', &
 !                         idir, ilim, rz%Ipt_%freqI(), rz%Ipt_%freqJ(), rz%Ept_%freqI(), rz%Ept_%freqJ()
 ! #endif
@@ -799,7 +799,7 @@ contains
                      call rz%defineFromEndPtCoordAndBase(&
                         ptI, right_sign_ * init_freq_, right_known_coord_, &
                         rbase_, 'j', delta_main_rz_, delta_main_rz_)
-! #ifdef _BSA_DEBUG
+! #ifdef BSA_DEBUG
 !                      print '(1x, a, 2i5, 4g12.5)', '  @idir, ilim,  ptI,  ptE  =  ', &
 !                         idir, ilim, rz%Ipt_%freqI(), rz%Ipt_%freqJ(), rz%Ept_%freqI(), rz%Ept_%freqJ()
 ! #endif
@@ -1278,7 +1278,7 @@ contains
          write(unit_dump_bfm_) &
             struct_data%modal_%Km_(struct_data%modal_%modes_)
 
-#ifdef _BSA_DEBUG
+#ifdef BSA_DEBUG
          print '(1x, a, a)', INFOMSG, 'Modal info dumped -- ok.'
 #endif
       endif
@@ -1291,7 +1291,7 @@ contains
       write (unit_dump_bfm_) msh_NZones
       write (unit_dump_bfm_) msh_max_zone_NPts
 
-#ifdef _BSA_DEBUG
+#ifdef BSA_DEBUG
       write(unit_debug_, *) ' @BsaMesherImpl::PreMesh() : Init BSA-Mesher pre meshing phase -- ok.'
 #endif
    end subroutine PreMesh
@@ -1351,7 +1351,7 @@ contains
       read(unit_dump_bfm_) ival2    ! n. of meshing zones
       read(unit_dump_bfm_) ival2    ! msh_max_zone_PTS
 
-#ifdef _BSA_DEBUG
+#ifdef BSA_DEBUG
       if (.not. izone == dimM_bisp_) &
          call bsa_Abort('First undumped value does not match BISP dimension.')
       if (.not. ival2 == msh_max_zone_NPts) &

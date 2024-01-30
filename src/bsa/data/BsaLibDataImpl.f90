@@ -37,7 +37,7 @@ contains
       integer(int32) :: istat
       character(len = 256) :: emsg
 
-#ifdef _BSA_DEBUG
+#ifdef BSA_DEBUG
       write(unit_debug_, *) INFOMSG//'@BsaLibData::cleanBSAData_() : cleaning...'
 #endif
 
@@ -92,7 +92,7 @@ contains
 
       is_data_cleaned_ = .true.
 
-#ifdef _BSA_DEBUG
+#ifdef BSA_DEBUG
       write(unit_debug_, *) INFOMSG//'@BsaLibData::cleanBSAData_() : cleaning -- ok.'
 #endif
 

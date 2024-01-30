@@ -15,7 +15,7 @@
 !! along with BSA Library.  If not, see <https://www.gnu.org/licenses/>.
 submodule(BsaLib_WindData) BsaLib_WindPSDImpl
 
-#ifndef _BSA_DEBUG
+#ifndef BSA_DEBUG
 #  define __use_concurrent_loops__
 #endif
 
@@ -57,7 +57,7 @@ contains
 
       call this%psd_%SetPSDFunction(psd_funcs(ipsd)%ptr)
 
-#ifdef _BSA_DEBUG
+#ifdef BSA_DEBUG
       print *, INFOMSG, '@WindImpl::SetPSDType() : PSD type set to ', this%i_psd_type_
 #endif
    end subroutine

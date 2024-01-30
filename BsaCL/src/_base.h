@@ -37,10 +37,6 @@
 #endif
 #define real REAL
 
-#if ((defined _DEBUG) || defined(_BSA_DEBUG)) && !(defined BSACLC_DEBUG)
-# define BSACLC_DEBUG
-#endif
-
 
 #ifndef STRINGIFYMACRO_LITERAL
 #  define STRINGIFYMACRO_LITERAL(X) #X

@@ -117,7 +117,7 @@ contains
       if (df <= 0._bsa_real_t) call bsa_Abort('Invalid "df" value.')
       this%df_ = df
 
-#ifdef _BSA_DEBUG
+#ifdef BSA_DEBUG
       write(unit_debug_, '(1x, a, a)') &
          INFOMSG, '@SettingsImpl::setClsSettings() : setting Bsa Classic settings -- ok.'
 #endif
@@ -131,7 +131,7 @@ contains
       class(settings_t), intent(inout) :: this
       integer(bsa_int_t), intent(in)   :: isvd, bkgrfmt, bkgaext, genpaext, maxaext, ifcov, idumpmod
 
-! #ifdef _BSA_DEBUG
+! #ifdef BSA_DEBUG
 !       write(unit_debug_, *) ' @SettingsImpl::SetMshrSetts() : init setting Bsa Mesher settings...'
 ! #endif
 
@@ -143,7 +143,7 @@ contains
       this%i_full_coverage_         = ifcov
       this%i_dump_modal_            = idumpmod
 
-#ifdef _BSA_DEBUG
+#ifdef BSA_DEBUG
       write(unit_debug_, '(1x, a, a)') &
          INFOMSG, '@SettingsImpl::SetMshrSetts() : setting Bsa Mesher settings -- ok.'
 #endif

@@ -83,7 +83,7 @@ contains
       call bsa_openFileHandles_()
 
 
-#ifdef _BSA_DEBUG
+#ifdef BSA_DEBUG
       write(unit_debug_, *) INFOMSG//'@BsaLib::bsa_Init() : bsa initialisation...'
 #endif
    
@@ -115,7 +115,7 @@ contains
       call logger_debug%init(unit_debug_, undebug_fname_)
       
 
-#ifdef _BSA_DEBUG
+#ifdef BSA_DEBUG
       write(unit_debug_, *) INFOMSG//'@BsaLib::bsa_Init() : bsa initialisation -- ok.'
 #endif
    end subroutine
@@ -163,7 +163,7 @@ contains
          m2mf_cls, m2mr_cls, m2o2mr_cls, m3mf_msh, m3mr_msh, m3mf_cls, m3mr_cls
 
 
-#ifdef _BSA_DEBUG
+#ifdef BSA_DEBUG
       write(unit_debug_, *) INFOMSG//'@BsaLibImpl::run() : MAIN...'
 #endif
 
@@ -316,7 +316,7 @@ contains
       endif
 #endif
 
-#ifdef _BSA_DEBUG
+#ifdef BSA_DEBUG
       write(unit_debug_, *) INFOMSG//'@BsaLibImpl::run() : MAIN -- ok.'
 #endif
    end subroutine bsa_Run
@@ -329,7 +329,7 @@ contains
    subroutine validateAll_()
       ! character(len=64) :: msg
 
-! #ifdef _BSA_DEBUG
+! #ifdef BSA_DEBUG
       character(len=64) :: fmt
       character(len=64) :: fmt2
       integer(int32) :: i
@@ -347,7 +347,7 @@ contains
       ! ======================
       ! SETTINGS
       ! ======================
-! #ifdef _BSA_DEBUG
+! #ifdef BSA_DEBUG
       write(fmt, '(a)') '("    - ", a, i10)'
 
       write(unit_debug_, *) '### settings:'
@@ -409,7 +409,7 @@ contains
 
       if (do_validate_modal_) call validateModalInfo_()
 
-! #ifdef _BSA_DEBUG
+! #ifdef BSA_DEBUG
       write(unit_debug_, *) '### structure:'
       write(unit_debug_, fmt) 'NLIBS         = ', struct_data%nlibs_
       write(unit_debug_, fmt) 'NNODES        = ', struct_data%nn_
@@ -486,7 +486,7 @@ contains
          call setPhitimesCLocalInstance_()
       endif
 
-! #ifdef _BSA_DEBUG
+! #ifdef BSA_DEBUG
       write(unit_debug_, fmt) 'WIND ZONES  = ', wd%nz_
       write(unit_debug_, fmt) 'PSD TYPE    = ', wd%i_psd_type_
       write(unit_debug_, fmt) 'EQ. NOD. VEL= ', wd%i_eq_nod_wind_speed_
@@ -684,7 +684,7 @@ contains
          enddo
       enddo
 
-! #ifdef _BSA_DEBUG
+! #ifdef BSA_DEBUG
 !       do id = 1, ndegw
 !          do im = 1, struct_data%modal_%nm_eff_
 !             write(unit=1372, fmt='(*(1x, f12.5))') & 
@@ -1601,7 +1601,7 @@ contains
 
 
    function computeSkewness_(dim, m2, m3, only_diag) result(sk)
-#ifdef _BSA_DEBUG
+#ifdef BSA_DEBUG
       use, intrinsic :: ieee_arithmetic
 #endif
       integer(bsa_int_t), intent(in) :: dim
@@ -1650,7 +1650,7 @@ contains
 
                   sk(pm3) = m3(pm3) / (denJ * sigm(ii))
 
-#ifdef _BSA_DEBUG
+#ifdef BSA_DEBUG
                   if (ieee_is_nan(sk(pm3))) then
                      print '(1x, a, a, 2i6)', &
                         ERRMSG, 'SK is NaN at indexes   ', pm3, l
@@ -1701,7 +1701,7 @@ contains
       enddo
       close(iun)
       
-! #ifdef _BSA_DEBUG
+! #ifdef BSA_DEBUG
 !       write(unit_debug_, '(1x, a, 2a, " -- ok.")') &
 !          INFOMSG, '@::exportSkewness_() : writing to file   ', fname
 ! #endif
