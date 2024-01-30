@@ -73,7 +73,7 @@ module BsaLib_Data
 
 
 #ifdef BSA_USE_GPU
-   integer, target :: ierr_cl_
+   integer(bsa_int_t), target :: ierr_cl_
 #endif
 
 

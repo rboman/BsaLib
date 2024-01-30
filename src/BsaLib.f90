@@ -129,6 +129,7 @@ module BsaLib
       !    logical, intent(in) :: bool
       ! end subroutine
 
+
       module subroutine bsa_setValidateDeltasPolicy(id)
          integer(bsa_int_t), intent(in) :: id
       end subroutine
