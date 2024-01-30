@@ -456,11 +456,15 @@ KERNEL void bfm_kernel(
       GLOBAL REAL *m3mf
 )
 {
-   const size_t gid0_  = GLOBAL_ID_X_DIM0; // this determines the pair of freqs
+   const size_t gid0_ = GLOBAL_ID_X_DIM0; // this determines the pair of freqs
+   const size_t lid0_ = LOCAL_ID_X_DIM0;
+
+   LOCAL REAL m3mf_loc_[BSACL_WIpWG];
+   m3mf_loc_[lid0_] = (REAL)0.f;
+
    UINT itmp_ = (NFI__ * NFJ__) - 1;
    if (gid0_ > itmp_) return;
 
-   const size_t lid0_ = LOCAL_ID_X_DIM0;
 
    LOCAL  REAL  m3mf_mno_wg[BSACL_WIpWG];
    m3mf_mno_wg[lid0_] = 0.f;
@@ -524,8 +528,6 @@ KERNEL void bfm_kernel(
    const REAL fiPfj_ = fi_ + fj_;
 
 
-   LOCAL REAL m3mf_loc_[BSACL_WIpWG];
-   m3mf_loc_[lid0_] = (REAL)0.f;
 
    REAL S_uvw_IJ_i, S_uvw_IJ_ij;
    REAL S_uvw_IK_j, S_uvw_IK_ij;
