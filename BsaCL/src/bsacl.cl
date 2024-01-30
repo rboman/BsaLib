@@ -607,6 +607,7 @@ KERNEL void bfm_kernel(
       }
    }
 
+#if 1
    // WG reduction
    UINT alive = BSACL_WIpWG;
    while (alive > 1) {
@@ -622,20 +623,20 @@ KERNEL void bfm_kernel(
    if (0 == lid0_) {
       m3mf[wgid1_*nwgd0_ + wgid0_] = m3mf_loc_[0];
    }
+#else
+   // BUG: unoptimal reduction scheme !!
+   if (0 == lid0_) {
 
-   // // BUG: unoptimal reduction scheme !!
-   // if (0 == lid0_) {
+      /** Reduce among all WI of current WG. */
+      for (itmp_ = 1; itmp_ < BSACL_WIpWG; ++itmp_)
+         m3mf_loc_[0] += m3mf_loc_[itmp_];
 
-   //    /** Reduce among all WI of current WG. */
-   //    for (itmp_ = 1; itmp_ < BSACL_WIpWG; ++itmp_)
-   //       m3mf_loc_[0] += m3mf_loc_[itmp_];
-
-   //    // Then store sum into global variable
-   //    const size_t wgid0_ = BLOCK_ID_X_DIM0;
-   //    const size_t nwgd0_ = get_num_groups(0);
-   //    m3mf[wgid1_*nwgd0_ + wgid0_] = m3mf_loc_[0];
-   // }
-
+      // Then store sum into global variable
+      const size_t wgid0_ = BLOCK_ID_X_DIM0;
+      const size_t nwgd0_ = get_num_groups(0);
+      m3mf[wgid1_*nwgd0_ + wgid0_] = m3mf_loc_[0];
+   }
+#endif
    LOCAL_WORKGROUP_BARRIER;
 }
 
