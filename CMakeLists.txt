@@ -126,6 +126,15 @@ if (enable-single)
    add_compile_definitions( BSA_SINGLE_FLOATING_PRECISION )
 endif()
 
+# Disable annoying warning of incompatible RT libraries
+if (MSVC AND enable-gpu-code)
+   if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+      add_link_options( "/NODEFAULTLIB:MSVCRTD" )
+   else()
+      add_link_options( "/NODEFAULTLIB:MSVCRT" )
+   endif()
+endif()
+
 
 ###########################################################
 # Targets compilation
