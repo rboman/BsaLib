@@ -240,7 +240,7 @@ contains
 
 
    module logical function bsacl_VerifyMaxAllocCondition(idim) result(bool)
-      integer(kind = 8), intent(in) :: idim
+      integer(int64), intent(in) :: idim
       integer(c_int64_t) :: idim_
       integer(c_int), target :: i_can_ = -1_c_int
 

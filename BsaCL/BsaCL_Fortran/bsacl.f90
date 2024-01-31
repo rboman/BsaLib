@@ -170,7 +170,7 @@ module BsaCL
 
 
       module logical function bsacl_VerifyMaxAllocCondition(idim) result(bool)
-         integer(kind = 8), intent(in) :: idim
+         integer(int64), intent(in) :: idim
       end function
 
 

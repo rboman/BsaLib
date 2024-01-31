@@ -119,7 +119,7 @@ contains
 ! #ifdef _BSA_ALLOC_DEBUG
 !    module subroutine allocOKMsg_scalar_(name_, iloc, nbytes)
 !       character(len = *), intent(in) :: name_
-!       integer(kind = 8), intent(in), optional  :: iloc, nbytes
+!       integer(int64), intent(in), optional  :: iloc, nbytes
 
 !       write(unit_debug_, fmt='(3a)', advance='no') &
 !          'variable  "', name_, '"  allocated.'
@@ -140,7 +140,7 @@ contains
 !    module subroutine allocOKMsg_array_(name_, dims, iloc, nbytes)
 !       character(len = *), intent(in) :: name_
 !       integer, intent(in)            :: dims(..)
-!       integer(kind = 8), intent(in), optional  :: iloc, nbytes
+!       integer(int64), intent(in), optional  :: iloc, nbytes
 !       integer :: dim, ndims
 
 !       write(unit_debug_, fmt='(3a)', advance='no') &
