@@ -21,8 +21,6 @@
 #include "_base.h"
 
 
-
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -41,9 +39,11 @@ void bsaclAcquireWindNodalVelocities(REAL *__EXT_PTR_CONST nod_vel);
 void bsaclAcquireWindNodalWindZones(int *__EXT_PTR_CONST nod_wz);
 void bsaclAcquireWindTurbScales(REAL *__EXT_PTR_CONST wt_scl, const uint32_t nwz);
 void bsaclAcquireWindTurbStd(REAL *__EXT_PTR_CONST wt_std, const uint32_t nwz);
+#ifdef BSACL_ENABLE_EVALFCT_PTR
 void bsaclAcquireEvalFunc(evalFct_t fct);
 void bsaclAcquireEvalFuncByStrings(char **__EXT_PTR_CONST strings);
 void bsaclAcquireEvalFuncByFile(char *__EXT_PTR_CONST filename);
+#endif
 void bsaclAcquireComputationFreqs(const uint32_t nfi, REAL *__EXT_PTR_CONST fi, const uint32_t nfj, REAL *__EXT_PTR_CONST fj);
 void bsaclAcquireBaseWindTurbPSD(REAL *__EXT_PTR_CONST S_uvw);
 void bsaclAcquireResultBFMVect(REAL *__EXT_PTR_CONST m3mf, const uint32_t idim);

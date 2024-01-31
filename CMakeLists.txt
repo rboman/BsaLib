@@ -131,12 +131,12 @@ if (enable-single)
 endif()
 
 # Disable annoying warning of incompatible RT libraries
-if (MSVC AND enable-gpu-code)
-   if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
-      add_link_options( "/NODEFAULTLIB:MSVCRTD" )
-   else()
-      add_link_options( "/NODEFAULTLIB:MSVCRT" )
-   endif()
+if (WIN32 AND enable-gpu-code)
+   set( ignore_libs "MSVCRTD;MSVCRT;LIBCMT" )
+   foreach( lib IN LISTS ignore_libs )
+      add_link_options( "/NODEFAULTLIB:${lib}" )
+   endforeach()
+   unset( ignore_libs )
 endif()
 
 

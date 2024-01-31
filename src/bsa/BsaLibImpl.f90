@@ -200,7 +200,9 @@ contains
          call bsacl_AcquireWindCoeffs(wd%wfc_)
          call bsacl_AcquirePhiTimesCMat(PHItimesC_local_)
          call bsacl_AcquireTurbComponentsList(wd%tc_)
+#ifdef BSACL_ENABLE_EVALFCT_PTR
          call bsacl_AcquireEvaluationFunc(evaluatePSD)
+#endif
          call bsacl_AcquireNodalCorrelation(wd%nod_corr_)
 
          call bsacl_AcquireWindNodalVelocities(wd%u_node_)

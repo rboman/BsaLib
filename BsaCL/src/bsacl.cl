@@ -171,7 +171,7 @@ DEVICE REAL evalFct(
 
 
 
-#if (BSACL_KERNEL_ID==2) || (BSACL_KERNEL_ID==3)
+#if (BSACL_KERNEL_ID==3)
 
 /**
  * BFM kernel using a total of NN^3 WI organised into NWGs.
@@ -196,15 +196,10 @@ KERNEL void bfm_kernel(
       const    UINT          NNL__,
 #endif
       GLOBAL   UINT          *nodes_load,
-#if (BSACL_KERNEL_ID==2)
-      const    REAL          fi_,
-      const    REAL          fj_,
-#else
       GLOBAL   REAL          *fi,
       const    UINT          NFI__,
       GLOBAL   REAL          *fj,
       const    UINT          NFJ__,
-# endif
       const    REAL          dInfl,
 #ifndef BSACL_PASS_PARAMS_BY_MACRO__
       const    UINT          NM_EFF__,
@@ -313,11 +308,9 @@ KERNEL void bfm_kernel(
       REAL wstd_ = wind_turb_std[tc_];  // BUG: account for multiple wind zones!!
       REAL wscl_ = wind_turb_scl[tc_];  // BUG: account for multiple wind zones!!
 
-#if (BSACL_KERNEL_ID==3)
       for (UINT ifj_=0; ifj_ < NFJ__; ++ifj_) {
 
          REAL fj_ = fj[ifj_];
-#endif
 
          S_uvw_IK_j   = evalFct(fj_,  PSD_ID_ARG   wscl_, wstd_, ubni_);
          S_uvw_IK_j  *= evalFct(fj_,  PSD_ID_ARG   wscl_, wstd_, ubnk_);
@@ -329,11 +322,9 @@ KERNEL void bfm_kernel(
          S_uvw_JK_j   = sqrt(S_uvw_JK_j);
          S_uvw_JK_j  *= POWR(corrJK_, (REAL)(fabs(fj_)));
 
-#if (BSACL_KERNEL_ID==3)
          for (UINT ifi_=0; ifi_ < NFI__; ++ifi_) {
 
             REAL fi_    = fi[ifi_];
-#endif
             REAL fiPfj_ = fi_ + fj_;
 
             S_uvw_IJ_i   = evalFct(fi_,  PSD_ID_ARG   wscl_, wstd_, ubni_);
@@ -368,11 +359,8 @@ KERNEL void bfm_kernel(
                   * (S_uvw_JK_i  * S_uvw_IK_ij)
             );
 
-#if (BSACL_KERNEL_ID==3)
          } // fi
       } // fj
-#endif
-
    } // NTC_
 
    // Multiply by reference area
@@ -413,7 +401,7 @@ KERNEL void bfm_kernel(
    LOCAL_WORKGROUP_BARRIER;
 }
 
-#endif // (BSACL_KERNEL_ID==2) || (BSACL_KERNEL_ID==3)
+#endif // (BSACL_KERNEL_ID==3)
 
 
 
@@ -471,9 +459,6 @@ KERNEL void bfm_kernel(
    UINT itmp_ = (NFI__ * NFJ__) - 1;
    if (gid0_ > itmp_) return;
 
-
-   LOCAL  REAL  m3mf_mno_wg[BSACL_WIpWG];
-   m3mf_mno_wg[lid0_] = 0.f;
 
    /** determine which combination (M, N, O) of modal indexes apply to this WG. */
    const size_t wgid1_ = BLOCK_ID_Y_DIM1;

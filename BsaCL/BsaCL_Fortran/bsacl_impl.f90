@@ -154,6 +154,7 @@ contains
 
 
 
+#ifdef BSACL_ENABLE_EVALFCT_PTR
    ! This is what gets actually called in the C core
    module subroutine evalFunc_C_to_F_wrapper_(itc, nf, f, innl, res) bind(c)
       integer(c_int), value         :: itc
@@ -176,13 +177,6 @@ contains
       do i_ = 1, innl
          res((i_-1)*nf_ + 1 : (i_*nf_)) = real(res_(:, i_), kind=c_double)
       enddo
-! #ifdef BSA_DEBUG
-!       write(9542, *) "  Evaluation result is (Fortran) :"
-!       do itc_ = 1, nf_
-!          write(9542, fmt='(2x, i0, 2x, f10.4, *(2x, f12.5))', advance='no') itc, f_(itc_), res(1 : innl)
-!       enddo
-!       write(9542, *)
-! #endif
    end subroutine
 
 
@@ -206,7 +200,7 @@ contains
 
       call bsaclAcquireEvalFuncByFile__(c_loc(filename))
    end subroutine
-
+#endif
 
 
 

@@ -7,7 +7,9 @@ module BsaCL
    use, intrinsic :: iso_c_binding, only: c_int, c_double
    implicit none
    public
+#ifdef BSACL_ENABLE_EVALFCT_PTR
    private :: evalFunc_C_to_F_wrapper_
+#endif
 
 #ifdef INT32
    integer, parameter, public :: IK = int32
@@ -121,6 +123,7 @@ module BsaCL
 
 
 
+#ifdef BSACL_ENABLE_EVALFCT_PTR
       module subroutine evalFunc_C_to_F_wrapper_(itc, nf, f, innl, res) bind(c)
          import c_int, c_double
          integer(c_int), value         :: itc
@@ -129,18 +132,21 @@ module BsaCL
          real(c_double), intent(inout) :: res(*)
       end subroutine
 
+
       module subroutine bsacl_AcquireEvaluationFunc(evalfct)
          procedure(bsacl_EvalFunc_C_to_Fortran__), pointer, intent(in) :: evalfct
       end subroutine
+
 
       module subroutine bsacl_AcquireEvalFuncByStrings(strings)
          character(len = *), target, intent(in) :: strings
       end subroutine
 
+
       module subroutine bsacl_AcquireEvalFuncByFile(filename)
          character(len = *), target, intent(in) :: filename
       end subroutine
-
+#endif
 
       module subroutine bsacl_AcquireComputationFreqs(nfi, fi, nfj, fj)
          integer(IK), intent(in)      :: nfi, nfj

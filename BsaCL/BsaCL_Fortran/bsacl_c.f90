@@ -101,21 +101,24 @@ module BsaCL_c
 
 
 
+#ifdef BSACL_ENABLE_EVALFCT_PTR
       subroutine bsaclAcquireEvaluationFunc__(fct) bind(c, name="bsaclAcquireEvalFunc")
          import c_funptr
          type(c_funptr), value :: fct
       end subroutine
+
 
       subroutine bsaclAcquireEvalFuncByStrings__(strings) bind(c, name="bsaclAcquireEvalFuncByStrings")
          import c_ptr
          type(c_ptr), value :: strings
       end subroutine
 
+
       subroutine bsaclAcquireEvalFuncByFile__(filename) bind(c, name="bsaclAcquireEvalFuncByFile")
          import c_ptr
          type(c_ptr), value :: filename
       end subroutine
-
+#endif
 
 
       subroutine bsaclAcquireComputationFreqs__(nfi, fi, nfj, fj) bind(c, name="bsaclAcquireComputationFreqs")
