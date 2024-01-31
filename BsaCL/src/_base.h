@@ -32,10 +32,24 @@
 #  endif
 #  define REAL_IS_DOUBLE
 # else
-#  pragma message("  --[NOTE]:  enabling OpenCL double (f64) floating point precision.")
+#  pragma message("   --- [NOTE]:  enabling GPU double (f64) floating point precision.")
 # endif
 #endif
 #define real REAL
+
+
+#ifdef BSACL_USE_CUDA__
+# ifndef BSACL_KERNEL_ID
+#  define BSACL_KERNEL_ID 4
+# endif
+#else
+# if (BSACL_KERNEL_ID==4)
+#  ifndef BSACL_PASS_PARAMS_BY_MACRO__
+#   define BSACL_PASS_PARAMS_BY_MACRO__
+#  endif
+# endif
+#endif
+
 
 
 #ifndef STRINGIFYMACRO_LITERAL
@@ -96,15 +110,15 @@
 # define LOCAL_ID_X_DIM0 threadIdx.x
 # define LOCAL_ID_Y_DIM1 threadIdx.y
 # define LOCAL_ID_Z_DIM2 threadIdx.z
-# define N_BLOCKS_WGROUPS_X_DIM0
-# define N_BLOCKS_WGROUPS_Y_DIM1
-# define N_BLOCKS_WGROUPS_Z_DIM2
-# define BLOCK_ID_X_DIM0  blockIdx.x
-# define BLOCK_ID_Y_DIM1  blockIdx.y
-# define BLOCK_ID_Z_DIM2  blockIdx.z
-# define GLOBAL_ID_X_DIM0 threadIdx.x + blockDim.x * BLOCK_ID_X_DIM0
-# define GLOBAL_ID_Y_DIM1 threadIdx.y + blockDim.y * BLOCK_ID_Y_DIM1
-# define GLOBAL_ID_Z_DIM2 threadIdx.z + blockDim.z * BLOCK_ID_Z_DIM2
+# define N_BLOCKS_WGROUPS_X_DIM0 gridDim.x
+# define N_BLOCKS_WGROUPS_Y_DIM1 gridDim.y
+# define N_BLOCKS_WGROUPS_Z_DIM2 gridDim.z
+# define BLOCK_ID_X_DIM0 blockIdx.x
+# define BLOCK_ID_Y_DIM1 blockIdx.y
+# define BLOCK_ID_Z_DIM2 blockIdx.z
+# define GLOBAL_ID_X_DIM0 threadIdx.x + blockDim.x * blockIdx.x
+# define GLOBAL_ID_Y_DIM1 threadIdx.y + blockDim.y * blockIdx.y
+# define GLOBAL_ID_Z_DIM2 threadIdx.z + blockDim.z * blockIdx.z
 # define LOCAL_WORKGROUP_BARRIER __syncthreads()
 
 #else  // OpenCL

@@ -181,10 +181,10 @@ module BsaLib_Data
    logical :: test_no_bfm_mlr_ = .false.
 
    !> Controls whether to perform modal truncation or not
-   logical        :: do_trunc_POD_  = .false.
-   real(real64)   :: POD_trunc_lim_ = 0.0_real64
-   logical        :: nPODmodes_set_ = .false.
-   integer(int32) :: nmodes_POD_    = 0_int32
+   logical          :: do_trunc_POD_  = .false.
+   real(bsa_real_t) :: POD_trunc_lim_ = 0._bsa_real_t
+   logical          :: nPODmodes_set_ = .false.
+   integer(int32)   :: nmodes_POD_    = 0_int32
    logical, allocatable :: do_export_POD_trunc_(:)    !<-- BUG: this is because of OMP.
 #ifdef _BSA_EXPORT_POD_TRUNC_INFO
    integer(int32),     parameter :: iun_POD_trunc_ = 659_int32

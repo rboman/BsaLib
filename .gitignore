@@ -62,6 +62,7 @@ build*/
 .fortls*
 images/
 My *
-app/
+app/**
+!app/*.f90
 compile_flags.txt
 resources/cmake/

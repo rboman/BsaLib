@@ -18,9 +18,10 @@
 #pragma once
 
 #include <stdint.h>
-
-#include "_extdata.h"
 #include "_base.h"
+
+
+
 
 #ifdef __cplusplus
 extern "C" {

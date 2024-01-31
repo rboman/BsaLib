@@ -207,8 +207,7 @@ contains
       real(bsa_real_t), intent(in) :: dist, rot
       type(MPoint_t) :: P
 
-      ! BUG: change??
-      real(kind = 8) :: ang, dI, dJ
+      real(bsa_real_t) :: ang, dI, dJ
 
       if (rot < CST_PId2) then
 

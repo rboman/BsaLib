@@ -11,19 +11,19 @@ submodule(BsaCL) BsaCL_impl
 contains
 
    module subroutine bsacl_Init(ierr)
-      integer, intent(inout), target :: ierr
+      integer(IK), intent(inout), target :: ierr
       call bsaclInit__(c_loc(ierr))
    end subroutine
 
    module subroutine bsacl_Run(ierr)
-      integer, intent(inout), target :: ierr
+      integer(IK), intent(inout), target :: ierr
       call bsaclRun__(c_loc(ierr))
    end subroutine
 
 
    module function bsacl_SetKernelID(kid) result(ierr)
-      integer, value, intent(in) :: kid
-      integer :: ierr
+      integer(IK), value, intent(in) :: kid
+      integer(IK) :: ierr
 
       ierr = int(bsaclSetKernelID__(int(kid, c_int)))
    end function
@@ -31,15 +31,15 @@ contains
 
 
    module subroutine bsacl_AcquirePSDId(psdid)
-      integer(kind = 4), intent(in) :: psdid
+      integer(IK), intent(in) :: psdid
       call bsaclAcquirePSDId__(int(psdid, c_int))
    end subroutine
 
 
    module subroutine bsacl_AcquireStructModMat(modmat, natf)
-      real(kind = 8), intent(in), target :: modmat(:, :), natf(:)
+      real(RK), intent(in), target :: modmat(:, :), natf(:)
       integer(c_int) :: ndofs_c_, nmodes_c_
-      
+
       ndofs_c_  = size(modmat, dim=1, kind=c_int)
       nmodes_c_ = size(modmat, dim=2, kind=c_int)
       if (size(natf, kind=c_int) /= nmodes_c_) then
@@ -50,19 +50,19 @@ contains
    end subroutine
 
    module subroutine bsacl_AcquireLoadedNodesList(nodes_load)
-      integer(kind = 4), intent(in), target :: nodes_load(:)
+      integer(IK), intent(in), target :: nodes_load(:)
       integer(c_int) :: nnodes_l_
       nnodes_l_ = size(nodes_load, kind=c_int)
       call bsaclAcquireLoadedNodesList__(c_loc(nodes_load), nnodes_l_)
    end subroutine
 
    module subroutine bsacl_AcquireTotalNOfNodes(nn)
-      integer(kind = 4), intent(in) :: nn
+      integer(IK), intent(in) :: nn
       call bsaclAcquireTotalNOfNodes__(int(nn, kind=c_int))
    end subroutine
 
    module subroutine bsacl_AcquireUsedModesList(modes)
-      integer(kind = 4), intent(in), target :: modes(:)
+      integer(IK), intent(in), target :: modes(:)
       integer(c_int) :: nmodes_eff_
       nmodes_eff_ = size(modes, kind = c_int)
       call bsaclAcquireUsedModesList__(c_loc(modes), nmodes_eff_)
@@ -70,7 +70,7 @@ contains
 
 
    module subroutine bsacl_AcquireWindCoeffs(wfc)
-      real(kind = 8), intent(in), target :: wfc(:, :, :)
+      real(RK), intent(in), target :: wfc(:, :, :)
       integer(c_int) :: nlibs_, ndegw_, nnodes_l_
 
       nlibs_    = size(wfc, 1, c_int)
@@ -81,7 +81,7 @@ contains
 
 
    module subroutine bsacl_AcquireTurbComponentsList(tc)
-      integer(kind = 4), intent(in), target :: tc(:)
+      integer(IK), intent(in), target :: tc(:)
       integer(c_int) :: ntc_
       ntc_ = size(tc, kind=c_int)
       call bsaclAcquireTurbComponentsList__(c_loc(tc), ntc_)
@@ -89,7 +89,7 @@ contains
 
 
    module subroutine bsacl_AcquirePhiTimesCMat(phi_T_c)
-      real(kind = 8), intent(in), target :: phi_T_c(:, :, :)
+      real(RK), intent(in), target :: phi_T_c(:, :, :)
       integer(c_int) :: nm_eff_, nnodes_l_, ndegw_
 
       nm_eff_   = size(phi_T_c, 1, c_int)
@@ -98,8 +98,8 @@ contains
       call bsaclAcquirePhiTimesCMat__(c_loc(phi_T_c), nm_eff_, nnodes_l_, ndegw_)
 ! #ifdef BSA_DEBUG
 !       block
-!          integer :: m, n, d
-!          integer :: id = 0
+!          integer(IK) :: m, n, d
+!          integer(IK) :: id = 0
 !          do d = 1, ndegw_
 !             do n = 1, nnodes_l_
 !                write(4532, '(2x, i5, *(2x, f15.5))') id, phi_T_c(:, n, d)
@@ -113,7 +113,7 @@ contains
 
 
    module subroutine bsacl_AcquireNodalCorrelation(nod_corr)
-      real(kind = 8), intent(in), target :: nod_corr(:, :)
+      real(RK), intent(in), target :: nod_corr(:, :)
       integer(c_int) :: nnod_corr
       nnod_corr = size(nod_corr, dim=1)
       call bsaclAcquireNodalCorrelation__(c_loc(nod_corr), nnod_corr)
@@ -125,27 +125,27 @@ contains
 
 
    module subroutine bsacl_AcquireWindNodalVelocities(nod_vel)
-      real(kind = 8), intent(in), target :: nod_vel(:)
+      real(RK), intent(in), target :: nod_vel(:)
 
       call bsaclAcquireWindNodalVelocities__(c_loc(nod_vel))
    end subroutine
-   
+
    module subroutine bsacl_AcquireWindNodalWindZones(nod_wz)
-      integer(kind = 4), intent(in), target :: nod_wz(:)
+      integer(IK), intent(in), target :: nod_wz(:)
 
       call bsaclAcquireWindNodalWindZones__(c_loc(nod_wz))
    end subroutine
-   
+
    module subroutine bsacl_AcquireWindTurbScales(wt_scl, nwz)
-      real(kind = 8), intent(in), target :: wt_scl(:, :, :)
-      integer(kind = 4), intent(in)      :: nwz
+      real(RK), intent(in), target :: wt_scl(:, :, :)
+      integer(IK), intent(in)      :: nwz
 
       call bsaclAcquireWindTurbScales__(c_loc(wt_scl), int(nwz, c_int))
    end subroutine
-   
+
    module subroutine bsacl_AcquireWindTurbStd(wt_std, nwz)
-      real(kind = 8), intent(in), target :: wt_std(:, :)
-      integer(kind = 4), intent(in)      :: nwz
+      real(RK), intent(in), target :: wt_std(:, :)
+      integer(IK), intent(in)      :: nwz
 
       call bsaclAcquireWindTurbStd__(c_loc(wt_std), int(nwz, c_int))
    end subroutine
@@ -161,14 +161,14 @@ contains
       real(c_double), intent(in), target :: f
       real(c_double), intent(inout) :: res(*)
 
-      real(kind = 8), allocatable   :: res_(:, :)
+      real(RK), allocatable   :: res_(:, :)
 
       ! locals for Fortran procedure
-      integer(kind = 4) :: nf_, itc_, i_
-      real(kind = 8), pointer :: f_(:)
+      integer(IK) :: nf_, itc_, i_
+      real(RK), pointer :: f_(:)
 
-      nf_  = int(nf,  kind=4)
-      itc_ = int(itc, kind=4)
+      nf_  = int(nf,  kind=IK)
+      itc_ = int(itc, kind=IK)
       call c_f_pointer(c_loc(f), f_, [nf_])
 
       ! Then, calling internal Fortran function pointer to actual eval function
@@ -211,8 +211,8 @@ contains
 
 
    module subroutine bsacl_AcquireComputationFreqs(nfi, fi, nfj, fj)
-      integer(kind = 4), intent(in)      :: nfi, nfj
-      real(kind = 8), intent(in), target :: fi(..), fj(..)
+      integer(IK), intent(in)      :: nfi, nfj
+      real(RK), intent(in), target :: fi(..), fj(..)
       integer(c_int) :: nfi_, nfj_
 
       nfi_ = int(nfi, kind=c_int)
@@ -222,14 +222,14 @@ contains
 
 
    module subroutine bsacl_AcquireBaseWindTurbPSD(S_uvw)
-      real(kind = 8), intent(in), target :: S_uvw(:, :)
+      real(RK), intent(in), target :: S_uvw(:, :)
       call bsaclAcquireBaseWindTurbPSD__(c_loc(S_uvw))
    end subroutine
 
 
 
    module subroutine bsacl_AcquireResultBFMVect(m3mf)
-      real(kind = 8), intent(in), target :: m3mf(:)
+      real(RK), intent(in), target :: m3mf(:)
       integer(c_int) :: idim_
 
       idim_ = size(m3mf, kind=c_int)
@@ -239,7 +239,7 @@ contains
 
 
    module subroutine bsacl_SetDeviceType(itype)
-      integer, intent(in) :: itype
+      integer(IK), intent(in) :: itype
       call bsaclSetDeviceType__(int(itype, kind=c_int))
    end subroutine
 
@@ -249,7 +249,7 @@ contains
       integer(kind = 8), intent(in) :: idim
       integer(c_int64_t) :: idim_
       integer(c_int), target :: i_can_ = -1_c_int
-      
+
       idim_ = int(idim, kind=c_int64_t)
       call bsaclVerifyMaxAllocCondition__(idim_, c_loc(i_can_))
       if (i_can_ == 0_c_int) then
@@ -263,7 +263,7 @@ contains
 
 
    module subroutine bsacl_Abort(ierr)
-      integer, intent(in) :: ierr
+      integer(IK), intent(in) :: ierr
       call bsaclAbort__(int(ierr, kind=c_int))
    end subroutine
 

@@ -136,7 +136,7 @@ contains
       call checkMaxAllocation_()
 
       ! BUG: set it from .dat file
-      settings%i_scalar_vers_ = 0  ! 0=vectorised, 1=scalar
+      settings%i_scalar_vers_ = 1  ! 0=vectorised, 1=scalar
 
 
       if (settings%i_scalar_vers_ == 0) then ! VECTORISED

@@ -37,22 +37,22 @@
    !**************************************************************************************
    !   BSA  GENERICS
    !**************************************************************************************
-   integer(int32), parameter :: BSA_SPATIAL_SYM_NONE = 1_int32
-   integer(int32), parameter :: BSA_SPATIAL_SYM_HALF = 2_int32
-   integer(int32), parameter :: BSA_SPATIAL_SYM_FOUR = 4_int32
+   integer(IK), parameter :: BSA_SPATIAL_SYM_NONE = 1_IK
+   integer(IK), parameter :: BSA_SPATIAL_SYM_HALF = 2_IK
+   integer(IK), parameter :: BSA_SPATIAL_SYM_FOUR = 4_IK
 
-   integer(int32), parameter :: BSA_PREMESH_MODE_BASE         = 0_int32
-   integer(int32), parameter :: BSA_PREMESH_MODE_ZONE_REFINED = 1_int32
+   integer(IK), parameter :: BSA_PREMESH_MODE_BASE         = 0_IK
+   integer(IK), parameter :: BSA_PREMESH_MODE_ZONE_REFINED = 1_IK
 
-   integer(int32), parameter :: BSA_PREMESH_TYPE_DIAG_CREST_NO  = 0_int32
-   integer(int32), parameter :: BSA_PREMESH_TYPE_DIAG_CREST_YES = 1_int32
+   integer(IK), parameter :: BSA_PREMESH_TYPE_DIAG_CREST_NO  = 0_IK
+   integer(IK), parameter :: BSA_PREMESH_TYPE_DIAG_CREST_YES = 1_IK
 
-   integer(int32), parameter :: BSA_VALIDATE_DELTAS_POLICY_NONE    = 0_int32
-   integer(int32), parameter :: BSA_VALIDATE_DELTAS_POLICY_DEFAULT = 1_int32
-   integer(int32), parameter :: BSA_VALIDATE_DELTAS_POLICY_LIGHT   = 2_int32
-   integer(int32), parameter :: BSA_VALIDATE_DELTAS_POLICY_MEDIUM  = 3_int32
-   integer(int32), parameter :: BSA_VALIDATE_DELTAS_POLICY_HIGH    = 4_int32
-   integer(int32), parameter :: BSA_VALIDATE_DELTAS_POLICY_STRICT  = 5_int32
+   integer(IK), parameter :: BSA_VALIDATE_DELTAS_POLICY_NONE    = 0_IK
+   integer(IK), parameter :: BSA_VALIDATE_DELTAS_POLICY_DEFAULT = 1_IK
+   integer(IK), parameter :: BSA_VALIDATE_DELTAS_POLICY_LIGHT   = 2_IK
+   integer(IK), parameter :: BSA_VALIDATE_DELTAS_POLICY_MEDIUM  = 3_IK
+   integer(IK), parameter :: BSA_VALIDATE_DELTAS_POLICY_HIGH    = 4_IK
+   integer(IK), parameter :: BSA_VALIDATE_DELTAS_POLICY_STRICT  = 5_IK
 
    !**************************************************************************************
    !   BSA  I/O  DEFAULTS
@@ -119,14 +119,14 @@
    !**************************************************************************
    !  EXPORT CONSTANTs
    !**************************************************************************
-   integer(int32), parameter :: BSA_EXPORT_FORMAT_FORMATTED   = 0_int32
-   integer(int32), parameter :: BSA_EXPORT_FORMAT_UNFORMATTED = 1_int32
-   integer(int32), parameter :: BSA_EXPORT_MODE_APPEND  = 0_int32
-   integer(int32), parameter :: BSA_EXPORT_MODE_REPLACE = 1_int32
+   integer(IK), parameter :: BSA_EXPORT_FORMAT_FORMATTED   = 0_IK
+   integer(IK), parameter :: BSA_EXPORT_FORMAT_UNFORMATTED = 1_IK
+   integer(IK), parameter :: BSA_EXPORT_MODE_REPLACE = 0_IK
+   integer(IK), parameter :: BSA_EXPORT_MODE_APPEND  = 1_IK
 
-   integer(int32), parameter :: BSA_EXPORT_BRM_MODE_NONE = 0_int32
-   integer(int32), parameter :: BSA_EXPORT_BRM_MODE_BASE = 1_int32
-   integer(int32), parameter :: BSA_EXPORT_BRM_MODE_USR  = 9_int32
+   integer(IK), parameter :: BSA_EXPORT_BRM_MODE_NONE = 0_IK
+   integer(IK), parameter :: BSA_EXPORT_BRM_MODE_BASE = 1_IK
+   integer(IK), parameter :: BSA_EXPORT_BRM_MODE_USR  = 9_IK
 
 
    character(len = *), parameter :: BSA_EXPORT_M2MF_CLS_FNAME   = "m2mf_cls"
@@ -157,18 +157,18 @@
    !**************************************************************************************
 
    !> TO AVOID CRASHING BECAUSE OF MACHINE FLOATING PRECISION ERRORS
-   real(real64), parameter :: MACHINE_PRECISION = 1e-12_real64
+   real(RK), parameter :: MACHINE_PRECISION = 1e-12_RK
 
-   real(real64), parameter :: CST_PIGREC = 4.0_real64 * atan(1.0_real64)
+   real(RK), parameter :: CST_PIGREC = 4.0_RK * atan(1.0_RK)
 
-   real(real64), parameter :: CST_PIt2   = CST_PIGREC * 2.0_real64
-   real(real64), parameter :: CST_PIt4   = CST_PIGREC * 4.0_real64
+   real(RK), parameter :: CST_PIt2   = CST_PIGREC * 2.0_RK
+   real(RK), parameter :: CST_PIt4   = CST_PIGREC * 4.0_RK
 
-   real(real64), parameter :: CST_PId2   = CST_PIGREC / 2.0_real64
-   real(real64), parameter :: CST_PId4   = CST_PIGREC / 4.0_real64
+   real(RK), parameter :: CST_PId2   = CST_PIGREC / 2.0_RK
+   real(RK), parameter :: CST_PId4   = CST_PIGREC / 4.0_RK
 
 
-   real(real64), parameter :: CST_2d3    = 2.0_real64 / 3.0_real64
-   real(real64), parameter :: CST_3d2    = 3.0_real64 / 2.0_real64
-   real(real64), parameter :: CST_PIt3d2 = CST_PIGREC * CST_3d2
+   real(RK), parameter :: CST_2d3    = 2.0_RK / 3.0_RK
+   real(RK), parameter :: CST_3d2    = 3.0_RK / 2.0_RK
+   real(RK), parameter :: CST_PIt3d2 = CST_PIGREC * CST_3d2
 

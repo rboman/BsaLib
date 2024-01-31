@@ -29,7 +29,7 @@ contains
       integer(bsa_int_t), intent(in)   :: ivaru
 
       if (ivaru < 1 .or. ivaru > 3) call bsa_Abort('Invalid "ivaru" value.')
-      
+
       this%i_wind_prof_ = ivaru
 
 #ifdef BSA_DEBUG
@@ -92,9 +92,9 @@ contains
 #endif
                if (.not. (size(lim(:)) == size(ilim(:)))) &
                   call bsa_Abort('sizes of "lim" and "ilim" do not match.')
-                  
+
                this%limits_wz_(ilim(:)) = lim(:)
-            
+
 #if  (! defined(__INTEL_COMPILER_BUILD_DATE)) || (__INTEL_COMPILER_BUILD_DATE >= 20221019)
             rank default
                call bsa_Abort('expecting "ilim" to be a 1-rank array.')
@@ -111,7 +111,7 @@ contains
             endif
             this%limits_wz_ => lim(:)
          endif ! present ilim
-         
+
 #if  (! defined(__INTEL_COMPILER_BUILD_DATE)) || (__INTEL_COMPILER_BUILD_DATE >= 20221019)
       rank default
          call bsa_Abort('Expeting "lim" either to be a scalar or a 1-rank array.')
@@ -124,7 +124,7 @@ contains
 
 
    module subroutine SetAirDensity(aird)
-      real(real64), intent(in) :: aird
+      real(bsa_real_t), intent(in) :: aird
 
       if (aird < 0._real64) call bsa_Abort('Air density has a negative value.')
       air_dens_ = aird
@@ -269,7 +269,7 @@ contains
    end subroutine
 
 
-   
+
    module subroutine setTurbComps(this, tc, ntc)
       class(WindData_t) :: this
       integer(bsa_int_t), intent(in) :: tc(:)

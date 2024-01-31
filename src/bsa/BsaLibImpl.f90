@@ -86,7 +86,7 @@ contains
 #ifdef BSA_DEBUG
       write(unit_debug_, *) INFOMSG//'@BsaLib::bsa_Init() : bsa initialisation...'
 #endif
-   
+
       if (.not. allocated(settings)) then
          allocate(settings, stat=istat, errmsg=emsg)
          if (istat /= 0) call allocKOMsg('settings', istat, emsg)
@@ -113,7 +113,7 @@ contains
          if (istat /= 0) call allocKOMsg('logger_debug', istat, emsg)
       endif
       call logger_debug%init(unit_debug_, undebug_fname_)
-      
+
 
 #ifdef BSA_DEBUG
       write(unit_debug_, *) INFOMSG//'@BsaLib::bsa_Init() : bsa initialisation -- ok.'
@@ -245,7 +245,7 @@ contains
             itmp        = struct_data%nn_load_ * struct_data%nlibs_load_
             dimNf_psd_  = itmp * itmp ! itmp^2
             dimNf_bisp_ = dimNf_psd_ * itmp ! itmp^3
-            
+
             dimM_psd_   = struct_data%modal_%nm_eff_**2
             dimM_bisp_  = dimM_psd_ * struct_data%modal_%nm_eff_  ! nm^3
 
@@ -293,7 +293,7 @@ contains
 #ifdef _BSA_CHECK_NOD_COH_SVD
          goto 998
 #endif
-         
+
          ! NOTE: in case we cannot have 2nd order moments, force it here
          if (.not. is_only_msh_ .or. force_cls_execution_) then
             if (is_only_msh_) then ! only 2nd order stats
@@ -364,7 +364,7 @@ contains
       write(unit_debug_, fmt) 'USE 3D MATRIX SYM  = ',  settings%i_3d_sym_
       write(unit_debug_, fmt) 'N. OF FREQUENCIES  = ',  settings%nfreqs_
       write(unit_debug_, '("    - ", a, g10.5)') 'DELTA FREQ         = ',  settings%df_
-      
+
       write(unit_debug_, fmt) 'USE "SVD" DECOMP   = ',  settings%i_use_svd_
       write(unit_debug_, fmt) 'BKG_AERA_EXT       = ',  settings%bkg_area_extension_
       write(unit_debug_, fmt) 'BKG_BASE_RFMT      = ',  settings%bkg_base_rfmnt_
@@ -384,7 +384,7 @@ contains
       endif
       if (I_BKG_PEAK_DELTAF_BFM_REFMT_FCT_ <= 0) I_BKG_PEAK_DELTAF_BFM_REFMT_FCT_ = 2
       if (I_BKG_PEAK_DELTAF_BFM_REFMT_FCT_ <= 0) I_BKG_PEAK_DELTAF_BFM_REFMT_FCT_ = 3
-      
+
       associate(ibispsym => settings%i_bisp_sym_)
          if (.not. (ibispsym == 1 .or. ibispsym == 2 .or. ibispsym == 4)) then
             print '(1x, a, a, i0)', WARNMSG, 'Unsupported value  "iBispSym"= ', ibispsym
@@ -420,7 +420,7 @@ contains
 
       write(unit_debug_, fmt) 'NODES LOADED  = ', struct_data%nn_load_
       write(unit_debug_, '(*(10i5))') struct_data%n_load_
-      
+
       ! BUG: only actual loaded nodes are saved !!
       write(fmt2, '(a)') '( "    - ", a)'
       write(unit_debug_, fmt2) 'NODAL COORDS  = '
@@ -452,7 +452,7 @@ contains
       write(unit_debug_, fmt2) 'XSI         = ', struct_data%modal_%xsi_
 ! #endif
 
-         
+
       if (.not. allocated(struct_data%bkg_peak_width_)) then
          block
             real(bsa_real_t) :: vtmp(3, 3, wd%nz_)
@@ -535,13 +535,13 @@ contains
 
       write(unit_debug_, fmt) 'WZ. INC ANG = '
       write(unit_debug_, fmt2) wd%incAng_wz_
-      
+
       write(fmt2, '(a, i2, a)') '( ', wd%nz_ + 1, '(g10.4, 1x), / )'
       write(unit_debug_, fmt) 'WZ. LIMITS  = '
       write(unit_debug_, fmt2) wd%limits_wz_
 
 
-      
+
       write(fmt2, '(a, i2, a)') '( ', wd%nz_, '( 3(3g12.4, 1x, /), / ) )'
       write(unit_debug_, fmt) 'WZ. LXYZ    = '
       write(unit_debug_, fmt2) wd%turb_scales_wz_
@@ -601,7 +601,7 @@ contains
 
       ! we have found some mode shapes not 1-normalised
       nmk = struct_data%modal_%nm_ - nskip
-      
+
       allocate(modesk(nmk), stat=istat, errmsg=emsg)
       if (istat /= 0) call allocKOMsg('modesk', istat, emsg)
 
@@ -677,7 +677,7 @@ contains
             do im = 1, struct_data%modal_%nm_eff_
 
                m = struct_data%modal_%modes_(im)
-            
+
                PHItimesC_local_(im, in, id) = PHItimesC_local_(im, in, id) + &
                   sum(wd%wfc_(:, id, in) * struct_data%modal_%phi_(skip + struct_data%libs_load_, m))
             enddo
@@ -747,8 +747,8 @@ contains
    module subroutine bsa_setExportInCurrDir()
       call io_setExportInCurrDir()
    end subroutine
-   
-   
+
+
    module subroutine bsa_setOutUnit(iunit)
       integer(bsa_int_t), intent(in) :: iunit
 
@@ -898,7 +898,7 @@ contains
 
    module subroutine bsa_setExportFileFormat(iform)
       integer(bsa_int_t), intent(in) :: iform
-      
+
       call io_setExportFileFormat(iform)
    end subroutine
 
@@ -917,7 +917,7 @@ contains
 
    ! TODO: settings might be set via direct assignment ??
 
-   
+
    !=====================================
    !   SETTINGS
    !=====================================
@@ -939,7 +939,7 @@ contains
 
    module subroutine bsa_setVersion(ivers)
       integer(bsa_int_t), intent(in) :: ivers
-      
+
       call settings%SetVersion(ivers)
    end subroutine
 
@@ -1049,7 +1049,7 @@ contains
 
    module subroutine bsa_setAirDensity(aird)
       real(bsa_real_t), intent(in) :: aird
-      
+
       call wd%SetAirDensity(aird)
    end subroutine
 
@@ -1301,12 +1301,12 @@ contains
       use BsaLib_Functions, only: getBR_SFm_val_
       real(bsa_real_t), intent(in)  :: m2mf(:)
       real(bsa_real_t), allocatable, intent(out) :: bkg(:), res(:)
-      
+
       integer(int32) :: im, m
 
       associate(nm => struct_data%modal_%nm_eff_, modes => struct_data%modal_%modes_, &
          Km => struct_data%modal_%Km_, f => struct_data%modal_%nat_freqs_)
-   
+
 
          block
             integer(int32) :: istat
@@ -1366,7 +1366,7 @@ contains
                enddo ! i direction
             enddo ! i turb comp
 
-            
+
             ! do concurrent (im = 1 : nm) local(fnat, SFm_fnat, m, Km_loc2_) &
             !       shared(bkg, res, Km, f, modes, S_pad, S_uvw, rtmp)
 
@@ -1434,16 +1434,16 @@ contains
 
    module subroutine bsa_computePeakFactors(&
          m2, m2o2, obs_time, peak_g, sk, peak_ng_pos, peak_ng_neg)
-      real(kind = 8), intent(in)  :: m2(:), m2o2(:)
-      real(kind = 8), intent(in)  :: obs_time
-      real(kind = 8), allocatable, intent(inout) :: peak_g(:)
-      real(kind = 8), intent(in), allocatable    :: sk(:)
-      real(kind = 8), allocatable, intent(inout) :: peak_ng_pos(:)
-      real(kind = 8), allocatable, intent(inout), optional :: peak_ng_neg(:)
+      real(bsa_real_t), intent(in)  :: m2(:), m2o2(:)
+      real(bsa_real_t), intent(in)  :: obs_time
+      real(bsa_real_t), allocatable, intent(inout) :: peak_g(:)
+      real(bsa_real_t), intent(in), allocatable    :: sk(:)
+      real(bsa_real_t), allocatable, intent(inout) :: peak_ng_pos(:)
+      real(bsa_real_t), allocatable, intent(inout), optional :: peak_ng_neg(:)
 
       !> Euler's constant
-      real(kind = 8), parameter   :: gamma_ = 0.5772d0
-      real(kind = 8), allocatable :: beta(:)
+      real(bsa_real_t), parameter   :: gamma_ = 0.5772d0
+      real(bsa_real_t), allocatable :: beta(:)
 
       if (all(m2o2 == 0)) then
          print '(/ 1x, a, a)', &
@@ -1465,9 +1465,9 @@ contains
       if (allocated(sk)) then
 
          block
-            real(kind = 8), parameter   :: PI2 = CST_PIGREC * CST_PIGREC
-            real(kind = 8), allocatable :: rtmp(:), g4(:), h3(:), h40(:), h4(:)
-            real(kind = 8), allocatable :: k(:), beta2(:), beta3(:), pk_ng_neg_(:)
+            real(real64), parameter :: PI2 = CST_PIGREC * CST_PIGREC
+            real(bsa_real_t), allocatable :: rtmp(:), g4(:), h3(:), h40(:), h4(:)
+            real(bsa_real_t), allocatable :: k(:), beta2(:), beta3(:), pk_ng_neg_(:)
 
             ! NOTE: excess kurtosis evaluated empirically
             !       based on the "parabolic" relationship with
@@ -1496,12 +1496,12 @@ contains
             peak_ng_pos = peak_ng_pos + (3.d0 / beta * (PI2 / 6.d0 - gamma_ + (gamma_**2)))
             peak_ng_pos = peak_ng_pos + (beta3 + 3*beta*(gamma_ - 1))
             peak_ng_pos = peak_ng_pos * h4
-            
+
             pk_ng_neg_  = peak_ng_pos
             rtmp        = h3 * (beta2 + 2.d0 * gamma_ - 1. + 1.98d0 / beta2)
             peak_ng_pos = peak_ng_pos + rtmp
             pk_ng_neg_  = pk_ng_neg_  - rtmp
-            
+
             peak_ng_pos = peak_ng_pos + peak_g
             peak_ng_pos = peak_ng_pos * k
 
@@ -1628,7 +1628,7 @@ contains
 
          szm2 = size(m2, 1)
          szm3 = size(m3, 1)
-         
+
          allocate(sk(szm3))
          sk = 0._bsa_real_t
 
@@ -1687,7 +1687,7 @@ contains
 
       dim = size(vec)
       is_modal = dim == dimM_bisp_
-      
+
       if (is_modal) then
          ! modal header
          write(iun, *) struct_data%modal_%nm_eff_
@@ -1700,7 +1700,7 @@ contains
          write(iun, *) vec(i)
       enddo
       close(iun)
-      
+
 ! #ifdef BSA_DEBUG
 !       write(unit_debug_, '(1x, a, 2a, " -- ok.")') &
 !          INFOMSG, '@::exportSkewness_() : writing to file   ', fname
@@ -1735,7 +1735,7 @@ contains
    !      structure that has to be finally dereferenced in actual exporting routine!
    module subroutine bsa_setBRMExportFunction(fptr)
       procedure(exportBRMinterf_vect_), pointer, intent(in) :: fptr
-      
+
       write_brm_fptr_ => fptr
 
       ! if user provides its own function, make sure it does not get overridden
@@ -1900,7 +1900,7 @@ contains
       s2 = size(psd, 2)
       write(iun, *) s1
       write(iun, *) s2
-      
+
       ! NOTE: different from writing bisp
       ! BUG: need this dummy variable in order to avoid 
       !      I/O runtime warning...
@@ -1926,7 +1926,7 @@ contains
    module subroutine bsa_exportBispToFile(fname, bisp)
       character(len = *), intent(in) :: fname
       real(bsa_real_t), intent(in)   :: bisp(:, :, :)
-      
+
       integer(int32) :: s1, s2, s3, iun, i, j
 
       iun = io_openExportFileByName(exp_dir_ // fname)

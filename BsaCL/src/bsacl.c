@@ -51,10 +51,12 @@
 #endif
 
 
+typedef void (*evalFct_t)(int, int, const double*, int, double*);
+
 #include "bsacl.h"
 #ifdef BSACL_USE_CUDA__
-# ifdef BSACL_PASS_PARAMS_BY_MACRO
-#  undef BSACL_PASS_PARAMS_BY_MACRO  // in CUDA, we pass always by kernel param!
+# ifdef BSACL_PASS_PARAMS_BY_MACRO__
+#  undef BSACL_PASS_PARAMS_BY_MACRO__  // in CUDA, we pass always by kernel param!
 # endif
 
 
@@ -80,11 +82,16 @@
 
 
 //-------------------------------------
-// GLOBAL OpenCL VARIABLES
+// GLOBAL BSACL VARIABLES
 //-------------------------------------
 unsigned int bsacl_init_called__ = 0;
 
-#ifndef BSACL_USE_CUDA__
+
+#ifdef BSACL_USE_CUDA__
+
+dim3 cuda_nblocks__, cuda_nthreads_perblock__;
+
+#else
 
 cl_uint         n_platforms__  = 0;
 cl_platform_id *platform_all__ = NULL; // array of all available platforms
@@ -121,10 +128,6 @@ char     **clSourceStrings__ = NULL;
 char     **evalFctStrings__  = NULL;
 cl_kernel  kernel_bfm__;
 char       prog_compile_opts__[BUFSIZ] = {' '};
-
-#else
-
-dim3 cuda_nblocks__, cuda_nthreads_perblock__;
 
 #endif // BSACL_USE_CUDA__
 
@@ -166,8 +169,75 @@ BSACL_MEM  REAL_PTR_T  d_m3mf__ = NULL;
 // EXTERNAL DATA (to be acquired, i.e. no internal memory allocation)
 // ------------------------------------------------------------------
 
+typedef struct extdata_t {
+
+   int      *nodes_load__;  // list of loaded nodes in the structural model
+   unsigned NNODES_LOAD__;
+   unsigned NN__;
+
+   unsigned PSD_ID__;
+
+   unsigned NLIBS__;
+   unsigned NDOFS__;
+
+   unsigned NMODES_EFF__;
+   unsigned NDEGW__;
+
+   unsigned NTC__;
+   unsigned NNOD_CORR__; // n. of nodal correlation entries (per direction!)
+
+   unsigned DIM_M3_M__;
+   unsigned NMODES__;
+
+   unsigned NWZ__;  // N. of wind zones
+
+   REAL     *modmat__;
+   REAL     *natfreqs__;
+
+   int  *modes_eff__;    // list of effective modes used
+   int  *tc__;           // list of effective turbulent components
+
+   REAL *wfc__;       // wind force coefficients
+
+   REAL *phi_T_c__;   // Phi x C matrix
+
+   REAL *nod_corr__;  // nodal correlation array (no duplicates)
+
+   REAL *wind_nodal_vel__;
+   REAL *wind_turb_scales__;
+   REAL *wind_turb_std__;
+   int  *wind_nodal_windz__;
+
+   REAL *m3mf__;
+} extdata_t;
+
+
+static inline void freeExtData(extdata_t *extdata) {
+   extdata->nodes_load__       = NULL;
+   extdata->modmat__           = NULL;
+   extdata->natfreqs__         = NULL;
+   extdata->modes_eff__        = NULL;
+   extdata->wfc__              = NULL;
+   extdata->nod_corr__         = NULL;
+   extdata->phi_T_c__          = NULL;
+   extdata->wind_nodal_vel__   = NULL;
+   extdata->wind_nodal_windz__ = NULL;
+   extdata->wind_turb_scales__ = NULL;
+   extdata->wind_turb_std__    = NULL;
+   extdata->NWZ__         = 0;
+   extdata->NNODES_LOAD__ = 0;
+   extdata->NLIBS__       = 0;
+   extdata->NDOFS__       = 0;
+   extdata->NMODES__      = 0;
+   extdata->NMODES_EFF__  = 0;
+   extdata->NDEGW__       = 0;
+   extdata->NTC__         = 0;
+   extdata->NNOD_CORR__   = 0;
+   extdata->PSD_ID__      = 0;
+}
+
 extdata_t extdata__;
-unsigned int nfi__, nfj__;
+unsigned nfi__, nfj__;
 REAL *fi__ = NULL;
 REAL *fj__ = NULL;
 REAL *S_uvw__       = NULL;
@@ -175,20 +245,22 @@ REAL *S_uvw_fiPfj__ = NULL;
 
 
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+
 
 
 // -----------------------------------
 //  LOCAL helper functions
 // -----------------------------------
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 ierr_t releaseDeviceMem_() {
    unsigned ierr_;
 
    ierr_  = BSACL_DEVICE_FREE_MEM(d_m3mf__);
+
    ierr_ |= BSACL_DEVICE_FREE_MEM(d_nodes_load__);
    ierr_ |= BSACL_DEVICE_FREE_MEM(d_nod_corr__);
    ierr_ |= BSACL_DEVICE_FREE_MEM(d_phiTc__);
@@ -840,8 +912,8 @@ void assembleProgramBuildOptsString_()
    ++buf;
 
    if (pass_params_by_macro_ == 1) {
-      strcpy(buf, " -D BSACL_PASS_PARAMS_BY_MACRO");
-      buf += 30;
+      strcpy(buf, " -D BSACL_PASS_PARAMS_BY_MACRO__");
+      buf += 32;
 
       strcpy(buf, " -D NTC__=");
       buf += 10;
@@ -1162,6 +1234,13 @@ void bsaclRun(int *__EXT_PTR_CONST ierr) {
    dInfl_ = dInfl_ * dInfl_;  // infl area
 #endif
 
+
+#ifdef BSACL_USE_CUDA__
+   kernel_id_ = BSACL_KERNEL_ID;
+   pass_params_by_macro_ = 0U;
+#endif
+
+
 #ifdef BSA_DEBUG
    printf("%sUsing kernel ID  %u\n", INFO_MSG, kernel_id_);
 #endif /* ifdef BSA_DEBUG */
@@ -1192,8 +1271,10 @@ void bsaclRun(int *__EXT_PTR_CONST ierr) {
 
    initCreateDeviceBuffers_();
 
+#ifndef BSACL_USE_CUDA__
    // make sure to set passing byu macro to 1 BEFORE setting kernel arguments.
    if (kernel_id_ == 4 && pass_params_by_macro_ == 0) pass_params_by_macro_ = 1U;
+#endif
 
 #ifndef BSACL_USE_CUDA__
    ierr_ = setBfmKernelArgs_();
@@ -1231,13 +1312,15 @@ void bsaclRun(int *__EXT_PTR_CONST ierr) {
 #if (BSACL_KERNEL_ID==2)
             fi_,
             fj_,
-#elif (BSACL_KERNEL_ID==3)
+#elif (BSACL_KERNEL_ID==3) || (BSACL_KERNEL_ID==4)
             d_fi__,
             nfi__,
             d_fj__,
             nfj__,
 #endif
+#if (BSACL_KERNEL_ID != 4)
             dInfl_,
+#endif
             extdata__.NMODES_EFF__,
             extdata__.NDEGW__,
             d_phiTc__,
@@ -1347,9 +1430,9 @@ ret_: *ierr = (int)ierr_;
 
 BSACL_INT bsaclSetKernelID(unsigned kid)
 {
-   ierr_t ret = 0;
+   ierr_t ret = BSACL_SUCCESS;
    if (kid < 2 || kid > 4) {
-      ret = 1;
+      ret = (ierr_t)1;
    } else {
       kernel_id_ = kid;
    }

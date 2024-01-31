@@ -47,17 +47,17 @@ module BsaLib_IO
    character(len = :), private, allocatable :: export_file_position_
    character(len = :), private, allocatable :: export_file_status_
 
-contains
 
+contains
 
 
    subroutine io_setExportAppendMode(imode)
       integer(int32), intent(in) :: imode
 
-      if (imode == BSA_EXPORT_MODE_APPEND) then
+      if (imode == BSA_EXPORT_MODE_REPLACE) then
+         export_file_status_   = IO_STATUS_REPLACE  ! overrides if exists
+      elseif (imode == BSA_EXPORT_MODE_APPEND) then
          export_file_position_ = IO_POSITION_APPEND
-      elseif (imode == BSA_EXPORT_MODE_REPLACE) then
-         export_file_status_   = IO_STATUS_REPLACE  ! overrides if exists.
       endif
    end subroutine
 
@@ -83,7 +83,7 @@ contains
 
    subroutine io_setExportFileFormat(iform)
       integer(int32), intent(in) :: iform
-      
+
       if (iform == BSA_EXPORT_FORMAT_FORMATTED) then
          export_file_form_ = IO_FORM_FORMATTED
       elseif (iform == BSA_EXPORT_FORMAT_UNFORMATTED) then
@@ -155,7 +155,7 @@ contains
       character(len = *), intent(in) :: file
       integer(int32) :: iun
       integer(int32) :: ierr_
-      
+
       open(newunit=iun, file=file          &
          , iostat=ierr_                    &
          , access=export_file_access_      &
@@ -165,7 +165,7 @@ contains
          , position=export_file_position_  &
          , status=export_file_status_)
 
-      
+
       if (ierr_ == 0) return
 
       iun = 0
@@ -195,7 +195,7 @@ contains
          return
       endif
 
-      
+
       ! VERIFY FILENAME (and unit by consequence)
       ! NOTE: unit not opened
 
@@ -208,7 +208,7 @@ contains
          ! first check by setting default filename (accounts for unit number)
          fname = setDefFileNameFromUnitNum_(iun)
          inquire(file=fname, opened=is_opn)
-         
+
          do while (is_opn)
 
             ! invalid first default name, increment unit number

@@ -24,6 +24,50 @@ submodule(BsaLib_Functions) BsaLib_FunctionsImpl
    implicit none (type, external)
 
 
+#ifdef BSA_SINGLE_FLOATING_PRECISION
+# ifdef BSA_USE_SVD_METHOD
+#  define POD__ sgesvd
+# else
+#  define POD__ ssyev
+# endif
+#else
+# ifdef BSA_USE_SVD_METHOD
+#  define POD__ dgesvd
+# else
+#  define POD__ dsyev
+# endif
+#endif
+
+
+
+   interface
+#ifdef BSA_USE_SVD_METHOD
+      SUBROUTINE POD__( JOBU, JOBVT, M, N, A, LDA, S, U, LDU, &
+                           VT, LDVT, WORK, LWORK, INFO )
+         import bsa_real_t
+         !    .. Scalar Arguments ..
+         CHARACTER          JOBU, JOBVT
+         INTEGER            LDA, LDU, LDVT, M, N
+         integer            info, lwork
+         !     .. Array Arguments ..
+         real(bsa_real_t)   A( LDA, * ), S( * ), U( LDU, * ),&
+                               VT( LDVT, * ), WORK( * )
+      end subroutine
+#else
+      SUBROUTINE POD__( JOBZ, UPLO, N, A, LDA, W, WORK, LWORK, INFO )
+         import bsa_real_t
+         !     .. Scalar Arguments ..
+         CHARACTER          JOBZ, UPLO
+         INTEGER            INFO, LDA, LWORK, N
+         !     ..
+         !     .. Array Arguments ..
+         real(bsa_real_t)   A( LDA, * ), W( * ), WORK( * )
+      END SUBROUTINE
+#endif
+   end interface
+
+
+
 contains
 
 
@@ -280,41 +324,16 @@ contains
 
 
    module subroutine prefetchSVDWorkDim_()
-      double precision :: tmpmat(NNODESL, NNODESL)
-      ! double precision, allocatable :: tmpmat(:, :)
+      real(bsa_real_t) :: tmpmat(NNODESL, NNODESL)
+      ! real(bsa_real_t), allocatable :: tmpmat(:, :)
 
-      double precision, dimension(NNODESL) :: tmpv
+      real(bsa_real_t), dimension(NNODESL) :: tmpv
 
-      double precision, dimension(1) :: optWork
-      double precision, dimension(1) :: tmp1arr
+      real(bsa_real_t), dimension(1) :: optWork
+      real(bsa_real_t), dimension(1) :: tmp1arr
 
       integer(int32) :: istat
       character(len = 256) :: emsg
-
-      interface
-#ifdef _BSA_USE_SVD_METHOD
-         SUBROUTINE DGESVD( JOBU, JOBVT, M, N, A, LDA, S, U, LDU, &
-               VT, LDVT, WORK, LWORK, INFO )
-            !    .. Scalar Arguments ..
-            CHARACTER          JOBU, JOBVT
-            INTEGER            LDA, LDU, LDVT, M, N
-            integer            info, lwork
-            !     .. Array Arguments ..
-            DOUBLE PRECISION   A( LDA, * ), S( * ), U( LDU, * ),&
-                                 VT( LDVT, * ), WORK( * )
-         end subroutine
-#else
-         SUBROUTINE dsyev( JOBZ, UPLO, N, A, LDA, W, WORK, LWORK, INFO )
-            !     .. Scalar Arguments ..
-                  CHARACTER          JOBZ, UPLO
-                  INTEGER            INFO, LDA, LWORK, N
-            !     ..
-            !     .. Array Arguments ..
-                  DOUBLE PRECISION   A( LDA, * ), W( * ), WORK( * )
-         END SUBROUTINE
-#endif
-      end interface
-
 
       if (.not. allocated(MSHR_SVD_INFO)) then
          allocate(MSHR_SVD_INFO, stat=istat, errmsg=emsg)
@@ -322,8 +341,8 @@ contains
       endif
 
       MSHR_SVD_INFO = 0
-#ifdef _BSA_USE_SVD_METHOD
-      call dgesvd(&
+#ifdef BSA_USE_SVD_METHOD
+   call POD__(&
            'O' &        ! min(M,N) columns of U are returned in array U
          , 'N' &        ! no rows of V are computed
          , NNODESL &    ! n. of rows M
@@ -340,13 +359,14 @@ contains
          , MSHR_SVD_INFO  &
       )
 #else
-      call dsyev('V', 'L', &
+      call POD__('V', 'L', &
          NNODESL, tmpmat, NNODESL, tmp1arr, optWork, MSHR_SVD_LWORK, MSHR_SVD_INFO)
 #endif
 
       if (MSHR_SVD_INFO == 0) then
 
          MSHR_SVD_LWORK = int(optWork(1))
+
 ! #ifdef BSA_DEBUG
          print '(1x, a, a, i0 /)', &
             INFOMSG, 'WORK query ok. Optimal work dimension = ', MSHR_SVD_LWORK
@@ -404,11 +424,11 @@ contains
 
    integer(int32) pure function getNPODModesByThreshold_(eigvals, rlim) result(nPODmodes)
 !DIR$ ATTRIBUTES FORCEINLINE :: getNPODModesByThreshold_
-      real(real64), intent(in), contiguous :: eigvals(:)
-      real(real64), intent(in) :: rlim
-      real(real64) :: limval
+      real(bsa_real_t), intent(in), contiguous :: eigvals(:)
+      real(bsa_real_t), intent(in) :: rlim
+      real(bsa_real_t) :: limval
 
-#ifdef _BSA_USE_SVD_METHOD
+#ifdef BSA_USE_SVD_METHOD
 # define __IDX 1
 # define __OP  +
 #else
@@ -455,35 +475,35 @@ contains
       real(bsa_real_t) :: fi_
       integer(int32), allocatable   :: npodw2(:)
 
-      double precision, allocatable, target  :: D_S_uvw_w2(:, :)
-      double precision,              pointer :: D_S_uvw_w2_ptr(:)
+      real(bsa_real_t), allocatable, target  :: D_S_uvw_w2(:, :)
+      real(bsa_real_t),              pointer :: D_S_uvw_w2_ptr(:)
 
-      double precision, allocatable, target  :: S_uvw_w2(:, :, :)
-      double precision,              pointer :: S_uvw_w2_ptr(:, :)
+      real(bsa_real_t), allocatable, target  :: S_uvw_w2(:, :, :)
+      real(bsa_real_t),              pointer :: S_uvw_w2_ptr(:, :)
 #else
 
 # define __EGVL_w2 D_S_uvw_w2
 # define __EGVT_w2 S_uvw_w2
 
-      double precision              :: D_S_uvw_w2(NNODESL)
-      double precision, allocatable :: S_uvw_w2(:, :)
+      real(bsa_real_t)              :: D_S_uvw_w2(NNODESL)
+      real(bsa_real_t), allocatable :: S_uvw_w2(:, :)
 #endif
 
-      double precision              :: D_S_uvw_w1(NNODESL)   ! singular values vectors (DECREASING ordering!)
-      double precision, allocatable :: S_uvw_w1(:, :)
+      real(bsa_real_t)              :: D_S_uvw_w1(NNODESL)   ! singular values vectors (DECREASING ordering!)
+      real(bsa_real_t), allocatable :: S_uvw_w1(:, :)
 
-      double precision              :: D_S_uvw_w1w2(NNODESL)
-      double precision, allocatable :: S_uvw_w1w2(:, :)
+      real(bsa_real_t)              :: D_S_uvw_w1w2(NNODESL)
+      real(bsa_real_t), allocatable :: S_uvw_w1w2(:, :)
 
       ! for SVD related routines
       integer :: lwork, info
-      double precision, allocatable :: work_arr(:)
+      real(bsa_real_t), allocatable :: work_arr(:)
 
-      double precision :: tmpv(1, NNODESL)   ! tmp vec for interfacing, BUG: might be avoided?
+      real(bsa_real_t) :: tmpv(1, NNODESL)   ! tmp vec for interfacing, BUG: might be avoided?
 
-      double precision, dimension(NNODESL, 1)    :: eigvp, eigvq
-      double precision, dimension(NMODES_EFF, 1) :: tmpm1, tmpm2, tmpm3
-      double precision :: tmpDp, tmpTq, tmpo, tmpn
+      real(bsa_real_t), dimension(NNODESL, 1)    :: eigvp, eigvq
+      real(bsa_real_t), dimension(NMODES_EFF, 1) :: tmpm1, tmpm2, tmpm3
+      real(bsa_real_t) :: tmpDp, tmpTq, tmpo, tmpn
 
       ! wind turbulent comps indexes
       integer(int32) :: itc, tc, tcP3
@@ -495,29 +515,6 @@ contains
 
       real(bsa_real_t) :: fiPfj_(1)
 
-      interface
-#ifdef _BSA_USE_SVD_METHOD
-         SUBROUTINE DGESVD( JOBU, JOBVT, M, N, A, LDA, S, U, LDU, &
-               VT, LDVT, WORK, LWORK, INFO )
-            !    .. Scalar Arguments ..
-            CHARACTER          JOBU, JOBVT
-            INTEGER            LDA, LDU, LDVT, M, N
-            integer            info, lwork
-            !     .. Array Arguments ..
-            DOUBLE PRECISION   A( LDA, * ), S( * ), U( LDU, * ),&
-                                 VT( LDVT, * ), WORK( * )
-         end subroutine
-#else
-         SUBROUTINE dsyev( JOBZ, UPLO, N, A, LDA, W, WORK, LWORK, INFO )
-            !     .. Scalar Arguments ..
-                  CHARACTER          JOBZ, UPLO
-                  INTEGER            INFO, LDA, LWORK, N
-            !     ..
-            !     .. Array Arguments ..
-                  DOUBLE PRECISION   A( LDA, * ), W( * ), WORK( * )
-         END SUBROUTINE
-#endif
-      end interface
 
       bfm = 0._bsa_real_t
 
@@ -560,7 +557,7 @@ contains
             S_uvw_w2(:, :, ifj) = &
                wd%getFullNodalPSD(NNODESL, struct_data%n_load_, S_uvw_w2(:, 1, ifj), fj(ifj), 1)
 
-# ifdef _BSA_USE_SVD_METHOD
+# ifdef BSA_USE_SVD_METHOD
             call dgesvd(&
                  'O' &                    ! min(M,N) columns of U are overwritten on array A (saves memory)
                , 'N' &                    ! no rows of V are computed
@@ -624,8 +621,8 @@ contains
 # endif
 
 
-# ifdef _BSA_USE_SVD_METHOD
-         call dgesvd(&
+# ifdef BSA_USE_SVD_METHOD
+         call POD__(&
               'O' &           ! min(M,N) columns of U are overwritten on array A (saves memory)
             , 'N' &           ! no rows of V are computed
             , NNODESL    &    ! n. of rows M
@@ -639,9 +636,9 @@ contains
             , 1          &
             , work_arr, lwork, info)
 # else
-         call dsyev('V', 'L', &
-            NNODESL, S_uvw_w1, NNODESL, D_S_uvw_w1, &
-               work_arr, lwork, info)
+         call POD__('V', 'L', &
+                     NNODESL, S_uvw_w1, NNODESL, D_S_uvw_w1, &
+                        work_arr, lwork, info)
 # endif
          if (info /= 0) then
             print '(1x, a, a, i0)', &
@@ -650,8 +647,8 @@ contains
          endif
 
 
-# ifdef _BSA_USE_SVD_METHOD
-         call dgesvd(&
+# ifdef BSA_USE_SVD_METHOD
+         call POD__(&
               'O' &           ! min(M,N) columns of U are overwritten on array A (saves memory)
             , 'N' &           ! no rows of V are computed
             , NNODESL    &    ! n. of rows M
@@ -665,7 +662,7 @@ contains
             , 1          &
             , work_arr, lwork, info)
 # else
-         call dsyev('V', 'L', &
+         call POD__('V', 'L', &
             NNODESL, S_uvw_w2, NNODESL, D_S_uvw_w2, &
                work_arr, lwork, info)
 # endif
@@ -713,8 +710,8 @@ contains
          wd%getFullNodalPSD(NNODESL, struct_data%n_load_, S_uvw_w1(:, 1), fi(ifi), 1)
 
 
-# ifdef _BSA_USE_SVD_METHOD
-      call dgesvd(&
+# ifdef BSA_USE_SVD_METHOD
+      call POD__(&
             'O' &          ! min(M,N) columns of U are overwritten on array A (saves memory)
          , 'N' &           ! no rows of V are computed
          , NNODESL    &    ! n. of rows M
@@ -728,7 +725,7 @@ contains
          , 1          &
          , work_arr, lwork, info)
 # else
-      call dsyev('V', 'L', &
+      call POD__('V', 'L', &
          NNODESL, S_uvw_w1, NNODESL, D_S_uvw_w1, &
             work_arr, lwork, info)
 # endif
@@ -756,8 +753,8 @@ contains
             reshape(wd%evalPSD(1, fiPfj_, NNODESL, struct_data%n_load_, 1, tc), [NNODESL, 1])
          S_uvw_w1w2 = wd%getFullNodalPSD(NNODESL, struct_data%n_load_, S_uvw_w1w2(:, 1), fiPfj_(1), 1)
 
-#ifdef _BSA_USE_SVD_METHOD
-         call dgesvd(&
+#ifdef BSA_USE_SVD_METHOD
+         call POD__(&
               'O' &             ! min(M,N) columns of U are overwritten on array A (saves memory)
             , 'N' &             ! no rows of V are computed
             , NNODESL      &    ! n. of rows M
@@ -771,10 +768,10 @@ contains
             , 1            &
             , work_arr, lwork, info)
 #else
-         call dsyev('V', 'L', &
+         call POD__('V', 'L', &
             NNODESL, S_uvw_w1w2, NNODESL, D_S_uvw_w1w2, &
                work_arr, lwork, info)
-#endif ! _BSA_USE_SVD_METHOD
+#endif ! BSA_USE_SVD_METHOD
          if (info /= 0) then
             print '(1x, a, a, i0)', &
                ERRMSG, 'Error applying SVD to S_uvw_w1w2. Exit code  ', info
@@ -825,7 +822,7 @@ contains
 
 
          ! 5-2-2, 2-2-5 (6-3-3, 3-3-6) (7-4-4, 4-4-7)
-#ifdef _BSA_USE_SVD_METHOD
+#ifdef BSA_USE_SVD_METHOD
          do p = 1, nmw1
 #else
          do p = NNODESL, NNODESL-(nmw1-1), -1
@@ -843,7 +840,7 @@ contains
 
 
             ! 5-2-2 (6-3-3, 7-4-4)
-#ifdef _BSA_USE_SVD_METHOD
+#ifdef BSA_USE_SVD_METHOD
             do q = 1, nmw2
 #else
             do q = NNODESL, NNODESL-(nmw2-1), -1
@@ -887,7 +884,7 @@ contains
 
 
             ! 2-2-5 (3-3-6, 4-4-7)
-#ifdef _BSA_USE_SVD_METHOD
+#ifdef BSA_USE_SVD_METHOD
             do q = 1, nmw1w2
 #else
             do q = NNODESL, NNODESL-(nmw1w2-1), -1
@@ -930,7 +927,7 @@ contains
 
 
          ! 2-5-2 (3-6-3, 4-7-4)
-#ifdef _BSA_USE_SVD_METHOD
+#ifdef BSA_USE_SVD_METHOD
          do p = 1, nmw1w2
 #else
          do p = NNODESL, NNODESL-(nmw1w2-1), -1
@@ -943,7 +940,7 @@ contains
 
             tmpDp = D_S_uvw_w1w2(p)
 
-#ifdef _BSA_USE_SVD_METHOD
+#ifdef BSA_USE_SVD_METHOD
             do q = 1, nmw2
 #else
             do q = NNODESL, NNODESL-(nmw2-1), -1

@@ -35,7 +35,7 @@ module BsaLib_WindData
       , 'ORNSTEIN_UHLENBECK' &
    &]
 
-   
+
 
    character(len = *), dimension(5), public, parameter :: CST_WIND_V_PROFILES = [&
         'POWER     ' &
@@ -50,9 +50,9 @@ module BsaLib_WindData
 
 
 
-   
+
    ! ----- private variables
-   real(real64)                  :: air_dens_ = 1.225_real64
+   real(bsa_real_t)                  :: air_dens_ = 1.225_real64
    real(bsa_real_t), allocatable :: rot_W2G_(:, :)  ! rotation from GRS to WRS (global)
 
 
@@ -112,7 +112,7 @@ module BsaLib_WindData
 
       !> Wind loaded nodes' wind zone
       integer(bsa_int_t), pointer :: wz_node_(:) => null()
-      
+
       !> Nodal Wind Altitudes (needed for some PSDs computation)
       real(bsa_real_t), pointer :: wAlt_node_(:) => null()
 
@@ -201,7 +201,7 @@ module BsaLib_WindData
       procedure, public, pass :: SetTurbCompsAndDirsDefault
 
       procedure, public, pass :: evalPSD => evalPSD_
-      
+
       procedure, public, pass :: getFullNodalPSD
 
       procedure, public, pass :: clean
@@ -229,14 +229,14 @@ module BsaLib_WindData
    interface
 
       module subroutine SetAirDensity(aird)
-         real(real64), intent(in) :: aird
+         real(bsa_real_t), intent(in) :: aird
       end subroutine
 
 
       module subroutine SetGlobalW2G(mat)
          real(bsa_real_t), intent(in) :: mat(3, 3)
       end subroutine
-      
+
 
       module subroutine SetWindVertProf(this, ivaru)
          class(WindData_t), intent(inout) :: this
@@ -249,7 +249,7 @@ module BsaLib_WindData
          integer(bsa_int_t), value :: ipsd
       end subroutine
 
-      
+
       module subroutine SetMainvertDir(this, ivert)
          class(WindData_t), intent(inout) :: this
          integer(bsa_int_t), intent(in) :: ivert
@@ -267,7 +267,7 @@ module BsaLib_WindData
 #endif
       end subroutine
 
-      
+
       module subroutine SetWZMeanWindVel(this, UBref)
          class(WindData_t), intent(inout) :: this
          real(bsa_real_t), target, intent(in) :: UBref(this%nz_)

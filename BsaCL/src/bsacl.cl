@@ -53,17 +53,6 @@
 
 
 
-#ifndef BSACL_KERNEL_ID
-# define BSACL_KERNEL_ID 4
-#endif
-
-#if (BSACL_KERNEL_ID==4)
-# ifndef BSACL_PASS_PARAMS_BY_MACRO
-#  define BSACL_PASS_PARAMS_BY_MACRO
-# endif
-#endif
-
-
 
 DEVICE UINT getCorrId(
       PRIVATE UINT ni,
@@ -156,7 +145,7 @@ DEVICE REAL evalFct(
 
 
 
-#ifdef BSACL_PASS_PARAMS_BY_MACRO
+#ifdef BSACL_PASS_PARAMS_BY_MACRO__
 #  ifndef NTC__
 #   error NTC__  is not defined!
 #  endif
@@ -169,7 +158,7 @@ DEVICE REAL evalFct(
 #  ifndef NM_EFF__
 #   error NM_EFF__  is not defined!
 #  endif
-#endif // BSACL_PASS_PARAMS_BY_MACRO
+#endif // BSACL_PASS_PARAMS_BY_MACRO__
 
 
 #ifdef BSACL_USE_CUDA__
@@ -199,11 +188,11 @@ KERNEL void bfm_kernel(
 #ifdef BSACL_USE_CUDA__
       const    UINT          BSACL_WIND_PSD_ID,
 #endif
-#ifndef BSACL_PASS_PARAMS_BY_MACRO
+#ifndef BSACL_PASS_PARAMS_BY_MACRO__
       const    UINT          NTC__,
 #endif
       CONSTANT UINT          *tc,
-#ifndef BSACL_PASS_PARAMS_BY_MACRO
+#ifndef BSACL_PASS_PARAMS_BY_MACRO__
       const    UINT          NNL__,
 #endif
       GLOBAL   UINT          *nodes_load,
@@ -217,12 +206,12 @@ KERNEL void bfm_kernel(
       const    UINT          NFJ__,
 # endif
       const    REAL          dInfl,
-#ifndef BSACL_PASS_PARAMS_BY_MACRO
+#ifndef BSACL_PASS_PARAMS_BY_MACRO__
       const    UINT          NM_EFF__,
       const    UINT          NDEGW__,
 #endif
       const    GLOBAL   REAL *phiTc,
-#ifndef BSACL_PASS_PARAMS_BY_MACRO
+#ifndef BSACL_PASS_PARAMS_BY_MACRO__
       const    UINT          NN__,
       const    UINT          NNOD_CORR__,   // BUG: NOT used
 #endif
@@ -441,26 +430,26 @@ KERNEL void bfm_kernel(
 #ifdef BSACL_USE_CUDA__
       const    UINT          BSACL_WIND_PSD_ID,
 #endif
-#ifndef BSACL_PASS_PARAMS_BY_MACRO
+#ifndef BSACL_PASS_PARAMS_BY_MACRO__
       const    UINT          NTC__,
 #endif
       CONSTANT UINT          *tc,
-#ifndef BSACL_PASS_PARAMS_BY_MACRO
+#ifndef BSACL_PASS_PARAMS_BY_MACRO__
       const    UINT          NNL__,
 #endif
       GLOBAL   UINT          *nodes_load,
       GLOBAL   REAL          *fi,
-#ifndef BSACL_PASS_PARAMS_BY_MACRO
+#ifndef BSACL_PASS_PARAMS_BY_MACRO__
       const    UINT          NFI__,
 #endif
       GLOBAL   REAL          *fj,
-#ifndef BSACL_PASS_PARAMS_BY_MACRO
+#ifndef BSACL_PASS_PARAMS_BY_MACRO__
       const    UINT          NFJ__,
       const    UINT          NM_EFF__,
       const    UINT          NDEGW__,
 #endif
       const    GLOBAL   REAL *phiTc,
-#ifndef BSACL_PASS_PARAMS_BY_MACRO
+#ifndef BSACL_PASS_PARAMS_BY_MACRO__
       const    UINT          NN__,
       const    UINT          NNOD_CORR__,   // BUG: NOT used
 #endif
@@ -502,7 +491,12 @@ KERNEL void bfm_kernel(
     * Then, each inner [] will be itself divided as:
     *     [ [6 coeffs mode m], [6 coeffs mode n], [6 coeffs mode o]  ]
     * */
+#ifdef BSACL_USE_CUDA__
+   /* BUG: we can't use a RT parameter for automatic allocation.. */
+   LOCAL REAL phiTc_mno_[3 * 6 * 4]; // 6 : Uu, Uv, Uw, u2, v2, w2; 3 modes
+#else
    LOCAL REAL phiTc_mno_[3 * 6 * NNL__]; // 6 : Uu, Uv, Uw, u2, v2, w2; 3 modes
+#endif
    const UINT phiTc_offst_ = NM_EFF__ * NNL__;
    if (BSACL_WIpWG < NNL__) {
       const BSACL_USHORT n_reps = NNL__ / BSACL_WIpWG;
@@ -638,7 +632,7 @@ KERNEL void bfm_kernel(
    }
    // Then store sum into global variable
    const size_t wgid0_ = BLOCK_ID_X_DIM0;
-   const size_t nwgd0_ = get_num_groups(0);
+   const size_t nwgd0_ = N_BLOCKS_WGROUPS_X_DIM0;
    if (0 == lid0_) {
       m3mf[wgid1_*nwgd0_ + wgid0_] = m3mf_loc_[0];
    }
@@ -652,7 +646,7 @@ KERNEL void bfm_kernel(
 
       // Then store sum into global variable
       const size_t wgid0_ = BLOCK_ID_X_DIM0;
-      const size_t nwgd0_ = get_num_groups(0);
+      const size_t nwgd0_ = N_BLOCKS_WGROUPS_X_DIM0;
       m3mf[wgid1_*nwgd0_ + wgid0_] = m3mf_loc_[0];
    }
 #endif

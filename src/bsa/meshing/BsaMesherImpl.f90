@@ -31,7 +31,7 @@ submodule(BsaLib) BsaLib_MesherImpl
    ! to have a local instance to be referenced
    integer(bsa_int_t) :: NM__, NM_EFF__
    character(len = *), parameter :: bfm_dump_file_name_ = 'dumpfile'
-   
+
    ! BUG: let the user choose how many modes it allows to be covered max.
    integer(int32), parameter :: N_RES_PEAK_IN_BKG_ZONE_DIV_FCT_ = 4
 
@@ -107,7 +107,7 @@ contains
       print '(1x, a, a, i0)', MSGCONT, ' POST-MESH  (BFM) : ', msh_bfmpts_post_
       print '(1x, a, a, i0)', MSGCONT, ' POST-MESH  (BRM) : ', msh_brmpts_post_
 
-      
+
 #ifdef BSA_DEBUG
       write(unit_debug_, *) ' @BsaMesherImpl::mainMesher_() : Init BSA-Mesher main -- ok.'
 #endif
@@ -171,7 +171,7 @@ contains
    subroutine PreMesh()
       real(real64), parameter :: cst_sqrt2d2 = sqrt(2._real64) / 2._real64      
       integer(int32) :: NLims, iost
-      
+
       logical :: iun_open
       real(bsa_real_t) :: base_i, base_j, max_ext
       real(bsa_real_t) :: deltaI_S2_2, deltaI_2_S2_2
@@ -270,12 +270,12 @@ contains
                , MSHR_SVD_INFO  &
             )
             if (MSHR_SVD_INFO /= 0) call bsa_Abort("Error while computing SVD of nodal correlation")
-            
+
             write(4397, *) NNODESL
             do iost = 1, NNODESL
                write(4397, *) nod_corr_full_(:, iost)
             enddo
-            
+
             write(4398, *) NNODESL
             write(4398, *) nod_corr_EVLs_
             do iost = 1, NNODESL
@@ -285,7 +285,7 @@ contains
       end block
 #endif
 
-      
+
       !===================================================================================
       ! BKG peak
       !
@@ -312,7 +312,7 @@ contains
       !          3.  next zone is peak.
       !              BKG does include this, plus all previous resonant peaks.
       call bkgz%setInterestModeIndexPtr(0)
-      
+
 
       iost = settings%bkg_base_rfmnt_
       ! if (.not. test_no_bfm_mlr_) then
@@ -350,13 +350,13 @@ contains
       do_export_POD_trunc_    = .false.
       do_export_POD_trunc_(1) = .true.  ! <-- NO OMP parall here regardless.
 #endif
-      
+
       call bkgz%compute()
 #ifndef _BSA_USE_CACHED_POD_DATA
       call logger_debug%logZonePremeshingTotTime(&
          zone_title, timer%time(), msh_bfmpts_pre_, .true.)
 #endif
-         
+
       if (.not. allocated(limits)) goto 998  ! NOTE: BKG zone covers them all, bad..
 
 
@@ -389,10 +389,10 @@ contains
          !> ['NORTH-EAST', 'SOUTH-EAST', 'SOUTH-WEST', 'NORTH-WEST']
          character(len = 10), parameter :: DIRS_DIAG_LABELS(4) = &
             ['NORTH-EAST', 'SOUTH-EAST', 'SOUTH-WEST', 'NORTH-WEST']
-         
+
          !> Set of pair rotations, per main direction
-         real(real64), parameter :: ROTATIONS(6) = &
-            [CST_PIt3d2, 0._real64, CST_PId2, CST_PIGREC, CST_PIt3d2, 0._real64]
+         real(bsa_real_t), parameter :: ROTATIONS(6) = &
+            [CST_PIt3d2, 0._bsa_real_t, CST_PId2, CST_PIGREC, CST_PIt3d2, 0._bsa_real_t]
 
          !> Which base is actually passed, depending on N-E-S-W direction
          character(len = 1), parameter :: COORDS_DIR_CH(4) = ['j', 'i', 'j', 'i']
@@ -444,10 +444,10 @@ contains
          allocate(inter_modes_(NLimsP1))
          inter_modes_ = 0
 
-         
+
          maxF       = limits(NLims) + deltaI_2_S2_2
          id_im_last = size(msh_ZoneLimsInterestModes) - 1
-         
+
          pol = MPolicy_PRE_PEAK_2
 
          ! extend limits and policies to covering after last peak
@@ -473,7 +473,7 @@ contains
             bases_i_(1) = base_i
             bases_i_(2) = base_j
             bases_i_(3) = base_i
-         
+
             N_THREADS_MIN_ = 1
          else
             n_dirs_     = N_DIRS_FULL
@@ -522,7 +522,7 @@ contains
 
             iim = 1
             do ilim = 1, NLims
-               
+
                lim = limits(ilim)
                policy_ptr => policies(ilim)
 
@@ -531,7 +531,7 @@ contains
                df_J = df_J_ref * policy_ptr%delta_fJ_fct_
 
                call rz%setPolicy(policy_ptr)
-               
+
                ! get this zone interest modes
                if (idir == 2) inter_modes_(ilim) = iim
                if (ilim == 1 .or. policies(ilim+1) == MPolicy_PEAK) then
@@ -547,7 +547,7 @@ contains
                   if (idir == 1) print *, int_modes_
                   !$omp end critical
 #endif
-               
+
                   ! set current zone interest modes pointer (before update)
                   call rz%setInterestModeIndexPtr(iim)
                   iim  = iim + nim + 1
@@ -624,10 +624,10 @@ contains
                zone_title, timer%time(), n_bfm_pts_pre_, .true.)
             !$omp end critical
 #endif
-            
+
          enddo ! n dirs
          !$omp end parallel do
-      
+
          deallocate(bases_i_)
 
          ! BUG: might be removed, code duplication for little CPU improvement..
@@ -680,7 +680,7 @@ contains
 
                ! computing base of first opening rect zone
                init_freq_ = basePts(1)%freqI()
-               
+
                main_refs_ = maxval(refmts(:, 1))
                bases_ch   = getEquivalentLooperIterator(N_DIRS_FULL, 'ij')
 
@@ -713,7 +713,7 @@ contains
                   main_rz_rot_  = ROTATIONS(idirP1_)
                   right_rz_rot_ = ROTATIONS(idirP1_ + 1)   ! idir + 2
                   call rz%setRotation(main_rz_rot_)
-                  
+
                   pol = policies(1)
                   call rz%setPolicy(pol)
 
@@ -741,8 +741,8 @@ contains
 
                   left_known_coord_  = bases_ch(idir)
                   right_known_coord_ = bases_ch(5 - idir)
-                  
-                  
+
+
                   do ilim = 2, NLimsP1
 
                      call rz%setInterestModeIndexPtr(inter_modes_(ilim))
@@ -757,7 +757,7 @@ contains
 
                      ! NOTE: this policy is shared by the other zones as well
                      call rz%setPolicy(policies(ilim))
-                     
+
                      delta_main_rz_ = minval(deltas(:, ilim))
                      call rz%setRotation(main_rz_rot_)
                      call rz%defineFromEndPtCoordAndBase(&
@@ -884,7 +884,7 @@ contains
                   zone_title, timer%time(), rz%zoneTotNPts(), .true.)
                !$omp end critical
 #endif
-               
+
             enddo ! idir
             !$omp end parallel do
 
@@ -938,12 +938,12 @@ contains
 
                   n_bfm_pts_pre_ = 0
                   idir_t2        = idir * 2
-                  
+
                   call timer%init()
                   zone_title = 'Diagonal crest  -  '//DIRS_DIAG_LABELS(idir_t2)
 
                   iim  = 1  ! reset pointer for interest modes
-                  
+
                   ! caching
                   sign_dir = LIM_SIGN_DIRS(idir_t2) ! BUG: remove, just for check
                   tmpdelta = deltaI_S2_2 * sign_dir
@@ -976,7 +976,7 @@ contains
 
                   if (ipre_mesh_mode == BSA_PREMESH_MODE_BASE) then
 
-                     
+
                      ! IMPLEMENT & VERIFY
                      print '(1x, a, a)', &
                         ERRMSG, '"BASE"  pre mesh mode not yet implemented.'
@@ -1108,13 +1108,13 @@ contains
                         call rz%defineFromEndPtCoordAndBase(&
                            tz%Cpt_, lim_I, 'i', rtmp, 'i', &
                            deltas(2, ilim) * pol%delta_fI_fct_, deltas(2, ilim) * pol%delta_fJ_fct_)
-                        
+
                         call rz%compute()
 #ifndef _BSA_USE_CACHED_POD_DATA
                         n_bfm_pts_pre_ = n_bfm_pts_pre_ + rz%zoneTotNPts()
 #endif
 
-                        
+
                         ! save for starting next iteration
                         ptI = ptA
 
@@ -1181,7 +1181,7 @@ contains
 
             ! BUG: check if it is ok setting this interest modes' pointer.
             call rz%setInterestModeIndexPtr(id_im_last)
-            
+
             pol = MPolicy_PAD_ZONE_EXTERN
             call rz%setPolicy(pol)
 
@@ -1264,7 +1264,7 @@ contains
 
          print '(1x, a, a /)', &
             WARNMSG, 'Including modal info in dump file. Check if this can be avoided.'
-         
+
          ! write kept modes, might serve after as well.
          ! NOTE: in fact, nm_eff_ is the VERY FIRST thing which is dumped!
          !       But, at the very beginning, we don't yet how many modes will be kept, 
@@ -1340,7 +1340,7 @@ contains
       class(*), pointer :: brm_export_data_ => null()
       type(BrmExportBaseData_t), allocatable, target :: brm_export_base_data_
       logical :: do_export_brm_base_
-      
+
 
       ! skip them, we already have them stored in module variables
       ! However, there since they might serve outside this scope
@@ -1369,7 +1369,7 @@ contains
 # endif
 #endif
 
-      
+
       print '(1x, a)', '-----------------------------------------------------------'
       print '(1x, a)', '--------------------    POST - MESH    --------------------'
       print '(1x, a)', '-----------------------------------------------------------'
@@ -1430,7 +1430,7 @@ contains
          izone = izone + 1
          print '(1x, a, a, i6, a, i0 )', &
             INFOMSG, 'Interpolating zone n. ', izone, ', with ID=  ', izone_id
-            
+
          if (izone_id == MZone_ID%RECTANGLE) then
             call UndumpZone( rz   __bfm_undump__)
             z => rz
@@ -1528,7 +1528,7 @@ contains
 
    pure elemental function getMaxSpaceExtension_() result(max_ext)
       real(bsa_real_t) :: max_ext
-      
+
       max_ext = maxval(struct_data%modal_%nat_freqs_)
       max_ext = max_ext * settings%max_area_extension_
    end function getMaxSpaceExtension_
@@ -1620,7 +1620,7 @@ contains
 
 
          ! START
-         
+
          skip = skip + 1  !<-- start from next (completely/partially out) resonant peak zone.
          if (bpw_ext_2 < peak_ext_lims_(1, skip)) then ! two separate peak zones -> PRE_PEAK in between
 
@@ -1673,7 +1673,7 @@ contains
 
                ! BUG: check this branch
                if (NLims_ == 2 .and. pzBF <= limits_(NLims_ - 1)) then  
-                  
+
                   ! it is actually a FULL COVERAGE meaning that this mode's BACK frontier
                   ! entirely covers previously defined zone (i.e. resonance peak very very close)
 
@@ -1681,7 +1681,7 @@ contains
                   limits_(itmp) = pzBF
 
                   policies_(itmp) = MPolicy_PRE_PEAK_2
-                  
+
                   limits_(NLims_)   = pzFF
                   policies_(NLims_) = MPolicy_PEAK
 
@@ -1779,7 +1779,7 @@ contains
       do im = 1, NM_EFF__  ! TODO: implement do concurrent
 
          nmode = struct_data%modal_%modes_(im)
-         
+
          modf = struct_data%modal_%nat_freqs_(nmode)
          ext  = struct_data%modal_%xsi_(nmode) * modf
          ext  = ext * cst

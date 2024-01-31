@@ -121,6 +121,10 @@ endif()
 
 add_compile_definitions( $<$<CONFIG:DEBUG>:BSA_DEBUG> )
 
+if (enable-gpu-code)
+   set( enable-single ON )
+endif()
+
 if (enable-single)
    message( STATUS "NOTE: enabling single precision floating point arithmetic")
    add_compile_definitions( BSA_SINGLE_FLOATING_PRECISION )
@@ -140,8 +144,11 @@ endif()
 # Targets compilation
 ###########################################################
 if (enable-gpu-code)
-   if (enable-cuda AND enable-ocl-ptx-code-gen)
-      set( enable-ocl-ptx-code-gen OFF )
+   if (enable-cuda)
+      enable_language( CUDA )
+      if (enable-ocl-ptx-code-gen)
+         set( enable-ocl-ptx-code-gen OFF )
+      endif()
    endif()
    add_subdirectory( BsaCL )
 endif()

@@ -14,7 +14,7 @@
 !! You should have received a copy of the GNU General Public License
 !! along with BSA Library.  If not, see <https://www.gnu.org/licenses/>.
 module BsaLib_Settings
-   
+
    use BsaLib_CONSTANTS, only: bsa_int_t, bsa_real_t, int32
    implicit none (type, external)
    private
@@ -23,9 +23,8 @@ module BsaLib_Settings
    integer(int32), public :: i_min_round_prec_ = 10_int32
 
    type, public :: settings_t
-   
-      ! GENERAL settings
 
+      ! === GENERAL settings
 
       !> Subanalysis type
       !> ==1, classic
@@ -59,7 +58,7 @@ module BsaLib_Settings
 
 
 
-      ! CLASSIC settings
+      ! === CLASSIC settings
 
 
       !> If suban=="classic", number of sistematic freqs.
@@ -87,7 +86,7 @@ module BsaLib_Settings
 
 
 
-      ! MESHER settings
+      ! === MESHER settings
 
 
       !> If ==1, using SVD to S_uvw matrices

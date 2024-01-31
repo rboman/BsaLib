@@ -14,15 +14,12 @@
 !! You should have received a copy of the GNU General Public License
 !! along with BSA Library.  If not, see <https://www.gnu.org/licenses/>.
 module BsaLib_Functions
-   
+
    use BsaLib_CONSTANTS
    use BsaLib_Data, only: wd, struct_data, settings, dimM_bisp_, dimM_psd_
    implicit none (type, external)
    public
-
-
    private :: wd, struct_data, settings, dimM_bisp_, dimM_psd_
-
 
    ! make a local internal copy
    integer(bsa_int_t) :: NFREQS, NNODES, NNODESL, NLIBS, NLIBSL
@@ -33,8 +30,8 @@ module BsaLib_Functions
 
    integer              :: MSHR_SVD_LWORK = - 1
    integer, allocatable :: MSHR_SVD_INFO
-   double precision, allocatable :: MSHR_SVD_WORK(:)
-   
+   real(bsa_real_t), allocatable :: MSHR_SVD_WORK(:)
+
 
    interface
 
@@ -185,7 +182,7 @@ module BsaLib_Functions
          real(bsa_real_t), intent(out)  :: psdout(dimM_psd_), bispout(dimM_bisp_)
       end subroutine
 
-      
+
 
 
       module pure subroutine getBR_SFm_val_(nm, Suvw, fnat, im, m, psd)
