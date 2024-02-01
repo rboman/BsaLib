@@ -401,6 +401,7 @@ contains
       ! ======================
 
       if (struct_data%ndofs_ == 0) struct_data%ndofs_ = struct_data%nn_ * struct_data%nlibs_
+      if (struct_data%ndofs_ /= size(struct_data%modal_%phi_, 1)) call bsa_Abort("NDOFs does not match modal matrix size.")
 
       if (do_validate_modal_) call validateModalInfo_()
 
@@ -610,7 +611,7 @@ contains
       enddo
 
       struct_data%modal_%nm_eff_ = nmk
-      struct_data%modal_%modes_  = int(modesk, 4)
+      struct_data%modal_%modes_  = int(modesk, kind=bsa_int_t)
       deallocate(modesk, stat=istat)
    end subroutine validateModalInfo_
 

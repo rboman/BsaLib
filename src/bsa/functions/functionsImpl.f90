@@ -1143,7 +1143,7 @@ contains
 
          do inode = 1, NNODESL
 
-            node = int(struct_data%n_load_(inode), 4)
+            node = int(struct_data%n_load_(inode), kind=int32)
 
             posi = (node - 1) * NLIBS
             phi_ = struct_data%modal_%phi_(posi + struct_data%libs_load_, MODES)
