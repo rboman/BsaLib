@@ -131,10 +131,6 @@ contains
       class(settings_t), intent(inout) :: this
       integer(bsa_int_t), intent(in)   :: isvd, bkgrfmt, bkgaext, genpaext, maxaext, ifcov, idumpmod
 
-! #ifdef BSA_DEBUG
-!       write(unit_debug_, *) ' @SettingsImpl::SetMshrSetts() : init setting Bsa Mesher settings...'
-! #endif
-
       this%i_use_svd_               = isvd
       this%bkg_base_rfmnt_          = bkgrfmt
       this%bkg_area_extension_      = bkgaext

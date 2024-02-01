@@ -207,9 +207,6 @@ contains
       integer, value :: ni, nj
 
       if (.not. this%isGRSAligned()) call bsa_Abort('Rect zone is not GRS aligned.')
-! #ifdef BSA_DEBUG
-!       write(unit_debug_, *) ' @MRectZoneImpl::defineFromDeltas_refinements() : init...'
-! #endif
 
 
       ! NOTE: force them odd
@@ -232,9 +229,6 @@ contains
       this%deltaf_J_   = dfj
 
       call this%define(pt, loc=loc)
-! #ifdef BSA_DEBUG
-!       write(unit_debug_, *) ' @MRectZoneImpl::defineFromDeltas_refinements() : init -- ok.'
-! #endif
    end subroutine
 
 
@@ -276,10 +270,6 @@ contains
       if (.not. loc == 'i') &
          call bsa_Abort(&
             'Cannot define deltas from max values if given point location is not "i" (Init).')
-
-! #ifdef BSA_DEBUG
-!       write(unit_debug_, *) ' @MRectZoneImpl::defineFromDeltas_maxvalues() : init...'
-! #endif
 
 
       block
@@ -323,13 +313,13 @@ contains
 
             elseif (this%rot_ == CST_PIGREC) then
                if (maxF_i >= fi .or. maxF_j >= fj) call bsa_Abort(invalid_max_vals)
-               
+
                bi = fi - maxF_i
                bj = fj - maxF_j
 
             elseif (this%rot_ == CST_PIt3d2) then ! 3/2 * pi
                if (maxF_i >= fi .or. maxF_j <= fj) call bsa_Abort(invalid_max_vals)
-               
+
                bj = fi - maxF_i
                bi = maxF_j - fj
 
@@ -368,7 +358,7 @@ contains
                real(bsa_real_t) :: di, dj
                logical :: do_exceed = .false.
 
-               
+
                ! defaults
                if (present(exceed) .and. exceed) do_exceed= .true.
                di = dfi
@@ -397,7 +387,7 @@ contains
                elseif (this%rot_ == CST_PId2) then ! 1/2 * pi
                   fi = pt%freqI() + dj
                   fj = pt%freqJ() - di
-                  
+
                   if (maxF_i < fi .or. maxF_j > fj) call bsa_Abort(invalid_max_vals)
 
                   do while (fi <= maxF_i)
@@ -520,7 +510,7 @@ contains
             end block
 
          endif ! force
-         
+
          ! backup actual n. of points
          this%ni_ = ni
          this%nj_ = nj
@@ -533,10 +523,6 @@ contains
 
          call this%define(pt, loc, bi, bj)
       end block
-
-! #ifdef BSA_DEBUG
-!       write(unit_debug_, *) ' @MRectZoneImpl::defineFromDeltas_maxvalues() : init -- ok.'
-! #endif
    end subroutine
 
 
@@ -564,15 +550,10 @@ contains
       if (.not. (base_dir == 'i' .or. base_dir == 'j')) &
          call bsa_Abort('Unvalid base direction identifier. Must be one of "i"/"j".')
 
-
-! #ifdef BSA_DEBUG
-!       write(unit_debug_, *) ' @MRectZoneImpl::defineFromEndPtCoordAndBase_norm() : init...'
-! #endif
-
       ! backup init point
       this%Ipt_ = MPoint(Pi)
 
-      
+
       ! get A or B point
       if (base_dir == 'i') then ! B point
 
@@ -604,10 +585,6 @@ contains
       ! once we have both bases, redefine deltas
       ! NOTE: this assumes refinements have been already set
       call this%deduceDeltas()
-
-! #ifdef BSA_DEBUG
-!       write(unit_debug_, *) ' @MRectZoneImpl::defineFromEndPtCoordAndBase_norm() : init -- ok.'
-! #endif
    end subroutine defineFromEndPtCoordAndBase_norm
 
 
@@ -624,19 +601,12 @@ contains
       character(len = 1), intent(in)    :: base_dir
       real(bsa_real_t), intent(in)      :: dfi, dfj
 
-! #ifdef BSA_DEBUG
-!       write(unit_debug_, *) ' @MRectZoneImpl::defineFromEndPtCoordAndBase_forceDeltas() : init...'
-! #endif
 
       call this%defineFromEndPtCoordAndBase_norm(&
          Pi, coord_val, coord_ty_ch, baseval, base_dir, .true.)
 
       ! forcing deltas
       call this%setDeltas(dfi, dfj, .true.)
-
-! #ifdef BSA_DEBUG
-!       write(unit_debug_, *) ' @MRectZoneImpl::defineFromEndPtCoordAndBase_forceDeltas() : init -- ok.'
-! #endif
    end subroutine defineFromEndPtCoordAndBase_forceDeltas
 
 
@@ -659,7 +629,7 @@ contains
       if (present(loc)) location = loc
 
       if (location == 'c') then
-         
+
          block
             real(bsa_real_t) :: bid2, bjd2
 
@@ -669,7 +639,7 @@ contains
             else
                bid2         = this%base_I_ / 2
             endif
-      
+
             if (present(base_j)) then
                this%base_J_ = base_j
                bjd2         = base_j / 2
@@ -686,7 +656,7 @@ contains
          ! NOTE: don't forget to update bases if passed!
          if (present(base_i)) this%base_I_ = base_i
          if (present(base_j)) this%base_J_ = base_j
-         
+
          call this%setIEpts(pt, loc)
       endif
    end subroutine define
@@ -744,7 +714,7 @@ contains
          dj =   this%base_J_ * s + this%base_I_ * c
       endif
 
-      
+
 
       select case (loc)
 
@@ -825,7 +795,7 @@ contains
       real(bsa_real_t) :: kd, rot, cd, fi, fj
       type(MPoint_t) :: Pe
 
-      
+
       ! NOTE: preinitialise to avoid errors !!!!!!!!!!!!
       cd = 0._bsa_real_t
 
@@ -871,7 +841,7 @@ contains
 
             ! BUG: forcing it to zero if below some precision
             if (kd < MACHINE_PRECISION) then
-               
+
 #ifdef BSA_DEBUG
                write(unit_debug_, '(a, a)') &
                   WARNMSG, '(2) kd < machine precision. Assuming kd == 0.'
@@ -911,13 +881,13 @@ contains
 
             ! BUG: forcing it to zero if below some precision
             if (kd < MACHINE_PRECISION) then
-               
+
 #ifdef BSA_DEBUG
                write(unit_debug_, '(a, a)') &
                   WARNMSG, '(3) kd < machine precision. Assuming kd == 0.'
 #endif
             else
-               
+
                if (this%rot_ < CST_PId2) then
                   rot = this%rot_
                   cd  = kd * tan(rot)
@@ -944,13 +914,13 @@ contains
 
             ! BUG: forcing it to zero if below some precision
             if (kd < MACHINE_PRECISION) then
-               
+
 #ifdef BSA_DEBUG
                write(unit_debug_, '(a, a)') &
                   WARNMSG, '(4) kd < machine precision. Assuming kd == 0.'
 #endif
             else
-               
+
                if (this%rot_ < CST_PId2) then
                   rot = this%rot_
                   cd  = kd / tan(rot)
@@ -1075,7 +1045,7 @@ contains
    !       msh(:, j, 1) = [fj, fi]
    !    enddo ! pj_head
 
-      
+
    !    ! internal columns
    !    do i = 2, this%ni_
 
@@ -1236,7 +1206,7 @@ contains
 
       write(unit_dump_bfm_) this%rot_
       write(unit_dump_bfm_) this%base_I_, this%base_J_
-      
+
       ! NOTE: maybe useless ?
       write(unit_dump_bfm_) this%ni_, this%nj_
 
@@ -1257,7 +1227,7 @@ contains
       !! NOTE: Each specific zone dumping method is called 
       !!       from the STATIC procedure UndumpZone() in MZone Module.
       class(MRectZone_t), intent(inout) :: this
-      
+
       real(bsa_real_t)   :: rval1, rval2
       integer(bsa_int_t) :: ival1, ival2
 
@@ -1273,7 +1243,7 @@ contains
       read(unit_dump_bfm_) rval1, rval2
       this%base_I_ = rval1
       this%base_J_ = rval2
-      
+
       ! refinements
       read(unit_dump_bfm_) ival1, ival2
       call this%setRefinements(ival1, ival2, .true.)

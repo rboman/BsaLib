@@ -1695,11 +1695,6 @@ contains
          write(iun, *) vec(i)
       enddo
       close(iun)
-
-! #ifdef BSA_DEBUG
-!       write(unit_debug_, '(1x, a, 2a, " -- ok.")') &
-!          INFOMSG, '@::exportSkewness_() : writing to file   ', fname
-! #endif
    end subroutine
 
 

@@ -366,10 +366,6 @@ contains
          call bsa_Abort('Either NFREQs or DF are == 0.')
 
 
-! #ifdef BSA_DEBUG
-!       write(unit_debug_, *) INFOMSG, '@BsaClassicImpl::computeFreqsVect_() : computing frequencies...'
-! #endif
-
       ! NOTE: make sure resonant peak are computed
       call struct%ComputeResPeakWidths()
 

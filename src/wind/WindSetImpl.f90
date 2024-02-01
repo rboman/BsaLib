@@ -340,10 +340,6 @@ contains
       class(WindData_t), intent(inout) :: this
       real(bsa_real_t), target, intent(in) :: Unod(:)
 
-! #ifdef BSA_DEBUG
-!       write(unit_debug_, '(1x, a, a)') INFOMSG, '@WindImpl::SetNodalVel() : setting nodal velocities...'
-! #endif
-
       this%u_node_ => Unod
 
 #ifdef BSA_DEBUG
@@ -357,10 +353,6 @@ contains
    module subroutine SetNodalWindZones(this, NodWZ)
       class(WindData_t), intent(inout) :: this
       integer(bsa_int_t), target, intent(in) :: NodWZ(:)
-
-! #ifdef BSA_DEBUG
-!       write(unit_debug_, '(1x, a, a)') INFOMSG, '@WindImpl::SetNodalWindZones() : setting nodal wind zones...'
-! #endif
 
       this%wz_node_ => NodWZ
 
@@ -377,10 +369,6 @@ contains
       class(WindData_t), intent(inout) :: this
       real(bsa_real_t), target, intent(in) :: WnodAlt(:)
 
-! #ifdef BSA_DEBUG
-!       write(unit_debug_, '(1x, a, a)') INFOMSG, '@WindImpl::SetNodalWindAltitudes() : setting nodal wind altitudes...'
-! #endif
-
       this%wAlt_node_ => WnodAlt
 
 #ifdef BSA_DEBUG
@@ -396,10 +384,6 @@ contains
    module subroutine SetSpatialNodalCorr(this, nodCorr)
       class(WindData_t), intent(inout) :: this
       real(bsa_real_t), target, intent(in) :: nodCorr(:, :)
-
-! #ifdef BSA_DEBUG
-!       write(unit_debug_, '(1x, a, a)') INFOMSG, '@WindImpl::SetSpatialNodalCorr() : setting spatial nodal correlation...'
-! #endif
 
       this%nod_corr_ => nodCorr
 
@@ -435,10 +419,6 @@ contains
    module subroutine SetWindFCoeffs(this, wfc)
       class(WindData_t), intent(inout) :: this
       real(bsa_real_t), target, intent(in) :: wfc(:, :, :)
-
-! #ifdef BSA_DEBUG
-!       write(unit_debug_, '(1x, a, a)') INFOMSG, '@WindImpl::SetWindFCoeffs() : setting wind forces coefficients...'
-! #endif
 
       this%wfc_ => wfc
 
@@ -500,10 +480,6 @@ contains
       write(unit_debug_, '(1x, a, a)') INFOMSG, '@WindImpl::clean() : cleaning up -- ok.'
 #endif
    end subroutine clean
-
-
-
-
 
 
 end submodule
