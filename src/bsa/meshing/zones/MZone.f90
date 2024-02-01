@@ -102,7 +102,9 @@ contains
 
 
    subroutine zoneName(this, name_in)
+#if (_WIN32 & __INTEL_COMPILER)
 !DIR$ ATTRIBUTES FORCEINLINE :: zoneName
+#endif
       class(MZone_t), intent(inout) :: this
       character(len=*), intent(in)  :: name_in
 

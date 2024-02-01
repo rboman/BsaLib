@@ -407,7 +407,9 @@ contains ! utility procedures
 
 
    function removeInputArgPlaceholder_(arg) result(arg_)
+#if (_WIN32 & __INTEL_COMPILER)
 !DIR$ ATTRIBUTES FORCEINLINE :: removeInputArgPlaceholder_
+#endif
       character(len = *), intent(in)  :: arg
       character(len = :), allocatable :: arg_
       character(len = *), parameter   :: MINUS = '-'

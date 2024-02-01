@@ -423,7 +423,9 @@ contains
 
 
    integer(int32) pure function getNPODModesByThreshold_(eigvals, rlim) result(nPODmodes)
+#if (_WIN32 & __INTEL_COMPILER)
 !DIR$ ATTRIBUTES FORCEINLINE :: getNPODModesByThreshold_
+#endif
       real(bsa_real_t), intent(in), contiguous :: eigvals(:)
       real(bsa_real_t), intent(in) :: rlim
       real(bsa_real_t) :: limval

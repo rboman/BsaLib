@@ -169,7 +169,7 @@ contains
    !> But how can this be more effective?
    !> 
    subroutine PreMesh()
-      real(real64), parameter :: cst_sqrt2d2 = sqrt(2._real64) / 2._real64      
+      real(real64), parameter :: cst_sqrt2d2 = sqrt(2._real64) / 2._real64
       integer(int32) :: NLims, iost
 
       logical :: iun_open
@@ -1766,7 +1766,9 @@ contains
 
 
    function getActualPeakZoneExtensionLimits_() result(peak_exts_lims)
+#if (_WIN32 & __INTEL_COMPILER)
 !DIR$ ATTRIBUTES FORCEINLINE :: getActualPeakZoneExtensionLimits_
+#endif
       real(bsa_real_t) :: peak_exts_lims(2, NM_EFF__)
       real(bsa_real_t) :: cst, modf, ext
       integer(int32)   :: im, nmode
