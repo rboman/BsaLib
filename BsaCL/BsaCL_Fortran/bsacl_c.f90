@@ -8,16 +8,19 @@ module BsaCL_c
          type(c_ptr), value :: ierr
       end subroutine
 
+
       subroutine bsaclRun__(ierr) bind(c, name="bsaclRun")
          import c_ptr
          type(c_ptr), value :: ierr
       end subroutine
+
 
       function bsaclSetKernelID__(kid) result(ierr) bind(c, name="bsaclSetKernelID")
          import c_int
          integer(c_int), value :: kid
          integer(c_int) :: ierr
       end function
+
 
       subroutine bsaclAcquirePSDId__(psdid) bind(c, name="bsaclAcquirePSDId")
          import c_int
@@ -31,6 +34,7 @@ module BsaCL_c
          integer(c_int), value :: ndofs, nmodes
       end subroutine
 
+
       subroutine bsaclAcquireLoadedNodesList__(nodes_load, nnodes_l) &
             bind(c, name="bsaclAcquireLoadedNodesList")
          import c_ptr, c_int
@@ -38,16 +42,19 @@ module BsaCL_c
          integer(c_int), value :: nnodes_l
       end subroutine
 
+
       subroutine bsaclAcquireTotalNOfNodes__(nn) bind(c, name="bsaclAcquireTotalNOfNodes")
          import c_int
          integer(c_int), value :: nn
       end subroutine
+
 
       subroutine bsaclAcquireUsedModesList__(modes, nmodes_eff) bind(c, name="bsaclAcquireUsedModesList")
          import c_ptr, c_int
          type(c_ptr), value    :: modes
          integer(c_int), value :: nmodes_eff
       end subroutine
+
 
       subroutine bsaclAcquireWindCoeffs__(wfc, nnodes_l, nlibs, ndegw) bind(c, name="bsaclAcquireWindCoeffs")
          import c_ptr, c_int
@@ -69,6 +76,7 @@ module BsaCL_c
          integer(c_int), value :: nnodes_l, nmodes, ndegw
       end subroutine
 
+
       subroutine bsaclAcquireNodalCorrelation__(nod_corr, nnod_corr) bind(c, name="bsaclAcquireNodalCorrelation")
          import c_ptr, c_int
          type(c_ptr), value    :: nod_corr
@@ -82,16 +90,19 @@ module BsaCL_c
          type(c_ptr), value :: nod_vel
       end subroutine
 
+
       subroutine bsaclAcquireWindNodalWindZones__(nod_wz) bind(c, name="bsaclAcquireWindNodalWindZones")
          import c_ptr
          type(c_ptr), value :: nod_wz
       end subroutine
+
 
       subroutine bsaclAcquireWindTurbScales__(wt_scl, nwz) bind(c, name="bsaclAcquireWindTurbScales")
          import c_ptr, c_int
          type(c_ptr), value    :: wt_scl
          integer(c_int), value :: nwz
       end subroutine
+
 
       subroutine bsaclAcquireWindTurbStd__(wt_std, nwz) bind(c, name="bsaclAcquireWindTurbStd")
          import c_ptr, c_int
@@ -158,6 +169,7 @@ module BsaCL_c
          import c_int
          integer(c_int), value :: ierr
       end subroutine
+
 
       subroutine bsaclFinalise__() bind(c, name="bsaclFinalise")
       end subroutine

@@ -54,42 +54,52 @@ module BsaCL
          integer(IK), intent(inout), target :: ierr
       end subroutine
 
+
       module subroutine bsacl_Run(ierr)
          integer(IK), intent(inout), target :: ierr
       end subroutine
+
 
       module function bsacl_SetKernelID(kid) result(ierr)
          integer(IK), value, intent(in) :: kid
          integer(IK) :: ierr
       end function
 
+
       module subroutine bsacl_AcquirePSDId(psdid)
          integer(IK), intent(in) :: psdid
       end subroutine
+
 
       module subroutine bsacl_AcquireStructModMat(modmat, natf)
          real(RK), intent(in), target :: modmat(:, :), natf(:)
       end subroutine
 
+
       module subroutine bsacl_AcquireLoadedNodesList(nodes_load)
          integer(IK), intent(in), target :: nodes_load(:)
       end subroutine
+
 
       module subroutine bsacl_AcquireTotalNOfNodes(nn)
          integer(IK), intent(in) :: nn
       end subroutine
 
+
       module subroutine bsacl_AcquireUsedModesList(modes)
          integer(IK), intent(in), target :: modes(:)
       end subroutine
+
 
       module subroutine bsacl_AcquireWindCoeffs(wfc)
          real(RK), intent(in), target :: wfc(:, :, :)
       end subroutine
 
+
       module subroutine bsacl_AcquireTurbComponentsList(tc)
          integer(IK), intent(in), target :: tc(:)
       end subroutine
+
 
       module subroutine bsacl_AcquirePhiTimesCMat(phi_T_c)
          real(RK), intent(in), target :: phi_T_c(:, :, :)
@@ -106,14 +116,17 @@ module BsaCL
          real(RK), intent(in), target :: nod_vel(:)
       end subroutine
 
+
       module subroutine bsacl_AcquireWindNodalWindZones(nod_wz)
          integer(IK), intent(in), target :: nod_wz(:)
       end subroutine
+
 
       module subroutine bsacl_AcquireWindTurbScales(wt_scl, nwz)
          real(RK), intent(in), target :: wt_scl(:, :, :)
          integer(IK), intent(in)      :: nwz
       end subroutine
+
 
       module subroutine bsacl_AcquireWindTurbStd(wt_std, nwz)
          real(RK), intent(in), target :: wt_std(:, :)
@@ -147,6 +160,7 @@ module BsaCL
       end subroutine
 #endif
 
+
       module subroutine bsacl_AcquireComputationFreqs(nfi, fi, nfj, fj)
          integer(IK), intent(in)      :: nfi, nfj
          real(RK), intent(in), target :: fi(..), fj(..)
@@ -176,6 +190,7 @@ module BsaCL
       module subroutine bsacl_Abort(ierr)
          integer(IK), intent(in) :: ierr
       end subroutine
+
 
       module subroutine bsacl_Finalise()
       end subroutine

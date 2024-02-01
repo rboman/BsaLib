@@ -15,6 +15,7 @@ contains
       call bsaclInit__(c_loc(ierr))
    end subroutine
 
+
    module subroutine bsacl_Run(ierr)
       integer(IK), intent(inout), target :: ierr
       call bsaclRun__(c_loc(ierr))
@@ -49,6 +50,7 @@ contains
       call bsaclAcquireStructModMat__(c_loc(modmat), c_loc(natf), ndofs_c_, nmodes_c_)
    end subroutine
 
+
    module subroutine bsacl_AcquireLoadedNodesList(nodes_load)
       integer(IK), intent(in), target :: nodes_load(:)
       integer(c_int) :: nnodes_l_
@@ -56,10 +58,12 @@ contains
       call bsaclAcquireLoadedNodesList__(c_loc(nodes_load), nnodes_l_)
    end subroutine
 
+
    module subroutine bsacl_AcquireTotalNOfNodes(nn)
       integer(IK), intent(in) :: nn
       call bsaclAcquireTotalNOfNodes__(int(nn, kind=c_int))
    end subroutine
+
 
    module subroutine bsacl_AcquireUsedModesList(modes)
       integer(IK), intent(in), target :: modes(:)
@@ -130,11 +134,13 @@ contains
       call bsaclAcquireWindNodalVelocities__(c_loc(nod_vel))
    end subroutine
 
+
    module subroutine bsacl_AcquireWindNodalWindZones(nod_wz)
       integer(IK), intent(in), target :: nod_wz(:)
 
       call bsaclAcquireWindNodalWindZones__(c_loc(nod_wz))
    end subroutine
+
 
    module subroutine bsacl_AcquireWindTurbScales(wt_scl, nwz)
       real(RK), intent(in), target :: wt_scl(:, :, :)
@@ -142,6 +148,7 @@ contains
 
       call bsaclAcquireWindTurbScales__(c_loc(wt_scl), int(nwz, c_int))
    end subroutine
+
 
    module subroutine bsacl_AcquireWindTurbStd(wt_std, nwz)
       real(RK), intent(in), target :: wt_std(:, :)
@@ -252,7 +259,6 @@ contains
          bool = .true.
       endif
    end function
-
 
 
 
