@@ -2214,6 +2214,7 @@ contains
                Suvw_N_T(1, :)        = Suvw(:, tc_pos)  ! storing transpose once for all
 
                itmp = 0
+
 !DIR$ UNROLL= 10
                do ifrj = 1, NFREQS
 
@@ -2271,12 +2272,17 @@ contains
                         ! NOTE: no need to retrieve actual mode
                         !       since we are supposed to store only
                         !       kept mode for all related variables.
-!DIR$ UNROLL= 10
+#ifdef BSA_DEBUG
                         do im = 1, NMODES_EFF
-
                            bisp(:, :, im) = bisp(:, :, im) + &
                               phik(im) * phij(im) * phii(im) * BF_ijk_III_w1w2
                         enddo
+#else
+                        do concurrent (im = 1:NMODES_EFF)
+                           bisp(:, :, im) = bisp(:, :, im) + &
+                              phik(im) * phij(im) * phii(im) * BF_ijk_III_w1w2
+                        enddo
+#endif
 
                      enddo ! i lib
                   enddo ! j lib
@@ -3367,15 +3373,6 @@ contains
 
       enddo ! itc
    end subroutine
-
-
-
-
-
-
-
-
-
 
 
 

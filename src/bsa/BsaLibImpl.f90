@@ -1903,12 +1903,12 @@ contains
       if (present(f)) then
          do j = 1, s1
             tmp = psd(j, :)
-            write(iun, '(*(g, 1x))') f(j), tmp
+            write(iun, '(*(g0, 1x))') f(j), tmp
          enddo
       else
          do j = 1, s1
             tmp = psd(j, :)
-            write(iun, '(*(g, 1x))') tmp
+            write(iun, '(*(g0, 1x))') tmp
          enddo
       endif
       close(iun)
@@ -1937,7 +1937,7 @@ contains
       write(iun, *) s3
       do j = 1, s3
          do i = 1, s2
-            write(iun, '(*(g, 1x))') bisp(:, i, j)
+            write(iun, '(*(g0, 1x))') bisp(:, i, j)
          enddo
       enddo
       close(iun)

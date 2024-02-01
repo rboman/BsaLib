@@ -179,7 +179,7 @@ contains
          if (nmodes /= this%modal_%nm_eff_) call bsa_Abort('Sizes do not match.')
       endif
 
-      
+
       if (.not. allocated(this%modal_%modes_)) then
          allocate(this%modal_%modes_(this%modal_%nm_eff_), stat=istat, errmsg=emsg)
          if (istat /= 0) call allocKOMsg('this % modal_%modes_', istat, emsg)
@@ -208,9 +208,9 @@ contains
          if (istat /= 0) call allocKOMsg('this % modal_%modes_', istat, emsg)
       endif
 
-      this%modal_%modes_ = [1 : this%modal_%nm_]    
+      this%modal_%modes_ = [1 : this%modal_%nm_]
    end subroutine SetKeptModesDefault
-   
+
 
 
 
@@ -288,7 +288,7 @@ contains
 #endif
 
       if (allocated(this%res_peak_width_)) then
-         
+
          if (.not. all(this%res_peak_width_ == 0._bsa_real_t)) return
 
       else
@@ -297,7 +297,7 @@ contains
          if (istat /= 0) call allocKOMsg('this % res_peak_width_', istat, emsg)
 
       endif
-      
+
       this%res_peak_width_ = this%modal_%xsi_ * this%modal_%nat_freqs_
 
 #ifdef BSA_DEBUG
@@ -334,14 +334,20 @@ contains
 
       this%bkg_peak_width_ = 0._bsa_real_t
 
-      ! BUG: this is not optimal!
-!DIR$ UNROLL
+#ifdef BSA_DEBUG
       do j = 1, 3
          do i = 1, 3
             if (wind_scales(i, j) == 0._bsa_real_t) cycle
             this%bkg_peak_width_(i, j) = 1._bsa_real_t / wind_scales(i, j)
          enddo
       enddo
+#else
+      do concurrent (j = 1:3, i = 1:3)
+         if (.not. wind_scales(i, j) == 0._bsa_real_t) then
+            this%bkg_peak_width_(i, j) = 1._bsa_real_t / wind_scales(i, j)
+         enddo
+      enddo
+#endif
 
 #ifdef BSA_DEBUG
       write(unit_debug_, *) &
@@ -369,7 +375,7 @@ contains
 ! #ifdef BSA_DEBUG
 !       write(unit_debug_, *) INFOMSG//'@StructImpl::clean() : cleaning up...'
 ! #endif
-      
+
       if (associated(this%n_load_))    nullify(this%n_load_)
       if (associated(this%libs_load_)) nullify(this%libs_load_)
       if (associated(this%coords_))    nullify(this%coords_)

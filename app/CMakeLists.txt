@@ -3,6 +3,10 @@ add_executable( bsa bsa.f90 )
 
 target_link_libraries( bsa BsaLib )
 
+if (intel-compiler)
+   target_compile_options( bsa PRIVATE -w )
+endif()
+
 if (enable-gpu-code)
    if (enable-cuda)
       set_target_properties(bsa PROPERTIES OUTPUT_NAME "bsa_cuda")

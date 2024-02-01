@@ -113,6 +113,7 @@ if (intel-compiler)
       $<$<AND:$<CONFIG:RELEASE>,$<COMPILE_LANGUAGE:Fortran>>:-O3>
       $<$<AND:$<CONFIG:RELEASE>,$<COMPILE_LANGUAGE:Fortran>>:-Ob1>
    )
+   add_compile_options( $<$<COMPILE_LANGUAGE:Fortran>:-Qdiag-disable:8291> ) # field widths recommendation
 else()
    add_compile_options(
       $<$<AND:$<CONFIG:RELEASE>,$<COMPILE_LANGUAGE:Fortran>>:-Ofast>
