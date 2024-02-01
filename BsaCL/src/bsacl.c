@@ -1120,11 +1120,13 @@ ierr_t getOptKernelDims_()
 
 
 #ifdef BSA_DEBUG
-   printf("\n%sEnqueueing kernel using:", INFO_MSG);
-   printf("\n%s - local grid dims  : %llu - %llu - %llu", 
+   printf("\n%sEnqueueing kernel using:\n", INFO_MSG);
+   printf("%s - local grid dims  : %llu - %llu - %llu\n",
       CONT_MSG, local_dims_ie_WIpWG__[0], local_dims_ie_WIpWG__[1], local_dims_ie_WIpWG__[2]);
-   printf("\n%s - global grid dims : %llu - %llu - %llu\n\n", 
+   printf("%s - global grid dims : %llu - %llu - %llu\n",
       CONT_MSG, global_dims_ie_NTWI__[0], global_dims_ie_NTWI__[1], global_dims_ie_NTWI__[2]);
+   printf("%s - n. of WG/TB      : %llu - %llu - %llu\n\n",
+      CONT_MSG, n_work_groups__[0], n_work_groups__[1], 1llu);
 #endif
 
    return BSACL_SUCCESS;
