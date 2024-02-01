@@ -45,7 +45,7 @@
 #endif
 
 
-
+#define _use_fast_reduction_scheme_
 
 
 DEVICE UINT getCorrId(
@@ -81,8 +81,6 @@ DEVICE UINT getCorrId(
 
 
 
-// #define _use_double_pow_unit_
-
 
 DEVICE REAL evalFct(
       const REAL f,
@@ -105,11 +103,7 @@ DEVICE REAL evalFct(
 # endif
       rtmp = cFL_U*cFL_U;
       rtmp = (rtmp * (REAL)70.7f) + (REAL)1.f;
-#ifdef _use_double_pow_unit_
-      rtmp = (REAL)POW_D((double)rtmp, ((double)5.f/(double)6.f));
-#else
       rtmp = POW(rtmp, ((REAL)5.f/(REAL)6.f));
-#endif
       rtmp = 1.f / rtmp;
 
       res  = (4.f * cL_U * w_std*w_std) * rtmp;
@@ -124,11 +118,7 @@ DEVICE REAL evalFct(
    if (BSACL_WIND_PSD_ID==BSACL_PSD_TYPE_DAVENPORT) {
 # endif
       rtmp = cFL_U*cFL_U + 1.f;
-#ifdef _use_double_pow_unit_
-      rtmp = (REAL)POW_D((double)rtmp, ((double)4.f/(double)3.f));
-#else
-      rtmp = POW(rtmp, (REAL)(4.f/3.f));
-#endif
+      rtmp = POW(rtmp, ((REAL)4.f/(REAL)3.f));
       rtmp = 1.f / rtmp;
 
       res  = (2.f/3.f * cFL_U * cL_U * w_std*w_std) * rtmp;
@@ -317,20 +307,12 @@ KERNEL void bfm_kernel(
          S_uvw_IK_j   = evalFct(fj_,  PSD_ID_ARG   wscl_, wstd_, ubni_);
          S_uvw_IK_j  *= evalFct(fj_,  PSD_ID_ARG   wscl_, wstd_, ubnk_);
          S_uvw_IK_j   = sqrt(S_uvw_IK_j);
-#ifdef _use_double_pow_unit_
-         S_uvw_IK_j  *= (REAL)POW_D((double)corrIK_, (FABS_D((double)fj_)));
-#else
-         S_uvw_IK_j  *= POW(corrIK_, (REAL)(FABS(fj_)));
-#endif
+         S_uvw_IK_j  *= POW(corrIK_, (FABS((REAL)fj_)));
 
          S_uvw_JK_j   = evalFct(fj_,  PSD_ID_ARG   wscl_, wstd_, ubnj_);
          S_uvw_JK_j  *= evalFct(fj_,  PSD_ID_ARG   wscl_, wstd_, ubnk_);
          S_uvw_JK_j   = sqrt(S_uvw_JK_j);
-#ifdef _use_double_pow_unit_
-         S_uvw_JK_j  *= (REAL)POW_D((double)corrJK_, (FABS_D((double)fj_)));
-#else
-         S_uvw_JK_j  *= POW(corrJK_, (REAL)(FABS(fj_)));
-#endif
+         S_uvw_JK_j  *= POW(corrJK_, (FABS((REAL)fj_)));
 
          for (UINT ifi_=0; ifi_ < NFI__; ++ifi_) {
 
@@ -340,40 +322,24 @@ KERNEL void bfm_kernel(
             S_uvw_IJ_i   = evalFct(fi_,  PSD_ID_ARG   wscl_, wstd_, ubni_);
             S_uvw_IJ_i  *= evalFct(fi_,  PSD_ID_ARG   wscl_, wstd_, ubnj_);
             S_uvw_IJ_i   = sqrt(S_uvw_IJ_i);
-#ifdef _use_double_pow_unit_
-            S_uvw_IJ_i  *= (REAL)POW_D((double)corrIJ_, (FABS_D((double)fi_)));
-#else
-            S_uvw_IJ_i  *= POW(corrIJ_, (REAL)(FABS(fi_)));
-#endif
+            S_uvw_IJ_i  *= POW(corrIJ_, (FABS((REAL)fi_)));
 
             S_uvw_IJ_ij  = evalFct(fiPfj_,  PSD_ID_ARG   wscl_, wstd_, ubni_);
             S_uvw_IJ_ij *= evalFct(fiPfj_,  PSD_ID_ARG   wscl_, wstd_, ubnj_);
             S_uvw_IJ_ij  = sqrt(S_uvw_IJ_ij);
-#ifdef _use_double_pow_unit_
-            S_uvw_IJ_ij *= (REAL)POW_D((double)corrIJ_, (FABS_D((double)fiPfj_)));
-#else
-            S_uvw_IJ_ij *= POW(corrIJ_, (REAL)(FABS(fiPfj_)));
-#endif
+            S_uvw_IJ_ij *= POW(corrIJ_, (FABS((REAL)fiPfj_)));
 
 
             S_uvw_IK_ij  = evalFct(fiPfj_,  PSD_ID_ARG   wscl_, wstd_, ubni_);
             S_uvw_IK_ij *= evalFct(fiPfj_,  PSD_ID_ARG   wscl_, wstd_, ubnk_);
             S_uvw_IK_ij  = sqrt(S_uvw_IK_ij);
-#ifdef _use_double_pow_unit_
-            S_uvw_IK_ij *= (REAL)POW_D((double)corrIK_, (FABS_D((double)fiPfj_)));
-#else
-            S_uvw_IK_ij *= POW(corrIK_, (REAL)(FABS(fiPfj_)));
-#endif
+            S_uvw_IK_ij *= POW(corrIK_, (FABS((REAL)fiPfj_)));
 
 
             S_uvw_JK_i   = evalFct(fi_,  PSD_ID_ARG   wscl_, wstd_, ubnj_);
             S_uvw_JK_i  *= evalFct(fi_,  PSD_ID_ARG   wscl_, wstd_, ubnk_);
             S_uvw_JK_i   = sqrt(S_uvw_JK_i);
-#ifdef _use_double_pow_unit_
-            S_uvw_JK_i  *= (REAL)POW_D((double)corrJK_, (FABS_D((double)fi_)));
-#else
-            S_uvw_JK_i  *= POW(corrJK_, (REAL)(FABS(fi_)));
-#endif
+            S_uvw_JK_i  *= POW(corrJK_, (FABS((REAL)fi_)));
 
 
             m3mf_wg_x_[lid0_] += 2.f * (
@@ -395,14 +361,13 @@ KERNEL void bfm_kernel(
    // BUG: apparently, removing this barrier leads to wrong results..
    LOCAL_WORKGROUP_BARRIER;
 
-#if 1
-   // WG reduction
-   UINT alive = BSACL_WIpWG;
-   while (alive > 1) {
+#ifdef _use_fast_reduction_scheme_
+   UINT active = BSACL_WIpWG;
+   while (active > 1) {
       LOCAL_WORKGROUP_BARRIER;
-      alive /= 2;
-      if (lid0_ < alive) {
-         m3mf_wg_x_[lid0_] += m3mf_wg_x_[lid0_+alive];
+      active /= 2;
+      if (lid0_ < active) {
+         m3mf_wg_x_[lid0_] += m3mf_wg_x_[lid0_+active];
       }
    }
    // Then store sum into global variable
@@ -411,7 +376,6 @@ KERNEL void bfm_kernel(
       m3mf[(itmp_*NM_EFF__*NM_EFF__*NM_EFF__) + wgid1_] += m3mf_wg_x_[0];
    }
 #else
-   // BUG: unoptimal reduction scheme !!
    if (0 == lid0_) {
 
       /** Reduce among all WI of current WG. */
@@ -568,8 +532,8 @@ KERNEL void bfm_kernel(
          UINT nk_   = nodes_load[ink_]-1;
          REAL ubnk_ = wind_nod_vel[nk_];
 
-         REAL S_uvw_K_i_  = evalFct(fi_,  PSD_ID_ARG   wscl_, wstd_, ubnk_);
-         REAL S_uvw_K_j_  = evalFct(fj_,  PSD_ID_ARG   wscl_, wstd_, ubnk_);
+         REAL S_uvw_K_i_  = evalFct(fi_,     PSD_ID_ARG   wscl_, wstd_, ubnk_);
+         REAL S_uvw_K_j_  = evalFct(fj_,     PSD_ID_ARG   wscl_, wstd_, ubnk_);
          REAL S_uvw_K_ij_ = evalFct(fiPfj_,  PSD_ID_ARG   wscl_, wstd_, ubnk_);
 
          for (UINT inj_=0; inj_ < NNL__; ++inj_) {
@@ -580,19 +544,15 @@ KERNEL void bfm_kernel(
 
             REAL corrJK_ = nod_corr[getCorrId(nj_, nk_, NN__)] < REAL_MIN ? REAL_MIN : nod_corr[getCorrId(nj_, nk_, NN__)];
 
-            REAL S_uvw_J_i_   = evalFct(fi_,  PSD_ID_ARG   wscl_, wstd_, ubnj_);
-            S_uvw_JK_i   = S_uvw_J_i_ * S_uvw_K_i_;
-            S_uvw_JK_i   = sqrt(S_uvw_JK_i);
-#ifdef _use_double_pow_unit_
-            S_uvw_JK_i  *= POW(corrJK_, (REAL)(FABS(fi_)));
-#else
-            S_uvw_JK_i  *= POW(corrJK_, (REAL)(FABS(fi_)));
-#endif
+            REAL S_uvw_J_i_ = evalFct(fi_,  PSD_ID_ARG   wscl_, wstd_, ubnj_);
+            S_uvw_JK_i  = S_uvw_J_i_ * S_uvw_K_i_;
+            S_uvw_JK_i  = sqrt(S_uvw_JK_i);
+            S_uvw_JK_i *= POW(corrJK_, (FABS((REAL)fi_)));
 
-            S_uvw_JK_j   = evalFct(fj_,  PSD_ID_ARG   wscl_, wstd_, ubnj_);
-            S_uvw_JK_j  *= S_uvw_K_j_;
-            S_uvw_JK_j   = sqrt(S_uvw_JK_j);
-            S_uvw_JK_j  *= POW(corrJK_, (REAL)(FABS(fj_)));
+            S_uvw_JK_j  = evalFct(fj_,  PSD_ID_ARG   wscl_, wstd_, ubnj_);
+            S_uvw_JK_j *= S_uvw_K_j_;
+            S_uvw_JK_j  = sqrt(S_uvw_JK_j);
+            S_uvw_JK_j *= POW(corrJK_, (FABS((REAL)fj_)));
 
             REAL S_uvw_J_ij_  = evalFct(fiPfj_,  PSD_ID_ARG   wscl_, wstd_, ubnj_);
 
@@ -608,22 +568,22 @@ KERNEL void bfm_kernel(
                S_uvw_IK_j   = evalFct(fj_,  PSD_ID_ARG   wscl_, wstd_, ubni_);
                S_uvw_IK_j  *= S_uvw_K_j_;
                S_uvw_IK_j   = sqrt(S_uvw_IK_j);
-               S_uvw_IK_j  *= POW(corrIK_, (REAL)(FABS(fj_)));
+               S_uvw_IK_j  *= POW(corrIK_, (FABS((REAL)fj_)));
 
                S_uvw_IK_ij  = evalFct(fiPfj_,  PSD_ID_ARG   wscl_, wstd_, ubni_);
                S_uvw_IK_ij *= S_uvw_K_ij_;
                S_uvw_IK_ij  = sqrt(S_uvw_IK_ij);
-               S_uvw_IK_ij *= POW(corrIK_, (REAL)(FABS(fiPfj_)));
+               S_uvw_IK_ij *= POW(corrIK_, (FABS((REAL)fiPfj_)));
 
                S_uvw_IJ_i   = evalFct(fi_,  PSD_ID_ARG   wscl_, wstd_, ubni_);
                S_uvw_IJ_i  *= S_uvw_J_i_;
                S_uvw_IJ_i   = sqrt(S_uvw_IJ_i);
-               S_uvw_IJ_i  *= POW(corrIJ_, (REAL)(FABS(fi_)));
+               S_uvw_IJ_i  *= POW(corrIJ_, (FABS((REAL)fi_)));
 
                S_uvw_IJ_ij  = evalFct(fiPfj_,  PSD_ID_ARG   wscl_, wstd_, ubni_);
                S_uvw_IJ_ij *= S_uvw_J_ij_;
                S_uvw_IJ_ij  = sqrt(S_uvw_IJ_ij);
-               S_uvw_IJ_ij *= POW(corrIJ_, (REAL)(FABS(fiPfj_)));
+               S_uvw_IJ_ij *= POW(corrIJ_, (FABS((REAL)fiPfj_)));
 
                m3mf_loc_[lid0_] += 2.f * (
                     phiTc_mno_[ni_offs_ + 3 + tc_] * phiTc_mno_[nj_offs_ + 6 +     tc_] * phiTc_mno_[nk_offs_ + 12 +     tc_] * (S_uvw_IJ_i  * S_uvw_IK_j )
@@ -635,14 +595,13 @@ KERNEL void bfm_kernel(
       }
    }
 
-#if 1
-   // WG reduction
-   UINT alive = BSACL_WIpWG;
-   while (alive > 1) {
+#ifdef _use_fast_reduction_scheme_
+   UINT active = BSACL_WIpWG;
+   while (active > 1) {
       LOCAL_WORKGROUP_BARRIER;
-      alive /= 2;
-      if (lid0_ < alive) {
-         m3mf_loc_[lid0_] += m3mf_loc_[lid0_+alive];
+      active /= 2;
+      if (lid0_ < active) {
+         m3mf_loc_[lid0_] += m3mf_loc_[lid0_+active];
       }
    }
    // Then store sum into global variable
@@ -652,7 +611,6 @@ KERNEL void bfm_kernel(
       m3mf[wgid1_*nwgd0_ + wgid0_] = m3mf_loc_[0];
    }
 #else
-   // BUG: unoptimal reduction scheme !!
    if (0 == lid0_) {
 
       /** Reduce among all WI of current WG. */
@@ -669,7 +627,4 @@ KERNEL void bfm_kernel(
 }
 
 #endif // (BSACL_KERNEL_ID==4)
-
-
-
 
