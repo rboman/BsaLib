@@ -19,31 +19,20 @@
 #include "_msgtypes.h"
 #include "_errtypes.h"
 #include "_base.h"
-#ifndef BSACL_OPT_N_WORK_ITEMS_PER_WORK_GROUP
-#  define BSACL_OPT_N_WORK_ITEMS_PER_WORK_GROUP 64
-#endif
-
-#ifndef BSACL_OPT_N_WORK_GROUPS
-#  define BSACL_OPT_N_WORK_GROUPS 10
-#endif
-
-#ifndef MIN_N_OF_WORK_GROUPS
-#  define MIN_N_OF_WORK_GROUPS 2
-#endif
-
-#ifndef BSACL_MAX_GPU_COUNT
-#  define BSACL_MAX_GPU_COUNT 8
-#endif
 
 
+// #ifndef BSACL_OPT_N_WORK_GROUPS
+// #  define BSACL_OPT_N_WORK_GROUPS 10
+// #endif
 
-#ifdef BSACL_USE_CUDA__
-# define _USE_MATH_DEFINES
-#endif
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+// #ifndef MIN_N_OF_WORK_GROUPS
+// #  define MIN_N_OF_WORK_GROUPS 2
+// #endif
+
+// #ifndef BSACL_MAX_GPU_COUNT
+// #  define BSACL_MAX_GPU_COUNT 8
+// #endif
+
 
 
 #ifndef BASE_DIRECTORY
@@ -56,6 +45,13 @@ typedef void (*evalFct_t)(int, int, const double*, int, double*);
 #endif
 
 
+#ifdef BSACL_USE_CUDA__
+# define _USE_MATH_DEFINES
+#endif
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "bsacl.h"
 #ifdef BSACL_USE_CUDA__
 # ifdef BSACL_PASS_PARAMS_BY_MACRO__
@@ -707,16 +703,10 @@ void assembleProgramBuildOptsString_()
    buf += 33;
 #endif
 
-   strcpy(buf, "-D BSACL_WIpWG=");
-   buf += 15;
-   strcpy(buf, STRINGIFYMACRO_VALUE(BSACL_OPT_N_WORK_ITEMS_PER_WORK_GROUP));
-   buf += strlen(STRINGIFYMACRO_VALUE(BSACL_OPT_N_WORK_ITEMS_PER_WORK_GROUP));
-
    strcpy(buf, " -D BSACL_KERNEL_ID=");
    buf += 20;
    sprintf(buf, "%-1u", kernel_id_);
    ++buf;
-
 
    strcpy(buf, " -D BSACL_WIND_PSD_ID=");
    buf += 22;
@@ -1093,22 +1083,22 @@ ierr_t getOptKernelDims_()
 
       // find how many WG of given size fit in nfreqs
       size_t nfreqs_ = nfi__ * nfj__;
-      nwg_ = (unsigned)(nfreqs_ / BSACL_OPT_N_WORK_ITEMS_PER_WORK_GROUP);
+      nwg_ = (unsigned)(nfreqs_ / BSACL_WIpWG);
       ++nwg_;
 
-      global_dims_ie_NTWI__[0] = nwg_*BSACL_OPT_N_WORK_ITEMS_PER_WORK_GROUP;
+      global_dims_ie_NTWI__[0] = nwg_*BSACL_WIpWG;
 
-      local_dims_ie_WIpWG__[0] = BSACL_OPT_N_WORK_ITEMS_PER_WORK_GROUP;
+      local_dims_ie_WIpWG__[0] = BSACL_WIpWG;
       local_dims_ie_WIpWG__[1] = 1;
 
    } else {
 
       ntwi_ = extdata__.NNODES_LOAD__ * extdata__.NNODES_LOAD__ * extdata__.NNODES_LOAD__;
-      nwg_  = (BSACL_UINT)ceil((double)ntwi_ / BSACL_OPT_N_WORK_ITEMS_PER_WORK_GROUP);
+      nwg_  = (BSACL_UINT)ceil((double)ntwi_ / BSACL_WIpWG);
 
-      global_dims_ie_NTWI__[0] = BSACL_OPT_N_WORK_ITEMS_PER_WORK_GROUP * nwg_;
+      global_dims_ie_NTWI__[0] = BSACL_WIpWG * nwg_;
 
-      local_dims_ie_WIpWG__[0] = BSACL_OPT_N_WORK_ITEMS_PER_WORK_GROUP;
+      local_dims_ie_WIpWG__[0] = BSACL_WIpWG;
       local_dims_ie_WIpWG__[1] = 1;
    }
 

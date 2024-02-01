@@ -45,12 +45,6 @@
 #endif
 
 
-// NOTE: default define BSACL_WIpWG if not passed as argument when 
-//       compiling on-the-fly this CL source.
-#ifndef BSACL_WIpWG
-#  define BSACL_WIpWG 64
-#endif
-
 
 
 
@@ -75,10 +69,6 @@ DEVICE UINT getCorrId(
 
 
 
-
-
-
-
 #ifdef BSACL_USE_CUDA__
 # ifdef BSACL_WIND_PSD_ID
 #  undef BSACL_WIND_PSD_ID
@@ -88,6 +78,10 @@ DEVICE UINT getCorrId(
 #  define BSACL_WIND_PSD_ID 1
 # endif
 #endif
+
+
+
+// #define _use_double_pow_unit_
 
 
 DEVICE REAL evalFct(
@@ -100,7 +94,7 @@ DEVICE REAL evalFct(
       const REAL w_nodvel
 )
 {
-   REAL rtmp, res = (REAL)0;
+   REAL rtmp, res = (REAL)0.f;
 
    const REAL cL_U  = w_scl / w_nodvel;
    const REAL cFL_U = f * cL_U;
@@ -110,8 +104,12 @@ DEVICE REAL evalFct(
    if (BSACL_WIND_PSD_ID==BSACL_PSD_TYPE_VONKARMAN) {
 # endif
       rtmp = cFL_U*cFL_U;
-      rtmp = rtmp * 70.7f + 1;
-      rtmp = POWR(rtmp, (REAL)(5.f/6.f));
+      rtmp = (rtmp * (REAL)70.7f) + (REAL)1.f;
+#ifdef _use_double_pow_unit_
+      rtmp = (REAL)POW_D((double)rtmp, ((double)5.f/(double)6.f));
+#else
+      rtmp = POW(rtmp, ((REAL)5.f/(REAL)6.f));
+#endif
       rtmp = 1.f / rtmp;
 
       res  = (4.f * cL_U * w_std*w_std) * rtmp;
@@ -126,7 +124,11 @@ DEVICE REAL evalFct(
    if (BSACL_WIND_PSD_ID==BSACL_PSD_TYPE_DAVENPORT) {
 # endif
       rtmp = cFL_U*cFL_U + 1.f;
-      rtmp = POWR(rtmp, (REAL)(4.f/3.f));
+#ifdef _use_double_pow_unit_
+      rtmp = (REAL)POW_D((double)rtmp, ((double)4.f/(double)3.f));
+#else
+      rtmp = POW(rtmp, (REAL)(4.f/3.f));
+#endif
       rtmp = 1.f / rtmp;
 
       res  = (2.f/3.f * cFL_U * cL_U * w_std*w_std) * rtmp;
@@ -315,12 +317,20 @@ KERNEL void bfm_kernel(
          S_uvw_IK_j   = evalFct(fj_,  PSD_ID_ARG   wscl_, wstd_, ubni_);
          S_uvw_IK_j  *= evalFct(fj_,  PSD_ID_ARG   wscl_, wstd_, ubnk_);
          S_uvw_IK_j   = sqrt(S_uvw_IK_j);
-         S_uvw_IK_j  *= POWR(corrIK_, (REAL)(fabs(fj_)));
+#ifdef _use_double_pow_unit_
+         S_uvw_IK_j  *= (REAL)POW_D((double)corrIK_, (FABS_D((double)fj_)));
+#else
+         S_uvw_IK_j  *= POW(corrIK_, (REAL)(FABS(fj_)));
+#endif
 
          S_uvw_JK_j   = evalFct(fj_,  PSD_ID_ARG   wscl_, wstd_, ubnj_);
          S_uvw_JK_j  *= evalFct(fj_,  PSD_ID_ARG   wscl_, wstd_, ubnk_);
          S_uvw_JK_j   = sqrt(S_uvw_JK_j);
-         S_uvw_JK_j  *= POWR(corrJK_, (REAL)(fabs(fj_)));
+#ifdef _use_double_pow_unit_
+         S_uvw_JK_j  *= (REAL)POW_D((double)corrJK_, (FABS_D((double)fj_)));
+#else
+         S_uvw_JK_j  *= POW(corrJK_, (REAL)(FABS(fj_)));
+#endif
 
          for (UINT ifi_=0; ifi_ < NFI__; ++ifi_) {
 
@@ -330,24 +340,40 @@ KERNEL void bfm_kernel(
             S_uvw_IJ_i   = evalFct(fi_,  PSD_ID_ARG   wscl_, wstd_, ubni_);
             S_uvw_IJ_i  *= evalFct(fi_,  PSD_ID_ARG   wscl_, wstd_, ubnj_);
             S_uvw_IJ_i   = sqrt(S_uvw_IJ_i);
-            S_uvw_IJ_i  *= POWR(corrIJ_, (REAL)(fabs(fi_)));
+#ifdef _use_double_pow_unit_
+            S_uvw_IJ_i  *= (REAL)POW_D((double)corrIJ_, (FABS_D((double)fi_)));
+#else
+            S_uvw_IJ_i  *= POW(corrIJ_, (REAL)(FABS(fi_)));
+#endif
 
             S_uvw_IJ_ij  = evalFct(fiPfj_,  PSD_ID_ARG   wscl_, wstd_, ubni_);
             S_uvw_IJ_ij *= evalFct(fiPfj_,  PSD_ID_ARG   wscl_, wstd_, ubnj_);
             S_uvw_IJ_ij  = sqrt(S_uvw_IJ_ij);
-            S_uvw_IJ_ij *= POWR(corrIJ_, (REAL)(fabs(fiPfj_)));
+#ifdef _use_double_pow_unit_
+            S_uvw_IJ_ij *= (REAL)POW_D((double)corrIJ_, (FABS_D((double)fiPfj_)));
+#else
+            S_uvw_IJ_ij *= POW(corrIJ_, (REAL)(FABS(fiPfj_)));
+#endif
 
 
             S_uvw_IK_ij  = evalFct(fiPfj_,  PSD_ID_ARG   wscl_, wstd_, ubni_);
             S_uvw_IK_ij *= evalFct(fiPfj_,  PSD_ID_ARG   wscl_, wstd_, ubnk_);
             S_uvw_IK_ij  = sqrt(S_uvw_IK_ij);
-            S_uvw_IK_ij *= POWR(corrIK_, (REAL)(fabs(fiPfj_)));
+#ifdef _use_double_pow_unit_
+            S_uvw_IK_ij *= (REAL)POW_D((double)corrIK_, (FABS_D((double)fiPfj_)));
+#else
+            S_uvw_IK_ij *= POW(corrIK_, (REAL)(FABS(fiPfj_)));
+#endif
 
 
             S_uvw_JK_i   = evalFct(fi_,  PSD_ID_ARG   wscl_, wstd_, ubnj_);
             S_uvw_JK_i  *= evalFct(fi_,  PSD_ID_ARG   wscl_, wstd_, ubnk_);
             S_uvw_JK_i   = sqrt(S_uvw_JK_i);
-            S_uvw_JK_i  *= POWR(corrJK_, (REAL)(fabs(fi_)));
+#ifdef _use_double_pow_unit_
+            S_uvw_JK_i  *= (REAL)POW_D((double)corrJK_, (FABS_D((double)fi_)));
+#else
+            S_uvw_JK_i  *= POW(corrJK_, (REAL)(FABS(fi_)));
+#endif
 
 
             m3mf_wg_x_[lid0_] += 2.f * (
@@ -557,12 +583,16 @@ KERNEL void bfm_kernel(
             REAL S_uvw_J_i_   = evalFct(fi_,  PSD_ID_ARG   wscl_, wstd_, ubnj_);
             S_uvw_JK_i   = S_uvw_J_i_ * S_uvw_K_i_;
             S_uvw_JK_i   = sqrt(S_uvw_JK_i);
-            S_uvw_JK_i  *= POWR(corrJK_, (REAL)(fabs(fi_)));
+#ifdef _use_double_pow_unit_
+            S_uvw_JK_i  *= POW(corrJK_, (REAL)(FABS(fi_)));
+#else
+            S_uvw_JK_i  *= POW(corrJK_, (REAL)(FABS(fi_)));
+#endif
 
             S_uvw_JK_j   = evalFct(fj_,  PSD_ID_ARG   wscl_, wstd_, ubnj_);
             S_uvw_JK_j  *= S_uvw_K_j_;
             S_uvw_JK_j   = sqrt(S_uvw_JK_j);
-            S_uvw_JK_j  *= POWR(corrJK_, (REAL)(fabs(fj_)));
+            S_uvw_JK_j  *= POW(corrJK_, (REAL)(FABS(fj_)));
 
             REAL S_uvw_J_ij_  = evalFct(fiPfj_,  PSD_ID_ARG   wscl_, wstd_, ubnj_);
 
@@ -578,22 +608,22 @@ KERNEL void bfm_kernel(
                S_uvw_IK_j   = evalFct(fj_,  PSD_ID_ARG   wscl_, wstd_, ubni_);
                S_uvw_IK_j  *= S_uvw_K_j_;
                S_uvw_IK_j   = sqrt(S_uvw_IK_j);
-               S_uvw_IK_j  *= POWR(corrIK_, (REAL)(fabs(fj_)));
+               S_uvw_IK_j  *= POW(corrIK_, (REAL)(FABS(fj_)));
 
                S_uvw_IK_ij  = evalFct(fiPfj_,  PSD_ID_ARG   wscl_, wstd_, ubni_);
                S_uvw_IK_ij *= S_uvw_K_ij_;
                S_uvw_IK_ij  = sqrt(S_uvw_IK_ij);
-               S_uvw_IK_ij *= POWR(corrIK_, (REAL)(fabs(fiPfj_)));
+               S_uvw_IK_ij *= POW(corrIK_, (REAL)(FABS(fiPfj_)));
 
                S_uvw_IJ_i   = evalFct(fi_,  PSD_ID_ARG   wscl_, wstd_, ubni_);
                S_uvw_IJ_i  *= S_uvw_J_i_;
                S_uvw_IJ_i   = sqrt(S_uvw_IJ_i);
-               S_uvw_IJ_i  *= POWR(corrIJ_, (REAL)(fabs(fi_)));
+               S_uvw_IJ_i  *= POW(corrIJ_, (REAL)(FABS(fi_)));
 
                S_uvw_IJ_ij  = evalFct(fiPfj_,  PSD_ID_ARG   wscl_, wstd_, ubni_);
                S_uvw_IJ_ij *= S_uvw_J_ij_;
                S_uvw_IJ_ij  = sqrt(S_uvw_IJ_ij);
-               S_uvw_IJ_ij *= POWR(corrIJ_, (REAL)(fabs(fiPfj_)));
+               S_uvw_IJ_ij *= POW(corrIJ_, (REAL)(FABS(fiPfj_)));
 
                m3mf_loc_[lid0_] += 2.f * (
                     phiTc_mno_[ni_offs_ + 3 + tc_] * phiTc_mno_[nj_offs_ + 6 +     tc_] * phiTc_mno_[nk_offs_ + 12 +     tc_] * (S_uvw_IJ_i  * S_uvw_IK_j )

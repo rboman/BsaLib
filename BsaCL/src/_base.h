@@ -51,6 +51,12 @@
 #endif
 
 
+// NOTE: default define BSACL_WIpWG if not passed as argument when 
+//       compiling on-the-fly this CL source.
+#ifndef BSACL_WIpWG
+#  define BSACL_WIpWG 256
+#endif
+
 
 #ifndef STRINGIFYMACRO_LITERAL
 #  define STRINGIFYMACRO_LITERAL(X) #X
@@ -102,11 +108,17 @@
 # define CONSTANT
 # define KERNEL __global__
 # define EXTERN_C extern "C"
-#ifdef BSA_SINGLE_FLOATING_PRECISION
-# define POWR powf
-#else
-# define POWR pow
-#endif
+# define POW_F powf
+# define POW_D pow
+# define FABS_F fabsf
+# define FABS_D fabs
+# ifdef BSA_SINGLE_FLOATING_PRECISION
+#  define POW powf
+#  define FABS fabsf
+# else
+#  define POW pow
+#  define FABS fabs
+# endif
 # define LOCAL_ID_X_DIM0 threadIdx.x
 # define LOCAL_ID_Y_DIM1 threadIdx.y
 # define LOCAL_ID_Z_DIM2 threadIdx.z
@@ -145,7 +157,12 @@
 # define CONSTANT __constant
 # define KERNEL __kernel
 # define EXTERN_C
-# define POWR powr
+# define POW_F powr
+# define POW_D powr
+# define POW   powr
+# define FABS_F fabs
+# define FABS_D fabs
+# define FABS   fabs
 # define LOCAL_ID_X_DIM0 get_local_id(0)
 # define LOCAL_ID_Y_DIM1 get_local_id(1)
 # define LOCAL_ID_Z_DIM2 get_local_id(2)

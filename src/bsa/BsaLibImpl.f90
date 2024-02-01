@@ -309,7 +309,7 @@ contains
 #ifdef BSA_USE_GPU
       call bsacl_Finalise()
       if (ierr_cl_ == BSACL_SUCCESS) then
-         print '(1x, 2a)', INFOMSG, " BSACL  returned correctly."
+         print '(1x, 2a)', INFOMSG, "BSACL returned correctly."
       else
          call bsa_Abort(" BSACL returned with error.")
       endif
