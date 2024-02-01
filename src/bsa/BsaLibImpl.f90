@@ -162,11 +162,6 @@ contains
       real(bsa_real_t), target, allocatable, dimension(:) :: &
          m2mf_cls, m2mr_cls, m2o2mr_cls, m3mf_msh, m3mr_msh, m3mf_cls, m3mr_cls
 
-
-#ifdef BSA_DEBUG
-      write(unit_debug_, *) INFOMSG//'@BsaLibImpl::run() : MAIN...'
-#endif
-
       ! user asked for nothing ??
       if (settings%i_compute_psd_ == 0 .and. settings%i_compute_bisp_ == 0) then
          print '(1x, 2a)', &
@@ -213,8 +208,12 @@ contains
          call bsacl_SetDeviceType(BSACL_DEVICE_TYPE_GPU)
 
          call bsacl_Init(ierr_cl_)
-         if (ierr_cl_ /= 0) goto 998
-#endif
+         if (ierr_cl_ /= 0) then
+            print '(1x, a, a)', &
+               ERRMSG, 'Failed to initialise BSACL.'
+            goto 998
+         endif
+#endif ! BSA_USE_GPU
 
          ! OK. check done.
          if (settings%i_only_diag_ == 1) then
@@ -277,15 +276,15 @@ contains
          if (.not. do_export_brm_ .and. .not. associated(write_brm_fptr_)) &
             write_brm_fptr_ => exportBRM_void_internal_
 
+#ifdef _BSA_CHECK_NOD_COH_SVD
+         settings%i_suban_type_   = 2  ! force MSH execution
+#endif
+
 
 #ifdef BSA_USE_GPU
          settings%i_suban_type_   = 1  ! force CLS execution
          settings%i_compute_bisp_ = 1
          settings%i_compute_psd_  = 0
-#endif
-
-#ifdef _BSA_CHECK_NOD_COH_SVD
-         settings%i_suban_type_   = 2  ! force MSH execution
 #endif
 
          is_only_msh_ = settings%i_suban_type_ == 2
@@ -309,17 +308,11 @@ contains
       998 continue
 #ifdef BSA_USE_GPU
       call bsacl_Finalise()
-      if (ierr_cl_ /= BSACL_PROBLEM_DIMENSIONS_TOO_SMALL) then
-         if (ierr_cl_ == 0) then
-            print '(1x, 2a)', INFOMSG, " BSACL  returned correctly."
-         else
-            call bsa_Abort(" BSACL  returned with error.")
-         endif
+      if (ierr_cl_ == BSACL_SUCCESS) then
+         print '(1x, 2a)', INFOMSG, " BSACL  returned correctly."
+      else
+         call bsa_Abort(" BSACL returned with error.")
       endif
-#endif
-
-#ifdef BSA_DEBUG
-      write(unit_debug_, *) INFOMSG//'@BsaLibImpl::run() : MAIN -- ok.'
 #endif
    end subroutine bsa_Run
 

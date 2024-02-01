@@ -16,7 +16,7 @@
 submodule(BsaLib_WindData) BsaLib_WindPSDImpl
 
 #ifndef BSA_DEBUG
-#  define __use_concurrent_loops__
+# define __use_concurrent_loops__
 #endif
 
    use BsaLib_CONSTANTS, only: bsa_int_t, bsa_real_t, real64, int32       &
@@ -30,6 +30,7 @@ submodule(BsaLib_WindData) BsaLib_WindPSDImpl
    ! TODO: might be statically initialised (parameter)
    type(arr_proc_pointer_t), dimension(5) :: psd_funcs
 
+
 contains
 
 
@@ -39,11 +40,13 @@ contains
       integer(int32) :: istat
       character(len = 256) :: emsg
 
-      ! if (ipsd < 1 .or. ipsd > 5) call bsa_Abort('Invalid "ipsd" value.')
-      ! if (ipsd < 1 .or. ipsd > 5) ipsd = 1
-      if (ipsd < 1 .or. ipsd > 5) error stop ERRMSG//'Invalid "ipsd" value.'
+      if (ipsd < 1 .or. ipsd > 5) then
+         print '(1x, 2a, i0, a)', &
+            WARNMSG, 'Invalid psd ID ', ipsd, '. Setting default (5).'
+         ipsd = 5
+      endif
 
-      ! TODO: this might be removed
+      ! NOTE: need to store it internally..
       this%i_psd_type_ = ipsd
 
       allocate(this%psd_, stat=istat, errmsg=emsg)
@@ -57,9 +60,9 @@ contains
 
       call this%psd_%SetPSDFunction(psd_funcs(ipsd)%ptr)
 
-#ifdef BSA_DEBUG
-      print *, INFOMSG, '@WindImpl::SetPSDType() : PSD type set to ', this%i_psd_type_
-#endif
+! #ifdef BSA_DEBUG
+!       print *, INFOMSG, '@WindImpl::SetPSDType() : PSD type set to ', this%i_psd_type_
+! #endif
    end subroutine
 
 
@@ -67,13 +70,13 @@ contains
 
 
    module function getFullNodalPSD(this, innl, nodesl, PSDvec, f, idir) result(PSDmat)
-      use BsaLib_Utility, only: util_getCorrVectIndex
-      use BsaLib_Data, only: struct_data
-      class(WindData_t), intent(in)  :: this
+      use BsaLib_Utility,  only: util_getCorrVectIndex
+      use BsaLib_Data,     only: struct_data
+      class(WindData_t),  intent(in) :: this
       integer(bsa_int_t), intent(in) :: innl, idir
       integer(bsa_int_t), intent(in) :: nodesl(innl)
-      real(bsa_real_t), intent(in) :: PSDvec(innl)
-      real(bsa_real_t), intent(in) :: f
+      real(bsa_real_t),   intent(in) :: PSDvec(innl)
+      real(bsa_real_t),   intent(in) :: f
       real(bsa_real_t) :: PSDmat(innl, innl)
       real(bsa_real_t) :: absf
       integer(int32)   :: i, j, ni, nj, id
@@ -107,7 +110,7 @@ contains
    end subroutine SetPSDFunction
 
 
-   
+
 
    module function evalPSD_(this, nf, f, innl, nnl, idir, itc) result(PSD)
       use BsaLib_Data, only: settings

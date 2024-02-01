@@ -45,7 +45,7 @@ module BsaLib
    !**************************************************************************************
    interface
       module subroutine mainClassic_(m2mf_cls, m2mr_cls, m2o2mr_cls, m3mf_cls, m3mr_cls)
-         real(bsa_real_t), allocatable :: &
+         real(bsa_real_t), allocatable, intent(inout) :: &
             m2mf_cls(:), m2mr_cls(:), m2o2mr_cls(:), m3mf_cls(:), m3mr_cls(:)
       end subroutine
 

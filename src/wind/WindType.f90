@@ -169,7 +169,7 @@ module BsaLib_WindData
 
 
 
-      !> internal PSd type variable
+      !> internal PSD type variable
       type(psd_t), allocatable, private :: psd_
 
    contains

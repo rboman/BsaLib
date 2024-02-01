@@ -37,7 +37,7 @@ module BsaCL
    end interface
 
 
-
+   integer(kind = IK), parameter :: BSACL_SUCCESS                      = 0_IK
    integer(kind = IK), parameter :: BSACL_DEVICE_TYPE_CPU              = BSACL_DEVICE_TYPE_CPU_
    integer(kind = IK), parameter :: BSACL_DEVICE_TYPE_GPU              = BSACL_DEVICE_TYPE_GPU_
    integer(kind = IK), parameter :: BSACL_DEVICE_TYPE_ACC              = BSACL_DEVICE_TYPE_ACC_
@@ -47,7 +47,6 @@ module BsaCL
    integer(kind = IK), parameter :: BSACL_DEF_PLATFORM_ACQUIRE_ERROR   = BSACL_DEF_PLATFORM_ACQUIRE_ERROR_
    integer(kind = IK), parameter :: BSACL_CQUEUES_CREATION_ERROR       = BSACL_CQUEUES_CREATION_ERROR_
    integer(kind = IK), parameter :: BSACL_INVALID_DEVICE_TYPE          = BSACL_INVALID_DEVICE_TYPE_
-   integer(kind = IK), parameter :: BSACL_PROBLEM_DIMENSIONS_TOO_SMALL = BSACL_PROBLEM_DIMENSIONS_TOO_SMALL_
 
 
    interface

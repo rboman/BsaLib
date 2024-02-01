@@ -27,14 +27,12 @@ contains
    !> BUG: now only supports EVENLY SPACED FREQUENCIES..
    module subroutine mainClassic_(m2mf_cls, m2mr_cls, m2o2mr_cls, m3mf_cls, m3mr_cls)
       use BsaLib_Functions
-      real(bsa_real_t), allocatable :: m2mf_cls(:), m2mr_cls(:), m2o2mr_cls(:), m3mf_cls(:), m3mr_cls(:)
-      integer :: idim2
-      real(bsa_real_t), allocatable :: S_uvw(:, :), f(:)
-      integer :: itc_, idir_, idxi, idxe
+      real(bsa_real_t), allocatable, intent(inout) :: &
+         m2mf_cls(:), m2mr_cls(:), m2o2mr_cls(:), m3mf_cls(:), m3mr_cls(:)
 
-#ifdef BSA_DEBUG
-      write(unit_debug_, *) INFOMSG, '@BsaClassicImpl::mainClassic_() : Init BSA-Classic main...'
-#endif
+      ! local
+      real(bsa_real_t), allocatable :: f(:)
+
 
       call computeFreqsVect_(settings, struct_data, f)
 
@@ -61,248 +59,232 @@ contains
       endif
 
 
-#ifdef BSA_DEBUG
-      print '(1x, a, a, i0)', INFOMSG, 'n. of frequencies to be computed=', settings%nfreqs_
-      print '(1x, a, a, i0)', INFOMSG, 'PSD  modal extension=', dimM_psd_
-      print '(1x, a, a, i0)', INFOMSG, 'BISP modal extension=', dimM_bisp_
-#endif
-
-
 #ifdef BSA_USE_GPU
+
+      call bsacl_AcquireResultBFMVect(m3mf_cls)
+      call bsacl_AcquireComputationFreqs(NFREQS, f, NFREQS, f)
+      ierr_cl_ = bsacl_SetKernelID(4)
+      if (ierr_cl_ /= 0) then
+         print '(1x, a, a)', ERRMSG, &
+            'Error in setting kernel identifier.'
+         goto 998
+      endif
+      call bsacl_Run(ierr_cl_)
+
+#else
+
       block
-         ! real(bsa_real_t), allocatable :: S_uvw_T_(:, :)
+         real(bsa_real_t), allocatable :: S_uvw(:, :)
+         integer :: itc_, idir_, idxi, idxe, idim2
 
-         call bsacl_AcquireResultBFMVect(m3mf_cls)
-         call bsacl_AcquireComputationFreqs(NFREQS, f, NFREQS, f)
-         ! S_uvw_T_ = transpose(S_uvw)  ! n_dim_ x n_freqs
-         ! deallocate(S_uvw)
-         ! call bsacl_AcquireBaseWindTurbPSD(S_uvw_T_)
-         if (bsacl_SetKernelID(4) /= 0) then
-            print '(1x, a, a)', ERRMSG, &
-               'Error in setting kernel identifier.'
-            ierr_cl_ = -1
-            goto 998
-         endif
-         call bsacl_Run(ierr_cl_)
-         if (ierr_cl_ == BSACL_PROBLEM_DIMENSIONS_TOO_SMALL) then
-            print '(1x, 2a)', WARNMSG, &
-               'Problem dimensions are too small for GPU parallelisation. Using CPU.'
-            ! S_uvw = transpose(S_uvw_T_)
-            ! deallocate(S_uvw_T_)
-            goto 997  ! CPU computation
-         endif
-      end block
-      goto 998
-#endif
-
-      997 continue
 #ifdef BSA_DEBUG
-      write(unit_debug_, *) INFOMSG, '@BsaClassicImpl::mainClassic_() : computing nodal wind turbulence PSDs...'
+         print '(1x, a, a, i0)', INFOMSG, 'n. of frequencies to be computed=', settings%nfreqs_
+         print '(1x, a, a, i0)', INFOMSG, 'PSD  modal extension=', dimM_psd_
+         print '(1x, a, a, i0)', INFOMSG, 'BISP modal extension=', dimM_bisp_
+
+         write(unit_debug_, *) INFOMSG, '@BsaClassicImpl::mainClassic_() : computing nodal wind turbulence PSDs...'
 #endif
 
-      idim2 = struct_data%nn_load_ * wd%i_ntc_  * wd%i_ndirs_
-      allocate(S_uvw(settings%nfreqs_, idim2))
-      idxi = 1
-      idxe = struct_data%nn_load_
-      do itc_ = 1, wd%i_ntc_
+         idim2 = struct_data%nn_load_ * wd%i_ntc_  * wd%i_ndirs_
+         allocate(S_uvw(settings%nfreqs_, idim2))
+         idxi = 1
+         idxe = struct_data%nn_load_
+         do itc_ = 1, wd%i_ntc_
 
-         do idir_ = 1, wd%i_ndirs_
+            do idir_ = 1, wd%i_ndirs_
 
-            ! BUG:  difference between idir and itc ???
-            ! NOTE: done for all the loaded nodes at once !
-            S_uvw(:, idxi:idxe) = wd%evalPSD(settings%nfreqs_, f, &
-               struct_data%nn_load_, struct_data%n_load_, wd%dirs_(idir_), wd%tc_(itc_))
+               ! BUG:  difference between idir and itc ???
+               ! NOTE: done for all the loaded nodes at once !
+               S_uvw(:, idxi:idxe) = wd%evalPSD(settings%nfreqs_, f, &
+                  struct_data%nn_load_, struct_data%n_load_, wd%dirs_(idir_), wd%tc_(itc_))
 
-            idxi = idxe + 1
-            idxe = idxe + struct_data%nn_load_
-         enddo ! i direction
-      enddo ! i turb comp
+               idxi = idxe + 1
+               idxe = idxe + struct_data%nn_load_
+            enddo ! i direction
+         enddo ! i turb comp
 
 
 #ifdef BSA_DEBUG
-      write(unit_debug_, *) INFOMSG, '@BsaClassicImpl::mainClassic_() : computing nodal wind turbulence PSDs -- ok.'
+         write(unit_debug_, *) INFOMSG, '@BsaClassicImpl::mainClassic_() : computing nodal wind turbulence PSDs -- ok.'
 
-      call bsa_exportPSDToFile('psd_Suvw.txt', S_uvw, f)
+         call bsa_exportPSDToFile('psd_Suvw.txt', S_uvw, f)
 #endif
-
-      block
-         real(bsa_real_t) :: m2(idim2)
-
-         call intgSpectraVect_(settings%nfreqs_, f, psd=S_uvw, m2=m2)
-         call bsa_exportMomentToFile('m2_PSDs.txt', m2)
-      end block
-
-
-      call checkMaxAllocation_()
-
-      ! BUG: set it from .dat file
-      settings%i_scalar_vers_ = 1  ! 0=vectorised, 1=scalar
-
-
-      if (settings%i_scalar_vers_ == 0) then ! VECTORISED
-
-         print '(/1x, 2a)', INFOMSG, 'Using  VECTORISED  version'
 
          block
-            real(bsa_real_t), allocatable :: psd(:, :), bisp(:, :, :)
+            real(bsa_real_t) :: m2(idim2)
 
-            !===========================================================
-            ! MODAL FORCES
-            !
-            call getBFM_vect_cls(f, S_uvw, psd, bisp)
-            if (allocated(S_uvw)) deallocate(S_uvw)
-            call intgSpectraVect_(settings%nfreqs_, f, psd=psd, m2=m2mf_cls, bisp=bisp, m3=m3mf_cls)
-            if (settings%i_compute_psd_ == 1) call bsa_exportPSDToFile('psdmf.txt', psd, f)
+            call intgSpectraVect_(settings%nfreqs_, f, psd=S_uvw, m2=m2)
+            call bsa_exportMomentToFile('m2_PSDs.txt', m2)
+         end block
 
 
-            !===========================================================
-            ! MODAL RESPONSES
-            !
-            call getBRM_vect_cls(f, psd, bisp)
-            call intgSpectraVect_(settings%nfreqs_, f, psd=psd, m2=m2mr_cls, bisp=bisp, m3=m3mr_cls)
-            if (settings%i_compute_psd_ == 1) call bsa_exportPSDToFile('psdmr.txt', psd, f)
+         call checkMaxAllocation_()
+
+
+         ! BUG: set it from .dat file
+         settings%i_scalar_vers_ = 1  ! 0=vectorised, 1=scalar
+
+
+         if (settings%i_scalar_vers_ == 0) then ! VECTORISED
+
+            print '(/1x, 2a)', INFOMSG, 'Using  VECTORISED  version'
 
             block
-               real(bsa_real_t), allocatable :: omegas(:)
-               integer :: i
+               real(bsa_real_t), allocatable :: psd(:, :), bisp(:, :, :)
 
-               omegas = f * CST_PIt2
-               do concurrent (i = 1 : dimM_psd_) shared(omegas, psd)
-                  psd(:, i) = psd(:, i) * omegas(:) * omegas(:)
-               enddo
-               call intgSpectraVect_(settings%nfreqs_, f, psd=psd, m2=m2o2mr_cls)
-            end block
+               !===========================================================
+               ! MODAL FORCES
+               !
+               call getBFM_vect_cls(f, S_uvw, psd, bisp)
+               if (allocated(S_uvw)) deallocate(S_uvw)
+               call intgSpectraVect_(settings%nfreqs_, f, psd=psd, m2=m2mf_cls, bisp=bisp, m3=m3mf_cls)
+               if (settings%i_compute_psd_ == 1) call bsa_exportPSDToFile('psdmf.txt', psd, f)
+
+
+               !===========================================================
+               ! MODAL RESPONSES
+               !
+               call getBRM_vect_cls(f, psd, bisp)
+               call intgSpectraVect_(settings%nfreqs_, f, psd=psd, m2=m2mr_cls, bisp=bisp, m3=m3mr_cls)
+               if (settings%i_compute_psd_ == 1) call bsa_exportPSDToFile('psdmr.txt', psd, f)
+
+               block
+                  real(bsa_real_t), allocatable :: omegas(:)
+                  integer :: i
+
+                  omegas = f * CST_PIt2
+                  do concurrent (i = 1 : dimM_psd_) shared(omegas, psd)
+                     psd(:, i) = psd(:, i) * omegas(:) * omegas(:)
+                  enddo
+                  call intgSpectraVect_(settings%nfreqs_, f, psd=psd, m2=m2o2mr_cls)
+               end block
 
 #if 0
-            block
-               real(bsa_real_t), allocatable :: psd_r(:, :)
-               integer(int32) :: im, jm, idx
+               block
+                  real(bsa_real_t), allocatable :: psd_r(:, :)
+                  integer(int32) :: im, jm, idx
 
-               allocate(psd_r(settings%nfreqs_, dimNr_psd_))
-               psd_r = 0._bsa_real_t
+                  allocate(psd_r(settings%nfreqs_, dimNr_psd_))
+                  psd_r = 0._bsa_real_t
 
-               idx = 0
-               do jm = 1, struct_data%modal_%nm_eff_
-                  do im = 1, struct_data%modal_%nm_eff_
+                  idx = 0
+                  do jm = 1, struct_data%modal_%nm_eff_
+                     do im = 1, struct_data%modal_%nm_eff_
 
-                     idx = idx + 1
-                     psd_r = psd_r + &
-                        matmul(psd(:, idx:idx), reshape(struct_data%modal_%phi_(:, im:im)*struct_data%modal_%phi_(:, jm:jm), [1, struct_data%ndofs_]))
+                        idx = idx + 1
+                        psd_r = psd_r + &
+                           matmul(psd(:, idx:idx), reshape(struct_data%modal_%phi_(:, im:im)*struct_data%modal_%phi_(:, jm:jm), [1, struct_data%ndofs_]))
+                     enddo
                   enddo
-               enddo
 
-               open(newunit=idx, file='psd_r', action='write', status='replace', form='unformatted')
-               rewind(idx)
-               write(idx) settings%nfreqs_, struct_data%ndofs_
-               do im = 1, settings%nfreqs_
-                  write(idx) f(im), psd_r(im, :)
-               enddo
-               close(idx)
+                  open(newunit=idx, file='psd_r', action='write', status='replace', form='unformatted')
+                  rewind(idx)
+                  write(idx) settings%nfreqs_, struct_data%ndofs_
+                  do im = 1, settings%nfreqs_
+                     write(idx) f(im), psd_r(im, :)
+                  enddo
+                  close(idx)
 
-               open(newunit=idx, file='psd_r.txt', action='write', status='replace', form='formatted')
-               rewind(idx)
-               write(idx, '(*(i))') settings%nfreqs_, struct_data%ndofs_
-               do im = 1, settings%nfreqs_
-                  write(idx, '(*(g, 2x))') f(im), psd_r(im, :)
-               enddo
-               close(idx)
-            end block
+                  open(newunit=idx, file='psd_r.txt', action='write', status='replace', form='formatted')
+                  rewind(idx)
+                  write(idx, '(*(i))') settings%nfreqs_, struct_data%ndofs_
+                  do im = 1, settings%nfreqs_
+                     write(idx, '(*(g, 2x))') f(im), psd_r(im, :)
+                  enddo
+                  close(idx)
+               end block
 #endif
 
-            if (allocated(psd))  deallocate(psd)
-            if (allocated(bisp)) deallocate(bisp)
-         end block
+               if (allocated(psd))  deallocate(psd)
+               if (allocated(bisp)) deallocate(bisp)
+            end block
 
 
 
-            !===============
-      else  ! SCALAR VERSION
-            !===============
+               !===============
+         else  ! SCALAR VERSION
+               !===============
 
 
-         print '(/1x, 2a)', INFOMSG, 'Using    SCALAR    version'
+            print '(/1x, 2a)', INFOMSG, 'Using    SCALAR    version'
 
-         print '(/ 1x, a, a /)', &
-            WARNMSG, 'For scalar version, computation of m2o2_mr not yet implemented !'
+            print '(/ 1x, a, a /)', &
+               WARNMSG, 'For scalar version, computation of m2o2_mr not yet implemented !'
 
-         block
-            real(bsa_real_t) :: fi, fj, dw, dw2, omg
-            real(bsa_real_t), allocatable :: S_uvw_pad(:, :)
+            block
+               real(bsa_real_t) :: fi, fj, dw, dw2, omg
+               real(bsa_real_t), allocatable :: S_uvw_pad(:, :)
 
-            integer, pointer :: jfr_ext => null()
-            integer, target  :: one_ext = 1
+               integer, pointer :: jfr_ext => null()
+               integer, target  :: one_ext = 1
 
-            integer :: lpad, indxi, indxe
+               integer :: lpad, indxi, indxe
 
-            real(bsa_real_t), dimension(dimM_psd_)  :: psdfm, psdrm, r_tmp
-            real(bsa_real_t), dimension(dimM_bisp_) :: bispfm, bisprm
+               real(bsa_real_t), dimension(dimM_psd_)  :: psdfm, psdrm, r_tmp
+               real(bsa_real_t), dimension(dimM_bisp_) :: bispfm, bisprm
 
-            psdfm  = 0._bsa_real_t
-            psdrm  = 0._bsa_real_t
-            bispfm = 0._bsa_real_t
-            bisprm = 0._bsa_real_t
+               psdfm  = 0._bsa_real_t
+               psdrm  = 0._bsa_real_t
+               bispfm = 0._bsa_real_t
+               bisprm = 0._bsa_real_t
 
-            dw  = (f(2) - f(1)) * CST_PIt2 ! [rad/s]
-            dw2 = dw*dw
-            ! get padded length
-            lpad  = (settings%nfreqs_ - 1) / 2
-            indxi = lpad + 1
-            indxe = lpad + settings%nfreqs_
-            lpad  = 2*lpad + settings%nfreqs_
+               dw  = (f(2) - f(1)) * CST_PIt2 ! [rad/s]
+               dw2 = dw*dw
+               ! get padded length
+               lpad  = (settings%nfreqs_ - 1) / 2
+               indxi = lpad + 1
+               indxe = lpad + settings%nfreqs_
+               lpad  = 2*lpad + settings%nfreqs_
 
-            allocate(S_uvw_pad(idim2, lpad))
-            S_uvw_pad(:, indxi : indxe) = transpose(S_uvw)
-
-
-            if (settings%i_compute_bisp_ == 0) then
-               jfr_ext => one_ext
-            else
-               jfr_ext => settings%nfreqs_
-            endif
+               allocate(S_uvw_pad(idim2, lpad))
+               S_uvw_pad(:, indxi : indxe) = transpose(S_uvw)
 
 
-            do ifr = 1, settings%nfreqs_
-
-               fi  = f(ifr)
-               omg = fi * CST_PIt2
-
-               do jfr = 1, jfr_ext
-
-                  fj = f(jfr)
-
-                  call getBFM_scalar_cls(ifr, jfr, fi, fj, S_uvw, S_uvw_pad(:, ifr - 1 + jfr), psdfm, bispfm)
-
-                  ! NOTE: using same infl area for each point in space!
-                  m3mf_cls = m3mf_cls + bispfm * dw2
-
-
-                  call getBRM_scalar_cls(ifr, jfr, fi, fj, psdfm, psdrm, bispfm, bisprm)
-                  m3mr_cls = m3mr_cls + bisprm * dw2
-               enddo ! i freqs
-
-               if (settings%i_compute_psd_ == 1) then
-                  m2mf_cls   = m2mf_cls + psdfm * dw
-                  r_tmp      = psdrm * dw
-                  m2mr_cls   = m2mr_cls + r_tmp
-                  m2o2mr_cls = m2o2mr_cls + r_tmp * omg*omg
+               if (settings%i_compute_bisp_ == 0) then
+                  jfr_ext => one_ext
+               else
+                  jfr_ext => settings%nfreqs_
                endif
 
-               print '(1x, a, 2(i12, a))', &
-                  INFOMSG, ifr*settings%nfreqs_, '  out of  ', settings%nfreqs_**2, '  done...'
 
-            enddo ! j freqs
-         end block
+               do ifr = 1, settings%nfreqs_
 
-      endif ! vect/scalar versions
+                  fi  = f(ifr)
+                  omg = fi * CST_PIt2
 
+                  do jfr = 1, jfr_ext
+
+                     fj = f(jfr)
+
+                     call getBFM_scalar_cls(ifr, jfr, fi, fj, S_uvw, S_uvw_pad(:, ifr - 1 + jfr), psdfm, bispfm)
+
+                     ! NOTE: using same infl area for each point in space!
+                     m3mf_cls = m3mf_cls + bispfm * dw2
+
+
+                     call getBRM_scalar_cls(ifr, jfr, fi, fj, psdfm, psdrm, bispfm, bisprm)
+                     m3mr_cls = m3mr_cls + bisprm * dw2
+                  enddo ! i freqs
+
+                  if (settings%i_compute_psd_ == 1) then
+                     m2mf_cls   = m2mf_cls + psdfm * dw
+                     r_tmp      = psdrm * dw
+                     m2mr_cls   = m2mr_cls + r_tmp
+                     m2o2mr_cls = m2o2mr_cls + r_tmp * omg*omg
+                  endif
+
+                  print '(1x, a, 2(i12, a))', &
+                     INFOMSG, ifr*settings%nfreqs_, '  out of  ', settings%nfreqs_**2, '  done...'
+
+               enddo ! j freqs
+            end block
+
+         endif ! vect/scalar versions
+      end block
+#endif
 
       998 continue
       if (allocated(f)) deallocate(f)
-
-#ifdef BSA_DEBUG
-      write(unit_debug_, *) &
-         INFOMSG, '@BsaClassicImpl::mainClassic_() : Init BSA-Classic main -- ok.'
-#endif
    end subroutine mainClassic_
 
 
