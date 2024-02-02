@@ -20,7 +20,7 @@
 #else
 #  ifdef BSACL_PI
 #    undef  BSACL_PI
-#    define BSACL_PI M_PI
+#    define BSACL_PI (BSACL_REAL)M_PI
 #  endif
 #  ifndef BSACL_BASE_DIR
 #    define BSACL_BASE_DIR ./
@@ -127,7 +127,7 @@ DEVICE BSACL_REAL evalFct(
 #endif // BSACL_WIND_PSD_ID==BSACL_PSD_TYPE_DAVENPORT
 
 #ifdef BSACL_CONV_PULSATION
-   res =  res / (4*(BSACL_REAL)BSACL_PI);
+   res =  res / (4 * BSACL_PI);
 #endif
 
    return res;

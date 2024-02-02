@@ -15,11 +15,6 @@
  * You should have received a copy of the GNU General Public License
  * along with BSA Library.  If not, see <https://www.gnu.org/licenses/>.
  * */
-#include "_devtypes.h"
-#include "_msgtypes.h"
-#include "_errtypes.h"
-#include "_base.h"
-
 
 // #ifndef BSACL_OPT_N_WORK_GROUPS
 // #  define BSACL_OPT_N_WORK_GROUPS 10
@@ -34,41 +29,48 @@
 // #endif
 
 
-
 #ifndef BASE_DIRECTORY
 # define BASE_DIRECTORY "./"  // By default, current binary directory.
 #endif
-
 
 #ifdef BSACL_ENABLE_EVALFCT_PTR
 typedef void (*evalFct_t)(int, int, const double*, int, double*);
 #endif
 
-
 #ifdef BSACL_USE_CUDA__
 # define _USE_MATH_DEFINES
 #endif
+
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "_msgtypes.h"
+#include "_errtypes.h"
+#include "_base.h"
 #include "bsacl.h"
+
 #ifdef BSACL_USE_CUDA__
+
 # ifdef BSACL_PASS_PARAMS_BY_MACRO__
 #  undef BSACL_PASS_PARAMS_BY_MACRO__  // in CUDA, we pass always by kernel param!
 # endif
-
 // # define __CUDACC_RTC__
 # pragma message("   --- [NOTE]:  Using  CUDA  in place of  OpenCL  specification!")
+# include <limits>
 # include "bsacl.cl"
 # ifdef NULL // CUDA does not like (void *) ptr assignment
 #   undef  NULL
 #   define NULL 0
 # endif
+
 #else // using OpenCL
+
+# include "_devtypes.h"
 # define CL_USE_DEPRECATED_OPENCL_1_2_APIS
 # define __CL_ENABLE_EXCEPTIONS
 # include <CL/cl.h>
+
 #endif
 
 
@@ -130,6 +132,7 @@ char       prog_compile_opts__[BUFSIZ] = {' '};
 #endif // BSACL_USE_CUDA__
 
 
+
 #ifndef BSACL_USE_CUDA__
 static BSACL_UINT n_work_dims__;
 #endif
@@ -149,20 +152,21 @@ static BSACL_REAL dInfl_ = { 0 };
 
 
 // BSACL memory buffers
-BSACL_MEM  UINT_PTR_T        d_tc__           = NULL;
-BSACL_MEM  UINT_PTR_T        d_nodes_load__   = NULL;
-BSACL_MEM  BSACL_REAL_PTR_T  d_phiTc__        = NULL;
-BSACL_MEM  BSACL_REAL_PTR_T  d_nod_corr__     = NULL;
+BSACL_MEM  UINT_PTR_T  d_tc__          = NULL;
+BSACL_MEM  UINT_PTR_T  d_nodes_load__  = NULL;
 
-BSACL_MEM  BSACL_REAL_PTR_T  d_wind_nodal_vel__   = NULL;
-BSACL_MEM  BSACL_REAL_PTR_T  d_wind_turb_scales__ = NULL;
-BSACL_MEM  BSACL_REAL_PTR_T  d_wind_turb_std__    = NULL;
-BSACL_MEM  INT_PTR_T         d_wind_nodal_windz__ = NULL;
+BSACL_MEM  REAL_PTR_T  d_phiTc__       = NULL;
+BSACL_MEM  REAL_PTR_T  d_nod_corr__    = NULL;
 
-BSACL_MEM  BSACL_REAL_PTR_T  d_fi__ = NULL;
-BSACL_MEM  BSACL_REAL_PTR_T  d_fj__ = NULL;
+BSACL_MEM  REAL_PTR_T  d_wind_nodal_vel__   = NULL;
+BSACL_MEM  REAL_PTR_T  d_wind_turb_scales__ = NULL;
+BSACL_MEM  REAL_PTR_T  d_wind_turb_std__    = NULL;
+BSACL_MEM  INT_PTR_T   d_wind_nodal_windz__ = NULL;
 
-BSACL_MEM  BSACL_REAL_PTR_T  d_m3mf__ = NULL;
+BSACL_MEM  REAL_PTR_T  d_fi__ = NULL;
+BSACL_MEM  REAL_PTR_T  d_fj__ = NULL;
+
+BSACL_MEM  REAL_PTR_T  d_m3mf__ = NULL;
 
 
 
@@ -265,7 +269,7 @@ extern "C" {
  * @brief (internal) releases BSACL local device memory.
  *
  */
-ierr_t releaseDeviceMem_() {
+static inline ierr_t releaseDeviceMem_() {
    unsigned ierr_;
 
    ierr_  = BSACL_DEVICE_FREE_MEM(d_m3mf__);
@@ -291,7 +295,7 @@ ierr_t releaseDeviceMem_() {
  * @brief (internal) releases BSACL local memory.
  *
  */
-void freeMem_(void) {
+static inline void freeMem_(void) {
 
    if (has_cleaned__) return;
 
@@ -352,14 +356,14 @@ void freeMem_(void) {
 
 
 
-void printMsg_(const char *const msgtype, const char *const msg) {
+static inline void printMsg_(const char *const msgtype, const char *const msg) {
    printf("%s%s.\n", msgtype, msg);
 }
-void printMsgWithIerr_(const char *const msgtype, const char *const msg, const int ierr) {
+static inline void printMsgWithIerr_(const char *const msgtype, const char *const msg, const int ierr) {
    printMsg_(msgtype, msg);
    if (ierr != 0) printf(" Aborting  (%d)", ierr);
 }
-void abortInternal_(const int ierr, const char *const emsg) {
+static void abortInternal_(const int ierr, const char *const emsg) {
    if (emsg != NULL) printMsgWithIerr_(ERRR_MSG, emsg, ierr);
    freeMem_();
    has_halted__ = 1U;
@@ -698,8 +702,8 @@ void assembleProgramBuildOptsString_()
    strcpy(buf, "\" \0");
    buf += 2;
 
-#ifdef BSA_SINGLE_FLOATING_PRECISION
-   strcpy(buf, "-D BSA_SINGLE_FLOATING_PRECISION ");
+#ifdef BSACL_USE_DOUBLE_PRECISION
+   strcpy(buf, "-D BSACL_USE_DOUBLE_PRECISION ");
    buf += 33;
 #endif
 
@@ -819,7 +823,7 @@ BSACL_INT setBfmKernelArgs_(void)
    dInfl_  = (BSACL_REAL)(*(fi__ + 1) - *fi__);
    dInfl_ *= (BSACL_REAL)(*(fj__ + 1) - *fj__);
 #ifdef BSACL_CONV_PULSATION
-   dInfl_ *= (BSACL_REAL)(4 * BSACL_PI * BSACL_PI);
+   dInfl_ *= 4 * BSACL_PI * BSACL_PI;
 #endif
 
    if (pass_params_by_macro_ == 0)

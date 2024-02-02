@@ -91,8 +91,6 @@
 
 #ifdef BSACL_USE_CUDA__
 
-#include <limits>
-
 # define BSACL_PI (BSACL_REAL)M_PI
 # define ierr_t cudaError_t
 # define BSACL_SUCCESS cudaSuccess
@@ -107,7 +105,7 @@
 # define BOOL BSACL_UINT
 # define UINT_PTR_T unsigned int*
 # define INT_PTR_T  int*
-# define BSACL_REAL_PTR_T __real*
+# define REAL_PTR_T __real*
 # define DEVICE __device__
 # define PRIVATE
 # define GLOBAL
@@ -119,12 +117,12 @@
 # define POW_D pow
 # define FABS_F fabsf
 # define FABS_D fabs
-# ifdef BSA_SINGLE_FLOATING_PRECISION
-#  define POW powf
-#  define FABS fabsf
-# else
+# ifdef BSACL_USE_DOUBLE_PRECISION
 #  define POW pow
 #  define FABS fabs
+# else
+#  define POW powf
+#  define FABS fabsf
 # endif
 # define LOCAL_ID_X_DIM0 threadIdx.x
 # define LOCAL_ID_Y_DIM1 threadIdx.y
@@ -142,7 +140,7 @@
 
 #else  // OpenCL
 
-# define BSACL_PI 3.14159265358979323846
+# define BSACL_PI (BSACL_REAL)3.14159265358979323846
 # define ierr_t cl_int
 # define BSACL_SUCCESS CL_SUCCESS
 # define BSACL_DEVICE_FREE_MEM(X) clReleaseMemObject(X)
@@ -156,7 +154,7 @@
 # define BOOL bool
 # define UINT_PTR_T
 # define INT_PTR_T
-# define BSACL_REAL_PTR_T
+# define REAL_PTR_T
 # define DEVICE
 # define PRIVATE __private
 # define GLOBAL __global
@@ -187,10 +185,10 @@
 #endif
 
 
-#ifdef BSA_SINGLE_FLOATING_PRECISION
-# define BSACL_REAL_MIN FLT_MIN
-#else
+#ifdef BSACL_USE_DOUBLE_PRECISION
 # define BSACL_REAL_MIN DBL_MIN
+#else
+# define BSACL_REAL_MIN FLT_MIN
 #endif
 
 
