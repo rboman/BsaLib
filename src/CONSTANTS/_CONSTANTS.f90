@@ -64,11 +64,11 @@
    character(len = *), parameter :: BSA_WIND_DATA_DUMPFILE           = 'dumpwind'
 
 #ifdef BSA_USE_GPU
-#  ifdef BSA_USE_CUDA
+# ifdef BSA_USE_CUDA
    character(len = *), parameter :: BSA_FILE_NAME_CL_SUFFIX = '_CUDA'
-#  else
+# else
    character(len = *), parameter :: BSA_FILE_NAME_CL_SUFFIX = '_CL'
-#  endif
+# endif
 #else
    character(len = 0), parameter :: BSA_FILE_NAME_CL_SUFFIX = ''
 #endif
@@ -78,12 +78,12 @@
    !**************************************************************************************
    !   LOGGING TAGs
    !**************************************************************************************
-   character(len = *), parameter :: MSGCONT = '            '
-   character(len = *), parameter :: INFOMSG = '  --[info]  '
-   character(len = *), parameter :: NOTEMSG = '  --[note]  '
-   character(len = *), parameter :: WARNMSG = '  --[warn]  '
-   character(len = *), parameter :: ERRMSG  = '  --[error] '
-   character(len = *), parameter :: DBGMSG  = '  --[debug] '
+   character(len = *), parameter :: MSGCONT = '             '
+   character(len = *), parameter :: INFOMSG = '  --[info]   '
+   character(len = *), parameter :: NOTEMSG = '  --[note]   '
+   character(len = *), parameter :: WARNMSG = '  --[warn]   '
+   character(len = *), parameter :: ERRMSG  = '  --[error]  '
+   character(len = *), parameter :: DBGMSG  = '  --[debug]  '
 
 
    !**************************************************************************

@@ -25,6 +25,8 @@ submodule(BsaLib) BsaLib_Impl
    logical :: only_diag_elems_ = .false.
    logical :: is_only_msh_     = .false.
    logical :: header_called_   = .false.
+
+
 contains
 
 
@@ -82,11 +84,6 @@ contains
 
       call bsa_openFileHandles_()
 
-
-#ifdef BSA_DEBUG
-      write(unit_debug_, *) INFOMSG//'@BsaLib::bsa_Init() : bsa initialisation...'
-#endif
-
       if (.not. allocated(settings)) then
          allocate(settings, stat=istat, errmsg=emsg)
          if (istat /= 0) call allocKOMsg('settings', istat, emsg)
@@ -114,10 +111,6 @@ contains
       endif
       call logger_debug%init(unit_debug_, undebug_fname_)
 
-
-#ifdef BSA_DEBUG
-      write(unit_debug_, *) INFOMSG//'@BsaLib::bsa_Init() : bsa initialisation -- ok.'
-#endif
    end subroutine
 
 
@@ -538,7 +531,7 @@ contains
 
 
 
-      write(fmt2, '(a, i2, a)') '( ', wd%nz_, '( 3(3g12.4, 1x, /), / ) )'
+      write(fmt2, '(a, i2, a)') '( ', wd%nz_, '( 3(3g12.4, 1x, /) ) )'
       write(unit_debug_, fmt) 'WZ. LXYZ    = '
       write(unit_debug_, fmt2) wd%turb_scales_wz_
 
@@ -550,6 +543,10 @@ contains
 
       write(unit_debug_, fmt) 'WZ. lROTW2G = '
       write(unit_debug_, fmt2) wd%rot_LW2G_wz_
+
+
+      write(unit_debug_, *) &
+         INFOMSG//'@BsaLibImpl::CheckVars() : log checking internal variables -- ok.'
 ! #endif
    end subroutine validateAll_
 
@@ -669,7 +666,6 @@ contains
          skip = (n - 1) * struct_data%nlibs_
 
          do id = 1, ndegw
-
             do im = 1, struct_data%modal_%nm_eff_
 
                m = struct_data%modal_%modes_(im)
@@ -680,16 +676,12 @@ contains
          enddo
       enddo
 
-! #ifdef BSA_DEBUG
-!       do id = 1, ndegw
-!          do im = 1, struct_data%modal_%nm_eff_
-!             write(unit=1372, fmt='(*(1x, f12.5))') & 
-!                PHItimesC_local_(im, :, id)
-!          enddo
-!       enddo
-! #endif
-
       call wd%SetPhitimesC(PHItimesC_local_)
+
+#ifdef BSA_DEBUG
+      write(unit_debug_, '(1x, a, a)') &
+         INFOMSG, '@BsaLibImpl::setPhitimesCLocalInstance_() : local PhiTimesC instance computed -- ok.'
+#endif
    end subroutine setPhitimesCLocalInstance_
 
 
@@ -1794,7 +1786,7 @@ contains
 
          siz = size(fi)
          do i= 1, siz
-            write(unit_dump_brm_) real(fi(i), kind=real32), real(fj(i), kind=real32), real(brm(:, i), kind=real32)      
+            write(unit_dump_brm_) real(fi(i), kind=real32), real(fj(i), kind=real32), real(brm(:, i), kind=real32)
          enddo
       endblock
    end subroutine

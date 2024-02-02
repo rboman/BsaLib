@@ -37,6 +37,9 @@ module BsaLib_WindData
 
 
 
+   !> NOTE: some wind profile definitions come from real measurement campaigns 
+   !>       conducted by Greisch Design Office (Liège, Belgium) for the 
+   !>       design of the Millau Bridge (Millau, France).
    character(len = *), dimension(5), public, parameter :: CST_WIND_V_PROFILES = [&
         'POWER     ' &
       , 'LOGARITHM ' &
@@ -44,15 +47,14 @@ module BsaLib_WindData
       , 'MILLAU MAQ' &
       , 'GLOB. POW ' &
    &]
-   !! NOTE: some wind profile definitions come from real measurement campaigns 
-   !!       conducted by Greisch Design Office (Liège, Belgium) for the 
-   !!       design of the Millau Bridge (Millau, France).
 
 
+   !> Vertical wind direction axis labels.
+   character(len = *), dimension(3), public, parameter :: CST_WIND_VERT_DIRS = ['X', 'Y', 'Z']
 
 
    ! ----- private variables
-   real(bsa_real_t)                  :: air_dens_ = 1.225_real64
+   real(bsa_real_t)              :: air_dens_ = 1.225_bsa_real_t
    real(bsa_real_t), allocatable :: rot_W2G_(:, :)  ! rotation from GRS to WRS (global)
 
 

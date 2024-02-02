@@ -38,10 +38,6 @@ contains
       endif
 
       this%coords_ => coords
-
-#ifdef BSA_DEBUG
-      write(unit_debug_, *) INFOMSG//'@StructImpl::SetNodalCoords() : init -- ok.'
-#endif
    end subroutine SetNodalCoords
 
 
@@ -54,13 +50,6 @@ contains
       integer(bsa_int_t), intent(in)        :: nlibs
 
       this%nlibs_ = nlibs
-
-      ! BUG: this might cause errors if NN==0
-      this%ndofs_ = this%nn_ * nlibs
-
-#ifdef BSA_DEBUG
-      write(unit_debug_, *) INFOMSG//'@StructImpl::SetNOfNodalDOFs() : init -- ok.'
-#endif
    end subroutine SetNOfNodalDOFs
 
 
@@ -73,10 +62,6 @@ contains
       integer(bsa_int_t), intent(in)        :: nn
 
       this%nn_ = nn
-
-#ifdef BSA_DEBUG
-      write(unit_debug_, *) INFOMSG//'@StructImpl::SetTotalNOfNodes() : init -- ok.'
-#endif
    end subroutine SetTotalNOfNodes
 
 
@@ -89,13 +74,8 @@ contains
 
 
       this%nlibs_load_ = nlib
-      this%libs_load_ => lib
-
-#ifdef BSA_DEBUG
-      write(unit_debug_, *) INFOMSG//'@StructImpl::SetLoadedNodalDOFs() : init -- ok.'
-#endif
+      this%libs_load_  => lib
    end subroutine SetLoadedNodalDOFs
-
 
 
 
@@ -107,15 +87,8 @@ contains
       integer(bsa_int_t), target, intent(in) :: nl(:)
 
       this%nn_load_ = nnl
-      this%n_load_ => nl
-
-#ifdef BSA_DEBUG
-      write(unit_debug_, *) INFOMSG//'@StructImpl::SetLoadedNodes() : init -- ok.'
-#endif
+      this%n_load_  => nl
    end subroutine SetLoadedNodes
-
-
-
 
 
 
@@ -129,10 +102,6 @@ contains
       this%modal_%nm_ = nm
       this%modal_%phi_       => Phi
       this%modal_%nat_freqs_ => natf
-
-#ifdef BSA_DEBUG
-      write(unit_debug_, *) INFOMSG//'@StructImpl::SetModalInfo() : init -- ok.'
-#endif
    end subroutine SetModalInfo
 
 
@@ -155,14 +124,10 @@ contains
 
       if (.not. allocated(this%modal_%modes_)) then
          allocate(this%modal_%modes_(this%modal_%nm_eff_), stat=istat, errmsg=emsg)
-         if (istat /= 0) call allocKOMsg('this % modal_%modes_', istat, emsg)
+         if (istat /= 0) call allocKOMsg('this % modal_ % modes_', istat, emsg)
       endif
 
       this%modal_%modes_ = modes
-
-#ifdef BSA_DEBUG
-      write(unit_debug_, *) INFOMSG//'@StructImpl::SetKeptModes() : init -- ok.'
-#endif
    end subroutine SetKeptModes
 
 
@@ -204,9 +169,6 @@ contains
       this%modal_%Km_ => Kg
       this%modal_%Cm_ => Cg
 
-#ifdef BSA_DEBUG
-      write(unit_debug_, *) INFOMSG//'@StructImpl::SetModalMatrices() : init -- ok.'
-#endif
    end subroutine SetModalMatrices
 
 
@@ -225,9 +187,6 @@ contains
 
       this%modal_%xsi_ => xsi
 
-#ifdef BSA_DEBUG
-      write(unit_debug_, *) INFOMSG//'@StructImpl::SetTotDamping() : init -- ok.'
-#endif
    end subroutine
 
 
@@ -251,12 +210,8 @@ contains
       this%res_peak_width_ = this%modal_%xsi_ * this%modal_%nat_freqs_
 
 #ifdef BSA_DEBUG
-      write(unit_debug_, *) DBGMSG, '@StructImpl::ComputeResPeakWidths() : res peak widths = '
+      write(unit_debug_, *) DBGMSG, 'Resonant peak widths = '
       write(unit_debug_, '(*(g12.5, 2x))') this%res_peak_width_
-#endif
-
-#ifdef BSA_DEBUG
-      write(unit_debug_, *) INFOMSG//'@StructImpl::ComputeResPeakWidths() : init -- ok.'
 #endif
    end subroutine ComputeResPeakWidths
 
@@ -299,10 +254,6 @@ contains
       write(unit_debug_, *) &
          DBGMSG, '@StructImpl::computeBKGPeakWidths() : bkg peak widths = '
       write(unit_debug_, '(3(g12.5, 2x))') this%bkg_peak_width_
-#endif
-
-#ifdef BSA_DEBUG
-      write(unit_debug_, *) INFOMSG//'@StructImpl::computeBKGPeakWidths() : init -- ok.'
 #endif
    end subroutine computeBKGPeakWidths
 
@@ -351,10 +302,6 @@ contains
          deallocate(this%res_peak_width_, stat=istat, errmsg=emsg)
          if (istat /= 0) call deallocKOMsg('this%res_peak_width_', istat, emsg)
       endif
-
-#ifdef BSA_DEBUG
-      write(unit_debug_, *) INFOMSG//'@StructImpl::clean() : cleaning up -- ok.'
-#endif
    end subroutine clean
 
 

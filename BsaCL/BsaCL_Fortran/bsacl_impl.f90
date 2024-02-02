@@ -6,7 +6,11 @@ submodule(BsaCL) BsaCL_impl
    use BsaCL_c
    implicit none
 
+
+#ifdef BSACL_ENABLE_EVALFCT_PTR
    procedure(bsacl_EvalFunc_C_to_Fortran__), pointer :: evalfct_ptr_ => null()
+#endif
+
 
 contains
 
