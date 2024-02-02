@@ -1319,7 +1319,7 @@ contains
       integer(int32) :: imk, imj, imi
       ! integer(int32) :: mi, mj, mk
 
-      integer(int32) :: i_ncycles = 0
+      integer(int32) :: i_ncycles
 
       real(bsa_real_t) :: f_abs(NFREQS)
 
@@ -1350,7 +1350,6 @@ contains
 
 
       f_abs = abs(f)
-      innl3 = NNODESL**3
 
 
       ! getting padded length and relative init/end indices (non zero zone)
@@ -1415,6 +1414,9 @@ contains
 
       endif
 
+
+      i_ncycles = 0
+      innl3     = NNODESL**3 * NTCOMPS
 
 
       !========================================================================
@@ -1566,8 +1568,8 @@ contains
 #ifdef BSA_DEBUG
                   i_ncycles = i_ncycles + NNODESL
                   print '(1x, a, a, f10.4, " %")', &
-                     INFOMSG, 'getFM_full_tnlm_vect_cls_() :   done  ', &
-                        real(i_ncycles, bsa_real_t)/innl3*100
+                     INFOMSG, ' done  ', &
+                        (real(i_ncycles, bsa_real_t)/innl3)*100
 #endif
 
                endif ! bisp computation
@@ -1698,7 +1700,7 @@ contains
       integer(int32) :: posm_
       integer(int32) :: imk, imj, imi
 
-      integer(int32) :: i_ncycles = 0
+      integer(int32) :: i_ncycles
 
       real(bsa_real_t) :: f_abs(NFREQS)
 
@@ -1727,7 +1729,6 @@ contains
 
 
       f_abs = abs(f)
-      innl3 = NNODESL**3
 
 
       ! getting padded length and relative init/end indices (non zero zone)
@@ -1802,6 +1803,8 @@ contains
       endif ! i bisp allocation
 
 
+      i_ncycles = 0
+      innl3     = NNODESL**3 * NTCOMPS
 
       !========================================================================
       ! BUG: for the moment, only considering correlation
@@ -1912,8 +1915,7 @@ contains
 ! #ifdef BSA_DEBUG
                   i_ncycles = i_ncycles + NNODESL
                   print '(1x, a, a, f10.4, " %")', &
-                     INFOMSG, 'getFM_full_tnm_vect_cls_() :   done  ', &
-                        real(i_ncycles, bsa_real_t)/innl3*100
+                     INFOMSG, ' done  ', real(i_ncycles, bsa_real_t)/innl3*100
 ! #endif
 
                endif ! bisp computation
