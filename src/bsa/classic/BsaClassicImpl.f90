@@ -27,7 +27,7 @@ contains
    !> BUG: now only supports EVENLY SPACED FREQUENCIES..
    module subroutine mainClassic_(m2mf_cls, m2mr_cls, m2o2mr_cls, m3mf_cls, m3mr_cls)
       use BsaLib_Functions
-      real(bsa_real_t), allocatable, intent(inout), target :: &
+      real(bsa_real_t), allocatable, intent(inout) :: &
          m2mf_cls(:), m2mr_cls(:), m2o2mr_cls(:), m3mf_cls(:), m3mr_cls(:)
 
       ! local
@@ -66,7 +66,7 @@ contains
       ierr_cl_ = bsacl_SetKernelID(4)
       if (ierr_cl_ /= 0) then
          print '(1x, a, a)', ERRMSG, &
-            'Could not set kernel ID.'
+            'Error in setting kernel identifier.'
          goto 998
       endif
       call bsacl_Run(ierr_cl_)
