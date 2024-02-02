@@ -2974,8 +2974,8 @@ contains
 
       real(bsa_real_t) :: H2j_r, H2j_i
 
-      wi = fi * CST_PIt2
 
+      wi = fi * CST_PIt2
 
       ! pre evaluate TFs (per mode)
 

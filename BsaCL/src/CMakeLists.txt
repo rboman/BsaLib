@@ -1,6 +1,10 @@
 # TODO: activate generation of shared library as well
 add_library( BsaCL STATIC bsacl.c )
 
+if (enable-gpu-double)
+   target_compile_definitions( BsaCL PRIVATE BSACL_USE_DOUBLE_PRECISION )
+endif()
+
 
 if (enable-ocl-ptx-code-gen)
    message( STATUS "NOTE: Compiling PTX code ON")

@@ -18,10 +18,16 @@
 #ifndef BSACL_BASE_H_
 #define BSACL_BASE_H_
 
+/* This controls the type of incoming external data*/
 #ifdef BSA_SINGLE_FLOATING_PRECISION
-# define REAL float
+# define __real float
 #else
-# define REAL double
+# define __real double
+#endif
+
+/* This controls the type of internal data */
+#ifdef BSACL_USE_DOUBLE_PRECISION
+# define BSACL_REAL double
 # ifdef BSACL_INCLUDE
 #  ifdef cl_khr_fp64
 #    pragma OPENCL EXTENSION cl_khr_fp64 : enable
@@ -30,12 +36,13 @@
 #  else
 #    error "Double precision floating point not supported by OpenCL implementation."
 #  endif
-#  define REAL_IS_DOUBLE
+#  define BSACL_REAL_IS_DOUBLE
 # else
 #  pragma message("   --- [NOTE]:  enabling GPU double (f64) floating point precision.")
 # endif
+#else
+# define BSACL_REAL float
 #endif
-#define real REAL
 
 
 #ifdef BSACL_USE_CUDA__
@@ -86,7 +93,7 @@
 
 #include <limits>
 
-# define BSACL_PI (REAL)M_PI
+# define BSACL_PI (BSACL_REAL)M_PI
 # define ierr_t cudaError_t
 # define BSACL_SUCCESS cudaSuccess
 # define BSACL_DEVICE_FREE_MEM(X) cudaFree((void *)X)
@@ -100,7 +107,7 @@
 # define BOOL BSACL_UINT
 # define UINT_PTR_T unsigned int*
 # define INT_PTR_T  int*
-# define REAL_PTR_T REAL*
+# define BSACL_REAL_PTR_T __real*
 # define DEVICE __device__
 # define PRIVATE
 # define GLOBAL
@@ -149,7 +156,7 @@
 # define BOOL bool
 # define UINT_PTR_T
 # define INT_PTR_T
-# define REAL_PTR_T
+# define BSACL_REAL_PTR_T
 # define DEVICE
 # define PRIVATE __private
 # define GLOBAL __global
@@ -181,9 +188,9 @@
 
 
 #ifdef BSA_SINGLE_FLOATING_PRECISION
-# define REAL_MIN FLT_MIN
+# define BSACL_REAL_MIN FLT_MIN
 #else
-# define REAL_MIN DBL_MIN
+# define BSACL_REAL_MIN DBL_MIN
 #endif
 
 

@@ -145,24 +145,24 @@ static unsigned short kernel_id_ = 4U;
 static unsigned short pass_params_by_macro_ = 1U;
 #endif
 
-static REAL dInfl_ = { 0 };
+static BSACL_REAL dInfl_ = { 0 };
 
 
 // BSACL memory buffers
-BSACL_MEM  UINT_PTR_T  d_tc__           = NULL;
-BSACL_MEM  UINT_PTR_T  d_nodes_load__   = NULL;
-BSACL_MEM  REAL_PTR_T  d_phiTc__        = NULL;
-BSACL_MEM  REAL_PTR_T  d_nod_corr__     = NULL;
+BSACL_MEM  UINT_PTR_T        d_tc__           = NULL;
+BSACL_MEM  UINT_PTR_T        d_nodes_load__   = NULL;
+BSACL_MEM  BSACL_REAL_PTR_T  d_phiTc__        = NULL;
+BSACL_MEM  BSACL_REAL_PTR_T  d_nod_corr__     = NULL;
 
-BSACL_MEM  REAL_PTR_T  d_wind_nodal_vel__   = NULL;
-BSACL_MEM  REAL_PTR_T  d_wind_turb_scales__ = NULL;
-BSACL_MEM  REAL_PTR_T  d_wind_turb_std__    = NULL;
-BSACL_MEM  INT_PTR_T   d_wind_nodal_windz__ = NULL;
+BSACL_MEM  BSACL_REAL_PTR_T  d_wind_nodal_vel__   = NULL;
+BSACL_MEM  BSACL_REAL_PTR_T  d_wind_turb_scales__ = NULL;
+BSACL_MEM  BSACL_REAL_PTR_T  d_wind_turb_std__    = NULL;
+BSACL_MEM  INT_PTR_T         d_wind_nodal_windz__ = NULL;
 
-BSACL_MEM  REAL_PTR_T  d_fi__ = NULL;
-BSACL_MEM  REAL_PTR_T  d_fj__ = NULL;
+BSACL_MEM  BSACL_REAL_PTR_T  d_fi__ = NULL;
+BSACL_MEM  BSACL_REAL_PTR_T  d_fj__ = NULL;
 
-BSACL_MEM  REAL_PTR_T  d_m3mf__ = NULL;
+BSACL_MEM  BSACL_REAL_PTR_T  d_m3mf__ = NULL;
 
 
 
@@ -193,22 +193,22 @@ typedef struct extdata_t {
 
    unsigned NWZ__;  // N. of wind zones
 
-   REAL     *modmat__;
-   REAL     *natfreqs__;
+   __real *modmat__;
+   __real *natfreqs__;
 
    int  *modes_eff__;    // list of effective modes used
    int  *tc__;           // list of effective turbulent components
 
-   REAL *wfc__;       // wind force coefficients
-   REAL *phi_T_c__;   // Phi x C matrix
-   REAL *nod_corr__;  // nodal correlation array (no duplicates)
+   __real *wfc__;       // wind force coefficients
+   __real *phi_T_c__;   // Phi x C matrix
+   __real *nod_corr__;  // nodal correlation array (no duplicates)
 
-   REAL *wind_nodal_vel__;
-   REAL *wind_turb_scales__;
-   REAL *wind_turb_std__;
-   int  *wind_nodal_windz__;
+   __real *wind_nodal_vel__;
+   __real *wind_turb_scales__;
+   __real *wind_turb_std__;
+   int    *wind_nodal_windz__;
 
-   REAL *m3mf__;
+   __real *m3mf__;
 } extdata_t;
 
 
@@ -242,10 +242,10 @@ static inline void freeExtData(extdata_t *extdata) {
 
 extdata_t extdata__;
 unsigned nfi__, nfj__;
-REAL *fi__ = NULL;
-REAL *fj__ = NULL;
-REAL *S_uvw__       = NULL;
-REAL *S_uvw_fiPfj__ = NULL;
+__real *fi__ = NULL;
+__real *fj__ = NULL;
+__real *S_uvw__       = NULL;
+__real *S_uvw_fiPfj__ = NULL;
 
 
 
@@ -816,10 +816,10 @@ BSACL_INT setBfmKernelArgs_(void)
    BSACL_INT ierr_  = 0;
    BSACL_UINT iarg_ = 0;
 
-   dInfl_  = (*(fi__ + 1) - *fi__);
-   dInfl_ *= (*(fj__ + 1) - *fj__);
+   dInfl_  = (BSACL_REAL)(*(fi__ + 1) - *fi__);
+   dInfl_ *= (BSACL_REAL)(*(fj__ + 1) - *fj__);
 #ifdef BSACL_CONV_PULSATION
-   dInfl_ *= 4 * BSACL_PI * BSACL_PI;
+   dInfl_ *= (BSACL_REAL)(4 * BSACL_PI * BSACL_PI);
 #endif
 
    if (pass_params_by_macro_ == 0)
@@ -842,7 +842,7 @@ BSACL_INT setBfmKernelArgs_(void)
    }
 
    if (kernel_id_ != 4)
-      ierr_ |= clSetKernelArg(kernel_bfm__, iarg_++, sizeof(REAL),   &dInfl_);
+      ierr_ |= clSetKernelArg(kernel_bfm__, iarg_++, sizeof(BSACL_REAL), &dInfl_);
 
    if (pass_params_by_macro_ == 0) {
       ierr_ |= clSetKernelArg(kernel_bfm__, iarg_++, sizeof(unsigned int), &extdata__.NMODES_EFF__);
@@ -914,7 +914,7 @@ void initCreateDeviceBuffers_()
 
    if (extdata__.phi_T_c__ == NULL)
       ABORT_INTERNAL_RETURN_VOID(-83, "phiTc was not acquired. Aborting.");
-   sz_ = extdata__.NMODES_EFF__ * extdata__.NNODES_LOAD__ * extdata__.NDEGW__ * sizeof(REAL);
+   sz_ = extdata__.NMODES_EFF__ * extdata__.NNODES_LOAD__ * extdata__.NDEGW__ * sizeof(__real);
 #ifdef BSACL_USE_CUDA__
    ierr_ = cudaMalloc((void**)&d_phiTc__, sz_);
 #else
@@ -931,7 +931,7 @@ void initCreateDeviceBuffers_()
 
    if (extdata__.nod_corr__ == NULL)
       ABORT_INTERNAL_RETURN_VOID(-83, "Nodal spatial correlation was not acquired. Aborting.");
-   sz_ = extdata__.NNOD_CORR__ * extdata__.NTC__ * sizeof(REAL);
+   sz_ = extdata__.NNOD_CORR__ * extdata__.NTC__ * sizeof(__real);
 #ifdef BSACL_USE_CUDA__
    ierr_ = cudaMalloc((void**)&d_nod_corr__, sz_);
 #else
@@ -947,7 +947,7 @@ void initCreateDeviceBuffers_()
 #endif
 
 
-   sz_ = extdata__.NN__ * sizeof(REAL);
+   sz_ = extdata__.NN__ * sizeof(__real);
 #ifdef BSACL_USE_CUDA__
    ierr_ = cudaMalloc((void**)&d_wind_nodal_vel__, sz_);
 #else
@@ -979,7 +979,7 @@ void initCreateDeviceBuffers_()
 #endif
 
 
-   sz_ = (size_t)(extdata__.NWZ__ * 3 * sizeof(REAL));
+   sz_ = (size_t)(extdata__.NWZ__ * 3 * sizeof(__real));
 #ifdef BSACL_USE_CUDA__
    ierr_ = cudaMalloc((void**)&d_wind_turb_std__, sz_);
 #else
@@ -1010,7 +1010,7 @@ void initCreateDeviceBuffers_()
 #endif
 
 
-   sz_ = nfi__ * sizeof(REAL);
+   sz_ = nfi__ * sizeof(__real);
 #ifdef BSACL_USE_CUDA__
    ierr_ = cudaMalloc((void**)&d_fi__, sz_);
 #else
@@ -1043,7 +1043,7 @@ void initCreateDeviceBuffers_()
 
    if (extdata__.m3mf__ == NULL)
       ABORT_INTERNAL_RETURN_VOID(-83, "Result array was not acquired. Aborting.");
-   sz_ = extdata__.DIM_M3_M__ * sizeof(REAL);
+   sz_ = extdata__.DIM_M3_M__ * sizeof(__real);
 
    sz_ *= n_work_groups__[0];
 
@@ -1231,7 +1231,7 @@ void bsaclRun(int *__EXT_PTR_CONST ierr) {
 #ifndef BSACL_USE_CUDA__
    cl_event mainKerEv_;
 #elif (defined BSACL_USE_CUDA__)
-   dInfl_ = (*(fi__ + 1) - *fi__) * 2 * BSACL_PI;  // rad/s
+   dInfl_ = (BSACL_REAL)(*(fi__ + 1) - *fi__) * 2 * BSACL_PI;  // rad/s
    dInfl_ = dInfl_ * dInfl_;  // infl area
 #endif
 
@@ -1330,9 +1330,9 @@ void bsaclRun(int *__EXT_PTR_CONST ierr) {
    printf("\n");
 
    // clReleaseEvent(mainKerEv_);
-   REAL *rtmp_;
-   size_ = sizeof(REAL) * extdata__.DIM_M3_M__*n_work_groups__[0];
-   rtmp_ = (REAL *)malloc(size_);
+   __real *rtmp_;
+   size_ = sizeof(__real) * extdata__.DIM_M3_M__*n_work_groups__[0];
+   rtmp_ = (__real *)malloc(size_);
 #ifdef BSACL_USE_CUDA__
    ierr_ = cudaMemcpy(rtmp_, d_m3mf__, size_, cudaMemcpyDeviceToHost);
 #else
@@ -1355,7 +1355,7 @@ void bsaclRun(int *__EXT_PTR_CONST ierr) {
          for (BSACL_UINT iwgx_ = 0; iwgx_ < n_work_groups__[0]; iwgx_++) {
             extdata__.m3mf__[i_] += rtmp_[iwgx_ + (i_*n_work_groups__[0])];
          }
-         extdata__.m3mf__[i_] *= dInfl_;
+         extdata__.m3mf__[i_] *= (__real)dInfl_;
       }
    }
    free(rtmp_);
@@ -1429,7 +1429,7 @@ void bsaclAcquirePSDId(const uint32_t psdid)
  * @param nmodes n. of modes (used)
  */
 void bsaclAcquireStructModMat(
-      REAL *__EXT_PTR_CONST modmat, REAL *__EXT_PTR_CONST natf, const uint32_t ndofs, const uint32_t nmodes)
+      __real *__EXT_PTR_CONST modmat, __real *__EXT_PTR_CONST natf, const uint32_t ndofs, const uint32_t nmodes)
 {
    if (has_halted__ == 1U) return;
    extdata__.modmat__   = modmat;
@@ -1506,7 +1506,7 @@ void bsaclAcquireUsedModesList(int *__EXT_PTR_CONST modes, const uint32_t nmodes
  * @param ndegw     n. of coefficients per element (transformation degree)
  */
 void bsaclAcquireWindCoeffs(
-      REAL *__EXT_PTR_CONST wfc, const uint32_t nnodes_l, const uint32_t nlibs, const uint32_t ndegw)
+      __real *__EXT_PTR_CONST wfc, const uint32_t nnodes_l, const uint32_t nlibs, const uint32_t ndegw)
 {
    if (has_halted__ == 1U) return;
    if (extdata__.NNODES_LOAD__ != 0 && nnodes_l != extdata__.NNODES_LOAD__) 
@@ -1548,7 +1548,7 @@ void bsaclAcquireTurbComponentsList(int *__EXT_PTR_CONST tc, const uint32_t ntc)
  * @param ndegw      n. of coefficients per element (transformation degree)
  */
 void bsaclAcquirePhiTimesCMat(
-      REAL *__EXT_PTR_CONST phi_T_c, const uint32_t nmodes_eff, const uint32_t nnodes_l, const uint32_t ndegw)
+      __real *__EXT_PTR_CONST phi_T_c, const uint32_t nmodes_eff, const uint32_t nnodes_l, const uint32_t ndegw)
 {
    if (has_halted__ == 1U) return;
    if (extdata__.NNODES_LOAD__ != 0 && nnodes_l != extdata__.NNODES_LOAD__)
@@ -1566,7 +1566,7 @@ void bsaclAcquirePhiTimesCMat(
 
 
 
-void bsaclAcquireNodalCorrelation(REAL *__EXT_PTR_CONST nod_corr, const uint32_t nnod_corr)
+void bsaclAcquireNodalCorrelation(__real *__EXT_PTR_CONST nod_corr, const uint32_t nnod_corr)
 {
    if (has_halted__ == 1U) return;
    extdata__.nod_corr__  = nod_corr;
@@ -1575,7 +1575,7 @@ void bsaclAcquireNodalCorrelation(REAL *__EXT_PTR_CONST nod_corr, const uint32_t
 
 
 
-void bsaclAcquireWindNodalVelocities(REAL *__EXT_PTR_CONST nod_vel)
+void bsaclAcquireWindNodalVelocities(__real *__EXT_PTR_CONST nod_vel)
 {
    if (has_halted__ == 1U) return;
    extdata__.wind_nodal_vel__ = nod_vel;
@@ -1587,14 +1587,14 @@ void bsaclAcquireWindNodalWindZones(int *__EXT_PTR_CONST nod_wz)
    extdata__.wind_nodal_windz__ = nod_wz;
 }
 
-void bsaclAcquireWindTurbScales(REAL *__EXT_PTR_CONST wt_scl, const uint32_t nwz)
+void bsaclAcquireWindTurbScales(__real *__EXT_PTR_CONST wt_scl, const uint32_t nwz)
 {
    if (has_halted__ == 1U) return;
    extdata__.NWZ__ = nwz;
    extdata__.wind_turb_scales__ = wt_scl;
 }
 
-void bsaclAcquireWindTurbStd(REAL *__EXT_PTR_CONST wt_std, const uint32_t nwz)
+void bsaclAcquireWindTurbStd(__real *__EXT_PTR_CONST wt_std, const uint32_t nwz)
 {
    if (has_halted__ == 1U) return;
    extdata__.NWZ__ = nwz;
@@ -1653,7 +1653,7 @@ void bsaclAcquireEvalFuncByFile(char *__EXT_PTR_CONST filename)
  *
  * */
 void bsaclAcquireComputationFreqs(
-      const uint32_t nfi, REAL *__EXT_PTR_CONST fi, const uint32_t nfj, REAL *__EXT_PTR_CONST fj) 
+      const uint32_t nfi, __real *__EXT_PTR_CONST fi, const uint32_t nfj, __real *__EXT_PTR_CONST fj) 
 {
    if (has_halted__ == 1U) return;
    nfi__ = nfi;
@@ -1669,7 +1669,7 @@ void bsaclAcquireComputationFreqs(
  * @brief Deprecated.
  *
  * */
-void bsaclAcquireBaseWindTurbPSD(REAL *__EXT_PTR_CONST S_uvw)
+void bsaclAcquireBaseWindTurbPSD(__real *__EXT_PTR_CONST S_uvw)
 {
    if (has_halted__ == 1U) return;
    S_uvw__ = S_uvw;
@@ -1682,7 +1682,7 @@ void bsaclAcquireBaseWindTurbPSD(REAL *__EXT_PTR_CONST S_uvw)
  * @brief Acquires reference to result array.
  *
  * */
-void bsaclAcquireResultBFMVect(REAL *__EXT_PTR_CONST m3mf, const uint32_t idim)
+void bsaclAcquireResultBFMVect(__real *__EXT_PTR_CONST m3mf, const uint32_t idim)
 {
    if (has_halted__ == 1U) return;
    extdata__.m3mf__     = m3mf;
@@ -1738,7 +1738,7 @@ void bsaclVerifyMaxAllocCondition(size_t idim, unsigned int *__EXT_PTR_CONST ica
 {
    if (has_halted__ == 1U) return;
 #ifndef BSACL_USE_CUDA__
-   if (dev_max_mem_alloc_size__[0] < idim * sizeof(REAL)) {
+   if (dev_max_mem_alloc_size__[0] < idim * sizeof(BSACL_REAL)) {
       *ican = 0U;
       return;
    }

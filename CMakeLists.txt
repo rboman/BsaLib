@@ -61,6 +61,7 @@ option(enable-gpu-code         "Enable GPU kernel code with OpenCL (defaulr) or 
 option(enable-const-ptr-def    "In GPU related code, declare internal pointers `const`"         ON)
 option(enable-ocl-ptx-code-gen "Enable OpenCL PTX debug code generation"                        ON)
 option(enable-cuda             "IF GPU code enabled, use CUDA instead of OpenCL (default)"      OFF)
+option(enable-gpu-double       "Enable double precision in GPU kernel code (discouraged)"       OFF)
 
 
 if (WIN32)
@@ -120,16 +121,17 @@ else()
    )
 endif()
 
+
 add_compile_definitions( $<$<CONFIG:DEBUG>:BSA_DEBUG> )
 
-if (enable-gpu-code)
-   set( enable-single ON )
-endif()
 
 if (enable-single)
    message( STATUS "NOTE: enabling single precision floating point arithmetic")
    add_compile_definitions( BSA_SINGLE_FLOATING_PRECISION )
+   set( enable-gpu-double OFF )
 endif()
+
+
 
 # Disable annoying warning of incompatible RT libraries
 if (WIN32 AND enable-gpu-code)

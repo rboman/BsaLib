@@ -73,9 +73,8 @@ contains
       if (ierr_cl_ /= 0) then
          print '(1x, a, a)', ERRMSG, &
             'BSACL run() returned with error.'
-         goto 998
       endif
-      call getBRM_scalar_cls(0, 0, 0., 0., null(), null(), m3mf_cls, m3mr_cls)
+
 #else
 
       block
@@ -110,8 +109,6 @@ contains
 
 
 #ifdef BSA_DEBUG
-         write(unit_debug_, *) INFOMSG, '@BsaClassicImpl::mainClassic_() : computing nodal wind turbulence PSDs -- ok.'
-
          call bsa_exportPSDToFile('psd_Suvw.txt', S_uvw, f)
 #endif
 
@@ -127,7 +124,7 @@ contains
 
 
          ! BUG: set it from .dat file
-         settings%i_scalar_vers_ = 1  ! 0=vectorised, 1=scalar
+         settings%i_scalar_vers_ = 0  ! 0=vectorised, 1=scalar
 
 
          if (settings%i_scalar_vers_ == 0) then ! VECTORISED
@@ -225,8 +222,8 @@ contains
 
                integer :: lpad, indxi, indxe
 
-               real(bsa_real_t), dimension(dimM_psd_)  :: psdfm, psdrm, r_tmp
-               real(bsa_real_t), dimension(dimM_bisp_) :: bispfm, bisprm
+               real(bsa_real_t), target, dimension(dimM_psd_)  :: psdfm, psdrm, r_tmp
+               real(bsa_real_t), target, dimension(dimM_bisp_) :: bispfm, bisprm
 
                psdfm  = 0._bsa_real_t
                psdrm  = 0._bsa_real_t

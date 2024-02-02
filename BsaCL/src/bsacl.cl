@@ -36,11 +36,10 @@
 
 #ifdef BSACL_USE_CUDA__
 # include <cuda_runtime.h>
-# pragma message("   --- [NOTE]:  Compiling kernel using  CUDA  runtime")
 #else
-# ifdef REAL_IS_DOUBLE
+# ifdef BSACL_REAL_IS_DOUBLE
 #  pragma OPENCL EXTENSION cl_khr_fp64 : enable
-#  undef REAL_IS_DOUBLE
+#  undef BSACL_REAL_IS_DOUBLE
 # endif
 #endif
 
@@ -82,28 +81,28 @@ DEVICE UINT getCorrId(
 
 
 
-DEVICE REAL evalFct(
-      const REAL f,
+DEVICE BSACL_REAL evalFct(
+      const BSACL_REAL f,
 #ifdef BSACL_USE_CUDA__
       const UINT BSACL_WIND_PSD_ID,
 #endif
-      const REAL w_scl,
-      const REAL w_std,
-      const REAL w_nodvel
+      const BSACL_REAL w_scl,
+      const BSACL_REAL w_std,
+      const BSACL_REAL w_nodvel
 )
 {
-   REAL rtmp, res = (REAL)0.f;
+   BSACL_REAL rtmp, res = (BSACL_REAL)0.f;
 
-   const REAL cL_U  = w_scl / w_nodvel;
-   const REAL cFL_U = f * cL_U;
+   const BSACL_REAL cL_U  = w_scl / w_nodvel;
+   const BSACL_REAL cFL_U = f * cL_U;
 
 #if (defined(BSACL_USE_CUDA__)) || (BSACL_WIND_PSD_ID==BSACL_PSD_TYPE_VONKARMAN)
 # ifdef BSACL_USE_CUDA__
    if (BSACL_WIND_PSD_ID==BSACL_PSD_TYPE_VONKARMAN) {
 # endif
       rtmp = cFL_U*cFL_U;
-      rtmp = (rtmp * (REAL)70.7f) + (REAL)1.f;
-      rtmp = POW(rtmp, ((REAL)5.f/(REAL)6.f));
+      rtmp = (rtmp * (BSACL_REAL)70.7f) + (BSACL_REAL)1.f;
+      rtmp = POW(rtmp, ((BSACL_REAL)5.f/(BSACL_REAL)6.f));
       rtmp = 1.f / rtmp;
 
       res  = (4.f * cL_U * w_std*w_std) * rtmp;
@@ -118,7 +117,7 @@ DEVICE REAL evalFct(
    if (BSACL_WIND_PSD_ID==BSACL_PSD_TYPE_DAVENPORT) {
 # endif
       rtmp = cFL_U*cFL_U + 1.f;
-      rtmp = POW(rtmp, ((REAL)4.f/(REAL)3.f));
+      rtmp = POW(rtmp, ((BSACL_REAL)4.f/(BSACL_REAL)3.f));
       rtmp = 1.f / rtmp;
 
       res  = (2.f/3.f * cFL_U * cL_U * w_std*w_std) * rtmp;
@@ -128,7 +127,7 @@ DEVICE REAL evalFct(
 #endif // BSACL_WIND_PSD_ID==BSACL_PSD_TYPE_DAVENPORT
 
 #ifdef BSACL_CONV_PULSATION
-   res =  res / (4*BSACL_PI);
+   res =  res / (4*(BSACL_REAL)BSACL_PI);
 #endif
 
    return res;
@@ -188,26 +187,26 @@ KERNEL void bfm_kernel(
       const    UINT          NNL__,
 #endif
       GLOBAL   UINT          *nodes_load,
-      GLOBAL   REAL          *fi,
+      GLOBAL   BSACL_REAL          *fi,
       const    UINT          NFI__,
-      GLOBAL   REAL          *fj,
+      GLOBAL   BSACL_REAL          *fj,
       const    UINT          NFJ__,
-      const    REAL          dInfl,
+      const    BSACL_REAL          dInfl,
 #ifndef BSACL_PASS_PARAMS_BY_MACRO__
       const    UINT          NM_EFF__,
       const    UINT          NDEGW__,
 #endif
-      const    GLOBAL   REAL *phiTc,
+      const    GLOBAL   BSACL_REAL *phiTc,
 #ifndef BSACL_PASS_PARAMS_BY_MACRO__
       const    UINT          NN__,
       const    UINT          NNOD_CORR__,   // BUG: NOT used
 #endif
-      const    GLOBAL   REAL *nod_corr,
-      const    GLOBAL   REAL *wind_nod_vel,
-      const    GLOBAL   REAL *wind_turb_scl,
-      const    GLOBAL   REAL *wind_turb_std,
+      const    GLOBAL   BSACL_REAL *nod_corr,
+      const    GLOBAL   BSACL_REAL *wind_nod_vel,
+      const    GLOBAL   BSACL_REAL *wind_turb_scl,
+      const    GLOBAL   BSACL_REAL *wind_turb_std,
       const    GLOBAL   int  *wind_nod_winz,
-      GLOBAL REAL *m3mf
+      GLOBAL BSACL_REAL *m3mf
 )
 {
    const size_t gid0_  = GLOBAL_ID_X_DIM0;
@@ -216,7 +215,7 @@ KERNEL void bfm_kernel(
    UINT itmp_ = (NNL__ * NNL__ * NNL__) - 1;
    if (gid0_ > itmp_) return;
 
-   LOCAL  REAL  m3mf_wg_x_[BSACL_WIpWG];
+   LOCAL  BSACL_REAL  m3mf_wg_x_[BSACL_WIpWG];
    m3mf_wg_x_[lid0_] = 0.f;
 
    /** get UNIQUE nodal indexes for this WI */
@@ -229,9 +228,9 @@ KERNEL void bfm_kernel(
    const UINT nj_  = nodes_load[inj_]-1; 
    const UINT nk_  = nodes_load[ink_]-1;
 
-   const REAL ubni_ = wind_nod_vel[ni_];
-   const REAL ubnj_ = wind_nod_vel[nj_];
-   const REAL ubnk_ = wind_nod_vel[nk_];
+   const BSACL_REAL ubni_ = wind_nod_vel[ni_];
+   const BSACL_REAL ubnj_ = wind_nod_vel[nj_];
+   const BSACL_REAL ubnk_ = wind_nod_vel[nk_];
 
    /** 
       BUG: consider all 3 spatial direction 
@@ -239,9 +238,9 @@ KERNEL void bfm_kernel(
            However, we do it to the base cause we do it only once (faster).
            Otherwise, we should split the loops..
    */
-   const REAL corrIJ_ = nod_corr[getCorrId(ni_, nj_, NN__)] < REAL_MIN ? REAL_MIN : nod_corr[getCorrId(ni_, nj_, NN__)];
-   const REAL corrIK_ = nod_corr[getCorrId(ni_, nk_, NN__)] < REAL_MIN ? REAL_MIN : nod_corr[getCorrId(ni_, nk_, NN__)];
-   const REAL corrJK_ = nod_corr[getCorrId(nj_, nk_, NN__)] < REAL_MIN ? REAL_MIN : nod_corr[getCorrId(nj_, nk_, NN__)];
+   const BSACL_REAL corrIJ_ = nod_corr[getCorrId(ni_, nj_, NN__)] < BSACL_REAL_MIN ? BSACL_REAL_MIN : nod_corr[getCorrId(ni_, nj_, NN__)];
+   const BSACL_REAL corrIK_ = nod_corr[getCorrId(ni_, nk_, NN__)] < BSACL_REAL_MIN ? BSACL_REAL_MIN : nod_corr[getCorrId(ni_, nk_, NN__)];
+   const BSACL_REAL corrJK_ = nod_corr[getCorrId(nj_, nk_, NN__)] < BSACL_REAL_MIN ? BSACL_REAL_MIN : nod_corr[getCorrId(nj_, nk_, NN__)];
 
 
    /** determines which combination (M, N, O) of modal indexes apply to this WG. */
@@ -258,7 +257,7 @@ KERNEL void bfm_kernel(
              2 coeffs (Uu and u^2, for each t.c.)
              3 modal indexes
    */
-   LOCAL  REAL  phiTc_[6 * 3 * BSACL_WIpWG];
+   LOCAL  BSACL_REAL  phiTc_[6 * 3 * BSACL_WIpWG];
 
    const UINT phiTc_offst_ = 18U * (UINT)lid0_;
 
@@ -289,57 +288,57 @@ KERNEL void bfm_kernel(
    phiTc_[17 + phiTc_offst_] = phiTc[mk_ + (ink_*NM_EFF__) + (5 * itmp_)]; // w^2
 
 
-   REAL S_uvw_IJ_i, S_uvw_IJ_ij;
-   REAL S_uvw_IK_j, S_uvw_IK_ij;
-   REAL S_uvw_JK_i, S_uvw_JK_j;
+   BSACL_REAL S_uvw_IJ_i, S_uvw_IJ_ij;
+   BSACL_REAL S_uvw_IK_j, S_uvw_IK_ij;
+   BSACL_REAL S_uvw_JK_i, S_uvw_JK_j;
 
    for (UINT itc_ = 0; itc_ < NTC__; ++itc_) {
 
       UINT tc_   = tc[itc_] - 1;
 
-      REAL wstd_ = wind_turb_std[tc_];  // BUG: account for multiple wind zones!!
-      REAL wscl_ = wind_turb_scl[tc_];  // BUG: account for multiple wind zones!!
+      BSACL_REAL wstd_ = wind_turb_std[tc_];  // BUG: account for multiple wind zones!!
+      BSACL_REAL wscl_ = wind_turb_scl[tc_];  // BUG: account for multiple wind zones!!
 
       for (UINT ifj_=0; ifj_ < NFJ__; ++ifj_) {
 
-         REAL fj_ = fj[ifj_];
+         BSACL_REAL fj_ = fj[ifj_];
 
          S_uvw_IK_j   = evalFct(fj_,  PSD_ID_ARG   wscl_, wstd_, ubni_);
          S_uvw_IK_j  *= evalFct(fj_,  PSD_ID_ARG   wscl_, wstd_, ubnk_);
          S_uvw_IK_j   = sqrt(S_uvw_IK_j);
-         S_uvw_IK_j  *= POW(corrIK_, (FABS((REAL)fj_)));
+         S_uvw_IK_j  *= POW(corrIK_, (FABS((BSACL_REAL)fj_)));
 
          S_uvw_JK_j   = evalFct(fj_,  PSD_ID_ARG   wscl_, wstd_, ubnj_);
          S_uvw_JK_j  *= evalFct(fj_,  PSD_ID_ARG   wscl_, wstd_, ubnk_);
          S_uvw_JK_j   = sqrt(S_uvw_JK_j);
-         S_uvw_JK_j  *= POW(corrJK_, (FABS((REAL)fj_)));
+         S_uvw_JK_j  *= POW(corrJK_, (FABS((BSACL_REAL)fj_)));
 
          for (UINT ifi_=0; ifi_ < NFI__; ++ifi_) {
 
-            REAL fi_    = fi[ifi_];
-            REAL fiPfj_ = fi_ + fj_;
+            BSACL_REAL fi_    = fi[ifi_];
+            BSACL_REAL fiPfj_ = fi_ + fj_;
 
             S_uvw_IJ_i   = evalFct(fi_,  PSD_ID_ARG   wscl_, wstd_, ubni_);
             S_uvw_IJ_i  *= evalFct(fi_,  PSD_ID_ARG   wscl_, wstd_, ubnj_);
             S_uvw_IJ_i   = sqrt(S_uvw_IJ_i);
-            S_uvw_IJ_i  *= POW(corrIJ_, (FABS((REAL)fi_)));
+            S_uvw_IJ_i  *= POW(corrIJ_, (FABS((BSACL_REAL)fi_)));
 
             S_uvw_IJ_ij  = evalFct(fiPfj_,  PSD_ID_ARG   wscl_, wstd_, ubni_);
             S_uvw_IJ_ij *= evalFct(fiPfj_,  PSD_ID_ARG   wscl_, wstd_, ubnj_);
             S_uvw_IJ_ij  = sqrt(S_uvw_IJ_ij);
-            S_uvw_IJ_ij *= POW(corrIJ_, (FABS((REAL)fiPfj_)));
+            S_uvw_IJ_ij *= POW(corrIJ_, (FABS((BSACL_REAL)fiPfj_)));
 
 
             S_uvw_IK_ij  = evalFct(fiPfj_,  PSD_ID_ARG   wscl_, wstd_, ubni_);
             S_uvw_IK_ij *= evalFct(fiPfj_,  PSD_ID_ARG   wscl_, wstd_, ubnk_);
             S_uvw_IK_ij  = sqrt(S_uvw_IK_ij);
-            S_uvw_IK_ij *= POW(corrIK_, (FABS((REAL)fiPfj_)));
+            S_uvw_IK_ij *= POW(corrIK_, (FABS((BSACL_REAL)fiPfj_)));
 
 
             S_uvw_JK_i   = evalFct(fi_,  PSD_ID_ARG   wscl_, wstd_, ubnj_);
             S_uvw_JK_i  *= evalFct(fi_,  PSD_ID_ARG   wscl_, wstd_, ubnk_);
             S_uvw_JK_i   = sqrt(S_uvw_JK_i);
-            S_uvw_JK_i  *= POW(corrJK_, (FABS((REAL)fi_)));
+            S_uvw_JK_i  *= POW(corrJK_, (FABS((BSACL_REAL)fi_)));
 
 
             m3mf_wg_x_[lid0_] += 2.f * (
@@ -416,35 +415,35 @@ KERNEL void bfm_kernel(
       const    UINT          NNL__,
 #endif
       GLOBAL   UINT          *nodes_load,
-      GLOBAL   REAL          *fi,
+      GLOBAL   __real        *fi,
 #ifndef BSACL_PASS_PARAMS_BY_MACRO__
       const    UINT          NFI__,
 #endif
-      GLOBAL   REAL          *fj,
+      GLOBAL   __real        *fj,
 #ifndef BSACL_PASS_PARAMS_BY_MACRO__
       const    UINT          NFJ__,
       const    UINT          NM_EFF__,
       const    UINT          NDEGW__,
 #endif
-      const    GLOBAL   REAL *phiTc,
+      const    GLOBAL  __real  *phiTc,
 #ifndef BSACL_PASS_PARAMS_BY_MACRO__
-      const    UINT          NN__,
-      const    UINT          NNOD_CORR__,   // BUG: NOT used
+      const    UINT            NN__,
+      const    UINT            NNOD_CORR__,   // BUG: NOT used
 #endif
-      const    GLOBAL   REAL *nod_corr,
-      const    GLOBAL   REAL *wind_nod_vel,
-      const    GLOBAL   REAL *wind_turb_scl,
-      const    GLOBAL   REAL *wind_turb_std,
-      const    GLOBAL   int  *wind_nod_winz,
-      GLOBAL REAL *m3mf
+      const    GLOBAL  __real  *nod_corr,
+      const    GLOBAL  __real  *wind_nod_vel,
+      const    GLOBAL  __real  *wind_turb_scl,
+      const    GLOBAL  __real  *wind_turb_std,
+      const    GLOBAL   int    *wind_nod_winz,
+      GLOBAL __real *m3mf
 )
 {
    const size_t gid0_ = GLOBAL_ID_X_DIM0; // this determines the pair of freqs
    const size_t lid0_ = LOCAL_ID_X_DIM0;
 
    /* NOTE: do set local variable to 0 for all WIs, avoids getting garbage in reduction op. */
-   LOCAL REAL m3mf_loc_[BSACL_WIpWG];
-   m3mf_loc_[lid0_] = (REAL)0.f;
+   LOCAL BSACL_REAL m3mf_loc_[BSACL_WIpWG];
+   m3mf_loc_[lid0_] = (BSACL_REAL)0.f;
 
    UINT itmp_ = (NFI__ * NFJ__) - 1;
    if (gid0_ > itmp_) return;
@@ -468,9 +467,9 @@ KERNEL void bfm_kernel(
     * */
 #ifdef BSACL_USE_CUDA__
    /* BUG: we can't use a RT parameter for automatic allocation.. */
-   LOCAL REAL phiTc_mno_[3 * 6 * 4]; // 6 : Uu, Uv, Uw, u2, v2, w2; 3 modes
+   LOCAL BSACL_REAL phiTc_mno_[3 * 6 * 4]; // 6 : Uu, Uv, Uw, u2, v2, w2; 3 modes
 #else
-   LOCAL REAL phiTc_mno_[3 * 6 * NNL__]; // 6 : Uu, Uv, Uw, u2, v2, w2; 3 modes
+   LOCAL BSACL_REAL phiTc_mno_[3 * 6 * NNL__]; // 6 : Uu, Uv, Uw, u2, v2, w2; 3 modes
 #endif
    const UINT phiTc_offst_ = NM_EFF__ * NNL__;
    if (BSACL_WIpWG < NNL__) {
@@ -479,27 +478,27 @@ KERNEL void bfm_kernel(
       for (BSACL_USHORT r=0; r < n_reps; ++r) {
          for (BSACL_USHORT d=0; d < 6; ++d) {
             UINT nid = lid0_ + r*BSACL_WIpWG;
-            phiTc_mno_[18*nid +      d] = phiTc[mi_ + (nid * NM_EFF__) + (d * phiTc_offst_)];
-            phiTc_mno_[18*nid +  6 + d] = phiTc[mj_ + (nid * NM_EFF__) + (d * phiTc_offst_)];
-            phiTc_mno_[18*nid + 12 + d] = phiTc[mk_ + (nid * NM_EFF__) + (d * phiTc_offst_)];
+            phiTc_mno_[18*nid +      d] = (BSACL_REAL)phiTc[mi_ + (nid * NM_EFF__) + (d * phiTc_offst_)];
+            phiTc_mno_[18*nid +  6 + d] = (BSACL_REAL)phiTc[mj_ + (nid * NM_EFF__) + (d * phiTc_offst_)];
+            phiTc_mno_[18*nid + 12 + d] = (BSACL_REAL)phiTc[mk_ + (nid * NM_EFF__) + (d * phiTc_offst_)];
          }
       }
       // last batch covering (NNL__-(BSACL_WIpWG * n_reps))
       if (lid0_ < (NNL__ - (BSACL_WIpWG * n_reps))) {
          for (BSACL_USHORT d=0; d < 6; ++d) {
             UINT nid = lid0_ + n_reps*BSACL_WIpWG;
-            phiTc_mno_[18*nid +      d] = phiTc[mi_ + (nid * NM_EFF__) + (d * phiTc_offst_)];
-            phiTc_mno_[18*nid +  6 + d] = phiTc[mj_ + (nid * NM_EFF__) + (d * phiTc_offst_)];
-            phiTc_mno_[18*nid + 12 + d] = phiTc[mk_ + (nid * NM_EFF__) + (d * phiTc_offst_)];
+            phiTc_mno_[18*nid +      d] = (BSACL_REAL)phiTc[mi_ + (nid * NM_EFF__) + (d * phiTc_offst_)];
+            phiTc_mno_[18*nid +  6 + d] = (BSACL_REAL)phiTc[mj_ + (nid * NM_EFF__) + (d * phiTc_offst_)];
+            phiTc_mno_[18*nid + 12 + d] = (BSACL_REAL)phiTc[mk_ + (nid * NM_EFF__) + (d * phiTc_offst_)];
          }
       }
    } else { // NWI > NNL
       if (lid0_ < NNL__) {
          UINT nid = 18*lid0_;
          for (BSACL_USHORT d=0; d < 6; ++d) {
-            phiTc_mno_[nid +      d] = phiTc[mi_ + (lid0_ * NM_EFF__) + (d * phiTc_offst_)];
-            phiTc_mno_[nid +  6 + d] = phiTc[mj_ + (lid0_ * NM_EFF__) + (d * phiTc_offst_)];
-            phiTc_mno_[nid + 12 + d] = phiTc[mk_ + (lid0_ * NM_EFF__) + (d * phiTc_offst_)];
+            phiTc_mno_[nid +      d] = (BSACL_REAL)phiTc[mi_ + (lid0_ * NM_EFF__) + (d * phiTc_offst_)];
+            phiTc_mno_[nid +  6 + d] = (BSACL_REAL)phiTc[mj_ + (lid0_ * NM_EFF__) + (d * phiTc_offst_)];
+            phiTc_mno_[nid + 12 + d] = (BSACL_REAL)phiTc[mk_ + (lid0_ * NM_EFF__) + (d * phiTc_offst_)];
          }
       }
    }
@@ -508,82 +507,85 @@ KERNEL void bfm_kernel(
 
    // Compute pair of frequencies
    itmp_ = gid0_ / NFI__;
-   const REAL fj_ = fj[itmp_];
+   const BSACL_REAL fj_    = (BSACL_REAL)fj[itmp_];
    itmp_ = gid0_ - (itmp_ * NFI__);
-   const REAL fi_ = fi[itmp_];
-   const REAL fiPfj_ = fi_ + fj_;
+   const BSACL_REAL fi_    = (BSACL_REAL)fi[itmp_];
+   const BSACL_REAL fiPfj_ = fi_ + fj_;
 
 
-
-   REAL S_uvw_IJ_i, S_uvw_IJ_ij;
-   REAL S_uvw_IK_j, S_uvw_IK_ij;
-   REAL S_uvw_JK_i, S_uvw_JK_j;
+   BSACL_REAL nod_corr_;
+   BSACL_REAL S_uvw_IJ_i, S_uvw_IJ_ij;
+   BSACL_REAL S_uvw_IK_j, S_uvw_IK_ij;
+   BSACL_REAL S_uvw_JK_i, S_uvw_JK_j;
 
    for (UINT itc_=0; itc_ < NTC__; ++itc_) {
 
       UINT tc_   = tc[itc_] - 1;
 
-      REAL wstd_ = wind_turb_std[tc_];  // BUG: account for multiple wind zones!!
-      REAL wscl_ = wind_turb_scl[tc_];  // BUG: account for multiple wind zones!!
+      BSACL_REAL wstd_ = (BSACL_REAL)wind_turb_std[tc_];  // BUG: account for multiple wind zones!!
+      BSACL_REAL wscl_ = (BSACL_REAL)wind_turb_scl[tc_];  // BUG: account for multiple wind zones!!
 
       for (UINT ink_=0; ink_ < NNL__; ++ink_) {
 
          UINT nk_offs_ = 18*ink_;
-         UINT nk_   = nodes_load[ink_]-1;
-         REAL ubnk_ = wind_nod_vel[nk_];
+         UINT nk_      = nodes_load[ink_]-1;
+         BSACL_REAL ubnk_ = (BSACL_REAL)wind_nod_vel[nk_];
 
-         REAL S_uvw_K_i_  = evalFct(fi_,     PSD_ID_ARG   wscl_, wstd_, ubnk_);
-         REAL S_uvw_K_j_  = evalFct(fj_,     PSD_ID_ARG   wscl_, wstd_, ubnk_);
-         REAL S_uvw_K_ij_ = evalFct(fiPfj_,  PSD_ID_ARG   wscl_, wstd_, ubnk_);
+         BSACL_REAL S_uvw_K_i_  = evalFct(fi_,     PSD_ID_ARG   wscl_, wstd_, ubnk_);
+         BSACL_REAL S_uvw_K_j_  = evalFct(fj_,     PSD_ID_ARG   wscl_, wstd_, ubnk_);
+         BSACL_REAL S_uvw_K_ij_ = evalFct(fiPfj_,  PSD_ID_ARG   wscl_, wstd_, ubnk_);
 
          for (UINT inj_=0; inj_ < NNL__; ++inj_) {
 
             UINT nj_offs_ = 18*inj_;
-            UINT nj_   = nodes_load[inj_]-1;
-            REAL ubnj_ = wind_nod_vel[nj_];
+            UINT nj_      = nodes_load[inj_]-1;
+            BSACL_REAL ubnj_ = (BSACL_REAL)wind_nod_vel[nj_];
 
-            REAL corrJK_ = nod_corr[getCorrId(nj_, nk_, NN__)] < REAL_MIN ? REAL_MIN : nod_corr[getCorrId(nj_, nk_, NN__)];
+            nod_corr_ = (BSACL_REAL)nod_corr[getCorrId(nj_, nk_, NN__)];
+            BSACL_REAL corrJK_   = nod_corr_ < BSACL_REAL_MIN ? BSACL_REAL_MIN : nod_corr_;
 
-            REAL S_uvw_J_i_ = evalFct(fi_,  PSD_ID_ARG   wscl_, wstd_, ubnj_);
+            BSACL_REAL S_uvw_J_i_ = evalFct(fi_,  PSD_ID_ARG   wscl_, wstd_, ubnj_);
             S_uvw_JK_i  = S_uvw_J_i_ * S_uvw_K_i_;
             S_uvw_JK_i  = sqrt(S_uvw_JK_i);
-            S_uvw_JK_i *= POW(corrJK_, (FABS((REAL)fi_)));
+            S_uvw_JK_i *= POW(corrJK_, (FABS((BSACL_REAL)fi_)));
 
             S_uvw_JK_j  = evalFct(fj_,  PSD_ID_ARG   wscl_, wstd_, ubnj_);
             S_uvw_JK_j *= S_uvw_K_j_;
             S_uvw_JK_j  = sqrt(S_uvw_JK_j);
-            S_uvw_JK_j *= POW(corrJK_, (FABS((REAL)fj_)));
+            S_uvw_JK_j *= POW(corrJK_, (FABS((BSACL_REAL)fj_)));
 
-            REAL S_uvw_J_ij_  = evalFct(fiPfj_,  PSD_ID_ARG   wscl_, wstd_, ubnj_);
+            BSACL_REAL S_uvw_J_ij_  = evalFct(fiPfj_,  PSD_ID_ARG   wscl_, wstd_, ubnj_);
 
             for (UINT ini_=0; ini_ < NNL__; ++ini_) {
 
                UINT ni_offs_ = 18*ini_;
-               UINT ni_   = nodes_load[ini_]-1;
-               REAL ubni_ = wind_nod_vel[ni_];
+               UINT ni_      = nodes_load[ini_]-1;
+               BSACL_REAL ubni_ = (BSACL_REAL)wind_nod_vel[ni_];
 
-               REAL corrIK_ = nod_corr[getCorrId(ni_, nk_, NN__)] < REAL_MIN ? REAL_MIN : nod_corr[getCorrId(ni_, nk_, NN__)];
-               REAL corrIJ_ = nod_corr[getCorrId(ni_, nj_, NN__)] < REAL_MIN ? REAL_MIN : nod_corr[getCorrId(ni_, nj_, NN__)];
+               nod_corr_ = (BSACL_REAL)nod_corr[getCorrId(ni_, nk_, NN__)];
+               BSACL_REAL corrIK_ = nod_corr_ < BSACL_REAL_MIN ? BSACL_REAL_MIN : nod_corr_;
+               nod_corr_ = (BSACL_REAL)nod_corr[getCorrId(ni_, nj_, NN__)];
+               BSACL_REAL corrIJ_ = nod_corr_ < BSACL_REAL_MIN ? BSACL_REAL_MIN : nod_corr_;
 
                S_uvw_IK_j   = evalFct(fj_,  PSD_ID_ARG   wscl_, wstd_, ubni_);
                S_uvw_IK_j  *= S_uvw_K_j_;
                S_uvw_IK_j   = sqrt(S_uvw_IK_j);
-               S_uvw_IK_j  *= POW(corrIK_, (FABS((REAL)fj_)));
+               S_uvw_IK_j  *= POW(corrIK_, (FABS((BSACL_REAL)fj_)));
 
                S_uvw_IK_ij  = evalFct(fiPfj_,  PSD_ID_ARG   wscl_, wstd_, ubni_);
                S_uvw_IK_ij *= S_uvw_K_ij_;
                S_uvw_IK_ij  = sqrt(S_uvw_IK_ij);
-               S_uvw_IK_ij *= POW(corrIK_, (FABS((REAL)fiPfj_)));
+               S_uvw_IK_ij *= POW(corrIK_, (FABS((BSACL_REAL)fiPfj_)));
 
                S_uvw_IJ_i   = evalFct(fi_,  PSD_ID_ARG   wscl_, wstd_, ubni_);
                S_uvw_IJ_i  *= S_uvw_J_i_;
                S_uvw_IJ_i   = sqrt(S_uvw_IJ_i);
-               S_uvw_IJ_i  *= POW(corrIJ_, (FABS((REAL)fi_)));
+               S_uvw_IJ_i  *= POW(corrIJ_, (FABS((BSACL_REAL)fi_)));
 
                S_uvw_IJ_ij  = evalFct(fiPfj_,  PSD_ID_ARG   wscl_, wstd_, ubni_);
                S_uvw_IJ_ij *= S_uvw_J_ij_;
                S_uvw_IJ_ij  = sqrt(S_uvw_IJ_ij);
-               S_uvw_IJ_ij *= POW(corrIJ_, (FABS((REAL)fiPfj_)));
+               S_uvw_IJ_ij *= POW(corrIJ_, (FABS((BSACL_REAL)fiPfj_)));
 
                m3mf_loc_[lid0_] += 2.f * (
                     phiTc_mno_[ni_offs_ + 3 + tc_] * phiTc_mno_[nj_offs_ + 6 +     tc_] * phiTc_mno_[nk_offs_ + 12 +     tc_] * (S_uvw_IJ_i  * S_uvw_IK_j )
@@ -608,7 +610,7 @@ KERNEL void bfm_kernel(
    const size_t wgid0_ = BLOCK_ID_X_DIM0;
    const size_t nwgd0_ = N_BLOCKS_WGROUPS_X_DIM0;
    if (0 == lid0_) {
-      m3mf[wgid1_*nwgd0_ + wgid0_] = m3mf_loc_[0];
+      m3mf[wgid1_*nwgd0_ + wgid0_] = (__real)m3mf_loc_[0];
    }
 #else
    if (0 == lid0_) {
@@ -620,7 +622,7 @@ KERNEL void bfm_kernel(
       // Then store sum into global variable
       const size_t wgid0_ = BLOCK_ID_X_DIM0;
       const size_t nwgd0_ = N_BLOCKS_WGROUPS_X_DIM0;
-      m3mf[wgid1_*nwgd0_ + wgid0_] = m3mf_loc_[0];
+      m3mf[wgid1_*nwgd0_ + wgid0_] = (__real)m3mf_loc_[0];
    }
 #endif
    LOCAL_WORKGROUP_BARRIER;
