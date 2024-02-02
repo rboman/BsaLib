@@ -99,9 +99,9 @@ program bsa
 
    ! local, used to retrieve single run BSA results
    real(bsa_real_t), allocatable :: bkg_(:),  res_(:)
-   real(bsa_real_t), allocatable :: m2mf_(:), m2mr_(:), m2o2mr_(:)   ! NOTE: implicitly classic
-   real(bsa_real_t), allocatable :: m3mf_cls_(:), m3mr_cls_(:)
-   real(bsa_real_t), allocatable :: m3mf_msh_(:), m3mr_msh_(:)
+   real(bsa_real_t), target, allocatable :: m2mf_(:), m2mr_(:), m2o2mr_(:)   ! NOTE: implicitly classic
+   real(bsa_real_t), target, allocatable :: m3mf_cls_(:), m3mr_cls_(:)
+   real(bsa_real_t), target, allocatable :: m3mf_msh_(:), m3mr_msh_(:)
 
 
    real(bsa_real_t), allocatable, dimension(:) :: m2_r_diag, m3_r_diag, sk_r_diag, m2o2_r_diag

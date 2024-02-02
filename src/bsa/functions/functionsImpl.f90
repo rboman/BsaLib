@@ -2961,13 +2961,13 @@ contains
 
 
    module subroutine getRM_full_scalar_cls_(ii, ij, fi, fj, psdin, psdout, bispin, bispout)
-      integer(bsa_int_t), intent(in)  :: ii, ij
-      real(bsa_real_t), intent(in)    :: fi, fj
-      real(bsa_real_t), intent(in)    :: psdin(dimM_psd_), bispin(dimM_bisp_)
-      real(bsa_real_t), intent(out)   :: psdout(dimM_psd_), bispout(dimM_bisp_)
+      integer(bsa_int_t), intent(in) :: ii, ij
+      real(bsa_real_t), intent(in)   :: fi, fj
+      real(bsa_real_t), pointer, intent(in) :: psdin(:), bispin(:)
+      real(bsa_real_t), pointer, intent(in) :: psdout(:), bispout(:)
 
       real(bsa_real_t) :: wi
-      integer(int32) :: posm, imk, imj
+      integer(int32)   :: posm, imk, imj
 
       real(bsa_real_t), dimension(NMODES_EFF) :: Cdiag, rpart, ipart, htmp
       real(bsa_real_t), dimension(NMODES_EFF) :: H1r, H1i
@@ -2990,7 +2990,7 @@ contains
       H1i   = - ipart / htmp
 
 
-      if (ij == 1) then ! also PSDr
+      if (ij == 1 .and. associated(psdin) .and. associated(psdout)) then ! also PSDr
 
          posm = 1
          do imk = 1, NMODES_EFF
@@ -3014,6 +3014,7 @@ contains
 
 
       ! BISPr
+      if (.not. (associated(bispin) .and. associated(bispout))) return
 
       block
          real(bsa_real_t), dimension(NMODES_EFF) :: H2r, H2i
@@ -3204,8 +3205,8 @@ contains
    module subroutine getRM_diag_scalar_cls_(ii, ij, fi, fj, psdin, psdout, bispin, bispout)
       integer(bsa_int_t), intent(in)  :: ii, ij  ! freqs indexes
       real(bsa_real_t), intent(in)    :: fi, fj
-      real(bsa_real_t), intent(in)    :: psdin(dimM_psd_), bispin(dimM_bisp_)
-      real(bsa_real_t), intent(out)   :: psdout(dimM_psd_), bispout(dimM_bisp_)
+      real(bsa_real_t), pointer, intent(in) :: psdin(:), bispin(:)
+      real(bsa_real_t), pointer, intent(in) :: psdout(:), bispout(:)
 
       real(bsa_real_t) :: wi
       integer(bsa_int_t)   :: imi

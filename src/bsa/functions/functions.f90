@@ -157,8 +157,8 @@ module BsaLib_Functions
       module subroutine getRM_full_scalar_cls_(ii, ij, fi, fj, psdin, psdout, bispin, bispout)
          integer(bsa_int_t), intent(in) :: ii, ij
          real(bsa_real_t), intent(in)   :: fi, fj
-         real(bsa_real_t), intent(in)   :: psdin(dimM_psd_), bispin(dimM_bisp_)
-         real(bsa_real_t), intent(out)  :: psdout(dimM_psd_), bispout(dimM_bisp_)
+         real(bsa_real_t), pointer, intent(in) :: psdin(:), bispin(:)
+         real(bsa_real_t), pointer, intent(in) :: psdout(:), bispout(:)
       end subroutine
 
 
@@ -178,8 +178,8 @@ module BsaLib_Functions
       module subroutine getRM_diag_scalar_cls_(ii, ij, fi, fj, psdin, psdout, bispin, bispout)
          integer(bsa_int_t), intent(in) :: ii, ij  ! freqs indexes
          real(bsa_real_t), intent(in)   :: fi, fj
-         real(bsa_real_t), intent(in)   :: psdin(dimM_psd_), bispin(dimM_bisp_)
-         real(bsa_real_t), intent(out)  :: psdout(dimM_psd_), bispout(dimM_bisp_)
+         real(bsa_real_t), pointer, intent(in) :: psdin(:), bispin(:)
+         real(bsa_real_t), pointer, intent(in) :: psdout(:), bispout(:)
       end subroutine
 
 
