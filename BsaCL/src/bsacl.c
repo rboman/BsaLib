@@ -148,7 +148,7 @@ static unsigned short kernel_id_ = 2U;
 static unsigned short pass_params_by_macro_ = 1U;
 #endif
 
-static BSACL_REAL dInfl_ = { 0 };
+static __real dInfl_ = { 0 };
 
 
 // BSACL memory buffers
@@ -822,11 +822,6 @@ BSACL_INT setBfmKernelArgs_(void)
    BSACL_INT ierr_  = 0;
    BSACL_UINT iarg_ = 0;
 
-   dInfl_  = (BSACL_REAL)(*(fi__ + 1) - *fi__);
-   dInfl_ *= (BSACL_REAL)(*(fj__ + 1) - *fj__);
-#ifdef BSACL_CONV_PULSATION
-   dInfl_ *= 4 * BSACL_PI * BSACL_PI;
-#endif
 
    if (pass_params_by_macro_ == 0)
       ierr_ |= clSetKernelArg(kernel_bfm__, iarg_++,  sizeof(unsigned int), &extdata__.NTC__);
@@ -842,10 +837,6 @@ BSACL_INT setBfmKernelArgs_(void)
    ierr_ |= clSetKernelArg(kernel_bfm__, iarg_++,  sizeof(cl_mem),       &d_fj__);
    if (kernel_id_ != 4 || pass_params_by_macro_ == 0)
       ierr_ |= clSetKernelArg(kernel_bfm__, iarg_++,  sizeof(unsigned int), &nfj__);
-
-
-   if (kernel_id_ != 4)
-      ierr_ |= clSetKernelArg(kernel_bfm__, iarg_++, sizeof(BSACL_REAL), &dInfl_);
 
 
    if (pass_params_by_macro_ == 0) {
@@ -1234,10 +1225,14 @@ void bsaclRun(int *__EXT_PTR_CONST ierr) {
 
 #ifndef BSACL_USE_CUDA__
    cl_event mainKerEv_;
-#elif (defined BSACL_USE_CUDA__)
-   dInfl_ = (BSACL_REAL)(*(fi__ + 1) - *fi__) * 2 * BSACL_PI;  // rad/s
-   dInfl_ = dInfl_ * dInfl_;  // infl area
 #endif
+
+   dInfl_  = (*(fi__ + 1) - *fi__);
+   dInfl_ *= (*(fj__ + 1) - *fj__);
+#ifdef BSACL_CONV_PULSATION
+   dInfl_ *= 4 * (__real)(BSACL_PI * BSACL_PI);
+#endif
+
 
 
 #ifdef BSACL_USE_CUDA__
@@ -1298,9 +1293,6 @@ void bsaclRun(int *__EXT_PTR_CONST ierr) {
             nfi__,
             d_fj__,
             nfj__,
-#if (BSACL_KERNEL_ID == 1)
-            dInfl_,
-#endif
             extdata__.NMODES_EFF__,
             extdata__.NDEGW__,
             d_phiTc__,
@@ -1352,6 +1344,9 @@ void bsaclRun(int *__EXT_PTR_CONST ierr) {
          for (BSACL_UINT i_ = 0; i_ < extdata__.DIM_M3_M__; i_++) {
             extdata__.m3mf__[i_] += rtmp_[iwgx_*extdata__.DIM_M3_M__ + i_];
          }
+      }
+      for (BSACL_UINT i_ = 0; i_ < extdata__.DIM_M3_M__; i_++) {
+         extdata__.m3mf__[i_] *= (__real)dInfl_;
       }
    } else {
       for (BSACL_UINT i_ = 0; i_ < extdata__.DIM_M3_M__; i_++) {

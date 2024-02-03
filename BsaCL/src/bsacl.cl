@@ -189,7 +189,6 @@ KERNEL void bfm_kernel(
       const    UINT          NFI__,
       GLOBAL   BSACL_REAL          *fj,
       const    UINT          NFJ__,
-      const    BSACL_REAL          dInfl,
 #ifndef BSACL_PASS_PARAMS_BY_MACRO__
       const    UINT          NM_EFF__,
       const    UINT          NDEGW__,
@@ -351,9 +350,6 @@ KERNEL void bfm_kernel(
          } // fi
       } // fj
    } // NTC_
-
-   // Multiply by reference area
-   m3mf_wg_x_[lid0_] *= dInfl;
 
    // BUG: apparently, removing this barrier leads to wrong results..
    LOCAL_WORKGROUP_BARRIER;
