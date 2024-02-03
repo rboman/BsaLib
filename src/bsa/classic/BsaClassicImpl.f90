@@ -63,7 +63,7 @@ contains
 
       call bsacl_AcquireResultBFMVect(m3mf_cls)
       call bsacl_AcquireComputationFreqs(NFREQS, f, NFREQS, f)
-      ierr_cl_ = bsacl_SetKernelID(4)
+      ierr_cl_ = bsacl_SetKernelID(2)
       if (ierr_cl_ /= 0) then
          print '(1x, a, a)', ERRMSG, &
             'Error in setting kernel identifier.'

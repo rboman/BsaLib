@@ -112,7 +112,7 @@ DEVICE BSACL_REAL evalFct(
 #endif // BSACL_WIND_PSD_ID==BSACL_PSD_TYPE_VONKARMAN
 
 
-#if (defined BSACL_USE_CUDA__) || (BSACL_WIND_PSD_ID==BSACL_PSD_TYPE_DAVENPORT)
+#if (defined(BSACL_USE_CUDA__)) || (BSACL_WIND_PSD_ID==BSACL_PSD_TYPE_DAVENPORT)
 # ifdef BSACL_USE_CUDA__
    if (BSACL_WIND_PSD_ID==BSACL_PSD_TYPE_DAVENPORT) {
 # endif
@@ -162,7 +162,7 @@ DEVICE BSACL_REAL evalFct(
 
 
 
-#if (BSACL_KERNEL_ID==3)
+#if (BSACL_KERNEL_ID==1)
 
 /**
  * BFM kernel using a total of NN^3 WI organised into NWGs.
@@ -170,10 +170,8 @@ DEVICE BSACL_REAL evalFct(
  *   modal indexes combination.
  * Hence, each WI will uniquely perform the kernel for a single and 
  *   unique combination of NODAL indexes (I,J,K). 
- *
- * BSACL_KERNEL_ID==3:
- *  This version loads all the 2D frequency vectors, and compute loops internally
- *    to avoid multiple kernel enqueueing.
+ * This version loads all the 2D frequency vectors, and compute loops internally
+ *   to avoid multiple kernel enqueueing.
 */
 KERNEL void bfm_kernel(
 #ifdef BSACL_USE_CUDA__
@@ -390,12 +388,12 @@ KERNEL void bfm_kernel(
    LOCAL_WORKGROUP_BARRIER;
 }
 
-#endif // (BSACL_KERNEL_ID==3)
+#endif // (BSACL_KERNEL_ID==1)
 
 
 
 
-#if (BSACL_KERNEL_ID==4)
+#if (BSACL_KERNEL_ID==2)
 
 /**
  * BFM kernel using a total of NF^2 x NM^3 work items.
@@ -628,5 +626,5 @@ KERNEL void bfm_kernel(
    LOCAL_WORKGROUP_BARRIER;
 }
 
-#endif // (BSACL_KERNEL_ID==4)
+#endif // (BSACL_KERNEL_ID==2)
 

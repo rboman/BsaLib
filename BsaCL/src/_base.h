@@ -47,10 +47,10 @@
 
 #ifdef BSACL_USE_CUDA__
 # ifndef BSACL_KERNEL_ID
-#  define BSACL_KERNEL_ID 4
+#  define BSACL_KERNEL_ID 2
 # endif
 #else
-# if (BSACL_KERNEL_ID==4)
+# if (BSACL_KERNEL_ID==2)
 #  ifndef BSACL_PASS_PARAMS_BY_MACRO__
 #   define BSACL_PASS_PARAMS_BY_MACRO__
 #  endif

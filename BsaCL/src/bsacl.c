@@ -143,7 +143,7 @@ static size_t n_work_groups__[3];
 static unsigned short has_halted__  = 0U;
 static unsigned short has_cleaned__ = 0U;
 
-static unsigned short kernel_id_ = 4U;
+static unsigned short kernel_id_ = 2U;
 #ifndef BSACL_USE_CUDA__
 static unsigned short pass_params_by_macro_ = 1U;
 #endif
@@ -342,8 +342,10 @@ static inline void freeMem_(void) {
 
    freeExtData(&extdata__);
 
-#if (BSACL_KERNEL_ID==1)
+#ifdef BSACL_ENABLE_EVALFCT_PTR
+#if (BSACL_KERNEL_ID==0)
    evalFunc_ptr__ = NULL;
+#endif
 #endif
 
    fi__    = NULL;
@@ -741,7 +743,7 @@ void assembleProgramBuildOptsString_()
       sprintf(buf, "%-5u", extdata__.NMODES_EFF__);
       buf += 5;
 
-      if (kernel_id_ == 4) {
+      if (kernel_id_ == 2) {
             strcpy(buf, " -D NFI__=");
             buf += 10;
             sprintf(buf, "%-10u", nfi__);
@@ -834,19 +836,17 @@ BSACL_INT setBfmKernelArgs_(void)
    ierr_ |= clSetKernelArg(kernel_bfm__, iarg_++,  sizeof(cl_mem),       &d_nodes_load__);
 
 
-   if (kernel_id_ == 2) {
-      iarg_ = 6;
-   } else {
-      ierr_ |= clSetKernelArg(kernel_bfm__, iarg_++,  sizeof(cl_mem),       &d_fi__);
-      if (kernel_id_ != 4 || pass_params_by_macro_ == 0)
-         ierr_ |= clSetKernelArg(kernel_bfm__, iarg_++,  sizeof(unsigned int), &nfi__);
-      ierr_ |= clSetKernelArg(kernel_bfm__, iarg_++,  sizeof(cl_mem),       &d_fj__);
-      if (kernel_id_ != 4 || pass_params_by_macro_ == 0)
-         ierr_ |= clSetKernelArg(kernel_bfm__, iarg_++,  sizeof(unsigned int), &nfj__);
-   }
+   ierr_ |= clSetKernelArg(kernel_bfm__, iarg_++,  sizeof(cl_mem),       &d_fi__);
+   if (kernel_id_ != 4 || pass_params_by_macro_ == 0)
+      ierr_ |= clSetKernelArg(kernel_bfm__, iarg_++,  sizeof(unsigned int), &nfi__);
+   ierr_ |= clSetKernelArg(kernel_bfm__, iarg_++,  sizeof(cl_mem),       &d_fj__);
+   if (kernel_id_ != 4 || pass_params_by_macro_ == 0)
+      ierr_ |= clSetKernelArg(kernel_bfm__, iarg_++,  sizeof(unsigned int), &nfj__);
+
 
    if (kernel_id_ != 4)
       ierr_ |= clSetKernelArg(kernel_bfm__, iarg_++, sizeof(BSACL_REAL), &dInfl_);
+
 
    if (pass_params_by_macro_ == 0) {
       ierr_ |= clSetKernelArg(kernel_bfm__, iarg_++, sizeof(unsigned int), &extdata__.NMODES_EFF__);
@@ -1083,7 +1083,7 @@ ierr_t getOptKernelDims_()
 
    global_dims_ie_NTWI__[1] = ntwi_; // NM^3
 
-   if (kernel_id_ == 4) {
+   if (kernel_id_ == 2) {
 
       // find how many WG of given size fit in nfreqs
       size_t nfreqs_ = nfi__ * nfj__;
@@ -1277,7 +1277,7 @@ void bsaclRun(int *__EXT_PTR_CONST ierr) {
 
 #ifndef BSACL_USE_CUDA__
    // make sure to set passing byu macro to 1 BEFORE setting kernel arguments.
-   if (kernel_id_ == 4 && pass_params_by_macro_ == 0) pass_params_by_macro_ = 1U;
+   if (kernel_id_ == 2 && pass_params_by_macro_ == 0) pass_params_by_macro_ = 1U;
 #endif
 
 #ifndef BSACL_USE_CUDA__
@@ -1298,7 +1298,7 @@ void bsaclRun(int *__EXT_PTR_CONST ierr) {
             nfi__,
             d_fj__,
             nfj__,
-#if (BSACL_KERNEL_ID != 4)
+#if (BSACL_KERNEL_ID == 1)
             dInfl_,
 #endif
             extdata__.NMODES_EFF__,
@@ -1347,7 +1347,7 @@ void bsaclRun(int *__EXT_PTR_CONST ierr) {
       ABORT_INTERNAL_GOTO_RET_(ierr_, "Failed to read results from device.", ret_);
 
    /** Cumulate all single WG contributions */
-   if (kernel_id_ == 3) {
+   if (kernel_id_ == 1) {
       for (BSACL_UINT iwgx_ = 0; iwgx_ < n_work_groups__[0]; iwgx_++) {
          for (BSACL_UINT i_ = 0; i_ < extdata__.DIM_M3_M__; i_++) {
             extdata__.m3mf__[i_] += rtmp_[iwgx_*extdata__.DIM_M3_M__ + i_];
@@ -1401,7 +1401,7 @@ ret_: *ierr = (int)ierr_;
 BSACL_INT bsaclSetKernelID(unsigned kid)
 {
    ierr_t ret = BSACL_SUCCESS;
-   if (kid < 2 || kid > 4) {
+   if (kid < 1 || kid > 2) {
       ret = (ierr_t)1;
    } else {
       kernel_id_ = kid;
@@ -1537,9 +1537,6 @@ void bsaclAcquireTurbComponentsList(int *__EXT_PTR_CONST tc, const uint32_t ntc)
    if (has_halted__ == 1U) return;
    extdata__.NTC__ = ntc;
    extdata__.tc__  = tc;
-#if (BSACL_KERNEL_ID==1)
-   if (extdata__.NNODES_LOAD__ != 0) BASE_PSD_ALLOC_SIZE__ = extdata__.NNODES_LOAD__ * ntc;
-#endif
 }
 
 
@@ -1612,9 +1609,11 @@ void bsaclAcquireWindTurbStd(__real *__EXT_PTR_CONST wt_std, const uint32_t nwz)
 void bsaclAcquireEvalFunc(evalFct_t fct)
 {
    if (has_halted__ == 1U) return;
-#if (BSACL_KERNEL_ID==1)
+#ifdef BSACL_ENABLE_EVALFCT_PTR
+#if (BSACL_KERNEL_ID==0)
    if (fct == NULL) ABORT_INTERNAL_RETURN_VOID(-11, "Passed evaluation function pointer is NULL.");
    evalFunc_ptr__ = fct;
+#endif
 #endif
    return;
 }
