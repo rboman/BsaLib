@@ -1346,7 +1346,7 @@ void bsaclRun(int *__EXT_PTR_CONST ierr) {
          }
       }
       for (BSACL_UINT i_ = 0; i_ < extdata__.DIM_M3_M__; i_++) {
-         extdata__.m3mf__[i_] *= (__real)dInfl_;
+         extdata__.m3mf__[i_] *= dInfl_;
       }
    } else {
       for (BSACL_UINT i_ = 0; i_ < extdata__.DIM_M3_M__; i_++) {
@@ -1354,7 +1354,7 @@ void bsaclRun(int *__EXT_PTR_CONST ierr) {
          for (BSACL_UINT iwgx_ = 0; iwgx_ < n_work_groups__[0]; iwgx_++) {
             extdata__.m3mf__[i_] += rtmp_[iwgx_ + (i_*n_work_groups__[0])];
          }
-         extdata__.m3mf__[i_] *= (__real)dInfl_;
+         extdata__.m3mf__[i_] *= dInfl_;
       }
    }
    free(rtmp_);
