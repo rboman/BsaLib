@@ -1400,12 +1400,14 @@ ret_: *ierr = (int)ierr_;
 
 BSACL_INT bsaclSetKernelID(unsigned kid)
 {
-   ierr_t ret = BSACL_SUCCESS;
+   ierr_t ret = { BSACL_SUCCESS };
+#ifndef BSACL_USE_CUDA__
    if (kid < 1 || kid > 2) {
       ret = (ierr_t)1;
    } else {
       kernel_id_ = kid;
    }
+#endif
    return ret;
 }
 
