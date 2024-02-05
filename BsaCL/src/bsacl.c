@@ -166,6 +166,10 @@ BSACL_MEM  INT_PTR_T   d_wind_nodal_windz__ = NULL;
 BSACL_MEM  REAL_PTR_T  d_fi__ = NULL;
 BSACL_MEM  REAL_PTR_T  d_fj__ = NULL;
 
+BSACL_MEM  REAL_PTR_T  d_Mg__ = NULL;
+BSACL_MEM  REAL_PTR_T  d_Cg__ = NULL;
+BSACL_MEM  REAL_PTR_T  d_Kg__ = NULL;
+
 BSACL_MEM  REAL_PTR_T  d_m3mf__ = NULL;
 
 
@@ -197,11 +201,15 @@ typedef struct extdata_t {
 
    unsigned NWZ__;  // N. of wind zones
 
+   int  *tc__;           // list of effective turbulent components
+   int  *modes_eff__;    // list of effective modes used
+
    __real *modmat__;
    __real *natfreqs__;
 
-   int  *modes_eff__;    // list of effective modes used
-   int  *tc__;           // list of effective turbulent components
+   __real *Mg__;
+   __real *Cg__;
+   __real *Kg__;
 
    __real *wfc__;       // wind force coefficients
    __real *phi_T_c__;   // Phi x C matrix
@@ -270,9 +278,7 @@ extern "C" {
  *
  */
 static inline ierr_t releaseDeviceMem_() {
-   unsigned ierr_;
-
-   ierr_  = BSACL_DEVICE_FREE_MEM(d_m3mf__);
+   unsigned ierr_ = 0u;
 
    ierr_ |= BSACL_DEVICE_FREE_MEM(d_nodes_load__);
    ierr_ |= BSACL_DEVICE_FREE_MEM(d_nod_corr__);
@@ -286,6 +292,13 @@ static inline ierr_t releaseDeviceMem_() {
 
    ierr_ |= BSACL_DEVICE_FREE_MEM(d_fi__);
    ierr_ |= BSACL_DEVICE_FREE_MEM(d_fj__);
+
+   ierr_ |= BSACL_DEVICE_FREE_MEM(d_Mg__);
+   ierr_ |= BSACL_DEVICE_FREE_MEM(d_Cg__);
+   ierr_ |= BSACL_DEVICE_FREE_MEM(d_Kg__);
+
+   ierr_ |= BSACL_DEVICE_FREE_MEM(d_m3mf__);
+
    return (ierr_t)ierr_;
 }
 
@@ -1015,31 +1028,77 @@ void initCreateDeviceBuffers_()
    if (ierr_ != BSACL_SUCCESS || d_fi__==NULL) 
       ABORT_INTERNAL_RETURN_VOID(ierr_, "Failed to create   d_fi__   device buffer");
 #ifdef BSACL_USE_CUDA__
-      ierr_ = cudaMemcpy((void *)d_fi__, (void *)fi__, sz_, cudaMemcpyHostToDevice);
-      if (ierr_ != BSACL_SUCCESS) 
-         ABORT_INTERNAL_RETURN_VOID(ierr_, "Failed to write device buffer  d_fi__.");
+   ierr_ = cudaMemcpy((void *)d_fi__, (void *)fi__, sz_, cudaMemcpyHostToDevice);
+   if (ierr_ != BSACL_SUCCESS) 
+      ABORT_INTERNAL_RETURN_VOID(ierr_, "Failed to write device buffer  d_fi__.");
 #endif
 
 
 #ifdef BSACL_USE_CUDA__
-      ierr_ = cudaMalloc((void**)&d_fj__, sz_);
+   ierr_ = cudaMalloc((void**)&d_fj__, sz_);
 #else
-      d_fj__ = clCreateBuffer(
-         context__, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sz_, (void *)fj__, &ierr_);
+   d_fj__ = clCreateBuffer(
+      context__, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sz_, (void *)fj__, &ierr_);
 #endif
-      if (ierr_ != BSACL_SUCCESS) 
-         ABORT_INTERNAL_RETURN_VOID(ierr_, "Failed to create   d_fj__   device buffer");
+   if (ierr_ != BSACL_SUCCESS) 
+      ABORT_INTERNAL_RETURN_VOID(ierr_, "Failed to create   d_fj__   device buffer");
 #ifdef BSACL_USE_CUDA__
-      ierr_ = cudaMemcpy((void *)d_fj__, (void *)fj__, sz_, cudaMemcpyHostToDevice);
-      if (ierr_ != BSACL_SUCCESS) 
+   ierr_ = cudaMemcpy((void *)d_fj__, (void *)fj__, sz_, cudaMemcpyHostToDevice);
+   if (ierr_ != BSACL_SUCCESS) 
       ABORT_INTERNAL_RETURN_VOID(ierr_, "Failed to write device buffer  d_fj__.");
 #endif
 
 
+   sz_ = extdata__.NMODES_EFF__ * sizeof(__real);
+#ifdef BSACL_USE_CUDA__
+   ierr_ = cudaMalloc((void**)&d_Mg__, sz_);
+#else
+   d_Mg__ = clCreateBuffer(
+      context__, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sz_, (void *)extdata__.Mg__, &ierr_);
+#endif
+   if (ierr_ != BSACL_SUCCESS) 
+      ABORT_INTERNAL_RETURN_VOID(ierr_, "Failed to create   d_Mg__   device buffer");
+#ifdef BSACL_USE_CUDA__
+   ierr_ = cudaMemcpy((void *)d_Mg__, (void *)extdata__.Mg__, sz_, cudaMemcpyHostToDevice);
+   if (ierr_ != BSACL_SUCCESS) 
+      ABORT_INTERNAL_RETURN_VOID(ierr_, "Failed to write device buffer  d_Mg__.");
+#endif
+
+#ifdef BSACL_USE_CUDA__
+   ierr_ = cudaMalloc((void**)&d_Kg__, sz_);
+#else
+   d_Kg__ = clCreateBuffer(
+      context__, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sz_, (void *)extdata__.Kg__, &ierr_);
+#endif
+   if (ierr_ != BSACL_SUCCESS) 
+      ABORT_INTERNAL_RETURN_VOID(ierr_, "Failed to create   d_Kg__   device buffer");
+#ifdef BSACL_USE_CUDA__
+   ierr_ = cudaMemcpy((void *)d_Kg__, (void *)extdata__.Kg__, sz_, cudaMemcpyHostToDevice);
+   if (ierr_ != BSACL_SUCCESS) 
+      ABORT_INTERNAL_RETURN_VOID(ierr_, "Failed to write device buffer  d_Kg__.");
+#endif
+
+   sz_ *= extdata__.NMODES_EFF__;
+#ifdef BSACL_USE_CUDA__
+   ierr_ = cudaMalloc((void**)&d_Cg__, sz_);
+#else
+   d_Cg__ = clCreateBuffer(
+      context__, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sz_, (void *)extdata__.Cg__, &ierr_);
+#endif
+   if (ierr_ != BSACL_SUCCESS) 
+      ABORT_INTERNAL_RETURN_VOID(ierr_, "Failed to create   d_Cg__   device buffer");
+#ifdef BSACL_USE_CUDA__
+   ierr_ = cudaMemcpy((void *)d_Cg__, (void *)extdata__.Cg__, sz_, cudaMemcpyHostToDevice);
+   if (ierr_ != BSACL_SUCCESS) 
+      ABORT_INTERNAL_RETURN_VOID(ierr_, "Failed to write device buffer  d_Cg__.");
+#endif
+
+
+
    if (extdata__.m3mf__ == NULL)
       ABORT_INTERNAL_RETURN_VOID(-83, "Result array was not acquired. Aborting.");
-   sz_ = extdata__.DIM_M3_M__ * sizeof(__real);
 
+   sz_  = extdata__.DIM_M3_M__ * sizeof(__real);
    sz_ *= n_work_groups__[0];
 
 #ifdef BSACL_USE_CUDA__
@@ -1303,6 +1362,9 @@ void bsaclRun(int *__EXT_PTR_CONST ierr) {
             d_wind_turb_scales__,
             d_wind_turb_std__,
             d_wind_nodal_windz__,
+            d_Mg__,
+            d_Cg__,
+            d_Kg__,
             d_m3mf__);
          ierr_ = cudaDeviceSynchronize();
          // ierr_ = cudaGetLastError();
@@ -1446,6 +1508,20 @@ void bsaclAcquireStructModMat(
 //    } 
 // #endif
 }
+
+
+
+void bsaclAcquireModalMatrices(
+      __real *__EXT_PTR_CONST Mg, __real *__EXT_PTR_CONST Cg, __real *__EXT_PTR_CONST Kg)
+{
+   if (has_halted__ == 1U) return;
+   extdata__.Mg__ = Mg;
+   extdata__.Cg__ = Cg;
+   extdata__.Kg__ = Kg;
+}
+
+
+
 
 
 /**

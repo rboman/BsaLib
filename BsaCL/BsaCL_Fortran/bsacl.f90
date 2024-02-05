@@ -76,6 +76,12 @@ module BsaCL
       end subroutine
 
 
+      module subroutine bsacl_AcquireModalMatrices(Mg, Cg, Kg)
+         real(RK), intent(in), dimension(:),    target :: Mg, Kg
+         real(RK), intent(in), dimension(:, :), target :: Cg
+      end subroutine
+
+
       module subroutine bsacl_AcquireLoadedNodesList(nodes_load)
          integer(IK), intent(in), target :: nodes_load(:)
       end subroutine

@@ -55,6 +55,18 @@ contains
    end subroutine
 
 
+
+   module subroutine bsacl_AcquireModalMatrices(Mg, Cg, Kg)
+      real(RK), intent(in), dimension(:),    target :: Mg, Kg
+      real(RK), intent(in), dimension(:, :), target :: Cg
+
+      call bsaclAcquireModalMatrices__(c_loc(Mg), c_loc(Cg), c_loc(Kg))
+   end subroutine
+
+
+
+
+
    module subroutine bsacl_AcquireLoadedNodesList(nodes_load)
       integer(IK), intent(in), target :: nodes_load(:)
       integer(c_int) :: nnodes_l_

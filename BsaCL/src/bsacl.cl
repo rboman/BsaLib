@@ -429,7 +429,10 @@ KERNEL void bfm_kernel(
       const    GLOBAL  __real  *wind_turb_scl,
       const    GLOBAL  __real  *wind_turb_std,
       const    GLOBAL   int    *wind_nod_winz,
-      GLOBAL __real *m3mf
+      const    GLOBAL  __real  *Mg,
+      const    GLOBAL  __real  *Cg,
+      const    GLOBAL  __real  *Kg,
+      GLOBAL __real *m3out
 )
 {
    const size_t gid0_ = GLOBAL_ID_X_DIM0; // this determines the pair of freqs
@@ -450,6 +453,54 @@ KERNEL void bfm_kernel(
    itmp_          = (UINT)wgid1_ - (mk_ * itmp_);
    const UINT mj_ = itmp_ / NM_EFF__;
    const UINT mi_ = itmp_ - (mj_ * NM_EFF__);
+
+
+   /**
+    * Prefetch modal matrices values for current WG.
+    * [ [Mg1, Mg2, Mg3], [Cg1, Cg2, Cg3], [] ]
+    *
+    * */
+   LOCAL BSACL_REAL modal_matrices_vals_[3 * 3];
+   if (lid0_ == 0) {
+      modal_matrices_vals_[lid0_] = (BSACL_REAL)Mg[/*(mi_ * NM_EFF__) + */ mi_];
+   }
+   if (lid0_ == 1) {
+      modal_matrices_vals_[lid0_] = (BSACL_REAL)Mg[/*(mj_ * NM_EFF__) + */ mj_];
+   }
+   if (lid0_ == 2) {
+      modal_matrices_vals_[lid0_] = (BSACL_REAL)Mg[/*(mk_ * NM_EFF__) + */ mk_];
+   }
+
+   if (lid0_ == 3) {
+      modal_matrices_vals_[lid0_] = (BSACL_REAL)Cg[(mi_ * NM_EFF__) + mi_];
+   }
+   if (lid0_ == 4) {
+      modal_matrices_vals_[lid0_] = (BSACL_REAL)Cg[(mj_ * NM_EFF__) + mj_];
+   }
+   if (lid0_ == 5) {
+      modal_matrices_vals_[lid0_] = (BSACL_REAL)Cg[(mk_ * NM_EFF__) + mk_];
+   }
+
+   if (lid0_ == 6) {
+      modal_matrices_vals_[lid0_] = (BSACL_REAL)Kg[/*(mi_ * NM_EFF__) + */ mi_];
+   }
+   if (lid0_ == 7) {
+      modal_matrices_vals_[lid0_] = (BSACL_REAL)Kg[/*(mj_ * NM_EFF__) + */ mj_];
+   }
+   if (lid0_ == 8) {
+      modal_matrices_vals_[lid0_] = (BSACL_REAL)Kg[/*(mk_ * NM_EFF__) + */ mk_];
+   }
+   LOCAL_WORKGROUP_BARRIER;
+
+
+   // if (gid0_ == 0 && lid0_ == 0 && wgid1_==1) {
+   //    for (itmp_ = 0; itmp_ < 9; ++ itmp_) {
+   //       printf(" %f ", modal_matrices_vals_[itmp_]);
+   //    }
+   //    printf("\n");
+   // }
+   // LOCAL_WORKGROUP_BARRIER;
+
 
 
    /**
@@ -497,6 +548,7 @@ KERNEL void bfm_kernel(
       }
    }
    LOCAL_WORKGROUP_BARRIER;
+
 
 
    // Compute pair of frequencies
@@ -581,7 +633,7 @@ KERNEL void bfm_kernel(
                S_uvw_IJ_ij  = sqrt(S_uvw_IJ_ij);
                S_uvw_IJ_ij *= POW(corrIJ_, (FABS((BSACL_REAL)fiPfj_)));
 
-               m3mf_loc_[lid0_] += 2.f * (
+               m3mf_loc_[lid0_] += (
                     phiTc_mno_[ni_offs_ + 3 + tc_] * phiTc_mno_[nj_offs_ + 6 +     tc_] * phiTc_mno_[nk_offs_ + 12 +     tc_] * (S_uvw_IJ_i  * S_uvw_IK_j )
                   + phiTc_mno_[ni_offs_ +     tc_] * phiTc_mno_[nj_offs_ + 6 + 3 + tc_] * phiTc_mno_[nk_offs_ + 12 +     tc_] * (S_uvw_IJ_ij * S_uvw_JK_j )
                   + phiTc_mno_[ni_offs_ +     tc_] * phiTc_mno_[nj_offs_ + 6 +     tc_] * phiTc_mno_[nk_offs_ + 12 + 3 + tc_] * (S_uvw_JK_i  * S_uvw_IK_ij)
@@ -590,6 +642,40 @@ KERNEL void bfm_kernel(
          }
       }
    }
+
+   // Now here multiply by 2
+   m3mf_loc_[lid0_] = m3mf_loc_[lid0_] * (BSACL_REAL)2.f;
+
+
+   // Apply transfer function
+   BSACL_REAL H1r_ = fi_ * 2 * BSACL_PI;  // wi
+   BSACL_REAL H1i_ = modal_matrices_vals_[3] * H1r_; // ipart
+   H1r_ = -(H1r_*H1r_ * modal_matrices_vals_[0]) + modal_matrices_vals_[6]; // rpart
+   BSACL_REAL rtmp = H1r_*H1r_ + H1i_*H1i_;
+   H1r_ =   (H1r_ / rtmp);
+   H1i_ = - (H1i_ / rtmp);
+
+   BSACL_REAL H2r_ = fj_ * 2 * BSACL_PI;  // wi
+   BSACL_REAL H2i_ = modal_matrices_vals_[4] * H2r_; // ipart
+   H2r_ = -(H2r_*H2r_ * modal_matrices_vals_[1]) + modal_matrices_vals_[7]; // rpart
+   rtmp = H2r_*H2r_ + H2i_*H2i_;
+   H2r_ =   (H2r_ / rtmp);
+   H2i_ = - (H2i_ / rtmp);
+
+   BSACL_REAL H12r_ = fiPfj_ * 2 * BSACL_PI;  // wi
+   BSACL_REAL H12i_ = modal_matrices_vals_[5] * H12r_; // ipart
+   H12r_ = -(H12r_*H12r_ * modal_matrices_vals_[2]) + modal_matrices_vals_[8]; // rpart
+   rtmp  = H12r_*H12r_ + H12i_*H12i_;
+   H12r_ =   (H12r_ / rtmp);
+   H12i_ = - (H12i_ / rtmp);
+
+   m3mf_loc_[lid0_] = m3mf_loc_[lid0_] * (
+        (H1r_ * H2r_ * H12r_)
+      + (H1r_ * H2i_ * H12i_)
+      + (H1i_ * H2r_ * H12i_)
+      - (H1i_ * H2i_ * H12r_)
+   );
+
 
 #ifdef _use_fast_reduction_scheme_
    UINT active = BSACL_WIpWG;
@@ -604,7 +690,7 @@ KERNEL void bfm_kernel(
    const size_t wgid0_ = BLOCK_ID_X_DIM0;
    const size_t nwgd0_ = N_BLOCKS_WGROUPS_X_DIM0;
    if (0 == lid0_) {
-      m3mf[wgid1_*nwgd0_ + wgid0_] = (__real)m3mf_loc_[0];
+      m3out[wgid1_*nwgd0_ + wgid0_] = (__real)m3mf_loc_[0];
    }
 #else
    if (0 == lid0_) {
@@ -616,7 +702,7 @@ KERNEL void bfm_kernel(
       // Then store sum into global variable
       const size_t wgid0_ = BLOCK_ID_X_DIM0;
       const size_t nwgd0_ = N_BLOCKS_WGROUPS_X_DIM0;
-      m3mf[wgid1_*nwgd0_ + wgid0_] = (__real)m3mf_loc_[0];
+      m3out[wgid1_*nwgd0_ + wgid0_] = (__real)m3mf_loc_[0];
    }
 #endif
    LOCAL_WORKGROUP_BARRIER;

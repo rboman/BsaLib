@@ -3209,8 +3209,8 @@ contains
       real(bsa_real_t), intent(in)    :: psdin(dimM_psd_), bispin(dimM_bisp_)
       real(bsa_real_t), intent(out)   :: psdout(dimM_psd_), bispout(dimM_bisp_)
 
-      real(bsa_real_t) :: wi
-      integer(bsa_int_t)   :: imi
+      real(bsa_real_t)   :: wi
+      integer(bsa_int_t) :: imi
 
       real(bsa_real_t), dimension(NMODES_EFF) :: Cdiag, rpart, ipart, htmp
       real(bsa_real_t), dimension(NMODES_EFF) :: H1r, H1i

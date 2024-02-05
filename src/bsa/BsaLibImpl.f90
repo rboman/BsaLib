@@ -182,6 +182,7 @@ contains
          call bsacl_AcquirePSDId(wd%i_psd_type_)
 # endif
          call bsacl_AcquireStructModMat(struct_data%modal_%phi_, struct_data%modal_%nat_freqs_)
+         call bsacl_AcquireModalMatrices(struct_data%modal_%Mm_, struct_data%modal_%Cm_, struct_data%modal_%Km_)
          call bsacl_AcquireLoadedNodesList(struct_data%n_load_)
          call bsacl_AcquireTotalNOfNodes(struct_data%nn_)
          call bsacl_AcquireUsedModesList(struct_data%modal_%modes_)

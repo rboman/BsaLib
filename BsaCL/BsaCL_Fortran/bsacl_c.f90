@@ -35,6 +35,12 @@ module BsaCL_c
       end subroutine
 
 
+      subroutine bsaclAcquireModalMatrices__(Mg, Cg, Kg) bind(c, name="bsaclAcquireModalMatrices")
+         import c_ptr
+         type(c_ptr), value :: Mg, Cg, Kg
+      end subroutine
+
+
       subroutine bsaclAcquireLoadedNodesList__(nodes_load, nnodes_l) &
             bind(c, name="bsaclAcquireLoadedNodesList")
          import c_ptr, c_int

@@ -29,6 +29,7 @@ void bsaclInit(int *__EXT_PTR_CONST ierr);
 void bsaclRun(int *__EXT_PTR_CONST ierr);
 void bsaclAcquirePSDId(const uint32_t psdid);
 void bsaclAcquireStructModMat(__real *__EXT_PTR_CONST modmat, __real *__EXT_PTR_CONST natf, const uint32_t ndofs, const uint32_t nmodes);
+void bsaclAcquireModalMatrices(__real *__EXT_PTR_CONST Mg, __real *__EXT_PTR_CONST Cg, __real *__EXT_PTR_CONST Kg);
 void bsaclAcquireLoadedNodesList(int *__EXT_PTR_CONST nodes_load, const uint32_t nnodes_l);
 void bsaclAcquireUsedModesList(int *__EXT_PTR_CONST modes, const uint32_t nmodes_eff);
 void bsaclAcquireWindCoeffs(__real *__EXT_PTR_CONST wfc, const uint32_t nnodes_l, const uint32_t nlibs, const uint32_t ndegw);

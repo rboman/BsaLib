@@ -61,7 +61,7 @@ contains
 
 #ifdef BSA_USE_GPU
 
-      call bsacl_AcquireResultBFMVect(m3mf_cls)
+      call bsacl_AcquireResultBFMVect(m3mr_cls)
       call bsacl_AcquireComputationFreqs(NFREQS, f, NFREQS, f)
       ierr_cl_ = bsacl_SetKernelID(2)
       if (ierr_cl_ /= 0) then
