@@ -493,15 +493,6 @@ KERNEL void bfm_kernel(
    LOCAL_WORKGROUP_BARRIER;
 
 
-   // if (gid0_ == 0 && lid0_ == 0 && wgid1_==1) {
-   //    for (itmp_ = 0; itmp_ < 9; ++ itmp_) {
-   //       printf(" %f ", modal_matrices_vals_[itmp_]);
-   //    }
-   //    printf("\n");
-   // }
-   // LOCAL_WORKGROUP_BARRIER;
-
-
 
    /**
     * Prefetch phiTc_ for this WG m-n-o modal indexes.
