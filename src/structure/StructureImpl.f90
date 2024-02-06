@@ -246,7 +246,7 @@ contains
       do concurrent (j = 1:3, i = 1:3)
          if (.not. wind_scales(i, j) == 0._bsa_real_t) then
             this%bkg_peak_width_(i, j) = 1._bsa_real_t / wind_scales(i, j)
-         enddo
+         endif
       enddo
 #endif
 
