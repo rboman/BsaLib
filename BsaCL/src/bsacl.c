@@ -372,7 +372,6 @@ static inline void freeMem_(void) {
 
 
 static inline void printMsg_(const char *const msgtype, const char *const msg) {
-   printf("%s%s.\n", msgtype, msg);
    printf("%s%s", msgtype, msg);
 }
 static inline void printMsgWithIerr_(const char *const msgtype, const char *const msg, const int ierr) {
