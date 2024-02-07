@@ -23,7 +23,8 @@ if (enable-gpu-code)
    endif()
 endif()
 
-set(LIB_MOD_DIR ${CMAKE_CURRENT_BINARY_DIR}/modules)
+
+set( LIB_MOD_DIR ${CMAKE_CURRENT_BINARY_DIR}/modules )
 if(NOT EXISTS "${LIB_MOD_DIR}")
   make_directory("${LIB_MOD_DIR}")
 endif()
