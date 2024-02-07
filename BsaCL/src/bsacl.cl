@@ -530,11 +530,11 @@ KERNEL void bfm_kernel(
       }
    } else { // NWI > NNL
       if (lid0_ < NNL__) {
-         UINT nid = 18*lid0_;
+         itmp_ = 18*lid0_;
          for (BSACL_USHORT d=0; d < 6; ++d) {
-            phiTc_mno_[nid +      d] = (BSACL_REAL)phiTc[mi_ + (lid0_ * NM_EFF__) + (d * phiTc_offst_)];
-            phiTc_mno_[nid +  6 + d] = (BSACL_REAL)phiTc[mj_ + (lid0_ * NM_EFF__) + (d * phiTc_offst_)];
-            phiTc_mno_[nid + 12 + d] = (BSACL_REAL)phiTc[mk_ + (lid0_ * NM_EFF__) + (d * phiTc_offst_)];
+            phiTc_mno_[itmp_ +      d] = (BSACL_REAL)phiTc[mi_ + (lid0_ * NM_EFF__) + (d * phiTc_offst_)];
+            phiTc_mno_[itmp_ +  6 + d] = (BSACL_REAL)phiTc[mj_ + (lid0_ * NM_EFF__) + (d * phiTc_offst_)];
+            phiTc_mno_[itmp_ + 12 + d] = (BSACL_REAL)phiTc[mk_ + (lid0_ * NM_EFF__) + (d * phiTc_offst_)];
          }
       }
    }
