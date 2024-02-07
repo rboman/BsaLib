@@ -32,3 +32,4 @@ set_target_properties( bsa
    PROPERTIES
    Fortran_MODULE_DIRECTORY ${LIB_MOD_DIR}
 )
+unset( LIB_MOD_DIR )
