@@ -555,9 +555,9 @@ KERNEL void bfm_kernel(
    BSACL_REAL S_uvw_IK_j, S_uvw_IK_ij;
    BSACL_REAL S_uvw_JK_i, S_uvw_JK_j;
 
-   for (UINT itc_=0; itc_ < NTC__; ++itc_) {
+   for (itmp_=0; itmp_ < NTC__; ++itmp_) {
 
-      UINT tc_   = tc[itc_] - 1;
+      UINT tc_   = tc[itmp_] - 1;
 
       BSACL_REAL wstd_ = (BSACL_REAL)wind_turb_std[tc_];  // BUG: account for multiple wind zones!!
       BSACL_REAL wscl_ = (BSACL_REAL)wind_turb_scl[tc_];  // BUG: account for multiple wind zones!!
