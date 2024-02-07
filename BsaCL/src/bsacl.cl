@@ -512,20 +512,20 @@ KERNEL void bfm_kernel(
       const BSACL_USHORT n_reps = NNL__ / BSACL_WIpWG;
       // full BSACL_WIpWG batches
       for (BSACL_USHORT r=0; r < n_reps; ++r) {
+         itmp_ = lid0_ + r*BSACL_WIpWG;
          for (BSACL_USHORT d=0; d < 6; ++d) {
-            UINT nid = lid0_ + r*BSACL_WIpWG;
-            phiTc_mno_[18*nid +      d] = (BSACL_REAL)phiTc[mi_ + (nid * NM_EFF__) + (d * phiTc_offst_)];
-            phiTc_mno_[18*nid +  6 + d] = (BSACL_REAL)phiTc[mj_ + (nid * NM_EFF__) + (d * phiTc_offst_)];
-            phiTc_mno_[18*nid + 12 + d] = (BSACL_REAL)phiTc[mk_ + (nid * NM_EFF__) + (d * phiTc_offst_)];
+            phiTc_mno_[18*itmp_ +      d] = (BSACL_REAL)phiTc[mi_ + (itmp_ * NM_EFF__) + (d * phiTc_offst_)];
+            phiTc_mno_[18*itmp_ +  6 + d] = (BSACL_REAL)phiTc[mj_ + (itmp_ * NM_EFF__) + (d * phiTc_offst_)];
+            phiTc_mno_[18*itmp_ + 12 + d] = (BSACL_REAL)phiTc[mk_ + (itmp_ * NM_EFF__) + (d * phiTc_offst_)];
          }
       }
       // last batch covering (NNL__-(BSACL_WIpWG * n_reps))
       if (lid0_ < (NNL__ - (BSACL_WIpWG * n_reps))) {
+         itmp_ = lid0_ + n_reps*BSACL_WIpWG;
          for (BSACL_USHORT d=0; d < 6; ++d) {
-            UINT nid = lid0_ + n_reps*BSACL_WIpWG;
-            phiTc_mno_[18*nid +      d] = (BSACL_REAL)phiTc[mi_ + (nid * NM_EFF__) + (d * phiTc_offst_)];
-            phiTc_mno_[18*nid +  6 + d] = (BSACL_REAL)phiTc[mj_ + (nid * NM_EFF__) + (d * phiTc_offst_)];
-            phiTc_mno_[18*nid + 12 + d] = (BSACL_REAL)phiTc[mk_ + (nid * NM_EFF__) + (d * phiTc_offst_)];
+            phiTc_mno_[18*itmp_ +      d] = (BSACL_REAL)phiTc[mi_ + (itmp_ * NM_EFF__) + (d * phiTc_offst_)];
+            phiTc_mno_[18*itmp_ +  6 + d] = (BSACL_REAL)phiTc[mj_ + (itmp_ * NM_EFF__) + (d * phiTc_offst_)];
+            phiTc_mno_[18*itmp_ + 12 + d] = (BSACL_REAL)phiTc[mk_ + (itmp_ * NM_EFF__) + (d * phiTc_offst_)];
          }
       }
    } else { // NWI > NNL
