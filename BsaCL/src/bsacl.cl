@@ -47,6 +47,7 @@
 #define _use_fast_reduction_scheme_
 
 
+
 DEVICE UINT getCorrId(
       PRIVATE UINT ni,
       PRIVATE UINT nj,
@@ -127,9 +128,8 @@ DEVICE BSACL_REAL evalFct(
 #endif // BSACL_WIND_PSD_ID==BSACL_PSD_TYPE_DAVENPORT
 
 #ifdef BSACL_CONV_PULSATION
-   res =  res / (4 * BSACL_PI);
+   res = res / (4 * BSACL_PI);
 #endif
-
    return res;
 } // evalFct
 
@@ -555,12 +555,14 @@ KERNEL void bfm_kernel(
    BSACL_REAL S_uvw_IK_j, S_uvw_IK_ij;
    BSACL_REAL S_uvw_JK_i, S_uvw_JK_j;
 
+
    for (itmp_=0; itmp_ < NTC__; ++itmp_) {
 
-      UINT tc_   = tc[itmp_] - 1;
+      UINT tc_ = tc[itmp_] - 1;
 
       BSACL_REAL wstd_ = (BSACL_REAL)wind_turb_std[tc_];  // BUG: account for multiple wind zones!!
       BSACL_REAL wscl_ = (BSACL_REAL)wind_turb_scl[tc_];  // BUG: account for multiple wind zones!!
+
 
       for (UINT ink_=0; ink_ < NNL__; ++ink_) {
 
@@ -572,14 +574,21 @@ KERNEL void bfm_kernel(
          BSACL_REAL S_uvw_K_j_  = evalFct(fj_,     PSD_ID_ARG   wscl_, wstd_, ubnk_);
          BSACL_REAL S_uvw_K_ij_ = evalFct(fiPfj_,  PSD_ID_ARG   wscl_, wstd_, ubnk_);
 
-         for (UINT inj_=0; inj_ < NNL__; ++inj_) {
+         // Main diag elements
+         m3mf_loc_[lid0_] += (
+              phiTc_mno_[nk_offs_ + 3 + tc_] * phiTc_mno_[nk_offs_ + 6 +     tc_] * phiTc_mno_[nk_offs_ + 12 +     tc_] * (S_uvw_K_i_  * S_uvw_K_j_ )
+            + phiTc_mno_[nk_offs_ +     tc_] * phiTc_mno_[nk_offs_ + 6 + 3 + tc_] * phiTc_mno_[nk_offs_ + 12 +     tc_] * (S_uvw_K_ij_ * S_uvw_K_j_ )
+            + phiTc_mno_[nk_offs_ +     tc_] * phiTc_mno_[nk_offs_ + 6 +     tc_] * phiTc_mno_[nk_offs_ + 12 + 3 + tc_] * (S_uvw_K_i_  * S_uvw_K_ij_)
+         );
+
+         for (UINT inj_=ink_+1; inj_ < NNL__; ++inj_) {
 
             UINT nj_offs_ = 18*inj_;
             UINT nj_      = nodes_load[inj_]-1;
             BSACL_REAL ubnj_ = (BSACL_REAL)wind_nod_vel[nj_];
 
             nod_corr_ = (BSACL_REAL)nod_corr[getCorrId(nj_, nk_, NN__)];
-            BSACL_REAL corrJK_   = nod_corr_ < BSACL_REAL_MIN ? BSACL_REAL_MIN : nod_corr_;
+            BSACL_REAL corrJK_ = nod_corr_ < BSACL_REAL_MIN ? BSACL_REAL_MIN : nod_corr_;
 
             BSACL_REAL S_uvw_J_i_ = evalFct(fi_,  PSD_ID_ARG   wscl_, wstd_, ubnj_);
             S_uvw_JK_i  = S_uvw_J_i_ * S_uvw_K_i_;
@@ -591,9 +600,22 @@ KERNEL void bfm_kernel(
             S_uvw_JK_j  = sqrt(S_uvw_JK_j);
             S_uvw_JK_j *= POW(corrJK_, (FABS((BSACL_REAL)fj_)));
 
+
             BSACL_REAL S_uvw_J_ij_  = evalFct(fiPfj_,  PSD_ID_ARG   wscl_, wstd_, ubnj_);
 
-            for (UINT ini_=0; ini_ < NNL__; ++ini_) {
+            // JK ij
+            S_uvw_IJ_ij  = sqrt(S_uvw_J_ij_ * S_uvw_K_ij_);
+            S_uvw_IJ_ij *= POW(corrJK_, (FABS((BSACL_REAL)fiPfj_)));
+
+            // Elements with two indexes equal (here computing j-j-k)
+            m3mf_loc_[lid0_] += (
+                 phiTc_mno_[nj_offs_ + 3 + tc_] * phiTc_mno_[nj_offs_ + 6 +     tc_] * phiTc_mno_[nk_offs_ + 12 +     tc_] * (S_uvw_J_i_  * S_uvw_JK_j )
+               + phiTc_mno_[nj_offs_ +     tc_] * phiTc_mno_[nj_offs_ + 6 + 3 + tc_] * phiTc_mno_[nk_offs_ + 12 +     tc_] * (S_uvw_J_ij_ * S_uvw_JK_j )
+               + phiTc_mno_[nj_offs_ +     tc_] * phiTc_mno_[nj_offs_ + 6 +     tc_] * phiTc_mno_[nk_offs_ + 12 + 3 + tc_] * (S_uvw_JK_i  * S_uvw_IJ_ij)
+            );
+
+
+            for (UINT ini_=inj_+1; ini_ < NNL__; ++ini_) {
 
                UINT ni_offs_ = 18*ini_;
                UINT ni_      = nodes_load[ini_]-1;
@@ -636,36 +658,37 @@ KERNEL void bfm_kernel(
 
    // Now here multiply by 2
    m3mf_loc_[lid0_] = m3mf_loc_[lid0_] * (BSACL_REAL)2.f;
+   m3mf_loc_[lid0_] = m3mf_loc_[lid0_] * (BSACL_REAL)6.f;
 
 
-   // Apply transfer function
-   BSACL_REAL H1r_ = fi_ * 2 * BSACL_PI;  // wi
-   BSACL_REAL H1i_ = modal_matrices_vals_[3] * H1r_; // ipart
-   H1r_ = -(H1r_*H1r_ * modal_matrices_vals_[0]) + modal_matrices_vals_[6]; // rpart
-   BSACL_REAL rtmp = H1r_*H1r_ + H1i_*H1i_;
-   H1r_ =   (H1r_ / rtmp);
-   H1i_ = - (H1i_ / rtmp);
+   // // Apply transfer function
+   // BSACL_REAL H1r_ = fi_ * 2 * BSACL_PI;  // wi
+   // BSACL_REAL H1i_ = modal_matrices_vals_[3] * H1r_; // ipart
+   // H1r_ = -(H1r_*H1r_ * modal_matrices_vals_[0]) + modal_matrices_vals_[6]; // rpart
+   // BSACL_REAL rtmp = H1r_*H1r_ + H1i_*H1i_;
+   // H1r_ =   (H1r_ / rtmp);
+   // H1i_ = - (H1i_ / rtmp);
 
-   BSACL_REAL H2r_ = fj_ * 2 * BSACL_PI;  // wi
-   BSACL_REAL H2i_ = modal_matrices_vals_[4] * H2r_; // ipart
-   H2r_ = -(H2r_*H2r_ * modal_matrices_vals_[1]) + modal_matrices_vals_[7]; // rpart
-   rtmp = H2r_*H2r_ + H2i_*H2i_;
-   H2r_ =   (H2r_ / rtmp);
-   H2i_ = - (H2i_ / rtmp);
+   // BSACL_REAL H2r_ = fj_ * 2 * BSACL_PI;  // wi
+   // BSACL_REAL H2i_ = modal_matrices_vals_[4] * H2r_; // ipart
+   // H2r_ = -(H2r_*H2r_ * modal_matrices_vals_[1]) + modal_matrices_vals_[7]; // rpart
+   // rtmp = H2r_*H2r_ + H2i_*H2i_;
+   // H2r_ =   (H2r_ / rtmp);
+   // H2i_ = - (H2i_ / rtmp);
 
-   BSACL_REAL H12r_ = fiPfj_ * 2 * BSACL_PI;  // wi
-   BSACL_REAL H12i_ = modal_matrices_vals_[5] * H12r_; // ipart
-   H12r_ = -(H12r_*H12r_ * modal_matrices_vals_[2]) + modal_matrices_vals_[8]; // rpart
-   rtmp  = H12r_*H12r_ + H12i_*H12i_;
-   H12r_ =   (H12r_ / rtmp);
-   H12i_ = - (H12i_ / rtmp);
+   // BSACL_REAL H12r_ = fiPfj_ * 2 * BSACL_PI;  // wi
+   // BSACL_REAL H12i_ = modal_matrices_vals_[5] * H12r_; // ipart
+   // H12r_ = -(H12r_*H12r_ * modal_matrices_vals_[2]) + modal_matrices_vals_[8]; // rpart
+   // rtmp  = H12r_*H12r_ + H12i_*H12i_;
+   // H12r_ =   (H12r_ / rtmp);
+   // H12i_ = - (H12i_ / rtmp);
 
-   m3mf_loc_[lid0_] = m3mf_loc_[lid0_] * (
-        (H1r_ * H2r_ * H12r_)
-      + (H1r_ * H2i_ * H12i_)
-      + (H1i_ * H2r_ * H12i_)
-      - (H1i_ * H2i_ * H12r_)
-   );
+   // m3mf_loc_[lid0_] = m3mf_loc_[lid0_] * (
+   //      (H1r_ * H2r_ * H12r_)
+   //    + (H1r_ * H2i_ * H12i_)
+   //    + (H1i_ * H2r_ * H12i_)
+   //    - (H1i_ * H2i_ * H12r_)
+   // );
 
 
 #ifdef _use_fast_reduction_scheme_
