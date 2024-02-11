@@ -75,7 +75,7 @@ DEVICE UINT getCorrId(
 # endif
 #else
 # ifndef BSACL_WIND_PSD_ID
-#  define BSACL_WIND_PSD_ID 1
+#  define BSACL_WIND_PSD_ID BSACL_PSD_TYPE_VONKARMAN
 # endif
 #endif
 
