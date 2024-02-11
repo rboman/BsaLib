@@ -551,10 +551,12 @@ KERNEL void bfm_kernel(
 
 
    BSACL_REAL nod_corr_;
-   BSACL_REAL S_uvw_IJ_i, S_uvw_IJ_ij;
-   BSACL_REAL S_uvw_IK_j, S_uvw_IK_ij;
-   BSACL_REAL S_uvw_JK_i, S_uvw_JK_j;
 
+   BSACL_REAL S_uvw_J_i_, S_uvw_J_j_, S_uvw_J_ij_;
+   BSACL_REAL S_uvw_K_i_, S_uvw_K_j_, S_uvw_K_ij_;
+   BSACL_REAL S_uvw_IJ_i, S_uvw_IJ_j, S_uvw_IJ_ij;
+   BSACL_REAL S_uvw_IK_i, S_uvw_IK_j, S_uvw_IK_ij;
+   BSACL_REAL S_uvw_JK_i, S_uvw_JK_j, S_uvw_JK_ij;
 
    for (itmp_=0; itmp_ < NTC__; ++itmp_) {
 
@@ -570,9 +572,9 @@ KERNEL void bfm_kernel(
          UINT nk_      = nodes_load[ink_]-1;
          BSACL_REAL ubnk_ = (BSACL_REAL)wind_nod_vel[nk_];
 
-         BSACL_REAL S_uvw_K_i_  = evalFct(fi_,     PSD_ID_ARG   wscl_, wstd_, ubnk_);
-         BSACL_REAL S_uvw_K_j_  = evalFct(fj_,     PSD_ID_ARG   wscl_, wstd_, ubnk_);
-         BSACL_REAL S_uvw_K_ij_ = evalFct(fiPfj_,  PSD_ID_ARG   wscl_, wstd_, ubnk_);
+         S_uvw_K_i_  = evalFct(fi_,     PSD_ID_ARG   wscl_, wstd_, ubnk_);
+         S_uvw_K_j_  = evalFct(fj_,     PSD_ID_ARG   wscl_, wstd_, ubnk_);
+         S_uvw_K_ij_ = evalFct(fiPfj_,  PSD_ID_ARG   wscl_, wstd_, ubnk_);
 
          // Main diag elements
          m3mf_loc_[lid0_] += (
@@ -580,6 +582,7 @@ KERNEL void bfm_kernel(
             + phiTc_mno_[nk_offs_ +     tc_] * phiTc_mno_[nk_offs_ + 6 + 3 + tc_] * phiTc_mno_[nk_offs_ + 12 +     tc_] * (S_uvw_K_ij_ * S_uvw_K_j_ )
             + phiTc_mno_[nk_offs_ +     tc_] * phiTc_mno_[nk_offs_ + 6 +     tc_] * phiTc_mno_[nk_offs_ + 12 + 3 + tc_] * (S_uvw_K_i_  * S_uvw_K_ij_)
          );
+
 
          for (UINT inj_=ink_+1; inj_ < NNL__; ++inj_) {
 
@@ -590,28 +593,37 @@ KERNEL void bfm_kernel(
             nod_corr_ = (BSACL_REAL)nod_corr[getCorrId(nj_, nk_, NN__)];
             BSACL_REAL corrJK_ = nod_corr_ < BSACL_REAL_MIN ? BSACL_REAL_MIN : nod_corr_;
 
-            BSACL_REAL S_uvw_J_i_ = evalFct(fi_,  PSD_ID_ARG   wscl_, wstd_, ubnj_);
-            S_uvw_JK_i  = S_uvw_J_i_ * S_uvw_K_i_;
-            S_uvw_JK_i  = sqrt(S_uvw_JK_i);
-            S_uvw_JK_i *= POW(corrJK_, (FABS((BSACL_REAL)fi_)));
+            S_uvw_J_i_  = evalFct(fi_,  PSD_ID_ARG   wscl_, wstd_, ubnj_);
+            S_uvw_JK_i  = sqrt(S_uvw_J_i_ * S_uvw_K_i_);
+            S_uvw_JK_i *= POW(corrJK_, (FABS(fi_)));
 
-            S_uvw_JK_j  = evalFct(fj_,  PSD_ID_ARG   wscl_, wstd_, ubnj_);
-            S_uvw_JK_j *= S_uvw_K_j_;
-            S_uvw_JK_j  = sqrt(S_uvw_JK_j);
-            S_uvw_JK_j *= POW(corrJK_, (FABS((BSACL_REAL)fj_)));
+            S_uvw_J_j_  = evalFct(fj_,  PSD_ID_ARG   wscl_, wstd_, ubnj_);
+            S_uvw_JK_j  = sqrt(S_uvw_J_j_ * S_uvw_K_j_);
+            S_uvw_JK_j *= POW(corrJK_, (FABS(fj_)));
 
-
-            BSACL_REAL S_uvw_J_ij_  = evalFct(fiPfj_,  PSD_ID_ARG   wscl_, wstd_, ubnj_);
-
-            // JK ij
-            S_uvw_IJ_ij  = sqrt(S_uvw_J_ij_ * S_uvw_K_ij_);
-            S_uvw_IJ_ij *= POW(corrJK_, (FABS((BSACL_REAL)fiPfj_)));
+            S_uvw_J_ij_  = evalFct(fiPfj_,  PSD_ID_ARG   wscl_, wstd_, ubnj_);
+            S_uvw_JK_ij  = sqrt(S_uvw_J_ij_ * S_uvw_K_ij_);
+            S_uvw_JK_ij *= POW(corrJK_, (FABS(fiPfj_)));
 
             // Elements with two indexes equal (here computing j-j-k)
             m3mf_loc_[lid0_] += (
                  phiTc_mno_[nj_offs_ + 3 + tc_] * phiTc_mno_[nj_offs_ + 6 +     tc_] * phiTc_mno_[nk_offs_ + 12 +     tc_] * (S_uvw_J_i_  * S_uvw_JK_j )
                + phiTc_mno_[nj_offs_ +     tc_] * phiTc_mno_[nj_offs_ + 6 + 3 + tc_] * phiTc_mno_[nk_offs_ + 12 +     tc_] * (S_uvw_J_ij_ * S_uvw_JK_j )
-               + phiTc_mno_[nj_offs_ +     tc_] * phiTc_mno_[nj_offs_ + 6 +     tc_] * phiTc_mno_[nk_offs_ + 12 + 3 + tc_] * (S_uvw_JK_i  * S_uvw_IJ_ij)
+               + phiTc_mno_[nj_offs_ +     tc_] * phiTc_mno_[nj_offs_ + 6 +     tc_] * phiTc_mno_[nk_offs_ + 12 + 3 + tc_] * (S_uvw_JK_i  * S_uvw_JK_ij)
+            );
+
+            // Elements with two indexes equal (here computing j-k-j)
+            m3mf_loc_[lid0_] += (
+                 phiTc_mno_[nj_offs_ + 3 + tc_] * phiTc_mno_[nk_offs_ + 6 +     tc_] * phiTc_mno_[nj_offs_ + 12 +     tc_] * (S_uvw_JK_i  * S_uvw_J_j_ )
+               + phiTc_mno_[nj_offs_ +     tc_] * phiTc_mno_[nk_offs_ + 6 + 3 + tc_] * phiTc_mno_[nj_offs_ + 12 +     tc_] * (S_uvw_JK_ij * S_uvw_JK_j )
+               + phiTc_mno_[nj_offs_ +     tc_] * phiTc_mno_[nk_offs_ + 6 +     tc_] * phiTc_mno_[nj_offs_ + 12 + 3 + tc_] * (S_uvw_JK_i  * S_uvw_J_ij_)
+             );
+
+            // Elements with two indexes equal (here computing k-j-j)
+            m3mf_loc_[lid0_] += (
+                 phiTc_mno_[nk_offs_ + 3 + tc_] * phiTc_mno_[nj_offs_ + 6 +     tc_] * phiTc_mno_[nj_offs_ + 12 +     tc_] * (S_uvw_JK_i  * S_uvw_JK_j )
+               + phiTc_mno_[nk_offs_ +     tc_] * phiTc_mno_[nj_offs_ + 6 + 3 + tc_] * phiTc_mno_[nj_offs_ + 12 +     tc_] * (S_uvw_JK_ij * S_uvw_J_j_ )
+               + phiTc_mno_[nk_offs_ +     tc_] * phiTc_mno_[nj_offs_ + 6 +     tc_] * phiTc_mno_[nj_offs_ + 12 + 3 + tc_] * (S_uvw_J_i_  * S_uvw_JK_ij)
             );
 
 
@@ -626,39 +638,86 @@ KERNEL void bfm_kernel(
                nod_corr_ = (BSACL_REAL)nod_corr[getCorrId(ni_, nj_, NN__)];
                BSACL_REAL corrIJ_ = nod_corr_ < BSACL_REAL_MIN ? BSACL_REAL_MIN : nod_corr_;
 
+               S_uvw_IK_i   = evalFct(fi_,  PSD_ID_ARG   wscl_, wstd_, ubni_);
+               S_uvw_IK_i  *= S_uvw_K_i_;
+               S_uvw_IK_i   = sqrt(S_uvw_IK_i);
+               S_uvw_IK_i  *= POW(corrIK_, (FABS(fi_)));
+
                S_uvw_IK_j   = evalFct(fj_,  PSD_ID_ARG   wscl_, wstd_, ubni_);
                S_uvw_IK_j  *= S_uvw_K_j_;
                S_uvw_IK_j   = sqrt(S_uvw_IK_j);
-               S_uvw_IK_j  *= POW(corrIK_, (FABS((BSACL_REAL)fj_)));
+               S_uvw_IK_j  *= POW(corrIK_, (FABS(fj_)));
 
                S_uvw_IK_ij  = evalFct(fiPfj_,  PSD_ID_ARG   wscl_, wstd_, ubni_);
                S_uvw_IK_ij *= S_uvw_K_ij_;
                S_uvw_IK_ij  = sqrt(S_uvw_IK_ij);
-               S_uvw_IK_ij *= POW(corrIK_, (FABS((BSACL_REAL)fiPfj_)));
+               S_uvw_IK_ij *= POW(corrIK_, (FABS(fiPfj_)));
+
 
                S_uvw_IJ_i   = evalFct(fi_,  PSD_ID_ARG   wscl_, wstd_, ubni_);
                S_uvw_IJ_i  *= S_uvw_J_i_;
                S_uvw_IJ_i   = sqrt(S_uvw_IJ_i);
-               S_uvw_IJ_i  *= POW(corrIJ_, (FABS((BSACL_REAL)fi_)));
+               S_uvw_IJ_i  *= POW(corrIJ_, (FABS(fi_)));
+
+               S_uvw_IJ_j   = evalFct(fj_,  PSD_ID_ARG   wscl_, wstd_, ubni_);
+               S_uvw_IJ_j  *= S_uvw_J_j_;
+               S_uvw_IJ_j   = sqrt(S_uvw_IJ_j);
+               S_uvw_IJ_j  *= POW(corrIJ_, (FABS(fj_)));
 
                S_uvw_IJ_ij  = evalFct(fiPfj_,  PSD_ID_ARG   wscl_, wstd_, ubni_);
                S_uvw_IJ_ij *= S_uvw_J_ij_;
                S_uvw_IJ_ij  = sqrt(S_uvw_IJ_ij);
-               S_uvw_IJ_ij *= POW(corrIJ_, (FABS((BSACL_REAL)fiPfj_)));
+               S_uvw_IJ_ij *= POW(corrIJ_, (FABS(fiPfj_)));
 
+               // computing (i-j-k)
                m3mf_loc_[lid0_] += (
                     phiTc_mno_[ni_offs_ + 3 + tc_] * phiTc_mno_[nj_offs_ + 6 +     tc_] * phiTc_mno_[nk_offs_ + 12 +     tc_] * (S_uvw_IJ_i  * S_uvw_IK_j )
                   + phiTc_mno_[ni_offs_ +     tc_] * phiTc_mno_[nj_offs_ + 6 + 3 + tc_] * phiTc_mno_[nk_offs_ + 12 +     tc_] * (S_uvw_IJ_ij * S_uvw_JK_j )
                   + phiTc_mno_[ni_offs_ +     tc_] * phiTc_mno_[nj_offs_ + 6 +     tc_] * phiTc_mno_[nk_offs_ + 12 + 3 + tc_] * (S_uvw_JK_i  * S_uvw_IK_ij)
                );
+
+               // computing (i-k-j)
+               m3mf_loc_[lid0_] += (
+                    phiTc_mno_[ni_offs_ + 3 + tc_] * phiTc_mno_[nk_offs_ + 6 +     tc_] * phiTc_mno_[nj_offs_ + 12 +     tc_] * (S_uvw_IK_i  * S_uvw_IJ_j )
+                  + phiTc_mno_[ni_offs_ +     tc_] * phiTc_mno_[nk_offs_ + 6 + 3 + tc_] * phiTc_mno_[nj_offs_ + 12 +     tc_] * (S_uvw_IK_ij * S_uvw_JK_j )
+                  + phiTc_mno_[ni_offs_ +     tc_] * phiTc_mno_[nk_offs_ + 6 +     tc_] * phiTc_mno_[nj_offs_ + 12 + 3 + tc_] * (S_uvw_JK_i  * S_uvw_IJ_ij)
+               );
+
+               // computing (j-i-k)
+               m3mf_loc_[lid0_] += (
+                    phiTc_mno_[nj_offs_ + 3 + tc_] * phiTc_mno_[ni_offs_ + 6 +     tc_] * phiTc_mno_[nk_offs_ + 12 +     tc_] * (S_uvw_IJ_i  * S_uvw_JK_j )
+                  + phiTc_mno_[nj_offs_ +     tc_] * phiTc_mno_[ni_offs_ + 6 + 3 + tc_] * phiTc_mno_[nk_offs_ + 12 +     tc_] * (S_uvw_IJ_ij * S_uvw_IK_j )
+                  + phiTc_mno_[nj_offs_ +     tc_] * phiTc_mno_[ni_offs_ + 6 +     tc_] * phiTc_mno_[nk_offs_ + 12 + 3 + tc_] * (S_uvw_IK_i  * S_uvw_JK_ij)
+               );
+
+               // computing (j-k-i)
+               m3mf_loc_[lid0_] += (
+                    phiTc_mno_[nj_offs_ + 3 + tc_] * phiTc_mno_[nk_offs_ + 6 +     tc_] * phiTc_mno_[ni_offs_ + 12 +     tc_] * (S_uvw_JK_i  * S_uvw_IJ_j )
+                  + phiTc_mno_[nj_offs_ +     tc_] * phiTc_mno_[nk_offs_ + 6 + 3 + tc_] * phiTc_mno_[ni_offs_ + 12 +     tc_] * (S_uvw_JK_ij * S_uvw_IK_j )
+                  + phiTc_mno_[nj_offs_ +     tc_] * phiTc_mno_[nk_offs_ + 6 +     tc_] * phiTc_mno_[ni_offs_ + 12 + 3 + tc_] * (S_uvw_IK_i  * S_uvw_IJ_ij)
+               );
+
+               // computing (k-i-j)
+               m3mf_loc_[lid0_] += (
+                    phiTc_mno_[nk_offs_ + 3 + tc_] * phiTc_mno_[ni_offs_ + 6 +     tc_] * phiTc_mno_[nj_offs_ + 12 +     tc_] * (S_uvw_IK_i  * S_uvw_JK_j )
+                  + phiTc_mno_[nk_offs_ +     tc_] * phiTc_mno_[ni_offs_ + 6 + 3 + tc_] * phiTc_mno_[nj_offs_ + 12 +     tc_] * (S_uvw_IK_ij * S_uvw_IJ_j )
+                  + phiTc_mno_[nk_offs_ +     tc_] * phiTc_mno_[ni_offs_ + 6 +     tc_] * phiTc_mno_[nj_offs_ + 12 + 3 + tc_] * (S_uvw_IJ_i  * S_uvw_JK_ij)
+               );
+
+               // computing (k-j-i)
+               m3mf_loc_[lid0_] += (
+                    phiTc_mno_[nk_offs_ + 3 + tc_] * phiTc_mno_[nj_offs_ + 6 +     tc_] * phiTc_mno_[ni_offs_ + 12 +     tc_] * (S_uvw_JK_i  * S_uvw_IK_j )
+                  + phiTc_mno_[nk_offs_ +     tc_] * phiTc_mno_[nj_offs_ + 6 + 3 + tc_] * phiTc_mno_[ni_offs_ + 12 +     tc_] * (S_uvw_JK_ij * S_uvw_IJ_j )
+                  + phiTc_mno_[nk_offs_ +     tc_] * phiTc_mno_[nj_offs_ + 6 +     tc_] * phiTc_mno_[ni_offs_ + 12 + 3 + tc_] * (S_uvw_IJ_i  * S_uvw_IK_ij)
+               );
+
             }
          }
       }
    }
 
    // Now here multiply by 2
-   m3mf_loc_[lid0_] = m3mf_loc_[lid0_] * (BSACL_REAL)2.f;
-   m3mf_loc_[lid0_] = m3mf_loc_[lid0_] * (BSACL_REAL)6.f;
+   m3mf_loc_[lid0_] *= (BSACL_REAL)2.f;
 
 
    // // Apply transfer function
