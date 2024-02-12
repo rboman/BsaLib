@@ -121,7 +121,11 @@ DEVICE BSACL_REAL evalFct(
       rtmp = POW(rtmp, ((BSACL_REAL)4.f/(BSACL_REAL)3.f));
       rtmp = 1.f / rtmp;
 
+#ifdef _use_optimised_loop_
+      res  = (2.f/3.f * FABS(cFL_U) * cL_U * w_std*w_std) * rtmp;
+#else
       res  = (2.f/3.f * cFL_U * cL_U * w_std*w_std) * rtmp;
+#endif
 # ifdef BSACL_USE_CUDA__
    }
 # endif
