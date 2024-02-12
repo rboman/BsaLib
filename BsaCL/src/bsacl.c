@@ -846,10 +846,10 @@ BSACL_INT setBfmKernelArgs_(void)
 
 
    ierr_ |= clSetKernelArg(kernel_bfm__, iarg_++,  sizeof(cl_mem),       &d_fi__);
-   if (kernel_id_ != 4 || pass_params_by_macro_ == 0)
+   if (pass_params_by_macro_ == 0)
       ierr_ |= clSetKernelArg(kernel_bfm__, iarg_++,  sizeof(unsigned int), &nfi__);
    ierr_ |= clSetKernelArg(kernel_bfm__, iarg_++,  sizeof(cl_mem),       &d_fj__);
-   if (kernel_id_ != 4 || pass_params_by_macro_ == 0)
+   if (pass_params_by_macro_ == 0)
       ierr_ |= clSetKernelArg(kernel_bfm__, iarg_++,  sizeof(unsigned int), &nfj__);
 
 
@@ -868,6 +868,10 @@ BSACL_INT setBfmKernelArgs_(void)
    ierr_ |= clSetKernelArg(kernel_bfm__, iarg_++, sizeof(cl_mem), &d_wind_turb_scales__);
    ierr_ |= clSetKernelArg(kernel_bfm__, iarg_++, sizeof(cl_mem), &d_wind_turb_std__);
    ierr_ |= clSetKernelArg(kernel_bfm__, iarg_++, sizeof(cl_mem), &d_wind_nodal_windz__);
+
+   ierr_ |= clSetKernelArg(kernel_bfm__, iarg_++, sizeof(cl_mem), &d_Mg__);
+   ierr_ |= clSetKernelArg(kernel_bfm__, iarg_++, sizeof(cl_mem), &d_Cg__);
+   ierr_ |= clSetKernelArg(kernel_bfm__, iarg_++, sizeof(cl_mem), &d_Kg__);
 
    ierr_ |= clSetKernelArg(kernel_bfm__, iarg_++, sizeof(cl_mem), &d_m3mf__);
    return ierr_;

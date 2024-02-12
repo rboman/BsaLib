@@ -185,11 +185,13 @@ KERNEL void bfm_kernel(
       const    UINT          NNL__,
 #endif
       GLOBAL   UINT          *nodes_load,
-      GLOBAL   BSACL_REAL          *fi,
-      const    UINT          NFI__,
-      GLOBAL   BSACL_REAL          *fj,
-      const    UINT          NFJ__,
+      GLOBAL   BSACL_REAL    *fi,
 #ifndef BSACL_PASS_PARAMS_BY_MACRO__
+      const    UINT          NFI__,
+#endif
+      GLOBAL   BSACL_REAL    *fj,
+#ifndef BSACL_PASS_PARAMS_BY_MACRO__
+      const    UINT          NFJ__,
       const    UINT          NM_EFF__,
       const    UINT          NDEGW__,
 #endif
@@ -595,13 +597,13 @@ KERNEL void bfm_kernel(
             nod_corr_ = (BSACL_REAL)nod_corr[getCorrId(nj_, nk_, NN__)];
             BSACL_REAL corrJK_ = nod_corr_ < BSACL_REAL_MIN ? BSACL_REAL_MIN : nod_corr_;
 
-            S_uvw_J_i_  = evalFct(fi_,  PSD_ID_ARG   wscl_, wstd_, ubnj_);
-            S_uvw_JK_i  = sqrt(S_uvw_J_i_ * S_uvw_K_i_);
-            S_uvw_JK_i *= POW(corrJK_, (FABS(fi_)));
+            S_uvw_J_i_   = evalFct(fi_,  PSD_ID_ARG   wscl_, wstd_, ubnj_);
+            S_uvw_JK_i   = sqrt(S_uvw_J_i_ * S_uvw_K_i_);
+            S_uvw_JK_i  *= POW(corrJK_, (FABS(fi_)));
 
-            S_uvw_J_j_  = evalFct(fj_,  PSD_ID_ARG   wscl_, wstd_, ubnj_);
-            S_uvw_JK_j  = sqrt(S_uvw_J_j_ * S_uvw_K_j_);
-            S_uvw_JK_j *= POW(corrJK_, (FABS(fj_)));
+            S_uvw_J_j_   = evalFct(fj_,  PSD_ID_ARG   wscl_, wstd_, ubnj_);
+            S_uvw_JK_j   = sqrt(S_uvw_J_j_ * S_uvw_K_j_);
+            S_uvw_JK_j  *= POW(corrJK_, (FABS(fj_)));
 
             S_uvw_J_ij_  = evalFct(fiPfj_,  PSD_ID_ARG   wscl_, wstd_, ubnj_);
             S_uvw_JK_ij  = sqrt(S_uvw_J_ij_ * S_uvw_K_ij_);
@@ -793,6 +795,7 @@ KERNEL void bfm_kernel(
                S_uvw_IJ_ij *= S_uvw_J_ij_;
                S_uvw_IJ_ij  = sqrt(S_uvw_IJ_ij);
                S_uvw_IJ_ij *= POW(corrIJ_, (FABS((BSACL_REAL)fiPfj_)));
+
 
                m3mf_loc_[lid0_] += (
                     phiTc_mno_[ni_offs_ + 3 + tc_] * phiTc_mno_[nj_offs_ + 6 +     tc_] * phiTc_mno_[nk_offs_ + 12 +     tc_] * (S_uvw_IJ_i  * S_uvw_IK_j )
