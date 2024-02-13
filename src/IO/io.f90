@@ -39,7 +39,6 @@ module BsaLib_IO
    logical                         :: export_in_cwd_ = .true.
    character(len = :), allocatable :: exp_dir_ ! either export, or default (out) if none set.
 
-   ! NOTE: might be private..
    character(len = :), private, allocatable :: export_file_access_
    character(len = :), private, allocatable :: export_file_action_
    character(len = :), private, allocatable :: export_file_async_

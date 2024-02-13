@@ -72,6 +72,7 @@ module BsaLib_Data
    end type
 
 
+   logical :: is_gpu_enabled_ = .false.
 #ifdef BSA_USE_GPU
    integer(bsa_int_t), target :: ierr_cl_
 #endif

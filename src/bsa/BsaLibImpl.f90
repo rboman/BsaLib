@@ -48,26 +48,10 @@ contains
 
 
 
-   subroutine bsa_openFileHandles_()
-      !! BUG: not really adapted to logic...
 
-      ! DEBUG unit
-      if (.not. allocated(undebug_fname_)) undebug_fname_ = 'bsadebug.bsa'
-      call io_getVerifiedFile(unit_debug_, undebug_fname_)
-      open(unit=unit_debug_          & 
-         , file=undebug_fname_       &
-         , status=IO_STATUS_REPLACE  &
-         , form=IO_FORM_FORMATTED    &
-         , action=IO_ACTION_WRITE )
 
-#ifdef _BSA_EXPORT_POD_TRUNC_INFO
-      open(unit=iun_POD_trunc_       &
-         , file=iun_POD_trunc_fname_ &
-         , status=IO_STATUS_REPLACE  &
-         , form=IO_FORM_UNFORMATTED  &
-         , access=IO_ACCESS_STREAM   &
-         , action=IO_ACTION_WRITE )
-#endif
+   module subroutine bsa_enableGPU()
+      is_gpu_enabled_ = .true.
    end subroutine
 
 
@@ -177,37 +161,52 @@ contains
          call setBsaFunctionLocalVars()
 
 
+! BUG: force GPU usage for the moment. Testing only
+#ifdef BSA_USE_GPU
+         is_gpu_enabled_ = .true.
+#endif
+
+
+         if (is_gpu_enabled_) then
 #ifdef BSA_USE_GPU
 # ifdef BSA_USE_CUDA
-         call bsacl_AcquirePSDId(wd%i_psd_type_)
+            call bsacl_AcquirePSDId(wd%i_psd_type_)
 # endif
-         call bsacl_AcquireStructModMat(struct_data%modal_%phi_, struct_data%modal_%nat_freqs_)
-         call bsacl_AcquireModalMatrices(struct_data%modal_%Mm_, struct_data%modal_%Cm_, struct_data%modal_%Km_)
-         call bsacl_AcquireLoadedNodesList(struct_data%n_load_)
-         call bsacl_AcquireTotalNOfNodes(struct_data%nn_)
-         call bsacl_AcquireUsedModesList(struct_data%modal_%modes_)
-         call bsacl_AcquireWindCoeffs(wd%wfc_)
-         call bsacl_AcquirePhiTimesCMat(PHItimesC_local_)
-         call bsacl_AcquireTurbComponentsList(wd%tc_)
-#ifdef BSACL_ENABLE_EVALFCT_PTR
-         call bsacl_AcquireEvaluationFunc(evaluatePSD)
-#endif
-         call bsacl_AcquireNodalCorrelation(wd%nod_corr_)
+            call bsacl_AcquireStructModMat(struct_data%modal_%phi_, struct_data%modal_%nat_freqs_)
+            call bsacl_AcquireModalMatrices(struct_data%modal_%Mm_, struct_data%modal_%Cm_, struct_data%modal_%Km_)
+            call bsacl_AcquireLoadedNodesList(struct_data%n_load_)
+            call bsacl_AcquireTotalNOfNodes(struct_data%nn_)
+            call bsacl_AcquireUsedModesList(struct_data%modal_%modes_)
+            call bsacl_AcquireWindCoeffs(wd%wfc_)
+            call bsacl_AcquirePhiTimesCMat(PHItimesC_local_)
+            call bsacl_AcquireTurbComponentsList(wd%tc_)
 
-         call bsacl_AcquireWindNodalVelocities(wd%u_node_)
-         call bsacl_AcquireWindNodalWindZones(wd%wz_node_)
-         call bsacl_AcquireWindTurbScales(wd%turb_scales_wz_, wd%nz_)
-         call bsacl_AcquireWindTurbStd(wd%sigmaUVW_wz_, wd%nz_)
+# ifdef BSACL_ENABLE_EVALFCT_PTR
+            call bsacl_AcquireEvaluationFunc(evaluatePSD)
+# endif
 
-         call bsacl_SetDeviceType(BSACL_DEVICE_TYPE_GPU)
+            call bsacl_AcquireNodalCorrelation(wd%nod_corr_)
 
-         call bsacl_Init(ierr_cl_)
-         if (ierr_cl_ /= 0) then
-            print '(1x, a, a)', &
-               ERRMSG, 'Failed to initialise BSACL.'
-            goto 998
-         endif
+            call bsacl_AcquireWindNodalVelocities(wd%u_node_)
+            call bsacl_AcquireWindNodalWindZones(wd%wz_node_)
+            call bsacl_AcquireWindTurbScales(wd%turb_scales_wz_, wd%nz_)
+            call bsacl_AcquireWindTurbStd(wd%sigmaUVW_wz_, wd%nz_)
+
+            call bsacl_SetDeviceType(BSACL_DEVICE_TYPE_GPU)
+
+            call bsacl_Init(ierr_cl_)
+            if (ierr_cl_ /= 0) then
+               print '(1x, a, a)', &
+                  ERRMSG, 'Failed to initialise BSACL.'
+               goto 998
+            endif
+#else
+            print '(1x, 2a)', &
+               WARNMSG, 'This BSA version does not support GPU offloading. Using CPU only.'
+            is_gpu_enabled_ = .false.
 #endif ! BSA_USE_GPU
+         endif ! gpu enabled
+
 
          ! OK. check done.
          if (settings%i_only_diag_ == 1) then
@@ -276,9 +275,12 @@ contains
 
 
 #ifdef BSA_USE_GPU
-         settings%i_suban_type_   = 1  ! force CLS execution
-         settings%i_compute_bisp_ = 1
-         settings%i_compute_psd_  = 0
+         ! BUG: this has to be removed. Use GPU also with mesher
+         if (is_gpu_enabled_) then
+            settings%i_suban_type_   = 1  ! force CLS execution
+            settings%i_compute_bisp_ = 1
+            settings%i_compute_psd_  = 0
+         endif
 #endif
 
          is_only_msh_ = settings%i_suban_type_ == 2
@@ -300,12 +302,15 @@ contains
       end block
 
       998 continue
+
 #ifdef BSA_USE_GPU
-      call bsacl_Finalise()
-      if (ierr_cl_ == BSACL_SUCCESS) then
-         print '(1x, 2a)', INFOMSG, "BSACL returned correctly."
-      else
-         call bsa_Abort(" BSACL returned with error.")
+      if (is_gpu_enabled_) then
+         call bsacl_Finalise()
+         if (ierr_cl_ == BSACL_SUCCESS) then
+            print '(1x, 2a)', INFOMSG, "BSACL returned correctly."
+         else
+            call bsa_Abort(" BSACL returned with error.")
+         endif
       endif
 #endif
    end subroutine bsa_Run
@@ -316,15 +321,13 @@ contains
 
 
    subroutine validateAll_()
-      ! character(len=64) :: msg
-
 ! #ifdef BSA_DEBUG
       character(len=64) :: fmt
       character(len=64) :: fmt2
       integer(int32) :: i
 
-
-      write(unit_debug_, *) INFOMSG//'@BsaLibImpl::CheckVars() : log checking internal variables...'
+      write(unit_debug_, *) &
+         INFOMSG//'@BsaLibImpl::CheckVars() : log checking internal variables...'
 ! #endif
 
       ! ======================
@@ -1515,11 +1518,35 @@ contains
 !=========================================================================================
 !=========================================================================================
 !
-!   EXPORTING   SECTION
+!  OUTPUT / EXPORTING
 !
 !=========================================================================================
 !=========================================================================================
 !=========================================================================================
+
+
+   subroutine bsa_openFileHandles_()
+      !! BUG: not really adapted to logic...
+
+      ! DEBUG unit
+      if (.not. allocated(undebug_fname_)) undebug_fname_ = 'bsadebug.bsa'
+      call io_getVerifiedFile(unit_debug_, undebug_fname_)
+      open(unit=unit_debug_          & 
+         , file=undebug_fname_       &
+         , status=IO_STATUS_REPLACE  &
+         , form=IO_FORM_FORMATTED    &
+         , action=IO_ACTION_WRITE )
+
+#ifdef _BSA_EXPORT_POD_TRUNC_INFO
+      open(unit=iun_POD_trunc_       &
+         , file=iun_POD_trunc_fname_ &
+         , status=IO_STATUS_REPLACE  &
+         , form=IO_FORM_UNFORMATTED  &
+         , access=IO_ACCESS_STREAM   &
+         , action=IO_ACTION_WRITE )
+#endif
+   end subroutine
+
 
 
 

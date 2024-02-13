@@ -73,6 +73,9 @@ module BsaLib
       end subroutine
 
 
+      module subroutine bsa_enableGPU()
+      end subroutine
+
 
       module subroutine bsa_setSpatialSymmetry(isym)
          integer(bsa_int_t), intent(in) :: isym
