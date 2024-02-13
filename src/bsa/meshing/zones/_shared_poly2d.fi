@@ -17,7 +17,7 @@
 #ifdef __triang_zone__
 # define __sub_name_compute compute_TZ_iso_
 # define __sub_name_interp  interpolateTZ_HTPC_v3
-# define __mod_sub_compute  
+# define __mod_sub_compute
 # define __this_type MTriangZone_t
 #else
 # define __sub_name_compute compute_rz_
@@ -65,7 +65,7 @@ __mod_sub_compute subroutine __sub_name_compute(this)
 #endif
 
 #ifdef _BSA_USE_CACHED_POD_DATA
-# define __bfm_dump__ 
+# define __bfm_dump__
 #else
 # define __bfm_dump__  ,bfm
 #endif
@@ -79,7 +79,7 @@ __mod_sub_compute subroutine __sub_name_compute(this)
    if (.not. (this%refmts_set_ .or. this%deltas_set_)) &
       call bsa_Abort('Either deltas or refinements must be set before computing a zone.')
 
-   
+
    if (this%base_I_ <= MACHINE_PRECISION .or. this%base_J_ <= MACHINE_PRECISION) then
       print '(1x, 4a)', &
          WARNMSG, 'One sub-zone at   ', &
@@ -90,11 +90,10 @@ __mod_sub_compute subroutine __sub_name_compute(this)
    if (this%deltaf_I_ <= MACHINE_PRECISION .or. this%deltaf_J_ <= MACHINE_PRECISION) &
       call bsa_Abort("At least one delta freq is zero.")
 #endif
-      
+
 
    block
 #ifndef _BSA_USE_CACHED_POD_DATA
-
 
 ! === Common declarations
       integer(int32) :: i, j
@@ -103,34 +102,34 @@ __mod_sub_compute subroutine __sub_name_compute(this)
       real(RK)       :: dfIi, dfIj, dfJi, dfJj
       real(RK), dimension(1), target :: base_fi, base_fj, fi, fj
       real(RK), allocatable          :: bfm(:, :)
-      
-#  ifdef _BSA_M3MF_ONLY_PREMESH
-#    ifdef __triang_zone__
+
+# ifdef _BSA_M3MF_ONLY_PREMESH
+#   ifdef __triang_zone__
       real(RK) :: dw, vtx_infl_t
-#    else
+#   else
       real(RK) :: dwI, dwJ
-#    endif
+#   endif
 
       real(RK), allocatable :: intg(:)
 
-! #    define __local_debug_write__
-#    ifdef __local_debug_write__
+! #   define __local_debug_write__
+#   ifdef __local_debug_write__
       integer(int32), save  :: iun = 430000
       real(RK), allocatable :: fi_v_save_(:), fj_v_save_(:)
-#    endif
-#  endif  ! _BSA_M3MF_ONLY_PREMESH
+#   endif
+# endif  ! _BSA_M3MF_ONLY_PREMESH
 ! === Common declarations
 
 
 
-#  ifdef __triang_zone__
+# ifdef __triang_zone__
       type(MPoint_t) :: pt
       integer(int32) :: Np_m1, Nj_m1
       real(RK)       :: df_CA, df_CST
 
       Np_m1 = this%ni_
       zNp   = (Np_m1 * (Np_m1+1)) / 2
-      
+
       Np_m1 = Np_m1 - 1
       Nj_m1 = Np_m1
 
@@ -147,7 +146,7 @@ __mod_sub_compute subroutine __sub_name_compute(this)
       dfIi = dfIi * df_CST
       dfIj = dfIj * df_CST
 
-#  else
+# else
 
       call this%getUnaryDeltas(dfIi, dfIj, dfJi, dfJj)
 
@@ -159,31 +158,31 @@ __mod_sub_compute subroutine __sub_name_compute(this)
 
 
       zNp = this%nj_ * this%ni_
-#  endif  ! __triang_zone__
+# endif  ! __triang_zone__
 
-   
 
-#  ifdef _BSA_M3MF_ONLY_PREMESH
-#    ifdef __triang_zone__
+
+# ifdef _BSA_M3MF_ONLY_PREMESH
+#   ifdef __triang_zone__
       dw = df_CST * CST_PIt2
       ctr_infl = dw * dw
       brd_infl = ctr_infl / 2._bsa_real_t
       vtx_infl = brd_infl / 2._bsa_real_t
       vtx_infl_t = vtx_infl / 2._bsa_real_t
-#    else
+#   else
       dwI = this%deltaf_I_ * CST_PIt2  ! deltas in [rad/s] (to compute influence areas)
       dwJ = this%deltaf_J_ * CST_PIt2
       ctr_infl = dwI * dwJ
       brd_infl = ctr_infl / 2._bsa_real_t
       vtx_infl = brd_infl / 2._bsa_real_t
-#    endif
+#   endif
 
       allocate(intg(dimM_bisp_))
-#    ifdef __local_debug_write__
+#   ifdef __local_debug_write__
       allocate(fi_v_save_(this%ni_))
       allocate(fj_v_save_(this%nj_))
-#    endif
-#  endif
+#   endif
+# endif ! _BSA_M3MF_ONLY_PREMESH
 
 
       ! allocate memory
@@ -198,13 +197,13 @@ __mod_sub_compute subroutine __sub_name_compute(this)
       !============================================================
       ! FIRST COLUMN (along J-dir, from I to A) (CA side in Triang)
       !
-#  ifdef __triang_zone__
+# ifdef __triang_zone__
       base_fi(1) = this%Cpt_%freqI()
       base_fj(1) = this%Cpt_%freqJ()
-#  else
+# else
       base_fi(1) = this%Ipt_%freqI()
       base_fj(1) = this%Ipt_%freqJ()
-#  endif
+# endif
       block
          real(RK) :: rtmp
 
@@ -224,17 +223,17 @@ __mod_sub_compute subroutine __sub_name_compute(this)
       fi(1) = base_fi(1)
       fj(1) = base_fj(1)
       bfm(:, 1:1) = getBFM_msh(fi, fj)
-#  ifdef _BSA_M3MF_ONLY_PREMESH
+# ifdef _BSA_M3MF_ONLY_PREMESH
       intg = bfm(:, 1) * vtx_infl
-#    ifdef __local_debug_write__
+#   ifdef __local_debug_write__
       fi_v_save_(1) = fi(1)
       fj_v_save_(1) = fj(1)
-#    endif
-#  endif
+#   endif
+# endif
 
-#  ifdef _BSA_CHECK_NOD_COH_SVD
+# ifdef _BSA_CHECK_NOD_COH_SVD
       return
-#  endif
+# endif
 
       ! internal lines
 # ifdef __triang_zone__
@@ -260,17 +259,17 @@ __mod_sub_compute subroutine __sub_name_compute(this)
       fj(1) = fj(1) + dfJj
       pt    = MPoint(fi(1), fj(1))
 
-#ifdef __zone_layout_validation__
+#  ifdef __zone_layout_validation__
       if (.not. pt == this%Apt_) &
          call bsa_Abort('First end point does not match triang A point. Aborting.')
-#endif
+#  endif
 
       i_bfm = j
       bfm(:, i_bfm:i_bfm) = getBFM_msh(fi, fj)
-#   ifdef _BSA_M3MF_ONLY_PREMESH
+#  ifdef _BSA_M3MF_ONLY_PREMESH
       intg = intg + bfm(:, i_bfm) * vtx_infl_t
-#   endif
-# endif
+#  endif
+# endif ! __triang_zone__  defined
 
 
       ! removing excess integral
@@ -293,9 +292,7 @@ __mod_sub_compute subroutine __sub_name_compute(this)
       !
 # ifdef __triang_zone__
       do i = 2, Np_m1
-
          Nj_m1 = Nj_m1 - 1
-
 # else
       do i = 2, this%ni_
 # endif
@@ -313,7 +310,7 @@ __mod_sub_compute subroutine __sub_name_compute(this)
 #   ifdef __local_debug_write__
          fi_v_save_(i) = fi(1)
 #   endif
-# endif
+# endif ! _BSA_M3MF_ONLY_PREMESH
 
          ! internal lines
 # ifdef __triang_zone__
@@ -344,11 +341,12 @@ __mod_sub_compute subroutine __sub_name_compute(this)
          intg = intg + bfm(:, i_bfm) * brd_infl
 #   endif
 
-# else
+# else ! rect zone
+
 #   ifdef _BSA_M3MF_ONLY_PREMESH
          intg = intg - bfm(:, i_bfm) * brd_infl
 #   endif
-# endif
+# endif ! __triang_zone__
       enddo  ! i
 
 
@@ -362,33 +360,33 @@ __mod_sub_compute subroutine __sub_name_compute(this)
 
       pt = MPoint(base_fi(1), base_fj(1))
 
-#ifdef __zone_layout_validation__
+#  ifdef __zone_layout_validation__
       if (.not. pt == this%Bpt_) &
          call bsa_Abort('End point does not match B triang point. Aborting.')
-#endif
+#  endif
 
       i_bfm = i_bfm + 1
       bfm(:, i_bfm:i_bfm) = getBFM_msh(base_fi, base_fj)
-#   ifdef _BSA_M3MF_ONLY_PREMESH
+#  ifdef _BSA_M3MF_ONLY_PREMESH
       intg = intg + bfm(:, i_bfm) * vtx_infl_t
-#   endif
-# endif
+#  endif
+# endif ! __triang_zone__   defined
 
 
-#ifdef __zone_layout_validation__
+# ifdef __zone_layout_validation__
       if (i_bfm /= zNp) then
          print *, 'i_bfm , zNp  =  ', i_bfm, zNp
          call bsa_Abort('"i_bfm" does not equal tot N of zone''s points.')
       endif
-#endif
+# endif
 
 
 # ifndef __triang_zone__
-#   ifdef _BSA_M3MF_ONLY_PREMESH
+#  ifdef _BSA_M3MF_ONLY_PREMESH
       intg = intg - bfm(:, i_bfm - this%nj_ + 1) * vtx_infl
       intg = intg - sum(bfm(:, i_bfm - this%nj_ + 1 : i_bfm-1) * brd_infl, dim=2)
       intg = intg - bfm(:, i_bfm) * vtx_infl
-#   endif
+#  endif
 # endif
 
 
@@ -396,7 +394,7 @@ __mod_sub_compute subroutine __sub_name_compute(this)
 # ifdef _BSA_M3MF_ONLY_PREMESH
       m3mf_msh_ptr_   = m3mf_msh_ptr_ + (intg * settings%i_bisp_sym_) ! update main integral
 
-#   ifdef __local_debug_write__
+#  ifdef __local_debug_write__
       iun = iun + 1
       write(iun, '(  (g) )') 0
       write(iun, '(  (g) )') this%rot_ / CST_PIGREC * 180._bsa_real_t
@@ -412,29 +410,33 @@ __mod_sub_compute subroutine __sub_name_compute(this)
       end block
       deallocate(fi_v_save_)
       deallocate(fj_v_save_)
-#   endif
-# endif
+#  endif ! __local_debug_write__
+# endif ! _BSA_M3MF_ONLY_PREMESH
+
       msh_bfmpts_pre_ = msh_bfmpts_pre_ + zNp   ! update tot num of meshing points
-      
+
       ! eventually, update zone with max N of points
       if (zNp > msh_max_zone_NPts) msh_max_zone_NPts = zNp
 
+
 #else  ! _BSA_USE_CACHED_POD_DATA  defined
+
       !$omp critical
 #endif
       msh_NZones = msh_NZones + 1            ! update n. of zones count
       call DumpZone(this  __bfm_dump__ )     ! dump zone info
       !$omp end critical
    end block
+
 #undef __bfm_dump__
 
 
-# ifndef __triang_zone__
+#ifndef __triang_zone__
    ! NOTE: reset them to 0 for ensuring next zone correct setup
    998 continue
    this%refmts_set_ = .false.
    this%deltas_set_ = .false.
-# endif
+#endif
 
 end subroutine __sub_name_compute
 
@@ -451,7 +453,7 @@ end subroutine __sub_name_compute
 #if (defined(_BSA_USE_CACHED_POD_DATA)) || (!defined(_BSA_M3MF_ONLY_PREMESH))
 # define __update_m3mf__
 #endif
-   
+
    subroutine __sub_name_interp( this &
 #ifndef _BSA_USE_CACHED_POD_DATA
       & , bfm_undump &
@@ -497,7 +499,7 @@ end subroutine __sub_name_compute
       integer(int32)  :: i, ist, n_segs_bfm_ref_i_, n_segs_bfm_ref_j_
       integer(int32)  :: n_pts_bfm_ref_i_, n_pts_bfm_ref_j_
       integer(int32)  :: pIcurr, pIprev, pJhead, pJtail     ! HTPC indexes
-      
+
       real(RK)        :: dfIi_bfm_lv0_, dfIj_bfm_lv0_, dfJi_bfm_lv0_, dfJj_bfm_lv0_
       real(RK)        :: dfIi_bfm_ref_, dfIj_bfm_ref_, dfJi_bfm_ref_, dfJj_bfm_ref_
       real(RK)        :: dfI_bfm_lv0_, dfJ_bfm_lv0_, dfI_bfm_ref_, dfJ_bfm_ref_
@@ -524,7 +526,7 @@ end subroutine __sub_name_compute
 #   define __ctr_infl_r  ctr_infl
 #   define __brd_infl_t  brd_infl
 #   define __vtx_infl_t  vtx_infl
-#endif
+#endif ! __triang_zone__
 
       ! Pos in general BFM undumped data
       integer(int32) :: i_bfm_old, i_bfm_ref_i, i_bfm_ref_j
@@ -543,7 +545,7 @@ end subroutine __sub_name_compute
       integer(int32) :: i_bfm_offs
 #   endif
 # endif
-#endif
+#endif ! __new_interp_proc__
 
       real(RK), allocatable :: bfm_new_left(:, :), bfm_new_right(:, :)
       real(RK), allocatable :: bfm_interp(:, :)
@@ -702,7 +704,7 @@ end subroutine __sub_name_compute
       dfJi_bfm_lv0_ = dfJi_bfm_lv0_ * this%deltaf_J_
       dfJj_bfm_lv0_ = dfJj_bfm_lv0_ * this%deltaf_J_
 
-      
+
       ! get n. of BFM refinement segments (between two old ones)
       n_segs_bfm_ref_i_ = 1 ! original
       n_segs_bfm_ref_j_ = 1
@@ -748,11 +750,11 @@ end subroutine __sub_name_compute
 
             i_ftc        = I_RES_PEAK_DELTAF_BFM_REFMT_FCT_
             inter_modes_ = msh_ZoneLimsInterestModes(im_idx_ + 1 : im_idx_ + n_im_)
-            
+
             ! BUG: introduce I and J peak widths!
             dwI = minval(peak_exts_(inter_modes_))  ! base MIN deltaf
          endif
-         
+
          if (dfI_bfm_ref_ > dwI / i_ftc) then
             do while (dfI_bfm_ref_ > dwI / i_ftc)
                n_segs_bfm_ref_i_ = n_segs_bfm_ref_i_ + 1
@@ -821,7 +823,7 @@ end subroutine __sub_name_compute
       nj          = nj_bfm_ref_ * (n_segs_bfm_ref_j_ * pol%interp_J_fct_) + 1
       ni_bfm_ref_ = ni_bfm_ref_ * n_segs_bfm_ref_i_ + 1
       nj_bfm_ref_ = nj_bfm_ref_ * n_segs_bfm_ref_j_ + 1
-      
+
       ! number of BRM points to interpolate (insert)
       ! between two know BFM (refined) points' direction lines.
       nipI = pol%interp_I_fct_ - 1
@@ -830,7 +832,7 @@ end subroutine __sub_name_compute
 
       nPtsPost = ni * nj
 #endif  ! if def __triang_zone__
-      
+
 
       allocate(brm(dimM_bisp_, nPtsPost), stat=ist)
       if (ist /= 0) call bsa_Abort("Error allocating ""brm"" in interpolating RZ.")
@@ -847,12 +849,12 @@ end subroutine __sub_name_compute
 #endif
       if (ist /= 0) call bsa_Abort("Error allocating ""bfm_new_right"" in interpolating RZ.")
       bfm_new_right = 0._bsa_real_t
-      
+
       allocate(bfm_interp(dimM_bisp_, nj), stat=ist)
       if (ist /= 0) call bsa_Abort("Error allocating ""bfm_interp"" in interpolating RZ.")
       bfm_interp = 0._bsa_real_t
 
-      
+
 #ifdef __triang_zone__
       fi_baseptI = this%Cpt_%freqI()
       fj_baseptI = this%Cpt_%freqJ()
@@ -899,7 +901,7 @@ end subroutine __sub_name_compute
       allocate(fj_v_(nj_bfm_ref_), stat=ist)
       if (ist /= 0) call bsa_Abort("Error allocating ""fj"" in interpolating RZ.")
       fj_v_ = 0._bsa_real_t
-      
+
       if     (this%rot_ < CST_PId2)   then  ! < 90
          fi_v_ = ([0 : ni_bfm_ref_-1] * ( dfI_bfm_ref_)) + fi_baseptI
          fj_v_ = ([0 : nj_bfm_ref_-1] * ( dfJ_bfm_ref_)) + fj_baseptI
@@ -936,7 +938,7 @@ end subroutine __sub_name_compute
 #endif  ! __new_interp_proc__
 
 
-# ifdef __local_debug_write__
+#ifdef __local_debug_write__
       if (.not. allocated(fi_v_save_)) then 
          allocate(fi_v_save_(ni_bfm_ref_), stat=ist)
          if (ist /= 0) call bsa_Abort("Error allocating ""fi"" in interpolating RZ.")
@@ -948,7 +950,7 @@ end subroutine __sub_name_compute
          if (ist /= 0) call bsa_Abort("Error allocating ""fj"" in interpolating RZ.")
          fj_v_save_ = 0._bsa_real_t
       endif
-# endif
+#endif
 
 
       if (do_export_brm_ .and. associated(pdata)) then
@@ -967,7 +969,7 @@ end subroutine __sub_name_compute
       ! Then for all the others, it will be done inside
       ! the loop over the NI (old) points of the old mesh.
       ! NOTE: integrate as well.
-      
+
 
       ! init point vertex
       i_brm = 1
@@ -983,11 +985,11 @@ end subroutine __sub_name_compute
       ifi = 1
       fi_v_save_(1) = fi_baseptJ(1)
 #endif
-      
+
 #ifdef _BSA_USE_CACHED_POD_DATA
-#   ifdef __triang_zone__
+# ifdef __triang_zone__
       i_bfm_offs         = 0
-#   endif
+# endif
       i_bfm              = 1
 #endif
       bfmtail            = bfm_undump(:, 1:1)
@@ -995,7 +997,7 @@ end subroutine __sub_name_compute
       intg_bfm           = bfmtail(:, 1) * __vtx_infl_r_bfm
 #endif
       bfm_new_left(:, 1) = bfmtail(:, 1)
-      
+
       brm(:, 1:1) = getBRM_msh(fi, fj, bfmtail)
 #ifdef _OPENMP
       __FREQ_I_
@@ -1009,7 +1011,7 @@ end subroutine __sub_name_compute
       do pJhead = 2, this%nj_ ! loop on all OLD BFM saved points (J-dir)
 
          do i_bfm_ref_j = 1, n_pts_bfm_ref_j_ ! loop on all REF BFM pts between 2 old.
-            
+
             ! compute head
             fi_baseptJ(1) = fi_baseptJ(1) + dfJi_bfm_ref_
             fj_baseptJ(1) = fj_baseptJ(1) + dfJj_bfm_ref_
@@ -1092,7 +1094,7 @@ end subroutine __sub_name_compute
 #ifdef __update_m3mf__
          intg_bfm      = intg_bfm + bfmhead(:, 1) * __brd_infl_r_bfm
 #endif
-         
+
 
 #ifdef __zone_layout_validation__
          if (n_pts_bfm_ref_j_ > 0) then 
@@ -1103,7 +1105,7 @@ end subroutine __sub_name_compute
          endif
 #endif
 
-         
+
          dfJhead = dfJ_bfm_ref_
          dfJtail = 0._bsa_real_t
          do pJtail = 1, nipJ ! interp (J-dir) between tail-head
@@ -1206,7 +1208,7 @@ end subroutine __sub_name_compute
 #else
             i_brm_shift  = i_brm + i_brm_offsetJ
 #endif
-            
+
             i_brm_write_ = i_brm_shift
 
             ! reset base freqs to point to new base -> prev base moved by ref BFM deltas (I-dir)
@@ -1263,19 +1265,19 @@ end subroutine __sub_name_compute
 #ifdef __update_m3mf__
                   intg_bfm = intg_bfm + bfmhead(:, 1) * __ctr_infl_r_bfm
 #endif
-                  
+
                   ! once we moved head, restore init, distances from head/tail
                   dfJhead = dfJ_bfm_ref_
                   dfJtail = 0._bsa_real_t
                   do pJtail = 1, nipJ ! interp (J-dir) between tail-head
-         
+
                      fi(1) = fi(1) + dfJi_brm_interp
                      fj(1) = fj(1) + dfJj_brm_interp
-         
+
                      ! update actual distances head/tail
                      dfJtail = dfJtail + dfJ_brm_interp_
                      dfJhead = dfJhead - dfJ_brm_interp_
-         
+
                      ! interpolation along J dir (between HEAD-TAIL)
                      i_bfm_interpJ = i_bfm_interpJ + 1
                      bfm_new_right(:, i_bfm_interpJ:i_bfm_interpJ) = &
@@ -1299,13 +1301,11 @@ end subroutine __sub_name_compute
                   fi(1) = fi(1) + dfJi_brm_interp
                   fj(1) = fj(1) + dfJj_brm_interp
 
-#ifdef __triang_zone__
-# ifdef __zone_layout_validation__
+#if defined(__triang_zone__) && defined(__zone_layout_validation__)
                   if (abs(fi(1) - fi_baseptJ(1)) > MACHINE_PRECISION .or. &
                      abs(fj(1) - fj_baseptJ(1)) > MACHINE_PRECISION) &
                         call bsa_Abort(&
                            'BAD (4-t): fi or fj at the end of a BFM ref segment does not coincide..')
-# endif
 #endif
 
                   i_bfm_interpJ                   = i_bfm_interpJ + 1
@@ -1326,7 +1326,7 @@ end subroutine __sub_name_compute
 
                   bfmtail = bfmhead
                enddo ! n. of (exact) ref points for BFM (J-dir)
-      
+
                ! here, next head is special (lies on an OLD BFM I-dir infl line).
                ! NOTE: don't forget to interpolate between this head and tail!!
                ! NOTE: it is a center point, except for the very last one (BORDER)
@@ -1346,14 +1346,14 @@ end subroutine __sub_name_compute
                dfJhead = dfJ_bfm_ref_
                dfJtail = 0._bsa_real_t
                do pJtail = 1, nipJ
-      
+
                   fi(1) = fi(1) + dfJi_brm_interp
                   fj(1) = fj(1) + dfJj_brm_interp
-      
+
                   ! update actual distances head/tail
                   dfJtail = dfJtail + dfJ_brm_interp_
                   dfJhead = dfJhead - dfJ_brm_interp_
-      
+
                   ! interpolation along J dir (between HEAD-TAIL)
                   i_bfm_interpJ = i_bfm_interpJ + 1
                   bfm_new_right(:, i_bfm_interpJ:i_bfm_interpJ) = &
@@ -1378,7 +1378,7 @@ end subroutine __sub_name_compute
                fj(1) = fj(1) + dfJj_brm_interp
                i_bfm_interpJ                   = i_bfm_interpJ + 1
                bfm_new_right(:, i_bfm_interpJ) = bfmhead(:, 1)
-               
+
                i_brm_shift = i_brm_shift + 1
                brm(:, i_brm_shift:i_brm_shift) = &
                   getBRM_msh(fi, fj, bfm_new_right(:, i_bfm_interpJ:i_bfm_interpJ))
@@ -1434,10 +1434,10 @@ end subroutine __sub_name_compute
                      getBRM_msh(fi, fj, bfm_new_right(:, i_bfm_interpJ:i_bfm_interpJ))
 
                   ! call write_brm_fptr_(fi, fj, brm(:, i_brm_shift), null())
-#ifdef _OPENMP
+# ifdef _OPENMP
                   __FREQ_I_shift_
                   __FREQ_J_shift_
-#endif
+# endif
 
                   intg = intg + brm(:, i_brm_shift) * __ctr_infl_r
                enddo
@@ -1453,10 +1453,10 @@ end subroutine __sub_name_compute
                   getBRM_msh(fi, fj, bfm_new_right(:, i_bfm_interpJ:i_bfm_interpJ))
 
                ! call write_brm_fptr_(fi, fj, brm(:, i_brm_shift), null())
-#ifdef _OPENMP
+# ifdef _OPENMP
                __FREQ_I_shift_
                __FREQ_J_shift_
-#endif
+# endif
 
                intg = intg + brm(:, i_brm_shift) * __ctr_infl_r
 
@@ -1479,9 +1479,9 @@ end subroutine __sub_name_compute
             !       there, it is a VERTEX point.
             !       However, it's the very last element in brm, we can remove it after.
             intg     = intg - brm(:, i_brm_shift) * __brd_infl_t
-# ifdef __update_m3mf__
+#ifdef __update_m3mf__
             intg_bfm = intg_bfm - bfmtail(:, 1) * __brd_infl_t_bfm
-# endif
+#endif
 
             ! Now INTERPOLATE along I-dir between left and right BFM infl lines.
             !
@@ -1494,7 +1494,7 @@ end subroutine __sub_name_compute
 
                dfIprev = dfIprev + dfI_brm_interp_
                dfIcurr = dfIcurr - dfI_brm_interp_
-               
+
 #ifdef __triang_zone__
                bfm_interp(:, 1 : njNew_picurr) = &
                   (  bfm_new_left (:, 1 : njNew_picurr) * dfIcurr + &
@@ -1623,10 +1623,10 @@ end subroutine __sub_name_compute
 
             ! moving right, shift infl-lines.
 #ifdef __triang_zone__
-#  ifdef _BSA_USE_CACHED_POD_DATA
+# ifdef _BSA_USE_CACHED_POD_DATA
             i_bfm_offs = i_bfm_offs + 1 
             i_bfm      = i_bfm + i_bfm_offs
-#  endif
+# endif
             bfm_new_left(:, 1:njNew_picurr) = bfm_new_right(:, 1:njNew_picurr)
 #else
             bfm_new_left = bfm_new_right
@@ -1677,7 +1677,7 @@ end subroutine __sub_name_compute
          ifi = ifi + 1
          fi_v_save_(ifi) = fi_baseptJ(1)
 #endif
-         
+
          i_brm_shift = i_brm_shift + 1
          brm(:, i_brm_shift:i_brm_shift) = getBRM_msh(fi, fj, bfm_new_right(:, 1:1))
 
@@ -1709,19 +1709,19 @@ end subroutine __sub_name_compute
 #ifdef __update_m3mf__
                intg_bfm = intg_bfm + bfmhead(:, 1) * __ctr_infl_r_bfm
 #endif
-      
+
                ! once we moved head, restore init, distances from head/tail
                dfJhead = dfJ_bfm_ref_
                dfJtail = 0._bsa_real_t
                do pJtail = 1, nipJ
-      
+
                   fi(1) = fi(1) + dfJi_brm_interp
                   fj(1) = fj(1) + dfJj_brm_interp
-      
+
                   ! update actual distances head/tail
                   dfJtail = dfJtail + dfJ_brm_interp_
                   dfJhead = dfJhead - dfJ_brm_interp_
-      
+
                   ! interpolation along J dir (between HEAD-TAIL)
                   i_bfm_interpJ = i_bfm_interpJ + 1
                   bfm_new_right(:, i_bfm_interpJ:i_bfm_interpJ) = &
@@ -1769,7 +1769,7 @@ end subroutine __sub_name_compute
             fj(1) = fj_baseptJ(1)
             fi_baseptJ(1) = fi_baseptJ(1) + dfJi_bfm_ref_
             fj_baseptJ(1) = fj_baseptJ(1) + dfJj_bfm_ref_
-            
+
 #ifdef _BSA_USE_CACHED_POD_DATA
             i_bfm         = i_bfm + 1
             bfmhead(:, 1) = bfm_undump(:, i_bfm)
@@ -1785,14 +1785,14 @@ end subroutine __sub_name_compute
             dfJhead = dfJ_bfm_ref_
             dfJtail = 0._bsa_real_t
             do pJtail = 1, nipJ
-   
+
                fi(1) = fi(1) + dfJi_brm_interp
                fj(1) = fj(1) + dfJj_brm_interp
-   
+
                ! update actual distances head/tail
                dfJtail = dfJtail + dfJ_brm_interp_
                dfJhead = dfJhead - dfJ_brm_interp_
-   
+
                ! interpolation along J dir (between HEAD-TAIL)
                ! NOTE: save it for later use.
                i_bfm_interpJ = i_bfm_interpJ + 1
@@ -1812,14 +1812,14 @@ end subroutine __sub_name_compute
                ! NOTE: it is a center point, except for very last row -> BORDER
                intg  = intg + brm(:, i_brm_shift) * __ctr_infl_r
             enddo ! pJtail = 1, nipJ
-   
+
             ! here, treat head, TAIL==HEAD
             fi(1) = fi(1) + dfJi_brm_interp
             fj(1) = fj(1) + dfJj_brm_interp
-            
+
             i_bfm_interpJ = i_bfm_interpJ + 1
             bfm_new_right(:, i_bfm_interpJ) = bfmhead(:, 1)
-            
+
             i_brm_shift = i_brm_shift + 1
             brm(:, i_brm_shift:i_brm_shift) = &
                getBRM_msh(fi, fj, bfm_new_right(:, i_bfm_interpJ:i_bfm_interpJ))
@@ -1873,7 +1873,7 @@ end subroutine __sub_name_compute
 
             dfIprev = dfIprev + dfI_brm_interp_
             dfIcurr = dfIcurr - dfI_brm_interp_
-            
+
 #ifdef __triang_zone__
             bfm_interp(:, 1 : njNew_picurr) = &
                (  bfm_new_left (:, 1 : njNew_picurr) * dfIcurr + &
@@ -1898,12 +1898,12 @@ end subroutine __sub_name_compute
             call write_brm_fptr_(fi, fj, brm(:, i_brm:i_brm), null())
 #endif
             intg = intg + brm(:, i_brm) * __brd_infl_r
-            
+
             do pJtail = 2, nj
 
                fi(1) = fi(1) + dfJi_brm_interp
                fj(1) = fj(1) + dfJj_brm_interp
-               
+
                i_brm = i_brm + 1
                brm(:, i_brm:i_brm) = getBRM_msh(fi, fj, bfm_interp(:, pJtail:pJtail))
 #ifdef _OPENMP
@@ -1962,7 +1962,7 @@ end subroutine __sub_name_compute
 
             i_brm               = i_brm + 1
             brm(:, i_brm:i_brm) = getBRM_msh(fi, fj, bfmhead)
-            
+
 # ifdef _OPENMP
             __FREQ_I_
             __FREQ_J_
@@ -1979,7 +1979,7 @@ end subroutine __sub_name_compute
             intg = intg - brm(:, i_brm) * __ctr_infl_r
 #endif
          enddo ! pIprev = 1, nipI
-         
+
          ! once finished with this section (CURR-PREV), since we skip J column
          ! at pi_curr infl line, we reset general BRM index to point to
          ! previously shifted one.
@@ -2012,15 +2012,15 @@ end subroutine __sub_name_compute
             fj(1) = fj(1) + dfJj_brm_interp
          enddo
 #endif ! _OPENMP
-         
+
 
 #ifdef __triang_zone__
-#  ifdef _BSA_USE_CACHED_POD_DATA
+# ifdef _BSA_USE_CACHED_POD_DATA
          i_bfm_offs = i_bfm_offs + 1 
          i_bfm      = i_bfm + i_bfm_offs
-#  endif
+# endif
          njOld = njOld - 1
-         
+
          bfm_new_left(:, 1 : njNew_picurr) = bfm_new_right(:, 1 : njNew_picurr)
 #else
          bfm_new_left = bfm_new_right
