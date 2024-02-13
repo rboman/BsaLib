@@ -57,6 +57,9 @@ module BsaLib_IO
          character(len = *), intent(in) :: name_, emsg
          integer, intent(in) :: istat
       end subroutine
+
+      module subroutine io_printUserData()
+      end subroutine
    end interface
 
 

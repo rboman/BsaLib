@@ -17,7 +17,9 @@ submodule(BsaLib) BsaLib_ClassicImpl
 
    use BsaLib_Data
 #ifdef BSA_DEBUG
-   use BsaLib_IO,   only: unit_debug_
+   use BsaLib_IO,   only: unit_debug_, io_printUserData
+#else
+   use BsaLib_IO,   only: io_printUserData
 #endif
    implicit none (type, external)
 
@@ -39,6 +41,7 @@ contains
       ! NOTE: reset in case NFREQs has been changed in previous call
       NFREQS = settings%nfreqs_
 
+      call io_printUserData()
 
       ! some shared memory allocation
       if (settings%i_compute_psd_ == 1) then
