@@ -770,6 +770,14 @@ void assembleProgramBuildOptsString_()
       }
    }
 
+#ifdef BSA_DEBUG
+   strcpy(buf, " -g ");
+   buf += 4;
+#else
+   strcpy(buf, " -cl-fast-relaxed-math ");
+   buf += 23;
+#endif
+
    *buf = '\0';
 
 #ifdef BSA_DEBUG
