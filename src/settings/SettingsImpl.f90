@@ -92,13 +92,7 @@ contains
       class(settings_t), intent(inout) :: this
       integer(bsa_int_t), intent(in)   :: ibispsym, i3dsym
 
-      if (ibispsym == 0) then
-         this%i_bisp_sym_ =  BSA_SPATIAL_SYM_NONE
-      elseif (ibispsym == 2 .or. ibispsym == 4) then
-         this%i_bisp_sym_ = ibispsym
-      else
-         call bsa_Abort('Invalid "ibispsym" value.')
-      endif
+      this%i_bisp_sym_ = ibispsym
 
       if (i3dsym < 0 .or. i3dsym > 1) call bsa_Abort('Invalid "i3dsym" value.')
       this%i_3d_sym_ = i3dsym

@@ -37,7 +37,7 @@
    !**************************************************************************************
    !   BSA  GENERICS
    !**************************************************************************************
-   integer(IK), parameter :: BSA_SPATIAL_SYM_NONE = 1_IK
+   integer(IK), parameter :: BSA_SPATIAL_SYM_NONE = 0_IK
    integer(IK), parameter :: BSA_SPATIAL_SYM_HALF = 2_IK
    integer(IK), parameter :: BSA_SPATIAL_SYM_FOUR = 4_IK
 

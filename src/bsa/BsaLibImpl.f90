@@ -327,14 +327,16 @@ contains
       if (I_BKG_PEAK_DELTAF_BFM_REFMT_FCT_ <= 0) I_BKG_PEAK_DELTAF_BFM_REFMT_FCT_ = 3
 
       associate(ibispsym => settings%i_bisp_sym_)
-         if (.not. (ibispsym == 1 .or. ibispsym == 2 .or. ibispsym == 4)) then
+         if (.not. ( ibispsym == BSA_SPATIAL_SYM_NONE .or. &
+                     ibispsym == BSA_SPATIAL_SYM_HALF .or. &
+                     ibispsym == BSA_SPATIAL_SYM_FOUR )) then
             print '(1x, a, a, i0)', WARNMSG, 'Unsupported value  "iBispSym"= ', ibispsym
-            print '(1x, a, a)',     MSGCONT, 'Valid values are:  1 (FULL, default), 2, 4.'
+            print '(1x, a, a)',     MSGCONT, 'Valid values are:  0 (FULL, default), 2 (HALF), 4 (FOURTH).'
             print '(1x, a, a)',     MSGCONT, 'Setting default value.'
-            ibispsym = 1
+            ibispsym = BSA_SPATIAL_SYM_NONE
          endif
 
-         if (ibispsym == 4 .and. settings%i_3d_sym_ == 1) then
+         if (ibispsym == BSA_SPATIAL_SYM_FOUR .and. settings%i_3d_sym_ == 1) then
             print '(1x, a, a)', WARNMSG, 'Cannot use 3D matrix symmetry if computing only 1/4 in space.'
             print '(1x, a, a)', MSGCONT, 'Disabling it..'
             settings%i_3d_sym_ = 0
