@@ -317,8 +317,6 @@ contains
       character(len=64) :: fmt2
       integer(int32) :: i
 
-      write(unit_debug_, *) &
-         INFOMSG//'@BsaLibImpl::CheckVars() : log checking internal variables...'
 ! #endif
 
       ! ======================
@@ -538,10 +536,6 @@ contains
 
       write(unit_debug_, fmt) 'WZ. lROTW2G = '
       write(unit_debug_, fmt2) wd%rot_LW2G_wz_
-
-
-      write(unit_debug_, *) &
-         INFOMSG//'@BsaLibImpl::CheckVars() : log checking internal variables -- ok.'
 ! #endif
    end subroutine validateAll_
 
