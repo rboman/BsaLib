@@ -47,6 +47,20 @@ module BsaLib_IO
    character(len = :), private, allocatable :: export_file_status_
 
 
+   interface
+      module subroutine allocKOMsg(name_, istat, emsg)
+         character(len = *), intent(in) :: name_, emsg
+         integer, intent(in) :: istat
+      end subroutine
+
+      module subroutine deallocKOMsg(name_, istat, emsg)
+         character(len = *), intent(in) :: name_, emsg
+         integer, intent(in) :: istat
+      end subroutine
+   end interface
+
+
+
 contains
 
 

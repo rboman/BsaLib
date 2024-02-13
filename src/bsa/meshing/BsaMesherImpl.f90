@@ -17,7 +17,7 @@ submodule(BsaLib) BsaLib_MesherImpl
 
    use BsaLib_Data
    use BsaLib_MPolicy
-   use BsaLib_IO,          only: unit_debug_, unit_dump_bfm_
+   use BsaLib_IO,          only: unit_debug_, unit_dump_bfm_, allocKOMsg, deallocKOMsg
    use BsaLib_MPoint,      only: MPoint_t, MPoint
    use BsaLib_MRectZone,   only: MRectZone_t, MRectZone
    use BsaLib_MTriangZone, only: MTriangZone_t, MTriangZone
@@ -112,6 +112,27 @@ contains
       write(unit_debug_, *) ' @BsaMesherImpl::mainMesher_() : Init BSA-Mesher main -- ok.'
 #endif
    end subroutine mainMesher_
+
+
+
+
+
+   subroutine logZonePremeshingTotTime_(zname, rtime, npts)
+      character(len=*), intent(in)  :: zname
+      real(real64), intent(in)      :: rtime
+      integer, intent(in), optional :: npts
+
+      print '(1x, a, "Done zone  ", a)', &
+            INFOMSG, zname
+      if (present(npts)) then
+         print '(1x, a, "- n. of zone points:  ", i10)', &
+            MSGCONT, npts
+      endif
+      print '(1x, a, "- TOT. TIME:          ", g0, " [s]" /)', &
+         MSGCONT, rtime
+   end subroutine
+
+
 
 
 
@@ -353,8 +374,7 @@ contains
 
       call bkgz%compute()
 #ifndef _BSA_USE_CACHED_POD_DATA
-      call logger_debug%logZonePremeshingTotTime(&
-         zone_title, timer%time(), msh_bfmpts_pre_, .true.)
+      call logZonePremeshingTotTime_(zone_title, timer%time(), msh_bfmpts_pre_)
 #endif
 
       if (.not. allocated(limits)) goto 998  ! NOTE: BKG zone covers them all, bad..
@@ -492,7 +512,7 @@ contains
          !$omp   shared(DIRS_LABELS, ROTATIONS, NLimsP1, COORDS_DIR_CH, LIM_SIGN_DIRS &
          !$omp          , policies, limits, df_I_ref, df_J_ref, msh_ZoneLimsInterestModes &
          !$omp          , refmts, deltas, inter_modes_, basePts, base_i, bases_i_ &
-         !$omp          , struct_data, wd, settings, logger_debug &
+         !$omp          , struct_data, wd, settings &
          !$omp          , id_im_last, maxF, NLims, getBFM_msh, pol &
          !$omp          , NFREQS, NNODES, NNODESL, NLIBS, NLIBSL &
          !$omp          , NMODES, NMODES_EFF, MODES &
@@ -620,8 +640,7 @@ contains
 
 #ifndef _BSA_USE_CACHED_POD_DATA
             !$omp critical
-            call logger_debug%logZonePremeshingTotTime(&
-               zone_title, timer%time(), n_bfm_pts_pre_, .true.)
+            call logZonePremeshingTotTime_(zone_title, timer%time(), n_bfm_pts_pre_)
             !$omp end critical
 #endif
 
@@ -690,8 +709,8 @@ contains
                !$omp   default(firstprivate), &
                !$omp   shared(ROTATIONS, LIM_SIGN_DIRS, main_refs_, bases_ch, inter_modes_ &
                !$omp          , basePts, policies, deltas, LEFT_RZ_SIGNS, DIRS_DIAG_LABELS &
-               !$omp          , struct_data, wd, settings, logger_debug, limits &
-               !$omp          , NFREQS, NNODES, NNODESL, NLIBS, NLIBSL &
+               !$omp          , struct_data, wd, settings, limits       &
+               !$omp          , NFREQS, NNODES, NNODESL, NLIBS, NLIBSL  &
                !$omp          , NMODES, NMODES_EFF, MODES &
                !$omp          , NPSDEL, NTCOMPS, NDIRS, TCOMPS, DIRS &
                !$omp          , MSHR_SVD_INFO, MSHR_SVD_LWORK, MSHR_SVD_WORK  &
@@ -811,9 +830,8 @@ contains
                   enddo ! ilim = 2, NLimsP1
 
 #ifndef _BSA_USE_CACHED_POD_DATA
-						!$omp critical
-                  call logger_debug%logZonePremeshingTotTime(&
-                     z_name_, timer%time(), n_bfm_pts_pre_, .true.)
+                  !$omp critical
+                  call logZonePremeshingTotTime_(z_name_, timer%time(), n_bfm_pts_pre_)
                   !$omp end critical
 #endif
                enddo ! idir
@@ -848,10 +866,10 @@ contains
             !$omp parallel do &
             !$omp   default(firstprivate), &
             !$omp   private(zone_title),   &
-            !$omp   shared(ROTATIONS, LIM_SIGN_DIRS &
+            !$omp   shared(ROTATIONS, LIM_SIGN_DIRS         &
             !$omp          , maxF, basePts, df_I, df_J, pol &
-            !$omp          , struct_data, wd, settings, logger_debug &
-            !$omp          , NFREQS, NNODES, NNODESL, NLIBS, NLIBSL &
+            !$omp          , struct_data, wd, settings               &
+            !$omp          , NFREQS, NNODES, NNODESL, NLIBS, NLIBSL  &
             !$omp          , NMODES, NMODES_EFF, MODES &
             !$omp          , NPSDEL, NTCOMPS, NDIRS, TCOMPS, DIRS &
             !$omp          , MSHR_SVD_INFO, MSHR_SVD_LWORK, MSHR_SVD_WORK  &
@@ -880,8 +898,7 @@ contains
 
 #ifndef _BSA_USE_CACHED_POD_DATA
                !$omp critical
-               call logger_debug%logZonePremeshingTotTime(&
-                  zone_title, timer%time(), rz%zoneTotNPts(), .true.)
+               call logZonePremeshingTotTime_(zone_title, timer%time(), rz%zoneTotNPts())
                !$omp end critical
 #endif
 
@@ -927,9 +944,9 @@ contains
                !$omp          , maxF, basePts, tmprots, ipre_mesh_mode &
                !$omp          , NLimsP1, limits, refmts, policies, deltas &
                !$omp          , base_i, id_im_last, NLims &
-               !$omp          , struct_data, wd, settings, logger_debug &
-               !$omp          , NFREQS, NNODES, NNODESL, NLIBS, NLIBSL &
+               !$omp          , struct_data, wd, settings &
                !$omp          , NMODES, NMODES_EFF, MODES &
+               !$omp          , NFREQS, NNODES, NNODESL, NLIBS, NLIBSL &
                !$omp          , NPSDEL, NTCOMPS, NDIRS, TCOMPS, DIRS &
                !$omp          , MSHR_SVD_INFO, MSHR_SVD_LWORK, MSHR_SVD_WORK  &
                !$omp          , msh_NZones, msh_bfmpts_pre_, msh_max_zone_NPts, m3mf_msh_ptr_), &
@@ -1150,8 +1167,7 @@ contains
 
 #ifndef _BSA_USE_CACHED_POD_DATA
                      !$omp critical
-                     call logger_debug%logZonePremeshingTotTime(&
-                        zone_title, timer%time(), n_bfm_pts_pre_, .true.)
+                     call logZonePremeshingTotTime_(zone_title, timer%time(), n_bfm_pts_pre_)
                      !$omp end critical
 #endif
                   endif ! pre mesh mode
@@ -1213,8 +1229,8 @@ contains
             !$omp   default(firstprivate),   &
             !$omp   private(zone_title),     &
             !$omp   shared(DIRS_LABELS, df_I, df_J, basePts, ROTATIONS  &
-            !$omp          , struct_data, wd, settings, logger_debug    &
-            !$omp          , LIM_SIGN_DIRS, LEFT_RZ_SIGNS, max_ext, maxext_sym_     &  
+            !$omp          , struct_data, wd, settings                              &
+            !$omp          , LIM_SIGN_DIRS, LEFT_RZ_SIGNS, max_ext, maxext_sym_     &
             !$omp          , NFREQS, NNODES, NNODESL, NLIBS, NLIBSL, NMODES, DIRS   &
             !$omp          , NMODES_EFF, MODES, NPSDEL, NTCOMPS, NDIRS, TCOMPS      &
             !$omp          , MSHR_SVD_INFO, MSHR_SVD_LWORK, MSHR_SVD_WORK           &
@@ -1237,8 +1253,7 @@ contains
 
 #ifndef _BSA_USE_CACHED_POD_DATA
                !$omp critical
-               call logger_debug%logZonePremeshingTotTime(&
-                  zone_title, timer%time(), rz%zoneTotNPts(), .true.)
+               call logZonePremeshingTotTime_(zone_title, timer%time(), rz%zoneTotNPts())
                !$omp end critical
 #endif
             enddo ! ndirs
@@ -1413,11 +1428,11 @@ contains
 #ifndef _BSA_USE_CACHED_POD_DATA
       !$omp   private(bfm_undump), &
 #endif
-      !$omp   shared(struct_data, wd, settings, logger_debug                   &
+      !$omp   shared(struct_data, wd, settings                                 &
       !$omp          , NFREQS, NNODES, NNODESL, NLIBS, NLIBSL, NMODES_EFF      &
       !$omp          , NPSDEL, NTCOMPS, NDIRS, TCOMPS, DIRS, NMODES, MODES     &
       !$omp          , MSHR_SVD_INFO, MSHR_SVD_LWORK, MSHR_SVD_WORK            &
-      !$omp          , bkg_peakw_, izone, MZone_ID, msh_NZones, m3mr_msh_ptr_  & 
+      !$omp          , bkg_peakw_, izone, MZone_ID, msh_NZones, m3mr_msh_ptr_  &
       !$omp          , msh_ZoneLimsInterestModes, do_validate_deltas_          &
       !$omp          , msh_bfmpts_post_, msh_brmpts_post_, unit_dump_bfm_      &
       !$omp          , dimM_bisp_, getBFM_msh, getBRM_msh, write_brm_fptr_),   &

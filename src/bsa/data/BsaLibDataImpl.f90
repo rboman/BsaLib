@@ -15,8 +15,8 @@
 !! along with BSA Library.  If not, see <https://www.gnu.org/licenses/>.
 submodule(BsaLib_Data) BsaLib_DataImpl
 
+   use BsaLib_IO
    use BsaLib_CONSTANTS, only: INFOMSG, WARNMSG, ERRMSG, MSGCONT, DBGMSG
-   use BsaLib_IO,        only: unit_debug_, unit_dump_bfm_, unit_dump_brm_
    implicit none (type, external)
 
 contains
@@ -81,11 +81,6 @@ contains
          if (istat /= 0) call deallocKOMsg('timer', istat, emsg)
       endif
 
-      if (allocated(logger_debug)) then
-         deallocate(logger_debug, stat=istat, errmsg=emsg)
-         if (istat /= 0) call deallocKOMsg('logger_debug', istat, emsg)
-      endif
-
       is_data_cleaned_ = .true.
 
 #ifdef BSA_DEBUG
@@ -124,10 +119,9 @@ contains
 
    module subroutine bsa_Abort(emsg)
       character(len = *), intent(in), optional :: emsg
-      ! external :: abort
 
       if (present(emsg)) print '(/ 1x, a, a/)', ERRMSG, emsg
-      
+
       call cleanBSAData_() ! free memory before halting
       error stop
    end subroutine

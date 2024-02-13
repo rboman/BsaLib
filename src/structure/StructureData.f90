@@ -14,7 +14,7 @@
 !! You should have received a copy of the GNU General Public License
 !! along with BSA Library.  If not, see <https://www.gnu.org/licenses/>.
 module BsaLib_Structure
-   
+
    use BsaLib_CONSTANTS, only: bsa_int_t, bsa_real_t, int32
    implicit none (type, external)
    private
@@ -66,7 +66,7 @@ module BsaLib_Structure
 
       !> n. of total DOFs
       integer(bsa_int_t) :: ndofs_ = 0
-      
+
       !> n. of actually loaded nodes
       integer(bsa_int_t) :: nn_load_ = 0
 
@@ -86,7 +86,7 @@ module BsaLib_Structure
       !> modal structure info
       type(StructureModalData_t) :: modal_
 
-      
+
       ! NOTE: following allocatables since are local instances !
 
       !> structure time scales

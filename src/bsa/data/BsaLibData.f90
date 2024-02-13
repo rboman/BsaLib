@@ -15,7 +15,6 @@
 !! along with BSA Library.  If not, see <https://www.gnu.org/licenses/>.
 module BsaLib_Data
 
-   use Logging
    use BsaLib_Timing
    use BsaLib_CONSTANTS
    use BsaLib_Settings
@@ -37,7 +36,6 @@ module BsaLib_Data
    type(WindData_t),      allocatable, target :: wd
    type(StructureData_t), allocatable, target :: struct_data
    type(timer_t),         allocatable, target :: timer
-   type(logger_t),        allocatable, target :: logger_debug
 
    logical :: is_data_cleaned_   = .false.
    logical :: close_deb_unit_    = .true.

@@ -87,14 +87,6 @@ contains
          allocate(timer, stat=istat, errmsg=emsg)
          if (istat /= 0) call allocKOMsg('timer', istat, emsg)
       endif
-
-
-      if (.not. allocated(logger_debug)) then
-         allocate(logger_debug, stat=istat, errmsg=emsg)
-         if (istat /= 0) call allocKOMsg('logger_debug', istat, emsg)
-      endif
-      call logger_debug%init(unit_debug_, undebug_fname_)
-
    end subroutine
 
 
@@ -151,7 +143,6 @@ contains
       block
          integer(int32) :: itmp
 
-         call logger_debug%init(unit_debug_)  ! setting up logger
          call io_setExportSpecifiers()
 
          ! check before doing some bad things..

@@ -15,8 +15,7 @@
 !! along with BSA Library.  If not, see <https://www.gnu.org/licenses/>.
 module BsaLib_WindData
 
-   use Logging
-   use BsaLib_IO, only: unit_dump_bfm_, unit_debug_, undebug_fname_
+   use BsaLib_IO
    use BsaLib_CONSTANTS
    use BsaLib_Settings
    implicit none (type, external)
