@@ -67,37 +67,11 @@ module BsaLib
 
 
       ! --------------------------         GENERAL       ---------------------------------
+
+
       module subroutine bsa_printBSAHeader()
       end subroutine
 
-
-      module subroutine bsa_setOutputDirectory(dirname)
-         character(len=*), intent(in) :: dirname
-      end subroutine
-
-
-      module subroutine bsa_setOutFileName(fname)
-         character(len=*), intent(in) :: fname
-      end subroutine
-
-
-      module subroutine bsa_setOutUnit(iunit)
-         integer(bsa_int_t), intent(in) :: iunit
-      end subroutine
-
-
-      module subroutine bsa_closeUnitsAtEnd()
-      end subroutine
-
-
-      module subroutine bsa_setExportFileFormat(iform)
-         integer(bsa_int_t), intent(in) :: iform
-      end subroutine
-
-
-      module subroutine bsa_setExportAppendMode(imode)
-         integer(bsa_int_t), intent(in) :: imode
-      end subroutine
 
 
       module subroutine bsa_setSpatialSymmetry(isym)
@@ -181,6 +155,7 @@ module BsaLib
 
 
 
+
       ! --------------------------         SETTINGS       ---------------------------------
 
 
@@ -191,55 +166,56 @@ module BsaLib
 
       module subroutine bsa_setSubanType(isuban)
          integer(bsa_int_t), intent(in) :: isuban
-      end subroutine 
+      end subroutine
 
 
 
       module subroutine bsa_setVersion(ivers)
          integer(bsa_int_t), intent(in) :: ivers
-      end subroutine 
+      end subroutine
 
 
 
       module subroutine bsa_setScalingConv(iconv)
          integer(bsa_int_t), intent(in) :: iconv
-      end subroutine 
+      end subroutine
 
 
 
       module subroutine bsa_setSpectraComputation(ipsd, ibisp)
          integer(bsa_int_t), intent(in), optional :: ipsd, ibisp
-      end subroutine 
+      end subroutine
 
 
 
       module subroutine bsa_setSpectraExtension(ionlydiag)
          integer(bsa_int_t), intent(in) :: ionlydiag
-      end subroutine 
+      end subroutine
 
 
 
       module subroutine bsa_setTestMode(itest)
          integer(bsa_int_t), intent(in) :: itest
-      end subroutine 
+      end subroutine
 
 
       module subroutine bsa_setSymmetries(ibispsym, i3dsym)
          integer(bsa_int_t), intent(in) :: ibispsym, i3dsym
-      end subroutine 
+      end subroutine
 
 
       module subroutine bsa_setupClassic(nfreqs, df)
          integer(bsa_int_t), intent(in) :: nfreqs
          real(bsa_real_t), intent(in) :: df
-      end subroutine 
+      end subroutine
 
 
 
       module subroutine bsa_setupMesher(isvd, bkgrfmt, bkgaext, genpaext, maxaext, ifcov, idumpmod)
          integer(bsa_int_t), intent(in) :: isvd, bkgrfmt, maxaext
          integer(bsa_int_t), intent(in) :: bkgaext, genpaext, ifcov, idumpmod
-      end subroutine 
+      end subroutine
+
 
 
 
@@ -261,86 +237,86 @@ module BsaLib
 
       module subroutine bsa_setWindVertProf(iwprof)
          integer(bsa_int_t), intent(in) :: iwprof
-      end subroutine 
+      end subroutine
 
 
 
       module subroutine bsa_setPSDType(ipsd)
          integer(bsa_int_t), intent(in) :: ipsd
-      end subroutine 
+      end subroutine
 
 
 
       module subroutine bsa_setWindAltDir(ivert)
          integer(bsa_int_t), intent(in) :: ivert
-      end subroutine 
+      end subroutine
 
 
 
       module subroutine bsa_setWindZoneLimits(lim, ilim)
          real(bsa_real_t), intent(in) :: lim(..)
          integer(bsa_int_t), intent(in), optional :: ilim(..)
-      end subroutine 
+      end subroutine
 
 
 
       module subroutine bsa_setAirDensity(aird)
          real(bsa_real_t), intent(in) :: aird
-      end subroutine 
+      end subroutine
 
 
 
       module subroutine bsa_setGlobalRotMatW2G(rotW2G)
          real(bsa_real_t), intent(in) :: rotW2G(3, 3)
-      end subroutine 
+      end subroutine
 
 
 
       module subroutine bsa_setWZMeanWindVel(mat)
          real(bsa_real_t), target, intent(in) :: mat(:)
-      end subroutine 
+      end subroutine
 
 
 
       module subroutine bsa_setWZRefAlt(Zref)
          real(bsa_real_t), target, intent(in) :: Zref(:)
-      end subroutine 
+      end subroutine
 
 
 
       module subroutine bsa_setTurbWindScales(L)
          real(bsa_real_t), target, intent(in) :: L(3, 3, *)
-      end subroutine 
+      end subroutine
 
 
 
       module subroutine bsa_setTurbWindSDT(sigma)
          real(bsa_real_t), target, intent(in) :: sigma(3, *)
-      end subroutine 
+      end subroutine
 
 
 
       module subroutine bsa_setWindCorrCoeffs(ccoeffs)
          real(bsa_real_t), target, intent(in) :: ccoeffs(3, 3, *)
-      end subroutine 
+      end subroutine
 
 
 
       module subroutine bsa_setWindCorrExpnts(cexpn)
          real(bsa_real_t), target, intent(in) :: cexpn(3, 3, *)
-      end subroutine 
+      end subroutine
 
 
 
       module subroutine bsa_setIncidenceAngles(incang)
          real(bsa_real_t), target, intent(in) :: incang(:)
-      end subroutine 
+      end subroutine
 
 
 
       module subroutine bsa_setWZRotMatW2G(rotW2G_L)
          real(bsa_real_t), target, intent(in) :: rotW2G_L(3, 3, *)
-      end subroutine 
+      end subroutine
 
 
 
@@ -380,7 +356,9 @@ module BsaLib
 
 
 
+
       ! --------------------------         STRUCTURAL       ---------------------------------
+
 
       module subroutine bsa_setNodalCoords(nn, coords)
          integer(bsa_int_t), intent(in)   :: nn
@@ -391,7 +369,7 @@ module BsaLib
 
       module subroutine bsa_setNodalNOfDOFs(nlibs)
          integer(bsa_int_t), intent(in) :: nlibs
-      end subroutine 
+      end subroutine
 
 
 
@@ -404,7 +382,7 @@ module BsaLib
       module subroutine bsa_setLoadedNodalDOFs(libs_l, nlibs_l)
          integer(bsa_int_t), intent(in), target, allocatable :: libs_l(:)
          integer(bsa_int_t), intent(in), optional :: nlibs_l
-      end subroutine 
+      end subroutine
 
 
 
@@ -418,7 +396,7 @@ module BsaLib
       module subroutine bsa_setModalInfo(ndofs, nm, Phi, natf)
          integer(bsa_int_t), intent(in) :: ndofs, nm
          real(bsa_real_t), intent(in), target :: Phi(ndofs, nm), natf(nm)
-      end subroutine 
+      end subroutine
 
 
 
@@ -432,13 +410,13 @@ module BsaLib
          integer(bsa_int_t), intent(in) :: nm
          real(bsa_real_t), intent(in), target, dimension(nm) :: Mgen, Kgen
          real(bsa_real_t), intent(in), target :: Cgen(nm, nm)
-      end subroutine 
+      end subroutine
 
 
 
       module subroutine bsa_setTotDamping(xsi)
          real(bsa_real_t), target, intent(in) :: xsi(:)
-      end subroutine 
+      end subroutine
 
 
 
@@ -451,6 +429,7 @@ module BsaLib
 
 
       ! --------------------------         COMPUTING       ---------------------------------
+
 
       module subroutine bsa_computeBRdecomp(m2mf, bkg, res)
          real(bsa_real_t), intent(in)  :: m2mf(:)
@@ -473,7 +452,43 @@ module BsaLib
 
 
 
-      ! --------------------------         EXPORTING       ---------------------------------
+      ! --------------------------    OUTPUT / EXPORTING    --------------------------------
+
+
+      module subroutine bsa_setOutputDirectory(dirname)
+         character(len=*), intent(in) :: dirname
+      end subroutine
+
+
+
+      module subroutine bsa_setOutFileName(fname)
+         character(len=*), intent(in) :: fname
+      end subroutine
+
+
+
+      module subroutine bsa_setOutUnit(iunit)
+         integer(bsa_int_t), intent(in) :: iunit
+      end subroutine
+
+
+
+      module subroutine bsa_closeUnitsAtEnd()
+      end subroutine
+
+
+
+      module subroutine bsa_setExportFileFormat(iform)
+         integer(bsa_int_t), intent(in) :: iform
+      end subroutine
+
+
+
+      module subroutine bsa_setExportAppendMode(imode)
+         integer(bsa_int_t), intent(in) :: imode
+      end subroutine
+
+
 
       module subroutine bsa_setExportDirectory(dirname)
          character(len = *), intent(in) :: dirname
