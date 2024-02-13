@@ -366,10 +366,10 @@ contains
 
          MSHR_SVD_LWORK = int(optWork(1))
 
-! #ifdef BSA_DEBUG
+#ifdef BSA_DEBUG
          print '(1x, a, a, i0 /)', &
-            INFOMSG, 'WORK query ok. Optimal work dimension = ', MSHR_SVD_LWORK
-! #endif
+            DBGMSG, 'WORK query ok. Optimal work dimension = ', MSHR_SVD_LWORK
+#endif
 
          if (allocated(MSHR_SVD_WORK)) then
             if (size(MSHR_SVD_WORK) /= MSHR_SVD_LWORK) then
