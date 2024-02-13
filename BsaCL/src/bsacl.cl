@@ -816,34 +816,34 @@ KERNEL void bfm_kernel(
    m3mf_loc_[lid0_] *= (BSACL_REAL)2.f;
 
 
-   // // Apply transfer function
-   // BSACL_REAL H1r_ = fi_ * 2 * BSACL_PI;  // wi
-   // BSACL_REAL H1i_ = modal_matrices_vals_[3] * H1r_; // ipart
-   // H1r_ = -(H1r_*H1r_ * modal_matrices_vals_[0]) + modal_matrices_vals_[6]; // rpart
-   // BSACL_REAL rtmp = H1r_*H1r_ + H1i_*H1i_;
-   // H1r_ =   (H1r_ / rtmp);
-   // H1i_ = - (H1i_ / rtmp);
+   // Apply transfer function
+   BSACL_REAL H1r_ = fi_ * 2 * BSACL_PI;  // wi
+   BSACL_REAL H1i_ = modal_matrices_vals_[3] * H1r_; // ipart
+   H1r_ = -(H1r_*H1r_ * modal_matrices_vals_[0]) + modal_matrices_vals_[6]; // rpart
+   BSACL_REAL rtmp = H1r_*H1r_ + H1i_*H1i_;
+   H1r_ =   (H1r_ / rtmp);
+   H1i_ = - (H1i_ / rtmp);
 
-   // BSACL_REAL H2r_ = fj_ * 2 * BSACL_PI;  // wi
-   // BSACL_REAL H2i_ = modal_matrices_vals_[4] * H2r_; // ipart
-   // H2r_ = -(H2r_*H2r_ * modal_matrices_vals_[1]) + modal_matrices_vals_[7]; // rpart
-   // rtmp = H2r_*H2r_ + H2i_*H2i_;
-   // H2r_ =   (H2r_ / rtmp);
-   // H2i_ = - (H2i_ / rtmp);
+   BSACL_REAL H2r_ = fj_ * 2 * BSACL_PI;  // wi
+   BSACL_REAL H2i_ = modal_matrices_vals_[4] * H2r_; // ipart
+   H2r_ = -(H2r_*H2r_ * modal_matrices_vals_[1]) + modal_matrices_vals_[7]; // rpart
+   rtmp = H2r_*H2r_ + H2i_*H2i_;
+   H2r_ =   (H2r_ / rtmp);
+   H2i_ = - (H2i_ / rtmp);
 
-   // BSACL_REAL H12r_ = fiPfj_ * 2 * BSACL_PI;  // wi
-   // BSACL_REAL H12i_ = modal_matrices_vals_[5] * H12r_; // ipart
-   // H12r_ = -(H12r_*H12r_ * modal_matrices_vals_[2]) + modal_matrices_vals_[8]; // rpart
-   // rtmp  = H12r_*H12r_ + H12i_*H12i_;
-   // H12r_ =   (H12r_ / rtmp);
-   // H12i_ = - (H12i_ / rtmp);
+   BSACL_REAL H12r_ = fiPfj_ * 2 * BSACL_PI;  // wi
+   BSACL_REAL H12i_ = modal_matrices_vals_[5] * H12r_; // ipart
+   H12r_ = -(H12r_*H12r_ * modal_matrices_vals_[2]) + modal_matrices_vals_[8]; // rpart
+   rtmp  = H12r_*H12r_ + H12i_*H12i_;
+   H12r_ =   (H12r_ / rtmp);
+   H12i_ = - (H12i_ / rtmp);
 
-   // m3mf_loc_[lid0_] = m3mf_loc_[lid0_] * (
-   //      (H1r_ * H2r_ * H12r_)
-   //    + (H1r_ * H2i_ * H12i_)
-   //    + (H1i_ * H2r_ * H12i_)
-   //    - (H1i_ * H2i_ * H12r_)
-   // );
+   m3mf_loc_[lid0_] = m3mf_loc_[lid0_] * (
+        (H1r_ * H2r_ * H12r_)
+      + (H1r_ * H2i_ * H12i_)
+      + (H1i_ * H2r_ * H12i_)
+      - (H1i_ * H2i_ * H12r_)
+   );
 
 
 #ifdef _use_fast_reduction_scheme_
