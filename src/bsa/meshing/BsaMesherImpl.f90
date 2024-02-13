@@ -393,6 +393,7 @@ contains
 
       write(*, '(1x, a, a, /, 10(" ", f10.4))') &
          INFOMSG, '  Limits frontiers:', limits
+      write(*, *) ''
 
       block
 
