@@ -25,9 +25,11 @@
 # define __real double
 #endif
 
+
 /* This controls the type of internal data */
 #ifdef BSACL_USE_DOUBLE_PRECISION
 # define BSACL_REAL double
+# define BSACL_REAL_MIN DBL_MIN
 # ifdef BSACL_INCLUDE
 #  ifdef cl_khr_fp64
 #    pragma OPENCL EXTENSION cl_khr_fp64 : enable
@@ -42,6 +44,7 @@
 # endif
 #else
 # define BSACL_REAL float
+# define BSACL_REAL_MIN FLT_MIN
 #endif
 
 
@@ -182,13 +185,6 @@
 # define GLOBAL_ID_Z_DIM2 get_global_id(2)
 # define LOCAL_WORKGROUP_BARRIER barrier(CLK_LOCAL_MEM_FENCE)
 
-#endif
-
-
-#ifdef BSACL_USE_DOUBLE_PRECISION
-# define BSACL_REAL_MIN DBL_MIN
-#else
-# define BSACL_REAL_MIN FLT_MIN
 #endif
 
 
