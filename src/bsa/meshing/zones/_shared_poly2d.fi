@@ -123,9 +123,11 @@ __mod_sub_compute subroutine __sub_name_compute(this)
 
 
 # ifdef __triang_zone__
-      type(MPoint_t) :: pt
       integer(int32) :: Np_m1, Nj_m1
       real(RK)       :: df_CA, df_CST
+#  ifdef __zone_layout_validation__
+      type(MPoint_t) :: pt
+#  endif
 
       Np_m1 = this%ni_
       zNp   = (Np_m1 * (Np_m1+1)) / 2
@@ -257,9 +259,9 @@ __mod_sub_compute subroutine __sub_name_compute(this)
 # ifdef __triang_zone__
       fi(1) = fi(1) + dfJi
       fj(1) = fj(1) + dfJj
-      pt    = MPoint(fi(1), fj(1))
 
 #  ifdef __zone_layout_validation__
+      pt = MPoint(fi(1), fj(1))
       if (.not. pt == this%Apt_) &
          call bsa_Abort('First end point does not match triang A point. Aborting.')
 #  endif
@@ -358,9 +360,9 @@ __mod_sub_compute subroutine __sub_name_compute(this)
       base_fi(1) = base_fi(1) + dfIi
       base_fj(1) = base_fj(1) + dfIj
 
-      pt = MPoint(base_fi(1), base_fj(1))
 
 #  ifdef __zone_layout_validation__
+      pt = MPoint(base_fi(1), base_fj(1))
       if (.not. pt == this%Bpt_) &
          call bsa_Abort('End point does not match B triang point. Aborting.')
 #  endif
@@ -2031,10 +2033,10 @@ end subroutine __sub_name_compute
 
 #ifdef __zone_layout_validation__
       if (i_brm /= nPtsPost) then
-#ifndef __triang_zone__
+# ifndef __triang_zone__
          print *, ' policy BFM-MLV factors      =  ', pol%interp_bfm_I_fct_, pol%interp_bfm_J_fct_
          print *, ' policy   BRM   factors      =  ', pol%interp_I_fct_, pol%interp_J_fct_
-#endif
+# endif
          print *, ' ibrm, nPtsPost  = ', i_brm, nPtsPost
          call bsa_Abort('"i_brm" does not equal rect zone''s n. of (interpolated) points.')
       endif
