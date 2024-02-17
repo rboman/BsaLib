@@ -105,6 +105,7 @@
 # define UINT unsigned int
 # define USHORT unsigned short
 # define BOOL BSACL_UINT
+# define BSACL_MEM_VOID_PTRPTR_CAST (void **)
 # define BSACL_MEM void*
 # define BSACL_MEM_UINT_T unsigned int*
 # define BSACL_MEM_INT_T  int*
@@ -164,6 +165,7 @@
 # define UINT uint
 # define USHORT ushort
 # define BOOL bool
+# define BSACL_MEM_VOID_PTRPTR_CAST
 # define BSACL_MEM cl_mem
 # define BSACL_MEM_UINT_T cl_mem
 # define BSACL_MEM_INT_T  cl_mem
@@ -206,5 +208,7 @@
 # define BSACL_MEM_COPY_HOST_PTR  CL_MEM_COPY_HOST_PTR
 #endif
 
+
+#define BSACL_ERROR_CODE(x) ((ierr_t)x)
 
 #endif // BSACL_BASE_H_

@@ -86,13 +86,12 @@ typedef void (*evalFct_t)(int, int, const double*, int, double*);
 //-------------------------------------
 static unsigned int n_threads__ = 0U;
 
-static unsigned int *thread_set_shared_kernel_args_ = NULL;
-
 static unsigned int bsacl_init_called__        = 0U;
 static unsigned int bsacl_init_devmem_called__ = 0U;
 
 
 #ifndef BSACL_USE_CUDA__
+
 
 static cl_uint         n_platforms__  = 0;
 static cl_platform_id *platform_all__ = NULL; // array of all available platforms
@@ -116,6 +115,7 @@ static cl_context context__        = NULL;
 static cl_command_queue *cqueues__ = NULL; /* Array of devices' command queues */
 static cl_program *programs__      = NULL;
 static cl_kernel  *kernels__       = NULL;
+static unsigned int *thread_set_shared_kernel_args_ = NULL;
 static char       **clSourceStrings__ = NULL;
 static char       **evalFctStrings__  = NULL;
 static char       **thread_prog_opts__= NULL;
@@ -334,14 +334,21 @@ static inline void freeMem_(void) {
 
    for (unsigned i = 0; i < n_threads__; ++i) {
 
+#ifndef BSACL_USE_CUDA__
       free(thread_prog_opts__[i]);
+#endif
 
       fi__[i] = NULL;
       fj__[i] = NULL;
       (void) BSACL_DEVICE_FREE_MEM(d_fi__[i]);
       (void) BSACL_DEVICE_FREE_MEM(d_fj__[i]);
    }
+#ifndef BSACL_USE_CUDA__
    thread_prog_opts__ = NULL;
+
+   free(thread_set_shared_kernel_args_);
+   thread_set_shared_kernel_args_ = NULL;
+#endif
 
    free(fi__);
    free(fj__);
@@ -356,8 +363,6 @@ static inline void freeMem_(void) {
    d_fi__ = NULL;
    d_fj__ = NULL;
 
-   free(thread_set_shared_kernel_args_);
-   thread_set_shared_kernel_args_ = NULL;
 
    has_cleaned__       = 1U;
    bsacl_init_called__ = 0U;
@@ -864,7 +869,7 @@ ierr_t setKernelArgs_(const unsigned i_thread, BSACL_MEM_REAL_T *d_res)
    if (thread_set_shared_kernel_args_[i_thread] == 0U) {
       if (pass_params_by_macro_ == 0U)
          ierr_ |= clSetKernelArg(kernels__[i_thread], iarg_++,  sizeof(unsigned int), &extdata__.NTC__);
-      ierr_ |= clSetKernelArg(kernels__[i_thread], iarg_++,  sizeof(cl_mem),       &d_tc__);
+      ierr_ |= clSetKernelArg(kernels__[i_thread],    iarg_++,  sizeof(cl_mem),       &d_tc__);
 
       if (pass_params_by_macro_ == 0U) {
          ierr_ |= clSetKernelArg(kernels__[i_thread], iarg_++, sizeof(unsigned int), &extdata__.NNODES_LOAD__);
@@ -914,6 +919,7 @@ ierr_t setKernelArgs_(const unsigned i_thread, BSACL_MEM_REAL_T *d_res)
 
 ierr_t initThreadMem_(const unsigned n_threads)
 {
+#ifndef BSACL_USE_CUDA__
    thread_set_shared_kernel_args_ = (unsigned int*)malloc(sizeof(unsigned int) * n_threads);
    if (thread_set_shared_kernel_args_ == NULL) return -1;
 
@@ -929,25 +935,25 @@ ierr_t initThreadMem_(const unsigned n_threads)
       thread_prog_opts__[i][0] = ' ';
       memset(thread_prog_opts__[i] + 1, '\0', BUFSIZ-1);
    }
-
+#endif
 
    nfi__  = (unsigned *)malloc(sizeof(unsigned) * n_threads);
-   if (nfi__ == NULL) return -1;
+   if (nfi__ == NULL) return BSACL_ERROR_CODE(-1);
 
    nfj__  = (unsigned *)malloc(sizeof(unsigned) * n_threads);
-   if (nfj__ == NULL) return -1;
+   if (nfj__ == NULL) return BSACL_ERROR_CODE(-1);
 
    fi__   = (__real **)malloc(sizeof(__real*) * n_threads);
-   if (fi__ == NULL) return -1;
+   if (fi__ == NULL) return BSACL_ERROR_CODE(-1);
 
    fj__   = (__real **)malloc(sizeof(__real*) * n_threads);
-   if (fj__ == NULL) return -1;
+   if (fj__ == NULL) return BSACL_ERROR_CODE(-1);
 
    d_fi__ = (BSACL_MEM_REAL_T *)malloc(sizeof(BSACL_MEM_REAL_T) * n_threads);
-   if (d_fi__ == NULL) return -1;
+   if (d_fi__ == NULL) return BSACL_ERROR_CODE(-1);
 
    d_fj__ = (BSACL_MEM_REAL_T *)malloc(sizeof(BSACL_MEM_REAL_T) * n_threads);
-   if (d_fj__ == NULL) return -1;
+   if (d_fj__ == NULL) return BSACL_ERROR_CODE(-1);
 
    for (unsigned i = 0; i < n_threads; ++i) {
       fi__[i]   = NULL;
@@ -969,7 +975,7 @@ ierr_t createDeviceBuffer_(BSACL_MEM *d_buf, const size_t sz, unsigned flags, vo
 
    // free device buffer if exists.
    if (*d_buf != NULL) {
-      ierr_ |= BSACL_DEVICE_FREE_MEM(*d_buf);
+      ierr_ = BSACL_DEVICE_FREE_MEM(*d_buf);
       if (ierr_ != BSACL_SUCCESS) {
          printMsg_(ERRR_MSG, "Failed to release device buffer.");
          goto err_;
@@ -1000,7 +1006,7 @@ ierr_t createDeviceBuffer_(BSACL_MEM *d_buf, const size_t sz, unsigned flags, vo
    goto ret_; // correct flow
 err_:
    if (*d_buf) ierr_ = BSACL_DEVICE_FREE_MEM(*d_buf);
-   ierr_ = ierr_ == 0 ? -45 : ierr_;
+   ierr_ = ierr_ == BSACL_SUCCESS ? BSACL_ERROR_CODE(-45) : ierr_;
 ret_:
    return ierr_;
 }
@@ -1027,10 +1033,9 @@ int bsaclInit(unsigned n_threads)
 {
    if (has_halted__ == 1U) { return -999; }
 
-#ifdef BSACL_USE_CUDA__
-   return BSACL_SUCCESS;
-#else
    BSACL_INT ierr_ = BSACL_SUCCESS;
+
+#ifndef BSACL_USE_CUDA__
 
    // Acquire platform
    ierr_ = getCLPlatformFromInfo_(&platform__, CL_PLATFORM_NAME, "NVIDIA\0", 0);
@@ -1075,6 +1080,7 @@ int bsaclInit(unsigned n_threads)
       ierr_ = (cl_int)BSACL_KERNELS_CREATION_ERROR_;
       ABORT_INTERNAL_GOTO_RET_(ierr_, "Failed to create kernel objects.\n", ret_);
    }
+#endif
 
    ierr_ = initThreadMem_(n_threads);
    if (ierr_ != BSACL_SUCCESS) ABORT_INTERNAL_GOTO_RET_(-32, "Failed to initialise thread memory.", ret_);
@@ -1085,7 +1091,6 @@ int bsaclInit(unsigned n_threads)
 
 ret_:
    return ierr_;
-#endif
 }
 
 
@@ -1097,7 +1102,7 @@ int bsaclInitDeviceMemory(void)
    size_t sz_;
 
    if (extdata__.tc__ == NULL) {
-      ierr_ = -83;
+      ierr_ = BSACL_ERROR_CODE(-83);
       ABORT_INTERNAL_GOTO_RET_(ierr_, "List of turb. components was not acquired. Aborting.", ret_);
    }
    sz_ = extdata__.NTC__ * sizeof(unsigned int);
@@ -1117,7 +1122,7 @@ int bsaclInitDeviceMemory(void)
 
 
    if (extdata__.nodes_load__ == NULL) {
-      ierr_ = -84;
+      ierr_ = BSACL_ERROR_CODE(-84);
       ABORT_INTERNAL_GOTO_RET_(ierr_, "List of loaded nodes was not acquired. Aborting.", ret_);
    }
    sz_ = extdata__.NNODES_LOAD__ * sizeof(unsigned int);
@@ -1138,7 +1143,7 @@ int bsaclInitDeviceMemory(void)
 
 
    if (extdata__.phi_T_c__ == NULL) {
-      ierr_ = -85;
+      ierr_ = BSACL_ERROR_CODE(-85);
       ABORT_INTERNAL_GOTO_RET_(ierr_, "phiTc was not acquired. Aborting.", ret_);
    }
    sz_ = extdata__.NMODES_EFF__ * extdata__.NNODES_LOAD__ * extdata__.NDEGW__ * sizeof(__real);
@@ -1157,7 +1162,7 @@ int bsaclInitDeviceMemory(void)
 #endif
 
    if (extdata__.nod_corr__ == NULL) {
-      ierr_ = -86;
+      ierr_ = BSACL_ERROR_CODE(-86);
       ABORT_INTERNAL_GOTO_RET_(ierr_, "Nodal spatial correlation was not acquired. Aborting.", ret_);
    }
    sz_ = extdata__.NNOD_CORR__ * extdata__.NTC__ * sizeof(__real);
@@ -1307,7 +1312,7 @@ int bsaclRun(unsigned i_thread, const size_t dim, __real *__EXT_PTR_CONST h_res)
 #endif
 
    if (has_halted__ == 1U) {
-      ierr_ = (ierr_t)-1;
+      ierr_ = BSACL_ERROR_CODE(-1);
       goto ret_;
    }
 
@@ -1316,13 +1321,13 @@ int bsaclRun(unsigned i_thread, const size_t dim, __real *__EXT_PTR_CONST h_res)
    // Init BsaCL runtime, if needed. Or, validate it.
    if (bsacl_init_called__ == 0U) {
       n_threads__ = 1U;
-      ierr_ = (BSACL_INT)bsaclInit(1); // use only 1 thread if called internally
+      ierr_ = (ierr_t)bsaclInit(1); // use only 1 thread if called internally
       if (ierr_ != BSACL_SUCCESS) {
          printMsg_(ERRR_MSG, "Failed to initialise BsaCL."); 
          goto ret_;
       }
       if (bsacl_init_devmem_called__ == 0U) {
-         ierr_ = bsaclInitDeviceMemory();
+         ierr_ = (ierr_t)bsaclInitDeviceMemory();
          if (ierr_ != BSACL_SUCCESS) 
             ABORT_INTERNAL_GOTO_RET_(ierr_, "Failed to initialise BsaCL device memory.", ret_);
       }
@@ -1333,11 +1338,11 @@ int bsaclRun(unsigned i_thread, const size_t dim, __real *__EXT_PTR_CONST h_res)
        * this run's compatibility with runtime initialisation.
        * */
       if (i_thread >= n_threads__) {
-         ierr_ = -10;
+         ierr_ = BSACL_ERROR_CODE(-10);
          ABORT_INTERNAL_GOTO_RET_(ierr_, "Runtime has to be re-initialised due to incompatible settings.", ret_);
       }
       if (bsacl_init_devmem_called__ == 0U) {
-         ierr_ = -101;
+         ierr_ = BSACL_ERROR_CODE(-101);
          ABORT_INTERNAL_GOTO_RET_(ierr_, "Device memory has not been initialised. Aborting.", ret_);
       }
    }
@@ -1352,7 +1357,7 @@ int bsaclRun(unsigned i_thread, const size_t dim, __real *__EXT_PTR_CONST h_res)
 
 
    if (fi__ == NULL || fj__ == NULL || fi__[i_thread]==NULL || fj__[i_thread] == NULL)
-      { ierr_ = (ierr_t)-20; printMsg_(ERRR_MSG, "No computation frequencies acquired."); goto ret_; }
+      { ierr_ = BSACL_ERROR_CODE(-20); printMsg_(ERRR_MSG, "No computation frequencies acquired."); goto ret_; }
 
    __real dInfl_  = (*(fi__[i_thread] + 1) - *fi__[i_thread]);
    dInfl_ *= (*(fj__[i_thread] + 1) - *fj__[i_thread]);
@@ -1434,26 +1439,26 @@ int bsaclRun(unsigned i_thread, const size_t dim, __real *__EXT_PTR_CONST h_res)
    size_t ntot_ = 0;
    ntot_ = nfi__[i_thread] * sizeof(__real);
    ierr_ = createDeviceBuffer_(
-      &(d_fi__[i_thread]), ntot_, BSACL_MEM_READ_ONLY | BSACL_MEM_COPY_HOST_PTR, fi__[i_thread] );
+      BSACL_MEM_VOID_PTRPTR_CAST &(d_fi__[i_thread]), ntot_, BSACL_MEM_READ_ONLY | BSACL_MEM_COPY_HOST_PTR, fi__[i_thread] );
    if (ierr_ != BSACL_SUCCESS) 
       ABORT_INTERNAL_GOTO_RET_(ierr_, "Failed to create d_fi__ device buffer.\n", ret_);
 
    ntot_ = nfj__[i_thread] * sizeof(__real);
    ierr_ = createDeviceBuffer_(
-      &(d_fj__[i_thread]), ntot_, BSACL_MEM_READ_ONLY | BSACL_MEM_COPY_HOST_PTR, fj__[i_thread] );
+      BSACL_MEM_VOID_PTRPTR_CAST &(d_fj__[i_thread]), ntot_, BSACL_MEM_READ_ONLY | BSACL_MEM_COPY_HOST_PTR, fj__[i_thread] );
    if (ierr_ != BSACL_SUCCESS) 
       ABORT_INTERNAL_GOTO_RET_(ierr_, "Failed to create d_fj__ device buffer.\n", ret_);
 
 
    // create result buffer on device.
    if (h_res == NULL) {
-      ierr_ = -123;
+      ierr_ = BSACL_ERROR_CODE(-123);
       ABORT_INTERNAL_GOTO_RET_(ierr_, "Host result array pointer is an invalid pointer.", ret_);
    }
    BSACL_MEM_REAL_T d_res_ = NULL;
    ntot_ = dim * n_work_groups__[0] * sizeof(__real);
 #ifdef BSACL_USE_CUDA__
-   ierr_ = cudaMalloc((void**)&d_res_, sz_);
+   ierr_ = cudaMalloc((void**)&d_res_, ntot_);
 #else
    d_res_ = clCreateBuffer(
       context__, BSACL_MEM_READ_WRITE, ntot_, NULL, &ierr_);
@@ -1461,7 +1466,7 @@ int bsaclRun(unsigned i_thread, const size_t dim, __real *__EXT_PTR_CONST h_res)
    if (ierr_ != BSACL_SUCCESS || d_res_ == NULL) {
       if (d_res_) {
          ierr_ = BSACL_DEVICE_FREE_MEM(d_res_);
-         ierr_ = -56;
+      ierr_ = BSACL_ERROR_CODE(-56);
       }
       ABORT_INTERNAL_GOTO_RET_(ierr_, "Failed to create  result  device buffer", ret_);
    }
@@ -1508,10 +1513,10 @@ int bsaclRun(unsigned i_thread, const size_t dim, __real *__EXT_PTR_CONST h_res)
             d_Mg__,
             d_Cg__,
             d_Kg__,
-            d_fi__[i_thread],
             nfi__[i_thread],
-            d_fj__[i_thread],
+            d_fi__[i_thread],
             nfj__[i_thread],
+            d_fj__[i_thread],
             d_res_);
          ierr_ = cudaDeviceSynchronize();
          // ierr_ = cudaGetLastError();
@@ -1594,7 +1599,7 @@ BSACL_INT bsaclSetKernelID(unsigned kid)
    ierr_t ret = { BSACL_SUCCESS };
 #ifndef BSACL_USE_CUDA__
    if (kid < 1 || kid > 2) {
-      ret = (ierr_t)1;
+      ret = BSACL_ERROR_CODE(1);
    } else {
       kernel_id_ = kid;
    }
