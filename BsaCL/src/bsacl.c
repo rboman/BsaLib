@@ -1439,13 +1439,13 @@ int bsaclRun(unsigned i_thread, const size_t dim, __real *__EXT_PTR_CONST h_res)
    size_t ntot_ = 0;
    ntot_ = nfi__[i_thread] * sizeof(__real);
    ierr_ = createDeviceBuffer_(
-      BSACL_MEM_VOID_PTRPTR_CAST &(d_fi__[i_thread]), ntot_, BSACL_MEM_READ_ONLY | BSACL_MEM_COPY_HOST_PTR, fi__[i_thread] );
+      BSACL_MEM_CAST(void **) &(d_fi__[i_thread]), ntot_, BSACL_MEM_READ_ONLY | BSACL_MEM_COPY_HOST_PTR, fi__[i_thread] );
    if (ierr_ != BSACL_SUCCESS) 
       ABORT_INTERNAL_GOTO_RET_(ierr_, "Failed to create d_fi__ device buffer.\n", ret_);
 
    ntot_ = nfj__[i_thread] * sizeof(__real);
    ierr_ = createDeviceBuffer_(
-      BSACL_MEM_VOID_PTRPTR_CAST &(d_fj__[i_thread]), ntot_, BSACL_MEM_READ_ONLY | BSACL_MEM_COPY_HOST_PTR, fj__[i_thread] );
+      BSACL_MEM_CAST(void **) &(d_fj__[i_thread]), ntot_, BSACL_MEM_READ_ONLY | BSACL_MEM_COPY_HOST_PTR, fj__[i_thread] );
    if (ierr_ != BSACL_SUCCESS) 
       ABORT_INTERNAL_GOTO_RET_(ierr_, "Failed to create d_fj__ device buffer.\n", ret_);
 
