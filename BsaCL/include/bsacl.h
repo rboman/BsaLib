@@ -25,8 +25,9 @@
 extern "C" {
 #endif
 
-void bsaclInit(int *__EXT_PTR_CONST ierr);
-void bsaclRun(int *__EXT_PTR_CONST ierr);
+int  bsaclInit(unsigned n_threads);
+int  bsaclInitDeviceMemory(void);
+int  bsaclRun(unsigned i_thread, const size_t dim, __real *__EXT_PTR_CONST h_res);
 void bsaclAcquirePSDId(const uint32_t psdid);
 void bsaclAcquireStructModMat(__real *__EXT_PTR_CONST modmat, __real *__EXT_PTR_CONST natf, const uint32_t ndofs, const uint32_t nmodes);
 void bsaclAcquireModalMatrices(__real *__EXT_PTR_CONST Mg, __real *__EXT_PTR_CONST Cg, __real *__EXT_PTR_CONST Kg);
@@ -45,9 +46,9 @@ void bsaclAcquireEvalFunc(evalFct_t fct);
 void bsaclAcquireEvalFuncByStrings(char **__EXT_PTR_CONST strings);
 void bsaclAcquireEvalFuncByFile(char *__EXT_PTR_CONST filename);
 #endif
-void bsaclAcquireComputationFreqs(const uint32_t nfi, __real *__EXT_PTR_CONST fi, const uint32_t nfj, __real *__EXT_PTR_CONST fj);
+void bsaclAcquireComputationFreqs(const unsigned i_thread,
+   const uint32_t nfi, __real *__EXT_PTR_CONST fi, const uint32_t nfj, __real *__EXT_PTR_CONST fj);
 void bsaclAcquireBaseWindTurbPSD(__real *__EXT_PTR_CONST S_uvw);
-void bsaclAcquireResultBFMVect(__real *__EXT_PTR_CONST m3mf, const uint32_t idim);
 void bsaclSetDeviceType(const uint32_t itype);
 void bsaclVerifyMaxAllocCondition(size_t idim, uint32_t *__EXT_PTR_CONST ican);
 void bsaclAbort(const int ierr);

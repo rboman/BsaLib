@@ -185,10 +185,15 @@ contains
 
             call bsacl_SetDeviceType(BSACL_DEVICE_TYPE_GPU)
 
-            call bsacl_Init(ierr_cl_)
+            ierr_cl_ = bsacl_Init(1)
             if (ierr_cl_ /= 0) then
-               print '(1x, a, a)', &
-                  ERRMSG, 'Failed to initialise BSACL.'
+               print '(1x, a, a)', ERRMSG, 'Failed to initialise BsaCL.'
+               goto 998
+            endif
+
+            ierr_cl_ = bsacl_InitDeviceMemory()
+            if (ierr_cl_ /= 0) then
+               print '(1x, a, a)', ERRMSG, 'Failed to initialise BSACL device memory.'
                goto 998
             endif
 #else

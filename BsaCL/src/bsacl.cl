@@ -187,28 +187,28 @@ KERNEL void bfm_kernel(
       CONSTANT UINT          *tc,
 #ifndef BSACL_PASS_PARAMS_BY_MACRO__
       const    UINT          NNL__,
-#endif
-      GLOBAL   UINT          *nodes_load,
-      GLOBAL   BSACL_REAL    *fi,
-#ifndef BSACL_PASS_PARAMS_BY_MACRO__
-      const    UINT          NFI__,
-#endif
-      GLOBAL   BSACL_REAL    *fj,
-#ifndef BSACL_PASS_PARAMS_BY_MACRO__
-      const    UINT          NFJ__,
       const    UINT          NM_EFF__,
       const    UINT          NDEGW__,
 #endif
-      const    GLOBAL   BSACL_REAL *phiTc,
+      const    GLOBAL  UINT        *nodes_load,
+      const    GLOBAL  BSACL_REAL  *phiTc,
 #ifndef BSACL_PASS_PARAMS_BY_MACRO__
       const    UINT          NN__,
       const    UINT          NNOD_CORR__,   // BUG: NOT used
 #endif
-      const    GLOBAL   BSACL_REAL *nod_corr,
-      const    GLOBAL   BSACL_REAL *wind_nod_vel,
-      const    GLOBAL   BSACL_REAL *wind_turb_scl,
-      const    GLOBAL   BSACL_REAL *wind_turb_std,
-      const    GLOBAL   int  *wind_nod_winz,
+      const    GLOBAL   BSACL_REAL  *nod_corr,
+      const    GLOBAL   BSACL_REAL  *wind_nod_vel,
+      const    GLOBAL   BSACL_REAL  *wind_turb_scl,
+      const    GLOBAL   BSACL_REAL  *wind_turb_std,
+      const    GLOBAL   int         *wind_nod_winz,
+      GLOBAL   BSACL_REAL   *fi,
+#ifndef BSACL_PASS_PARAMS_BY_MACRO__
+      const    UINT         NFI__,
+#endif
+      GLOBAL   BSACL_REAL   *fj,
+#ifndef BSACL_PASS_PARAMS_BY_MACRO__
+      const    UINT         NFJ__,
+#endif
       GLOBAL BSACL_REAL *m3mf
 )
 {
@@ -413,18 +413,10 @@ KERNEL void bfm_kernel(
       CONSTANT UINT          *tc,
 #ifndef BSACL_PASS_PARAMS_BY_MACRO__
       const    UINT          NNL__,
-#endif
-      GLOBAL   UINT          *nodes_load,
-      GLOBAL   __real        *fi,
-#ifndef BSACL_PASS_PARAMS_BY_MACRO__
-      const    UINT          NFI__,
-#endif
-      GLOBAL   __real        *fj,
-#ifndef BSACL_PASS_PARAMS_BY_MACRO__
-      const    UINT          NFJ__,
       const    UINT          NM_EFF__,
       const    UINT          NDEGW__,
 #endif
+      const    GLOBAL  UINT    *nodes_load,
       const    GLOBAL  __real  *phiTc,
 #ifndef BSACL_PASS_PARAMS_BY_MACRO__
       const    UINT            NN__,
@@ -434,10 +426,18 @@ KERNEL void bfm_kernel(
       const    GLOBAL  __real  *wind_nod_vel,
       const    GLOBAL  __real  *wind_turb_scl,
       const    GLOBAL  __real  *wind_turb_std,
-      const    GLOBAL   int    *wind_nod_winz,
+      const    GLOBAL  int     *wind_nod_winz,
       const    GLOBAL  __real  *Mg,
       const    GLOBAL  __real  *Cg,
       const    GLOBAL  __real  *Kg,
+#ifndef BSACL_PASS_PARAMS_BY_MACRO__
+      const    UINT     NFI__,
+#endif
+      GLOBAL   __real   *fi,
+#ifndef BSACL_PASS_PARAMS_BY_MACRO__
+      const    UINT     NFJ__,
+#endif
+      GLOBAL   __real   *fj,
       GLOBAL __real *m3out
 )
 {

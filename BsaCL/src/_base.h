@@ -98,7 +98,6 @@
 # define ierr_t cudaError_t
 # define BSACL_SUCCESS cudaSuccess
 # define BSACL_DEVICE_FREE_MEM(X) cudaFree((void *)X)
-# define BSACL_MEM
 # define BSACL_INT int
 # define BSACL_UINT unsigned int
 # define BSACL_USHORT unsigned short
@@ -106,9 +105,10 @@
 # define UINT unsigned int
 # define USHORT unsigned short
 # define BOOL BSACL_UINT
-# define UINT_PTR_T unsigned int*
-# define INT_PTR_T  int*
-# define REAL_PTR_T __real*
+# define BSACL_MEM void*
+# define BSACL_MEM_UINT_T unsigned int*
+# define BSACL_MEM_INT_T  int*
+# define BSACL_MEM_REAL_T __real*
 # define DEVICE __device__
 # define PRIVATE
 # define GLOBAL
@@ -141,13 +141,22 @@
 # define GLOBAL_ID_Z_DIM2 threadIdx.z + blockDim.z * blockIdx.z
 # define LOCAL_WORKGROUP_BARRIER __syncthreads()
 
+# define BSACL_MEM_READ_ONLY  0
+# define BSACL_MEM_WRITE_ONLY 0
+# define BSACL_MEM_READ_WRITE 0
+# define BSACL_MEM_HOST_NO_ACCESS  0
+# define BSACL_MEM_HOST_READ_ONLY  0
+# define BSACL_MEM_HOST_WRITE_ONLY 0
+# define BSACL_MEM_USE_HOST_PTR   0
+# define BSACL_MEM_ALLOC_HOST_PTR 0
+# define BSACL_MEM_COPY_HOST_PTR  0
+
 #else  // OpenCL
 
 # define BSACL_PI (BSACL_REAL)3.14159265358979323846
 # define ierr_t cl_int
 # define BSACL_SUCCESS CL_SUCCESS
 # define BSACL_DEVICE_FREE_MEM(X) clReleaseMemObject(X)
-# define BSACL_MEM cl_mem
 # define BSACL_INT int
 # define BSACL_UINT cl_uint
 # define BSACL_USHORT ushort
@@ -155,9 +164,10 @@
 # define UINT uint
 # define USHORT ushort
 # define BOOL bool
-# define UINT_PTR_T
-# define INT_PTR_T
-# define REAL_PTR_T
+# define BSACL_MEM cl_mem
+# define BSACL_MEM_UINT_T cl_mem
+# define BSACL_MEM_INT_T  cl_mem
+# define BSACL_MEM_REAL_T cl_mem
 # define DEVICE
 # define PRIVATE __private
 # define GLOBAL __global
@@ -185,6 +195,15 @@
 # define GLOBAL_ID_Z_DIM2 get_global_id(2)
 # define LOCAL_WORKGROUP_BARRIER barrier(CLK_LOCAL_MEM_FENCE)
 
+# define BSACL_MEM_READ_ONLY  CL_MEM_READ_ONLY
+# define BSACL_MEM_WRITE_ONLY CL_MEM_WRITE_ONLY
+# define BSACL_MEM_READ_WRITE CL_MEM_READ_WRITE
+# define BSACL_MEM_HOST_NO_ACCESS  CL_MEM_HOST_NO_ACCESS
+# define BSACL_MEM_HOST_READ_ONLY  CL_MEM_HOST_READ_ONLY
+# define BSACL_MEM_HOST_WRITE_ONLY CL_MEM_HOST_WRITE_ONLY
+# define BSACL_MEM_USE_HOST_PTR   CL_MEM_USE_HOST_PTR
+# define BSACL_MEM_ALLOC_HOST_PTR CL_MEM_ALLOC_HOST_PTR
+# define BSACL_MEM_COPY_HOST_PTR  CL_MEM_COPY_HOST_PTR
 #endif
 
 

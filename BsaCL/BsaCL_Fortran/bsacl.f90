@@ -50,14 +50,19 @@ module BsaCL
 
 
    interface
-      module subroutine bsacl_Init(ierr)
-         integer(IK), intent(inout), target :: ierr
-      end subroutine
+      module integer(IK) function bsacl_Init(n_threads)
+         integer(IK), intent(in), value :: n_threads
+      end function
 
 
-      module subroutine bsacl_Run(ierr)
-         integer(IK), intent(inout), target :: ierr
-      end subroutine
+      module integer(IK) function bsacl_InitDeviceMemory()
+      end function
+
+
+      module integer(IK) function bsacl_Run(i_thread, res)
+         integer(IK), intent(in), value :: i_thread
+         real(RK), pointer, intent(in)  :: res(:)
+      end function
 
 
       module function bsacl_SetKernelID(kid) result(ierr)
@@ -167,19 +172,14 @@ module BsaCL
 #endif
 
 
-      module subroutine bsacl_AcquireComputationFreqs(nfi, fi, nfj, fj)
-         integer(IK), intent(in)      :: nfi, nfj
+      module subroutine bsacl_AcquireComputationFreqs(i_thread, nfi, fi, nfj, fj)
+         integer(IK), intent(in)      :: i_thread, nfi, nfj
          real(RK), intent(in), target :: fi(..), fj(..)
       end subroutine
 
 
       module subroutine bsacl_AcquireBaseWindTurbPSD(S_uvw)
          real(RK), intent(in), target :: S_uvw(:, :)
-      end subroutine
-
-
-      module subroutine bsacl_AcquireResultBFMVect(m3mf)
-         real(RK), intent(in), target :: m3mf(:)
       end subroutine
 
 

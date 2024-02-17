@@ -29,7 +29,7 @@ contains
    !> BUG: now only supports EVENLY SPACED FREQUENCIES..
    module subroutine mainClassic_(m2mf_cls, m2mr_cls, m2o2mr_cls, m3mf_cls, m3mr_cls)
       use BsaLib_Functions
-      real(bsa_real_t), allocatable, intent(inout) :: &
+      real(bsa_real_t), allocatable, intent(inout), target :: &
          m2mf_cls(:), m2mr_cls(:), m2o2mr_cls(:), m3mf_cls(:), m3mr_cls(:)
 
       ! local
@@ -65,15 +65,14 @@ contains
 
 #ifdef BSA_USE_GPU
       if (is_gpu_enabled_) then
-         call bsacl_AcquireResultBFMVect(m3mr_cls)
-         call bsacl_AcquireComputationFreqs(NFREQS, f, NFREQS, f)
+         call bsacl_AcquireComputationFreqs(0, NFREQS, f, NFREQS, f)
          ierr_cl_ = bsacl_SetKernelID(2)
          if (ierr_cl_ /= 0) then
             print '(1x, a, a)', ERRMSG, &
                'Error in setting kernel identifier.'
             goto 998
          endif
-         call bsacl_Run(ierr_cl_)
+         ierr_cl_ = bsacl_Run(0, m3mr_cls)
          if (ierr_cl_ /= 0) then
             print '(1x, a, a)', ERRMSG, &
                'BSACL run() returned with error.'

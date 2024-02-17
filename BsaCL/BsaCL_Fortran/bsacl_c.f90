@@ -3,16 +3,22 @@ module BsaCL_c
    implicit none
    public
    interface
-      subroutine bsaclInit__(ierr) bind(c, name="bsaclInit")
-         import c_ptr
-         type(c_ptr), value :: ierr
-      end subroutine
+      integer function bsaclInit__(n_threads) bind(c, name="bsaclInit")
+         import c_int
+         integer(c_int), value :: n_threads
+      end function
 
 
-      subroutine bsaclRun__(ierr) bind(c, name="bsaclRun")
-         import c_ptr
-         type(c_ptr), value :: ierr
-      end subroutine
+      integer function bsaclInitDeviceMemory__() bind(c, name="bsaclInitDeviceMemory")
+      end function
+
+
+      integer function bsaclRun__(i_thread, dim, res) bind(c, name="bsaclRun")
+         import c_int, c_ptr, c_size_t
+         integer(c_int),    value :: i_thread
+         integer(c_size_t), value :: dim
+         type(c_ptr),       value :: res
+      end function
 
 
       function bsaclSetKernelID__(kid) result(ierr) bind(c, name="bsaclSetKernelID")
@@ -138,9 +144,9 @@ module BsaCL_c
 #endif
 
 
-      subroutine bsaclAcquireComputationFreqs__(nfi, fi, nfj, fj) bind(c, name="bsaclAcquireComputationFreqs")
+      subroutine bsaclAcquireComputationFreqs__(i_thread, nfi, fi, nfj, fj) bind(c, name="bsaclAcquireComputationFreqs")
          import c_ptr, c_int
-         integer(c_int), value :: nfi, nfj
+         integer(c_int), value :: i_thread, nfi, nfj
          type(c_ptr), value    :: fi, fj
       end subroutine
 
@@ -148,13 +154,6 @@ module BsaCL_c
       subroutine bsaclAcquireBaseWindTurbPSD__(S_uvw) bind(c, name="bsaclAcquireBaseWindTurbPSD")
          import c_ptr
          type(c_ptr), value :: S_uvw
-      end subroutine
-
-
-      subroutine bsaclAcquireResultBFMVect__(m3mf, idim) bind(c, name="bsaclAcquireResultBFMVect")
-         import c_ptr, c_int
-         type(c_ptr), value    :: m3mf
-         integer(c_int), value :: idim
       end subroutine
 
 

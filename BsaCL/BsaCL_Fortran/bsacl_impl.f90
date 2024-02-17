@@ -14,16 +14,23 @@ submodule(BsaCL) BsaCL_impl
 
 contains
 
-   module subroutine bsacl_Init(ierr)
-      integer(IK), intent(inout), target :: ierr
-      call bsaclInit__(c_loc(ierr))
-   end subroutine
+
+   module integer(IK) function bsacl_Init(n_threads)
+      integer(IK), intent(in), value :: n_threads
+      bsacl_Init = int( bsaclInit__(int(n_threads, c_int)), IK )
+   end function
 
 
-   module subroutine bsacl_Run(ierr)
-      integer(IK), intent(inout), target :: ierr
-      call bsaclRun__(c_loc(ierr))
-   end subroutine
+   module integer(IK) function bsacl_InitDeviceMemory()
+      bsacl_InitDeviceMemory = int( bsaclInitDeviceMemory__(), IK )
+   end function
+
+
+   module integer(IK) function bsacl_Run(i_thread, res)
+      integer(IK), intent(in), value :: i_thread
+      real(RK), pointer, intent(in)  :: res(:)
+      bsacl_Run = int( bsaclRun__(int(i_thread, c_int), int(size(res), c_size_t), c_loc(res)), IK )
+   end function
 
 
    module function bsacl_SetKernelID(kid) result(ierr)
@@ -227,30 +234,20 @@ contains
 
 
 
-   module subroutine bsacl_AcquireComputationFreqs(nfi, fi, nfj, fj)
-      integer(IK), intent(in)      :: nfi, nfj
+   module subroutine bsacl_AcquireComputationFreqs(i_thread, nfi, fi, nfj, fj)
+      integer(IK), intent(in)      :: i_thread, nfi, nfj
       real(RK), intent(in), target :: fi(..), fj(..)
       integer(c_int) :: nfi_, nfj_
 
       nfi_ = int(nfi, kind=c_int)
       nfj_ = int(nfj, kind=c_int)
-      call bsaclAcquireComputationFreqs__(nfi_, c_loc(fi), nfj_, c_loc(fj))
+      call bsaclAcquireComputationFreqs__(int(i_thread, c_int), nfi_, c_loc(fi), nfj_, c_loc(fj))
    end subroutine
 
 
    module subroutine bsacl_AcquireBaseWindTurbPSD(S_uvw)
       real(RK), intent(in), target :: S_uvw(:, :)
       call bsaclAcquireBaseWindTurbPSD__(c_loc(S_uvw))
-   end subroutine
-
-
-
-   module subroutine bsacl_AcquireResultBFMVect(m3mf)
-      real(RK), intent(in), target :: m3mf(:)
-      integer(c_int) :: idim_
-
-      idim_ = size(m3mf, kind=c_int)
-      call bsaclAcquireResultBFMVect__(c_loc(m3mf), idim_)
    end subroutine
 
 
