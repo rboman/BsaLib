@@ -27,6 +27,7 @@ module BsaCL
 #endif
 
 
+#ifdef BSACL_ENABLE_EVALFCT_PTR
    abstract interface
       function bsacl_EvalFunc_C_to_Fortran__(f_, nf_, itc_) result(res)
          import IK, RK
@@ -35,6 +36,7 @@ module BsaCL
          real(RK), allocatable, target :: res(:, :)
       end function
    end interface
+#endif
 
 
    integer(kind = IK), parameter :: BSACL_SUCCESS                      = 0_IK
