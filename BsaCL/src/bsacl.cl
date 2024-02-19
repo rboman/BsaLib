@@ -46,6 +46,7 @@
 
 #define _use_fast_reduction_scheme_
 #define _use_optimised_loop_
+#define _use_precomputed_shared_data_
 
 
 DEVICE UINT getCorrId(
@@ -566,6 +567,22 @@ KERNEL void bfm_kernel(
    BSACL_REAL S_uvw_IK_i, S_uvw_IK_j, S_uvw_IK_ij;
    BSACL_REAL S_uvw_JK_i, S_uvw_JK_j, S_uvw_JK_ij;
 
+# ifdef _use_precomputed_shared_data_
+   /**
+    * Shared object collecting base data at the nodal level.
+    * Since each WI in the WG has a unique pair of frequencies, 
+    * we need NNL__ elements * 3-freqs for each WI.
+    * NOTE: this might exceed max allowed local storage, spilling to glob memory!
+    * */
+#  ifdef BSACL_USE_CUDA__
+   LOCAL BSACL_REAL S_uvw_i_j_ij_[3 * BSACL_WIpWG * 4];
+#  else
+   LOCAL BSACL_REAL S_uvw_i_j_ij_[3 * BSACL_WIpWG * NNL__];
+#  endif
+#  define __s_uvw_get_value(wid, fid, nid) \
+            (S_uvw_i_j_ij_[(wid) + ((fid)*BSACL_WIpWG) + ((nid)*BSACL_WIpWG*3)])
+# endif
+
    for (itmp_=0; itmp_ < NTC__; ++itmp_) {
 
       UINT tc_ = tc[itmp_] - 1;
@@ -573,17 +590,33 @@ KERNEL void bfm_kernel(
       BSACL_REAL wstd_ = (BSACL_REAL)wind_turb_std[tc_];  // BUG: account for multiple wind zones!!
       BSACL_REAL wscl_ = (BSACL_REAL)wind_turb_scl[tc_];  // BUG: account for multiple wind zones!!
 
+# ifdef _use_precomputed_shared_data_
+      for (UINT ink_=0; ink_ < NNL__; ++ink_) {
+         UINT       nk_   = nodes_load[ink_]-1;
+         BSACL_REAL ubnk_ = (BSACL_REAL)wind_nod_vel[nk_];
+
+         __s_uvw_get_value(lid0_, 0, ink_) = evalFct(fi_,     PSD_ID_ARG  wscl_, wstd_, ubnk_);
+         __s_uvw_get_value(lid0_, 1, ink_) = evalFct(fj_,     PSD_ID_ARG  wscl_, wstd_, ubnk_);
+         __s_uvw_get_value(lid0_, 2, ink_) = evalFct(fiPfj_,  PSD_ID_ARG  wscl_, wstd_, ubnk_);
+      }
+# endif
+
 
       for (UINT ink_=0; ink_ < NNL__; ++ink_) {
 
          UINT nk_offs_ = 18*ink_;
          UINT nk_      = nodes_load[ink_]-1;
+# ifndef _use_precomputed_shared_data_
          BSACL_REAL ubnk_ = (BSACL_REAL)wind_nod_vel[nk_];
 
          S_uvw_K_i_  = evalFct(fi_,     PSD_ID_ARG   wscl_, wstd_, ubnk_);
          S_uvw_K_j_  = evalFct(fj_,     PSD_ID_ARG   wscl_, wstd_, ubnk_);
          S_uvw_K_ij_ = evalFct(fiPfj_,  PSD_ID_ARG   wscl_, wstd_, ubnk_);
-
+# else
+         S_uvw_K_i_  = __s_uvw_get_value(lid0_, 0, ink_);
+         S_uvw_K_j_  = __s_uvw_get_value(lid0_, 1, ink_);
+         S_uvw_K_ij_ = __s_uvw_get_value(lid0_, 2, ink_);
+# endif
          // Main diag elements
          m3mf_loc_[lid0_] += (
               phiTc_mno_[nk_offs_ + 3 + tc_] * phiTc_mno_[nk_offs_ + 6 +     tc_] * phiTc_mno_[nk_offs_ + 12 +     tc_] * (S_uvw_K_i_  * S_uvw_K_j_ )
@@ -596,22 +629,31 @@ KERNEL void bfm_kernel(
 
             UINT nj_offs_ = 18*inj_;
             UINT nj_      = nodes_load[inj_]-1;
-            BSACL_REAL ubnj_ = (BSACL_REAL)wind_nod_vel[nj_];
 
             nod_corr_ = (BSACL_REAL)nod_corr[getCorrId(nj_, nk_, NN__)];
             BSACL_REAL corrJK_ = nod_corr_ < BSACL_REAL_MIN ? BSACL_REAL_MIN : nod_corr_;
 
+# ifndef _use_precomputed_shared_data_
+            BSACL_REAL ubnj_ = (BSACL_REAL)wind_nod_vel[nj_];
+
             S_uvw_J_i_   = evalFct(fi_,  PSD_ID_ARG   wscl_, wstd_, ubnj_);
+            S_uvw_J_j_   = evalFct(fj_,  PSD_ID_ARG   wscl_, wstd_, ubnj_);
+            S_uvw_J_ij_  = evalFct(fiPfj_,  PSD_ID_ARG   wscl_, wstd_, ubnj_);
+# else
+            S_uvw_J_i_   = __s_uvw_get_value(lid0_, 0, inj_);
+            S_uvw_J_j_   = __s_uvw_get_value(lid0_, 1, inj_);
+            S_uvw_J_ij_  = __s_uvw_get_value(lid0_, 2, inj_);
+# endif
+
             S_uvw_JK_i   = sqrt(S_uvw_J_i_ * S_uvw_K_i_);
             S_uvw_JK_i  *= POW(corrJK_, (FABS(fi_)));
 
-            S_uvw_J_j_   = evalFct(fj_,  PSD_ID_ARG   wscl_, wstd_, ubnj_);
             S_uvw_JK_j   = sqrt(S_uvw_J_j_ * S_uvw_K_j_);
             S_uvw_JK_j  *= POW(corrJK_, (FABS(fj_)));
 
-            S_uvw_J_ij_  = evalFct(fiPfj_,  PSD_ID_ARG   wscl_, wstd_, ubnj_);
             S_uvw_JK_ij  = sqrt(S_uvw_J_ij_ * S_uvw_K_ij_);
             S_uvw_JK_ij *= POW(corrJK_, (FABS(fiPfj_)));
+
 
             // Elements with two indexes equal (here computing j-j-k)
             m3mf_loc_[lid0_] += (
@@ -639,40 +681,52 @@ KERNEL void bfm_kernel(
 
                UINT ni_offs_ = 18*ini_;
                UINT ni_      = nodes_load[ini_]-1;
-               BSACL_REAL ubni_ = (BSACL_REAL)wind_nod_vel[ni_];
 
                nod_corr_ = (BSACL_REAL)nod_corr[getCorrId(ni_, nk_, NN__)];
                BSACL_REAL corrIK_ = nod_corr_ < BSACL_REAL_MIN ? BSACL_REAL_MIN : nod_corr_;
                nod_corr_ = (BSACL_REAL)nod_corr[getCorrId(ni_, nj_, NN__)];
                BSACL_REAL corrIJ_ = nod_corr_ < BSACL_REAL_MIN ? BSACL_REAL_MIN : nod_corr_;
 
-               S_uvw_IK_i   = evalFct(fi_,  PSD_ID_ARG   wscl_, wstd_, ubni_);
+
+# ifndef _use_precomputed_shared_data_
+               BSACL_REAL ubni_ = (BSACL_REAL)wind_nod_vel[ni_];
+
+               S_uvw_IK_i   = evalFct(fi_,     PSD_ID_ARG   wscl_, wstd_, ubni_);
+               S_uvw_IK_j   = evalFct(fj_,     PSD_ID_ARG   wscl_, wstd_, ubni_);
+               S_uvw_IK_ij  = evalFct(fiPfj_,  PSD_ID_ARG   wscl_, wstd_, ubni_);
+               S_uvw_IJ_i   = evalFct(fi_,     PSD_ID_ARG   wscl_, wstd_, ubni_);
+               S_uvw_IJ_j   = evalFct(fj_,     PSD_ID_ARG   wscl_, wstd_, ubni_);
+               S_uvw_IJ_ij  = evalFct(fiPfj_,  PSD_ID_ARG   wscl_, wstd_, ubni_);
+# else
+               S_uvw_IK_i   = __s_uvw_get_value(lid0_, 0, ini_);
+               S_uvw_IJ_i   = S_uvw_IK_i;
+               S_uvw_IK_j   = __s_uvw_get_value(lid0_, 1, ini_);
+               S_uvw_IJ_j   = S_uvw_IK_j;
+               S_uvw_IK_ij  = __s_uvw_get_value(lid0_, 2, ini_);
+               S_uvw_IJ_ij  = S_uvw_IK_ij;
+# endif
+
                S_uvw_IK_i  *= S_uvw_K_i_;
                S_uvw_IK_i   = sqrt(S_uvw_IK_i);
                S_uvw_IK_i  *= POW(corrIK_, (FABS(fi_)));
 
-               S_uvw_IK_j   = evalFct(fj_,  PSD_ID_ARG   wscl_, wstd_, ubni_);
                S_uvw_IK_j  *= S_uvw_K_j_;
                S_uvw_IK_j   = sqrt(S_uvw_IK_j);
                S_uvw_IK_j  *= POW(corrIK_, (FABS(fj_)));
 
-               S_uvw_IK_ij  = evalFct(fiPfj_,  PSD_ID_ARG   wscl_, wstd_, ubni_);
                S_uvw_IK_ij *= S_uvw_K_ij_;
                S_uvw_IK_ij  = sqrt(S_uvw_IK_ij);
                S_uvw_IK_ij *= POW(corrIK_, (FABS(fiPfj_)));
 
 
-               S_uvw_IJ_i   = evalFct(fi_,  PSD_ID_ARG   wscl_, wstd_, ubni_);
                S_uvw_IJ_i  *= S_uvw_J_i_;
                S_uvw_IJ_i   = sqrt(S_uvw_IJ_i);
                S_uvw_IJ_i  *= POW(corrIJ_, (FABS(fi_)));
 
-               S_uvw_IJ_j   = evalFct(fj_,  PSD_ID_ARG   wscl_, wstd_, ubni_);
                S_uvw_IJ_j  *= S_uvw_J_j_;
                S_uvw_IJ_j   = sqrt(S_uvw_IJ_j);
                S_uvw_IJ_j  *= POW(corrIJ_, (FABS(fj_)));
 
-               S_uvw_IJ_ij  = evalFct(fiPfj_,  PSD_ID_ARG   wscl_, wstd_, ubni_);
                S_uvw_IJ_ij *= S_uvw_J_ij_;
                S_uvw_IJ_ij  = sqrt(S_uvw_IJ_ij);
                S_uvw_IJ_ij *= POW(corrIJ_, (FABS(fiPfj_)));
