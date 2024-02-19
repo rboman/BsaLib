@@ -46,6 +46,8 @@ if (enable-const-ptr-def)
 endif()
 
 target_compile_definitions( BsaCL PRIVATE BSACL_USE_RETRICTED_POINTERS )
+target_compile_definitions( BsaCL PRIVATE BSACL_USE_FUSED_OP )
+
 
 if (enable-cuda)
    set_target_properties( BsaCL PROPERTIES CUDA_ARCHITECTURES native )
@@ -53,6 +55,9 @@ if (enable-cuda)
    target_compile_options( BsaCL PRIVATE -diag-suppress 546 )
    target_compile_options( BsaCL PRIVATE
       $<$<CONFIG:Release>: --use_fast_math --extra-device-vectorization>
+   )
+   target_compile_options( BsaCL PRIVATE
+      $<$<CONFIG:Debug>: -lineinfo>
    )
    target_compile_definitions( BsaCL PRIVATE BSACL_USE_CUDA__ )
    set_target_properties( BsaCL PROPERTIES POSITION_INDEPENDENT_CODE ON )
