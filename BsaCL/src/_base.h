@@ -231,4 +231,32 @@
 
 #define BSACL_ERROR_CODE(x) ((ierr_t)x)
 
+
+#if (defined(BSACL_USE_CUDA__)) && (defined(BSACL_USE_FUSED_OP))
+# pragma message("   --- [NOTE]  Using FUSED operations!")
+# ifdef BSACL_USE_DOUBLE_PRECISION
+#  define BSACL_FUSE_ADD(x, y) __dadd_rn((x), (y))
+#  define BSACL_FUSE_MUL(x, y) __dmul_rn((x), (y))
+#  define BSACL_FUSE_FMA(x, y, z) __fma_rn((x), (y), (z))
+#  define BSACL_FUSE_RCP(x)    __drcp_rn((x))
+#  define BSACL_FUSE_DIV(x, y) __ddiv_rn((x), (y))
+#  define BSACL_FUSE_SQRT(x) __dsqrt_rn((x))
+# else
+#  define BSACL_FUSE_ADD(x, y) __fadd_rn((x), (y))
+#  define BSACL_FUSE_MUL(x, y) __fmul_rn((x), (y))
+#  define BSACL_FUSE_FMA(x, y, z) __fmaf_rn((x), (y), (z))
+#  define BSACL_FUSE_RCP(x)    __frcp_rn((x))
+#  define BSACL_FUSE_DIV(x, y) __fdiv_rn((x), (y))
+#  define BSACL_FUSE_SQRT(x) __fsqrt_rn((x))
+# endif
+#else
+# define BSACL_FUSE_ADD(x, y) ((x) + (y))
+# define BSACL_FUSE_MUL(x, y) ((x) * (y))
+# define BSACL_FUSE_FMA(x, y, z) ((x) * (y) + (z))
+# define BSACL_FUSE_RCP(x)    (1.f / (x))
+# define BSACL_FUSE_DIV(x, y) ((x) / (y))
+# define BSACL_FUSE_SQRT(x) (sqrt(x))
+#endif
+
+
 #endif // BSACL_BASE_H_
