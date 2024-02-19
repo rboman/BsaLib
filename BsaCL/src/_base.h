@@ -94,8 +94,8 @@
 #  endif
 # else // C compiler, is a keyword.
 #  define __RESTRICT_PTR restrict
-#  define __RESTRICT_PTR_CL __restrict__
 # endif
+# define __RESTRICT_PTR_CL __restrict__
 #else
 # define __RESTRICT_PTR
 # define __RESTRICT_PTR_CL
