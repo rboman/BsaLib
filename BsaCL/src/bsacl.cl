@@ -55,16 +55,14 @@ DEVICE UINT getCorrId(
       const   UINT NTOT
 )
 {
-   BOOL invert_ = (BOOL)(nj < ni);
    UINT res_;
-
-   if (invert_) {
-      UINT itemp_ = ni;
-      ni = nj;
-      nj = itemp_;
+   if (nj < ni) {
+      res_ = nj * (NTOT - 1) + ni;
+      res_ = res_ - (UINT)((nj*nj - nj) / 2.f);
+   } else {
+      res_ = ni * (NTOT - 1) + nj;
+      res_ = res_ - (UINT)((ni*ni - ni) / 2.f);
    }
-   res_ = ni * (NTOT-1) + nj;
-   res_ = res_ - (UINT)((ni*ni - ni) / 2.f);
    return res_;
 }
 
