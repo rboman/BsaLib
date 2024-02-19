@@ -629,7 +629,7 @@ KERNEL void bfm_kernel(
             UINT nj_      = nodes_load[inj_]-1;
 
             nod_corr_ = (BSACL_REAL)nod_corr[getCorrId(nj_, nk_, NN__)];
-            nod_corr_ = nod_corr_ < BSACL_REAL_MIN ? BSACL_REAL_MIN : nod_corr_;
+            BSACL_REAL corrJK_ = nod_corr_ < BSACL_REAL_MIN ? BSACL_REAL_MIN : nod_corr_;
 
 # ifndef _use_precomputed_shared_data_
             BSACL_REAL ubnj_ = (BSACL_REAL)wind_nod_vel[nj_];
@@ -644,13 +644,13 @@ KERNEL void bfm_kernel(
 # endif
 
             S_uvw_JK_i   = sqrt(S_uvw_J_i_ * S_uvw_K_i_);
-            S_uvw_JK_i  *= POW(nod_corr_, (FABS(fi_)));
+            S_uvw_JK_i  *= POW(corrJK_, (FABS(fi_)));
 
             S_uvw_JK_j   = sqrt(S_uvw_J_j_ * S_uvw_K_j_);
-            S_uvw_JK_j  *= POW(nod_corr_, (FABS(fj_)));
+            S_uvw_JK_j  *= POW(corrJK_, (FABS(fj_)));
 
             S_uvw_JK_ij  = sqrt(S_uvw_J_ij_ * S_uvw_K_ij_);
-            S_uvw_JK_ij *= POW(nod_corr_, (FABS(fiPfj_)));
+            S_uvw_JK_ij *= POW(corrJK_, (FABS(fiPfj_)));
 
 
             // Elements with two indexes equal (here computing j-j-k)
@@ -680,6 +680,11 @@ KERNEL void bfm_kernel(
                UINT ni_offs_ = 18*ini_;
                UINT ni_      = nodes_load[ini_]-1;
 
+               nod_corr_ = (BSACL_REAL)nod_corr[getCorrId(ni_, nk_, NN__)];
+               BSACL_REAL corrIK_ = nod_corr_ < BSACL_REAL_MIN ? BSACL_REAL_MIN : nod_corr_;
+               nod_corr_ = (BSACL_REAL)nod_corr[getCorrId(ni_, nj_, NN__)];
+               BSACL_REAL corrIJ_ = nod_corr_ < BSACL_REAL_MIN ? BSACL_REAL_MIN : nod_corr_;
+
 
 # ifndef _use_precomputed_shared_data_
                BSACL_REAL ubni_ = (BSACL_REAL)wind_nod_vel[ni_];
@@ -699,36 +704,30 @@ KERNEL void bfm_kernel(
                S_uvw_IJ_ij  = S_uvw_IK_ij;
 # endif
 
-               nod_corr_ = (BSACL_REAL)nod_corr[getCorrId(ni_, nk_, NN__)];
-               nod_corr_ = nod_corr_ < BSACL_REAL_MIN ? BSACL_REAL_MIN : nod_corr_;
-
                S_uvw_IK_i  *= S_uvw_K_i_;
                S_uvw_IK_i   = sqrt(S_uvw_IK_i);
-               S_uvw_IK_i  *= POW(nod_corr_, (FABS(fi_)));
+               S_uvw_IK_i  *= POW(corrIK_, (FABS(fi_)));
 
                S_uvw_IK_j  *= S_uvw_K_j_;
                S_uvw_IK_j   = sqrt(S_uvw_IK_j);
-               S_uvw_IK_j  *= POW(nod_corr_, (FABS(fj_)));
+               S_uvw_IK_j  *= POW(corrIK_, (FABS(fj_)));
 
                S_uvw_IK_ij *= S_uvw_K_ij_;
                S_uvw_IK_ij  = sqrt(S_uvw_IK_ij);
-               S_uvw_IK_ij *= POW(nod_corr_, (FABS(fiPfj_)));
+               S_uvw_IK_ij *= POW(corrIK_, (FABS(fiPfj_)));
 
-
-               nod_corr_ = (BSACL_REAL)nod_corr[getCorrId(ni_, nj_, NN__)];
-               nod_corr_ = nod_corr_ < BSACL_REAL_MIN ? BSACL_REAL_MIN : nod_corr_;
 
                S_uvw_IJ_i  *= S_uvw_J_i_;
                S_uvw_IJ_i   = sqrt(S_uvw_IJ_i);
-               S_uvw_IJ_i  *= POW(nod_corr_, (FABS(fi_)));
+               S_uvw_IJ_i  *= POW(corrIJ_, (FABS(fi_)));
 
                S_uvw_IJ_j  *= S_uvw_J_j_;
                S_uvw_IJ_j   = sqrt(S_uvw_IJ_j);
-               S_uvw_IJ_j  *= POW(nod_corr_, (FABS(fj_)));
+               S_uvw_IJ_j  *= POW(corrIJ_, (FABS(fj_)));
 
                S_uvw_IJ_ij *= S_uvw_J_ij_;
                S_uvw_IJ_ij  = sqrt(S_uvw_IJ_ij);
-               S_uvw_IJ_ij *= POW(nod_corr_, (FABS(fiPfj_)));
+               S_uvw_IJ_ij *= POW(corrIJ_, (FABS(fiPfj_)));
 
 
                // computing (i-j-k)
