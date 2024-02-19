@@ -40,9 +40,12 @@ if (enable-ocl-ptx-code-gen)
    target_compile_definitions( BsaCL PRIVATE BSACL_GENERATE_PTX_BINARY )
 endif()
 
+
 if (enable-const-ptr-def)
    target_compile_definitions( BsaCL PRIVATE BSACL_USE_CONST_EXT_POINTERS )
 endif()
+
+target_compile_definitions( BsaCL PRIVATE BSACL_USE_RETRICTED_POINTERS )
 
 if (enable-cuda)
    set_target_properties( BsaCL PROPERTIES CUDA_ARCHITECTURES native )

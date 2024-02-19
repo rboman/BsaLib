@@ -82,6 +82,26 @@
 #endif
 
 
+#ifdef BSACL_USE_RETRICTED_POINTERS
+# ifdef __cplusplus
+// from: https://stackoverflow.com/questions/5947564/whats-a-good-way-to-check-availability-of-restrict-keyword
+#  if defined(__GNUC__) && ((__GNUC__ > 3) || (__GNUC__ == 3 && __GNUC_MINOR__ >= 1))
+#    define __RESTRICT_PTR __restrict
+#  elif defined(_MSC_VER) && _MSC_VER >= 1400
+#    define __RESTRICT_PTR __restrict
+#  else
+#    define __RESTRICT_PTR
+#  endif
+# else // C compiler, is a keyword.
+#  define __RESTRICT_PTR restrict
+#  define __RESTRICT_PTR_CL __restrict__
+# endif
+#else
+# define __RESTRICT_PTR
+# define __RESTRICT_PTR_CL
+#endif
+
+
 // Wind PSDs
 #define BSACL_PSD_TYPE_UNKNOWN   0
 #define BSACL_PSD_TYPE_VONKARMAN 1

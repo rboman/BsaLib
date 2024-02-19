@@ -1304,7 +1304,7 @@ ret_:
  * @brief BSACL core function. Enqueue selected kernel to run on GPU(s).
  *
  */
-int bsaclRun(unsigned i_thread, const size_t dim, __real *__EXT_PTR_CONST h_res)
+int bsaclRun(unsigned i_thread, const size_t dim, __real * __RESTRICT_PTR __EXT_PTR_CONST h_res)
 {
    ierr_t ierr_;
 #ifndef BSACL_USE_CUDA__
@@ -1631,7 +1631,7 @@ void bsaclAcquirePSDId(const uint32_t psdid)
  * @param nmodes n. of modes (used)
  */
 void bsaclAcquireStructModMat(
-      __real *__EXT_PTR_CONST modmat, __real *__EXT_PTR_CONST natf, const uint32_t ndofs, const uint32_t nmodes)
+      __real * __RESTRICT_PTR __EXT_PTR_CONST modmat, __real * __RESTRICT_PTR __EXT_PTR_CONST natf, const uint32_t ndofs, const uint32_t nmodes)
 {
    if (has_halted__ == 1U) return;
    extdata__.modmat__   = modmat;
@@ -1651,7 +1651,7 @@ void bsaclAcquireStructModMat(
 
 
 void bsaclAcquireModalMatrices(
-      __real *__EXT_PTR_CONST Mg, __real *__EXT_PTR_CONST Cg, __real *__EXT_PTR_CONST Kg)
+      __real * __RESTRICT_PTR __EXT_PTR_CONST Mg, __real * __RESTRICT_PTR __EXT_PTR_CONST Cg, __real * __RESTRICT_PTR __EXT_PTR_CONST Kg)
 {
    if (has_halted__ == 1U) return;
    extdata__.Mg__ = Mg;
@@ -1669,7 +1669,7 @@ void bsaclAcquireModalMatrices(
  * @param nodes_load 
  * @param nnodes_l 
  */
-void bsaclAcquireLoadedNodesList(int *__EXT_PTR_CONST nodes_load, const uint32_t nnodes_l)
+void bsaclAcquireLoadedNodesList(int * __RESTRICT_PTR __EXT_PTR_CONST nodes_load, const uint32_t nnodes_l)
 {
    if (has_halted__ == 1U) return;
    if (extdata__.NNODES_LOAD__ != 0 && nnodes_l != extdata__.NNODES_LOAD__)
@@ -1699,7 +1699,7 @@ void bsaclAcquireTotalNOfNodes(const uint32_t nnodes_tot)
  * @param modes 
  * @param nmodes_eff 
  */
-void bsaclAcquireUsedModesList(int *__EXT_PTR_CONST modes, const uint32_t nmodes_eff)
+void bsaclAcquireUsedModesList(int * __RESTRICT_PTR __EXT_PTR_CONST modes, const uint32_t nmodes_eff)
 {
    if (has_halted__ == 1U) return;
    if (extdata__.NMODES_EFF__ != 0 && nmodes_eff != extdata__.NMODES_EFF__)
@@ -1722,7 +1722,7 @@ void bsaclAcquireUsedModesList(int *__EXT_PTR_CONST modes, const uint32_t nmodes
  * @param ndegw     n. of coefficients per element (transformation degree)
  */
 void bsaclAcquireWindCoeffs(
-      __real *__EXT_PTR_CONST wfc, const uint32_t nnodes_l, const uint32_t nlibs, const uint32_t ndegw)
+      __real * __RESTRICT_PTR __EXT_PTR_CONST wfc, const uint32_t nnodes_l, const uint32_t nlibs, const uint32_t ndegw)
 {
    if (has_halted__ == 1U) return;
    if (extdata__.NNODES_LOAD__ != 0 && nnodes_l != extdata__.NNODES_LOAD__) 
@@ -1744,7 +1744,7 @@ void bsaclAcquireWindCoeffs(
  * @param tc   list of turbulent components
  * @param ntc  n. of turb. components in the list
  */
-void bsaclAcquireTurbComponentsList(int *__EXT_PTR_CONST tc, const uint32_t ntc)
+void bsaclAcquireTurbComponentsList(int * __RESTRICT_PTR __EXT_PTR_CONST tc, const uint32_t ntc)
 {
    if (has_halted__ == 1U) return;
    extdata__.NTC__ = ntc;
@@ -1761,7 +1761,7 @@ void bsaclAcquireTurbComponentsList(int *__EXT_PTR_CONST tc, const uint32_t ntc)
  * @param ndegw      n. of coefficients per element (transformation degree)
  */
 void bsaclAcquirePhiTimesCMat(
-      __real *__EXT_PTR_CONST phi_T_c, const uint32_t nmodes_eff, const uint32_t nnodes_l, const uint32_t ndegw)
+      __real * __RESTRICT_PTR __EXT_PTR_CONST phi_T_c, const uint32_t nmodes_eff, const uint32_t nnodes_l, const uint32_t ndegw)
 {
    if (has_halted__ == 1U) return;
    if (extdata__.NNODES_LOAD__ != 0 && nnodes_l != extdata__.NNODES_LOAD__)
@@ -1779,7 +1779,7 @@ void bsaclAcquirePhiTimesCMat(
 
 
 
-void bsaclAcquireNodalCorrelation(__real *__EXT_PTR_CONST nod_corr, const uint32_t nnod_corr)
+void bsaclAcquireNodalCorrelation(__real * __RESTRICT_PTR __EXT_PTR_CONST nod_corr, const uint32_t nnod_corr)
 {
    if (has_halted__ == 1U) return;
    extdata__.nod_corr__  = nod_corr;
@@ -1788,26 +1788,26 @@ void bsaclAcquireNodalCorrelation(__real *__EXT_PTR_CONST nod_corr, const uint32
 
 
 
-void bsaclAcquireWindNodalVelocities(__real *__EXT_PTR_CONST nod_vel)
+void bsaclAcquireWindNodalVelocities(__real * __RESTRICT_PTR __EXT_PTR_CONST nod_vel)
 {
    if (has_halted__ == 1U) return;
    extdata__.wind_nodal_vel__ = nod_vel;
 }
 
-void bsaclAcquireWindNodalWindZones(int *__EXT_PTR_CONST nod_wz)
+void bsaclAcquireWindNodalWindZones(int * __RESTRICT_PTR __EXT_PTR_CONST nod_wz)
 {
    if (has_halted__ == 1U) return;
    extdata__.wind_nodal_windz__ = nod_wz;
 }
 
-void bsaclAcquireWindTurbScales(__real *__EXT_PTR_CONST wt_scl, const uint32_t nwz)
+void bsaclAcquireWindTurbScales(__real * __RESTRICT_PTR __EXT_PTR_CONST wt_scl, const uint32_t nwz)
 {
    if (has_halted__ == 1U) return;
    extdata__.NWZ__ = nwz;
    extdata__.wind_turb_scales__ = wt_scl;
 }
 
-void bsaclAcquireWindTurbStd(__real *__EXT_PTR_CONST wt_std, const uint32_t nwz)
+void bsaclAcquireWindTurbStd(__real * __RESTRICT_PTR __EXT_PTR_CONST wt_std, const uint32_t nwz)
 {
    if (has_halted__ == 1U) return;
    extdata__.NWZ__ = nwz;
@@ -1831,7 +1831,7 @@ void bsaclAcquireEvalFunc(evalFct_t fct)
 }
 
 
-void bsaclAcquireEvalFuncByStrings(char **__EXT_PTR_CONST strings)
+void bsaclAcquireEvalFuncByStrings(char ** __RESTRICT_PTR __EXT_PTR_CONST strings)
 {
    if (has_halted__ == 1U) return;
 #ifndef BSACL_USE_CUDA__
@@ -1845,7 +1845,7 @@ void bsaclAcquireEvalFuncByStrings(char **__EXT_PTR_CONST strings)
 }
 
 
-void bsaclAcquireEvalFuncByFile(char *__EXT_PTR_CONST filename)
+void bsaclAcquireEvalFuncByFile(char * __RESTRICT_PTR __EXT_PTR_CONST filename)
 {
    if (has_halted__ == 1U) return;
 #ifndef BSACL_USE_CUDA__
@@ -1868,7 +1868,7 @@ void bsaclAcquireEvalFuncByFile(char *__EXT_PTR_CONST filename)
  *
  * */
 void bsaclAcquireComputationFreqs(const unsigned i_thread,
-      const uint32_t nfi, __real *__EXT_PTR_CONST fi, const uint32_t nfj, __real *__EXT_PTR_CONST fj) 
+      const uint32_t nfi, __real * __RESTRICT_PTR __EXT_PTR_CONST fi, const uint32_t nfj, __real * __RESTRICT_PTR __EXT_PTR_CONST fj) 
 {
    if (has_halted__ == 1U) return;
    if (bsacl_init_called__ == 0U) {
@@ -1892,7 +1892,7 @@ void bsaclAcquireComputationFreqs(const unsigned i_thread,
  * @brief Deprecated.
  *
  * */
-void bsaclAcquireBaseWindTurbPSD(__real *__EXT_PTR_CONST S_uvw)
+void bsaclAcquireBaseWindTurbPSD(__real * __RESTRICT_PTR __EXT_PTR_CONST S_uvw)
 {
    if (has_halted__ == 1U) return;
    S_uvw__ = S_uvw;
@@ -1943,7 +1943,7 @@ void bsaclSetDeviceType(const uint32_t itype)
  *        1 otherwise.
  *
  * */
-void bsaclVerifyMaxAllocCondition(size_t idim, unsigned int *__EXT_PTR_CONST ican)
+void bsaclVerifyMaxAllocCondition(size_t idim, unsigned int * __RESTRICT_PTR __EXT_PTR_CONST ican)
 {
    if (has_halted__ == 1U) return;
 #ifndef BSACL_USE_CUDA__

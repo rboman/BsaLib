@@ -184,28 +184,28 @@ KERNEL void bfm_kernel(
 #ifndef BSACL_PASS_PARAMS_BY_MACRO__
       const    UINT          NTC__,
 #endif
-      CONSTANT UINT          *tc,
+      CONSTANT UINT          *__RESTRICT_PTR_CL tc,
 #ifndef BSACL_PASS_PARAMS_BY_MACRO__
       const    UINT          NNL__,
       const    UINT          NM_EFF__,
       const    UINT          NDEGW__,
 #endif
-      const    GLOBAL  UINT        *nodes_load,
-      const    GLOBAL  BSACL_REAL  *phiTc,
+      const    GLOBAL  UINT        *__RESTRICT_PTR_CL nodes_load,
+      const    GLOBAL  BSACL_REAL  *__RESTRICT_PTR_CL phiTc,
 #ifndef BSACL_PASS_PARAMS_BY_MACRO__
       const    UINT          NN__,
       const    UINT          NNOD_CORR__,   // BUG: NOT used
 #endif
-      const    GLOBAL   BSACL_REAL  *nod_corr,
-      const    GLOBAL   BSACL_REAL  *wind_nod_vel,
-      const    GLOBAL   BSACL_REAL  *wind_turb_scl,
-      const    GLOBAL   BSACL_REAL  *wind_turb_std,
-      const    GLOBAL   int         *wind_nod_winz,
-      GLOBAL   BSACL_REAL   *fi,
+      const    GLOBAL   BSACL_REAL  *__RESTRICT_PTR_CL nod_corr,
+      const    GLOBAL   BSACL_REAL  *__RESTRICT_PTR_CL wind_nod_vel,
+      const    GLOBAL   BSACL_REAL  *__RESTRICT_PTR_CL wind_turb_scl,
+      const    GLOBAL   BSACL_REAL  *__RESTRICT_PTR_CL wind_turb_std,
+      const    GLOBAL   int         *__RESTRICT_PTR_CL wind_nod_winz,
+      GLOBAL   BSACL_REAL   *__RESTRICT_PTR_CL fi,
 #ifndef BSACL_PASS_PARAMS_BY_MACRO__
       const    UINT         NFI__,
 #endif
-      GLOBAL   BSACL_REAL   *fj,
+      GLOBAL   BSACL_REAL   *__RESTRICT_PTR_CL fj,
 #ifndef BSACL_PASS_PARAMS_BY_MACRO__
       const    UINT         NFJ__,
 #endif
@@ -410,34 +410,34 @@ KERNEL void bfm_kernel(
 #ifndef BSACL_PASS_PARAMS_BY_MACRO__
       const    UINT          NTC__,
 #endif
-      CONSTANT UINT          *tc,
+      CONSTANT UINT          *__RESTRICT_PTR_CL tc,
 #ifndef BSACL_PASS_PARAMS_BY_MACRO__
       const    UINT          NNL__,
       const    UINT          NM_EFF__,
       const    UINT          NDEGW__,
 #endif
-      const    GLOBAL  UINT    *nodes_load,
-      const    GLOBAL  __real  *phiTc,
+      const    GLOBAL  UINT    *__RESTRICT_PTR_CL nodes_load,
+      const    GLOBAL  __real  *__RESTRICT_PTR_CL phiTc,
 #ifndef BSACL_PASS_PARAMS_BY_MACRO__
       const    UINT            NN__,
       const    UINT            NNOD_CORR__,   // BUG: NOT used
 #endif
-      const    GLOBAL  __real  *nod_corr,
-      const    GLOBAL  __real  *wind_nod_vel,
-      const    GLOBAL  __real  *wind_turb_scl,
-      const    GLOBAL  __real  *wind_turb_std,
-      const    GLOBAL  int     *wind_nod_winz,
-      const    GLOBAL  __real  *Mg,
-      const    GLOBAL  __real  *Cg,
-      const    GLOBAL  __real  *Kg,
+      const    GLOBAL  __real  *__RESTRICT_PTR_CL nod_corr,
+      const    GLOBAL  __real  *__RESTRICT_PTR_CL wind_nod_vel,
+      const    GLOBAL  __real  *__RESTRICT_PTR_CL wind_turb_scl,
+      const    GLOBAL  __real  *__RESTRICT_PTR_CL wind_turb_std,
+      const    GLOBAL  int     *__RESTRICT_PTR_CL wind_nod_winz,
+      const    GLOBAL  __real  *__RESTRICT_PTR_CL Mg,
+      const    GLOBAL  __real  *__RESTRICT_PTR_CL Cg,
+      const    GLOBAL  __real  *__RESTRICT_PTR_CL Kg,
 #ifndef BSACL_PASS_PARAMS_BY_MACRO__
       const    UINT     NFI__,
 #endif
-      GLOBAL   __real   *fi,
+      GLOBAL   __real   *__RESTRICT_PTR_CL fi,
 #ifndef BSACL_PASS_PARAMS_BY_MACRO__
       const    UINT     NFJ__,
 #endif
-      GLOBAL   __real   *fj,
+      GLOBAL   __real   *__RESTRICT_PTR_CL fj,
       GLOBAL __real *m3out
 )
 {
