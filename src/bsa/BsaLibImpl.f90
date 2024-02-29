@@ -341,6 +341,9 @@ contains
             ibispsym = BSA_SPATIAL_SYM_NONE
          endif
 
+         ! BUG: we need to set to 1 if NONE, multiplies moments
+         if (ibispsym == BSA_SPATIAL_SYM_NONE) ibispsym = 1
+
          if (ibispsym == BSA_SPATIAL_SYM_FOUR .and. settings%i_3d_sym_ == 1) then
             print '(1x, a, a)', WARNMSG, 'Cannot use 3D matrix symmetry if computing only 1/4 in space.'
             print '(1x, a, a)', MSGCONT, 'Disabling it..'
