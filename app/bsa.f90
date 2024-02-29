@@ -75,9 +75,6 @@ module data
    real(bsa_real_t), target, allocatable :: r_xsist_(:), r_xsiad_(:)
 #endif
 
-   logical :: use_custom_damping_ = .false.
-   real(bsa_real_t), allocatable :: custom_damp_val_(:)
-
    integer(int32) :: i_exprt_mode_ = BSA_EXPORT_MODE_REPLACE
    integer(int32) :: i_exprt_form_ = BSA_EXPORT_FORMAT_FORMATTED
    logical :: export_results_to_files_ = .true.
@@ -136,12 +133,6 @@ program bsa
 
    call setup()
 
-   ! NOTE: save in r_xsist the total, before pass it
-   if (use_custom_damping_) then
-      print '(1x, 2a, g, a)', &
-         WARNMSG, 'Using custom damping of  ', custom_damp_val_(1), '  for all modes.'
-      r_xsist(:) = real(custom_damp_val_(1), kind=real64)
-   endif
 #ifdef BSA_SINGLE_FLOATING_PRECISION
    call bsa_setTotDamping(r_xsist_)
 #else
@@ -378,12 +369,6 @@ contains ! utility procedures
       print *, '        valid  <val>  values:'
       print *, '           formatted, unformatted (default)'
       print *
-      print *, '   --force-damping, -force-damping, /force-damping  <val>'
-      print *, '        If specified, uses  <val>  damping for all modes.'
-      print *, '        For multiple values (parametric analysis), separate'
-      print *, '        values using semicolon, ex.  val1;val2;val3;etc..'
-      print *, '        In such cases, BSA core is run multiple times.'
-      print *
       print *, '   --append-exports, -append-exports, /append-exports'
       print *, '        Appends to instead of overriding existing export files.'
       print *
@@ -470,13 +455,6 @@ contains ! utility procedures
                         call usage()
                   end select
 
-               case ('force-damping')
-                  currargc = currargc + 1
-                  call get_command_argument(currargc, arg, status=istat)
-                  if (istat /= 0) call usage()
-                  call getCustomXSIValues_(arg)
-
-
                case ('append-exports')
                   i_exprt_mode_ = BSA_EXPORT_MODE_APPEND
 
@@ -500,83 +478,12 @@ contains ! utility procedures
             end select
 
             if (currargc == argc) exit ! parsing finished
-
-            ! go to next input arg
-            currargc = currargc + 1
+            currargc = currargc + 1    ! go to next input arg
          enddo
 
       end block
 
    end subroutine parseArgs
-
-
-
-
-
-   subroutine getCustomXSIValues_(arg)
-      character(len = *), intent(in) :: arg
-      integer :: iich, iech, lench, ixsi
-      ! BUG: limits to 20 xsi values. Allow infinite.
-      real(bsa_real_t) :: xsi_(20)
-
-      lench = len_trim(arg)
-      if (lench == 0) goto 99
-      iich = 1
-      iech = 1
-      ixsi = 0
-      do while (iech <= lench)
-         if (arg(iech:iech) == ';') then
-            ixsi = ixsi + 1
-            read(unit=arg(iich : iech-1), fmt='(f)', err=99) xsi_(ixsi)
-            iech = iech + 1
-            iich = iech
-         else
-            iech = iech + 1
-         endif
-      enddo
-      ! NOTE: treat last one (only one if no semicolon found)
-      ixsi = ixsi + 1
-      read(unit=arg(iich : iech), fmt='(f)', err=99) xsi_(ixsi)
-
-      ! if we get here, correctly read
-      use_custom_damping_ = .true.
-      custom_damp_val_    = xsi_(1 : ixsi)
-      return
-
-      99 print '(1x, a, a)', &
-         ERRMSG, 'Error while parsing damping values. Please check again.'
-      call usage()
-   end subroutine
-
-
-
-
-
-   ! subroutine allocGlobFromLocSizes(loc, glob, n)
-   !    real(bsa_real_t), allocatable, intent(in)  :: loc(:)
-   !    real(bsa_real_t), allocatable, intent(out) :: glob(:, :)
-   !    integer, intent(in) :: n
-   !    integer :: dim
-
-   !    if (allocated(loc)) then
-   !       dim = size(loc)
-   !       allocate(glob(dim, n))
-   !    endif
-   ! end subroutine
-
-
-   ! subroutine moveAllocToGlob(glob, loc, idx)
-   !    real(bsa_real_t), intent(out) :: glob(:, :)
-   !    real(bsa_real_t), allocatable :: loc(:)
-   !    integer, intent(in) :: idx
-
-   !    if (allocated(loc)) then
-   !       ! is a memcpy
-   !       glob(:, idx) = loc
-   !       deallocate(loc)
-   !    endif
-   ! end subroutine
-
 
 
 
