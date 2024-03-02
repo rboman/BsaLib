@@ -590,8 +590,8 @@ contains
 
    subroutine setExportPathPrefix_()
       if (export_in_cwd_) then
-         exp_dir_ = ''
-         out_dir_ = ''
+         exp_dir_ = ' '
+         out_dir_ = ' '
       else
          if (allocated(exp_dir_)) return
          if (.not. allocated(out_dir_)) out_dir_ = BSA_OUT_DIRNAME_DEFAULT
