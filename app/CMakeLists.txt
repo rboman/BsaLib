@@ -29,6 +29,10 @@
 
 add_executable( bsa bsa.f90 )
 
+if (enable-openmp)
+   set_target_properties( bsa PROPERTIES OUTPUT_NAME bsa_omp )
+endif()
+
 target_link_libraries( bsa BsaLib )
 
 if (intel-compiler)
