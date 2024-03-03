@@ -619,10 +619,12 @@ end subroutine __sub_name_compute
       ! get n. of BFM refinement segments (between two old ones)
       n_segs_bfm_ref_i_ = 1 ! original
       n_segs_bfm_ref_j_ = 1
-      do i = 1, this%policy_%n_interp_bfm_lvs_
-         n_segs_bfm_ref_i_ = n_segs_bfm_ref_i_ * this%policy_%interp_bfm_I_fct_
-         n_segs_bfm_ref_j_ = n_segs_bfm_ref_j_ * this%policy_%interp_bfm_J_fct_
-      enddo
+      if (.not. is_visual_) then
+         do i = 1, this%policy_%n_interp_bfm_lvs_
+            n_segs_bfm_ref_i_ = n_segs_bfm_ref_i_ * this%policy_%interp_bfm_I_fct_
+            n_segs_bfm_ref_j_ = n_segs_bfm_ref_j_ * this%policy_%interp_bfm_J_fct_
+         enddo
+      endif
       n_pts_bfm_ref_i_ = n_segs_bfm_ref_i_ - 1
       n_pts_bfm_ref_j_ = n_segs_bfm_ref_j_ - 1
 
@@ -711,10 +713,12 @@ end subroutine __sub_name_compute
       ! get n. of BFM refinement segments (between two old ones)
       n_segs_bfm_ref_i_ = 1 ! original
       n_segs_bfm_ref_j_ = 1
-      do i = 1, pol%n_interp_bfm_lvs_
-         n_segs_bfm_ref_i_ = n_segs_bfm_ref_i_ * pol%interp_bfm_I_fct_
-         n_segs_bfm_ref_j_ = n_segs_bfm_ref_j_ * pol%interp_bfm_J_fct_
-      enddo
+      if (.not. is_visual_) then
+         do i = 1, pol%n_interp_bfm_lvs_
+            n_segs_bfm_ref_i_ = n_segs_bfm_ref_i_ * pol%interp_bfm_I_fct_
+            n_segs_bfm_ref_j_ = n_segs_bfm_ref_j_ * pol%interp_bfm_J_fct_
+         enddo
+      endif
       dfI_bfm_lv0_ = this%deltaf_I_
       dfI_bfm_ref_ = dfI_bfm_lv0_ / n_segs_bfm_ref_i_
       dfJ_bfm_lv0_ = this%deltaf_J_
@@ -724,7 +728,7 @@ end subroutine __sub_name_compute
       ! Validate BFM_ref deltas
       ! NOTE: for the moment, check only if too coarse. 
       !       Later on, check also if too fine!
-      if (do_validate_deltas_) then
+      if (do_validate_deltas_ .and. .not.is_visual_) then
 
          ! NOTE: 0 denotes that interest modes are to be inferenced from index 1.
          !       In fact, there are 3 scenarios.
@@ -781,7 +785,8 @@ end subroutine __sub_name_compute
                dfJ_bfm_ref_      = dfJ_bfm_lv0_ / n_segs_bfm_ref_j_
             enddo
          endif
-      endif
+      endif  ! do_validate_deltas_ .and. .not.is_visual_
+
       n_pts_bfm_ref_i_ = n_segs_bfm_ref_i_ - 1
       n_pts_bfm_ref_j_ = n_segs_bfm_ref_j_ - 1
 
