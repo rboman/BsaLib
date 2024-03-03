@@ -673,9 +673,7 @@ contains
             call rz%compute()
 #ifndef BSA_USE_POD_DATA_CACHING
             n_bfm_pts_pre_ = n_bfm_pts_pre_ + rz%zoneTotNPts()
-#endif
 
-#ifndef BSA_USE_POD_DATA_CACHING
             !$omp critical
             call logZonePremeshingTotTime_(zone_title, timer%time(), n_bfm_pts_pre_)
             !$omp end critical
@@ -1456,7 +1454,7 @@ contains
       if (do_export_brm_base_) brm_export_base_data_%i_doNotPrintGenHeader_ = 1   ! now we can disable gen header print
 
 #ifndef BSA_USE_POD_DATA_CACHING
-# ifdef _OPENMP
+# if  (defined(_OPENMP)) && (defined(BSA_USE_POST_MESH_OMP))
       deallocate(bfm_undump)  !<-- better to copy a null pointer than a whole bunch of memory.
       if (associated(brm_export_data_)) brm_export_data_ => null()
 # endif
@@ -1466,12 +1464,13 @@ contains
 
       ! NOTE: no need to check for EOF. We know how many zones we have dumped.
       !
+#if  (defined(_OPENMP)) && (defined(BSA_USE_POST_MESH_OMP))
       !$omp parallel do &
       !$omp   firstprivate(brm_export_base_data_, brm_export_data_), &
       !$omp   private(z, rz, tz, izone_id), &
-#ifndef BSA_USE_POD_DATA_CACHING
+# ifndef BSA_USE_POD_DATA_CACHING
       !$omp   private(bfm_undump), &
-#endif
+# endif
       !$omp   shared(struct_data, wd, settings                                 &
       !$omp          , NFREQS, NNODES, NNODESL, NLIBS, NLIBSL, NMODES_EFF      &
       !$omp          , NPSDEL, NTCOMPS, NDIRS, TCOMPS, DIRS, NMODES, MODES     &
@@ -1482,9 +1481,12 @@ contains
       !$omp          , is_visual_, is_brn_export_, visual_idx_                 &
       !$omp          , dimM_bisp_, getBFM_msh, getBRM_msh, write_brm_fptr_),   &
       !$omp   num_threads(n_threads)
+#endif
       do izone_ = 2, nzones
 
+#if  (defined(_OPENMP)) && (defined(BSA_USE_POST_MESH_OMP))
          !$omp critical
+#endif
          read(unit_dump_bfm_) izone_id   ! fetch zone type ID
 
          izone = izone + 1
@@ -1498,7 +1500,9 @@ contains
             call UndumpZone( tz   __bfm_undump__)
             z => tz
          endif
+#if  (defined(_OPENMP)) && (defined(BSA_USE_POST_MESH_OMP))
          !$omp end critical
+#endif
 
          ! brm_export_base_data_%i_doNotPrintZonHeader_ = 0
          if (do_export_brm_base_) then
@@ -1507,7 +1511,9 @@ contains
          endif
          call z%interpolate(__bfm_undump_interp__   brm_export_data_)
       enddo ! nZones
+#if  (defined(_OPENMP)) && (defined(BSA_USE_POST_MESH_OMP))
       !$omp end parallel do
+#endif
 
 #ifndef BSA_USE_POD_DATA_CACHING
       if (allocated(bfm_undump)) deallocate(bfm_undump)

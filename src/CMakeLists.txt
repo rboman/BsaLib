@@ -66,8 +66,10 @@ set_target_properties( ${project}
 )
 
 
-# TODO: experimental
-target_compile_definitions( ${project} PRIVATE BSA_USE_POD_DATA_CACHING )
+# # TODO: experimental
+# target_compile_definitions( ${project} PRIVATE BSA_USE_POD_DATA_CACHING )
+# target_compile_definitions( ${project} PRIVATE BSA_USE_POST_MESH_OMP )
+
 
 
 # TODO: see if we can manage this better

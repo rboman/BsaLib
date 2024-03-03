@@ -211,11 +211,15 @@ contains
       endif
 
 
+#if (defined(_OPENMP)) && (defined(BSA_DEBUG))
+      print '(1x, a, a)', NOTEMSG, 'This version has been compiled with OpenMP support.'
+#endif
       print *
+
       block
          integer(int32) :: itmp
 
-         call validateAll_() ! check before doing some bad things..
+         call validateAll_()              ! check before doing some bad things..
          call setBsaFunctionLocalVars()   ! NOTE: reset internal state, if something has been changed
          call io_printUserData()
 
@@ -1777,7 +1781,6 @@ contains
       class(*), pointer, intent(in) :: pdata
 
       ! Need to verify if to print headers
-      ! !$omp critical
       if (associated(pdata)) then
          select type (pdata)
             type is (BrmExportBaseData_t)
@@ -1805,7 +1808,6 @@ contains
             endif
          enddo
       endblock
-      ! !$omp end critical
    end subroutine
 
 
