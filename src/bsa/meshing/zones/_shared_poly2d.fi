@@ -64,7 +64,7 @@ __mod_sub_compute subroutine __sub_name_compute(this)
 # endif
 #endif
 
-#ifdef _BSA_USE_CACHED_POD_DATA
+#ifdef BSA_USE_POD_DATA_CACHING
 # define __bfm_dump__
 #else
 # define __bfm_dump__  ,bfm
@@ -93,7 +93,7 @@ __mod_sub_compute subroutine __sub_name_compute(this)
 
 
    block
-#ifndef _BSA_USE_CACHED_POD_DATA
+#ifndef BSA_USE_POD_DATA_CACHING
 
 ! === Common declarations
       integer(int32) :: i, j
@@ -421,7 +421,7 @@ __mod_sub_compute subroutine __sub_name_compute(this)
       if (zNp > msh_max_zone_NPts) msh_max_zone_NPts = zNp
 
 
-#else  ! _BSA_USE_CACHED_POD_DATA  defined
+#else  ! BSA_USE_POD_DATA_CACHING  defined
 
       !$omp critical
 #endif
@@ -452,12 +452,12 @@ end subroutine __sub_name_compute
 
 
 
-#if (defined(_BSA_USE_CACHED_POD_DATA)) || (!defined(_BSA_M3MF_ONLY_PREMESH))
+#if (defined(BSA_USE_POD_DATA_CACHING)) || (!defined(_BSA_M3MF_ONLY_PREMESH))
 # define __update_m3mf__
 #endif
 
    subroutine __sub_name_interp( this &
-#ifndef _BSA_USE_CACHED_POD_DATA
+#ifndef BSA_USE_POD_DATA_CACHING
       & , bfm_undump &
 #endif
       & , pdata )
@@ -469,8 +469,8 @@ end subroutine __sub_name_compute
          , m3mf_msh_ptr_            &
 #endif
          , m3mr_msh_ptr_, settings  &
-         , msh_bfmpts_post_, msh_brmpts_post_      &
-         , BrmExportBaseData_t, do_export_brm_     &
+         , msh_bfmpts_post_, msh_brmpts_post_               &
+         , BrmExportBaseData_t, do_export_brm_, is_visual_  &
 #ifndef __triang_zone__
          , do_validate_deltas_, msh_ZoneLimsInterestModes, peak_exts_ &
          , I_BKG_PEAK_DELTAF_BFM_REFMT_FCT_, I_RES_PEAK_DELTAF_BFM_REFMT_FCT_ &
@@ -483,7 +483,7 @@ end subroutine __sub_name_compute
 #endif
       !
       class(__this_type), intent(inout) :: this
-#ifndef _BSA_USE_CACHED_POD_DATA
+#ifndef BSA_USE_POD_DATA_CACHING
       real(RK), intent(in)          :: bfm_undump(:, :)
 #endif
       class(*), pointer, intent(in) :: pdata
@@ -541,7 +541,7 @@ end subroutine __sub_name_compute
       real(RK), pointer :: fi_ptr(:) => null(), fj_ptr(:) => null()
 #ifdef __new_interp_proc__
       real(RK), allocatable :: fi_v_(:), fj_v_(:)
-# ifdef _BSA_USE_CACHED_POD_DATA
+# ifdef BSA_USE_POD_DATA_CACHING
       real(RK), allocatable :: bfm_undump(:, :)
       integer(int32) :: i_bfm
 #   ifdef __triang_zone__
@@ -576,7 +576,7 @@ end subroutine __sub_name_compute
 #endif  ! __update_m3mf__
 
 
-! #if (defined(_BSA_USE_CACHED_POD_DATA)) || (defined(__update_m3mf__))
+! #if (defined(BSA_USE_POD_DATA_CACHING)) || (defined(__update_m3mf__))
 ! #  define __local_debug_write__
 ! #endif
 
@@ -899,7 +899,7 @@ end subroutine __sub_name_compute
 
 
 #ifdef __new_interp_proc__
-# ifdef _BSA_USE_CACHED_POD_DATA
+# ifdef BSA_USE_POD_DATA_CACHING
 
       ! *********************************************************
       ! BUG:  NOTE, this works only if rot=={0, 90, 180, 270} !!!
@@ -936,7 +936,7 @@ end subroutine __sub_name_compute
 #   endif
       deallocate(fi_v_)
       deallocate(fj_v_)
-# endif  ! _BSA_USE_CACHED_POD_DATA  defined
+# endif  ! BSA_USE_POD_DATA_CACHING  defined
 
 
       allocate(fi_v_(nPtsPost), stat=ist)
@@ -964,7 +964,7 @@ end subroutine __sub_name_compute
 #endif
 
 
-      if (do_export_brm_ .and. associated(pdata)) then
+      if ((is_visual_ .or. do_export_brm_) .and. associated(pdata)) then
          select type (pdata)
             class is (BrmExportBaseData_t)
                pdata%nI_ = ni
@@ -989,7 +989,7 @@ end subroutine __sub_name_compute
       fi_baseptJ(1) = fi(1)
       fj_baseptJ(1) = fj(1)
 
-#if (!(defined(_BSA_USE_CACHED_POD_DATA))) && (defined(__local_debug_write__))
+#if (!(defined(BSA_USE_POD_DATA_CACHING))) && (defined(__local_debug_write__))
       ifj = 1
       fj_v_save_(1) = fj_baseptJ(1)
 
@@ -997,7 +997,7 @@ end subroutine __sub_name_compute
       fi_v_save_(1) = fi_baseptJ(1)
 #endif
 
-#ifdef _BSA_USE_CACHED_POD_DATA
+#ifdef BSA_USE_POD_DATA_CACHING
 # ifdef __triang_zone__
       i_bfm_offs         = 0
 # endif
@@ -1026,7 +1026,7 @@ end subroutine __sub_name_compute
             ! compute head
             fi_baseptJ(1) = fi_baseptJ(1) + dfJi_bfm_ref_
             fj_baseptJ(1) = fj_baseptJ(1) + dfJj_bfm_ref_
-#ifdef _BSA_USE_CACHED_POD_DATA
+#ifdef BSA_USE_POD_DATA_CACHING
             i_bfm   = i_bfm + 1
             bfmhead = bfm_undump(:, i_bfm:i_bfm)
 #else
@@ -1065,7 +1065,7 @@ end subroutine __sub_name_compute
             fi(1) = fi(1) + dfJi_brm_interp
             fj(1) = fj(1) + dfJj_brm_interp
 
-#if (!(defined(_BSA_USE_CACHED_POD_DATA))) && (defined(__local_debug_write__))
+#if (!(defined(BSA_USE_POD_DATA_CACHING))) && (defined(__local_debug_write__))
             ifj = ifj + 1
             fj_v_save_(ifj) = fj_baseptJ(1)
 #endif
@@ -1096,7 +1096,7 @@ end subroutine __sub_name_compute
          !
          ! next head is an OLD BFM (next) mesh point!
          !
-#ifdef _BSA_USE_CACHED_POD_DATA
+#ifdef BSA_USE_POD_DATA_CACHING
          i_bfm         = i_bfm + 1
          bfmhead(:, 1) = bfm_undump(:, i_bfm)
 #else
@@ -1155,7 +1155,7 @@ end subroutine __sub_name_compute
                      'BAD (3): fi or fj at the end of a BFM ref segment does not coincide with reference.')
 #endif
 
-#if (!(defined(_BSA_USE_CACHED_POD_DATA))) && (defined(__local_debug_write__))
+#if (!(defined(BSA_USE_POD_DATA_CACHING))) && (defined(__local_debug_write__))
          ifj = ifj + 1
          fj_v_save_(ifj) = fj(1)
 #endif
@@ -1228,7 +1228,7 @@ end subroutine __sub_name_compute
             fj_baseptJ(1) = fj_baseptI + dfIj_bfm_ref_
             fi(1)         = fi_baseptJ(1)
             fj(1)         = fj_baseptJ(1)
-#ifdef _BSA_USE_CACHED_POD_DATA
+#ifdef BSA_USE_POD_DATA_CACHING
             i_bfm   = i_bfm + 1
             bfmtail = bfm_undump(:, i_bfm:i_bfm)
 #else
@@ -1240,7 +1240,7 @@ end subroutine __sub_name_compute
             bfm_new_right(:, 1) = bfmtail(:, 1)
 
 
-#if (!(defined(_BSA_USE_CACHED_POD_DATA))) && (defined(__local_debug_write__))    
+#if (!(defined(BSA_USE_POD_DATA_CACHING))) && (defined(__local_debug_write__))    
             ifi = ifi + 1
             fi_v_save_(ifi) = fi_baseptJ(1)
 #endif
@@ -1267,7 +1267,7 @@ end subroutine __sub_name_compute
 
                   fi_baseptJ(1) = fi_baseptJ(1) + dfJi_bfm_ref_
                   fj_baseptJ(1) = fj_baseptJ(1) + dfJj_bfm_ref_
-#ifdef _BSA_USE_CACHED_POD_DATA
+#ifdef BSA_USE_POD_DATA_CACHING
                   i_bfm   = i_bfm + 1
                   bfmhead = bfm_undump(:, i_bfm:i_bfm)
 #else
@@ -1343,7 +1343,7 @@ end subroutine __sub_name_compute
                ! NOTE: it is a center point, except for the very last one (BORDER)
                fi_baseptJ(1) = fi_baseptJ(1) + dfJi_bfm_ref_
                fj_baseptJ(1) = fj_baseptJ(1) + dfJj_bfm_ref_
-#ifdef _BSA_USE_CACHED_POD_DATA
+#ifdef BSA_USE_POD_DATA_CACHING
                i_bfm   = i_bfm + 1
                bfmhead = bfm_undump(:, i_bfm:i_bfm)
 #else
@@ -1416,7 +1416,7 @@ end subroutine __sub_name_compute
 
                fi_baseptJ(1) = fi_baseptJ(1) + dfJi_bfm_ref_
                fj_baseptJ(1) = fj_baseptJ(1) + dfJj_bfm_ref_
-# ifdef _BSA_USE_CACHED_POD_DATA
+# ifdef BSA_USE_POD_DATA_CACHING
                i_bfm   = i_bfm + 1
                bfmhead = bfm_undump(:, i_bfm:i_bfm)
 # else
@@ -1634,7 +1634,7 @@ end subroutine __sub_name_compute
 
             ! moving right, shift infl-lines.
 #ifdef __triang_zone__
-# ifdef _BSA_USE_CACHED_POD_DATA
+# ifdef BSA_USE_POD_DATA_CACHING
             i_bfm_offs = i_bfm_offs + 1 
             i_bfm      = i_bfm + i_bfm_offs
 # endif
@@ -1672,7 +1672,7 @@ end subroutine __sub_name_compute
          fi(1)         = fi_baseptJ(1)
          fj(1)         = fj_baseptJ(1)
 
-#ifdef _BSA_USE_CACHED_POD_DATA
+#ifdef BSA_USE_POD_DATA_CACHING
          i_bfm         = i_bfm + 1
          bfmtail(:, 1) = bfm_undump(:, i_bfm)
 #else
@@ -1684,7 +1684,7 @@ end subroutine __sub_name_compute
 #endif
          bfm_new_right(:, 1) = bfmtail(:, 1)
 
-#if (!(defined(_BSA_USE_CACHED_POD_DATA))) && (defined(__local_debug_write__))   
+#if (!(defined(BSA_USE_POD_DATA_CACHING))) && (defined(__local_debug_write__))   
          ifi = ifi + 1
          fi_v_save_(ifi) = fi_baseptJ(1)
 #endif
@@ -1711,7 +1711,7 @@ end subroutine __sub_name_compute
 
                fi_baseptJ(1) = fi_baseptJ(1) + dfJi_bfm_ref_
                fj_baseptJ(1) = fj_baseptJ(1) + dfJj_bfm_ref_
-#ifdef _BSA_USE_CACHED_POD_DATA
+#ifdef BSA_USE_POD_DATA_CACHING
                i_bfm   = i_bfm + 1
                bfmhead = bfm_undump(:, i_bfm:i_bfm)
 #else
@@ -1781,7 +1781,7 @@ end subroutine __sub_name_compute
             fi_baseptJ(1) = fi_baseptJ(1) + dfJi_bfm_ref_
             fj_baseptJ(1) = fj_baseptJ(1) + dfJj_bfm_ref_
 
-#ifdef _BSA_USE_CACHED_POD_DATA
+#ifdef BSA_USE_POD_DATA_CACHING
             i_bfm         = i_bfm + 1
             bfmhead(:, 1) = bfm_undump(:, i_bfm)
 #else
@@ -2026,7 +2026,7 @@ end subroutine __sub_name_compute
 
 
 #ifdef __triang_zone__
-# ifdef _BSA_USE_CACHED_POD_DATA
+# ifdef BSA_USE_POD_DATA_CACHING
          i_bfm_offs = i_bfm_offs + 1 
          i_bfm      = i_bfm + i_bfm_offs
 # endif

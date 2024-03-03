@@ -23,7 +23,16 @@ submodule(BsaLib) BsaLib_ClassicImpl
 #endif
    implicit none (type, external)
 
+
 contains
+
+
+   module subroutine bsa_forceBsaClsExecution(bool)
+      logical, intent(in) :: bool
+      force_cls_execution_ = bool
+   end subroutine
+
+
 
 
    !> BUG: now only supports EVENLY SPACED FREQUENCIES..
@@ -38,10 +47,9 @@ contains
 
       call computeFreqsVect_(settings, struct_data, f)
 
-      ! NOTE: reset in case NFREQs has been changed in previous call
-      NFREQS = settings%nfreqs_
+      NFREQS = settings%nfreqs_ ! NOTE: reset in case NFREQs has been changed in previous call
 
-      call io_printUserData()
+      if (settings%i_suban_type_ == 1) call io_printUserData()
 
       ! some shared memory allocation
       if (settings%i_compute_psd_ == 1) then

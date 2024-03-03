@@ -75,13 +75,13 @@ module BsaLib_MZone
       end subroutine
 
       subroutine intf_MZoneInterp_(this &
-#ifndef _BSA_USE_CACHED_POD_DATA
+#ifndef BSA_USE_POD_DATA_CACHING
          & , bfm &
 #endif
          &, pdata)
          import :: MZone_t, bsa_real_t
          class(MZone_t), intent(inout) :: this
-#ifndef _BSA_USE_CACHED_POD_DATA
+#ifndef BSA_USE_POD_DATA_CACHING
          real(bsa_real_t), intent(in)  :: bfm(:, :)
 #endif
          class(*), pointer, intent(in) :: pdata
@@ -148,7 +148,7 @@ contains
 
 
 
-#ifdef _BSA_USE_CACHED_POD_DATA
+#ifdef BSA_USE_POD_DATA_CACHING
 # define __bfm_dump__
 # define __decl__
 #else
@@ -187,14 +187,14 @@ contains
       ! ! deferred knowing num of zone's meshing points
       ! tot = size(data)
       ! write(unit_dump_bfm_) tot
-#ifndef _BSA_USE_CACHED_POD_DATA
+#ifndef BSA_USE_POD_DATA_CACHING
       write(unit_dump_bfm_) data ! NOTE: dimBISP first, then nj * ni
 #endif
    end subroutine DumpZone
 
 
 
-#ifdef _BSA_USE_CACHED_POD_DATA
+#ifdef BSA_USE_POD_DATA_CACHING
 # define __bfm_dump__
 # define __decl__
 #else
@@ -221,12 +221,12 @@ contains
       read(unit_dump_bfm_) zNp
       call z%setPolicy(zNp)
       if (test_no_bfm_mlr_) call z%disableZonePolicyBfmMLR()
-      
+
       ! zone interest modes index ptr
       read(unit_dump_bfm_) z%id_im_
 
 
-#ifndef _BSA_USE_CACHED_POD_DATA
+#ifndef BSA_USE_POD_DATA_CACHING
       ! once zone is undumped, get its N. of points
       ! NOTE: needed in order to correctly index into bfm_undump !
       zNp = z%zoneTotNPts()

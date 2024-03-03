@@ -79,6 +79,9 @@ module data
    integer(int32) :: i_exprt_form_ = BSA_EXPORT_FORMAT_FORMATTED
    logical :: export_results_to_files_ = .true.
 
+   logical :: is_visual_       = .false.
+   logical :: is_visual_nodal_ = .false.
+
 end module data
 
 
@@ -99,7 +102,6 @@ program bsa
    real(bsa_real_t), target, allocatable :: m2mf_(:), m2mr_(:), m2o2mr_(:)   ! NOTE: implicitly classic
    real(bsa_real_t), target, allocatable :: m3mf_cls_(:), m3mr_cls_(:)
    real(bsa_real_t), target, allocatable :: m3mf_msh_(:), m3mr_msh_(:)
-
 
    real(bsa_real_t), allocatable, dimension(:) :: m2_r_diag, m3_r_diag, sk_r_diag, m2o2_r_diag
    real(bsa_real_t), allocatable, dimension(:) :: m2_r_full, m3_r_full, sk_r_full, m2o2_r_full
@@ -144,8 +146,7 @@ program bsa
    call bsa_Run(m2mf_, m2mr_, m2o2mr_, m3mf_msh_, m3mr_msh_, m3mf_cls_, m3mr_cls_)
 
    ! POST-PROCESSING
-   if (export_results_to_files_) then
-
+   if (export_results_to_files_ .and. .not.is_visual_) then
 
       if (i_onlyd == 1) then
          cmb_sffx = 'diag' // BSA_FILE_NAME_CL_SUFFIX
@@ -364,22 +365,32 @@ contains ! utility procedures
       print *, ' Syntax:'
       print *, '    bsa.exe  [[options] file]'
       print *
-      print *, ' options:'
-      print *, '   --readmode, -readmode, /readmode  <val>'
+      print *, ' NOTE: every command option can be preceded by "-", "--" or "/"'
+      print *
+      print *, ' Options:'
+      print *, '   readmode  <val>'
       print *, '        valid  <val>  values:'
       print *, '           formatted, unformatted (default)'
       print *
-      print *, '   --append-exports, -append-exports, /append-exports'
+      print *, '   append-exports'
       print *, '        Appends to instead of overriding existing export files.'
       print *
-      print *, '   --export-binary, -export-binary, /export-binary'
+      print *, '   export-binary'
       print *, '        Exports results using unformatted (binary) files.'
       print *
-      print *, '   --no-export, -no-export, /no-export'
+      print *, '   no-export'
       print *, '        Do not export results to files.'
       print *
-      print *, '   --out-file, -out-file, /out-file  <outfilename>'
+      print *, '   out-file  <outfilename>'
       print *, '        If specified, uses  <outfilename>  as output file name.'
+      print *
+      print *, '   visual  [-m,-n]  idx1[-ix2-idx3]'
+      print *, '        Enables visual mode (exporting Bispetrum to file).'
+      print *, '        Flags:'
+      print *, '           -m  modal'
+      print *, '           -n  nodal'
+      print *, '        If no flag is given, "-m" is assumed.'
+      print *, '        idx{1,2,3} is an integer.'
       print *
       print *, ' file: input file name.'
       print *, '       If none is passed, automatically searches it into'
@@ -471,6 +482,9 @@ contains ! utility procedures
                   if (istat /= 0) call usage()
                   call bsa_setOutFileName(arg(1 : len_trim(arg)))
 
+               case ('visual')
+                  currargc = currargc + 1
+                  call getVisualCLIInfo_(currargc)
 
                case default ! input file
                   FINFILE_FNAME_ = arg_(1 : len_trim(arg_))
@@ -480,12 +494,80 @@ contains ! utility procedures
             if (currargc == argc) exit ! parsing finished
             currargc = currargc + 1    ! go to next input arg
          enddo
-
       end block
 
    end subroutine parseArgs
 
 
+
+
+   subroutine getVisualCLIInfo_(iarg)
+      integer, intent(inout) :: iarg
+      character(len = 64)    :: arg
+      integer :: i, istat, list(3)
+
+      ! first flag must be either -m or -n (modal/nodal)
+      call get_command_argument(iarg, arg, status=istat)
+      if (istat /= 0) call releaseMemory(-12)
+      i = 1
+      do while ((arg(i:i)=='-' .or. arg(i:i)=='/'))
+         i = i + 1
+      enddo
+      if (i > 1) then
+         iarg = iarg + 1
+         if (arg(i:) == 'n') is_visual_nodal_ = .true.
+         ! flag was passed
+         call get_command_argument(iarg, arg, status=istat)
+         if (istat /= 0) call releaseMemory(-13)
+      endif
+
+      ! extract list
+      list = 0
+      call extractListFromString_(arg, list)
+      if (list(1) == 0) goto 98
+      if (is_visual_nodal_) then
+         if (list(2) == 0) goto 98
+         call bsa_setVisualModeNodalIndexes(list(1), list(2))
+      else
+         if (list(2) == 0 .or. list(3) == 0) then
+            list = list(1)
+         endif
+         call bsa_setVisualModeModalIndexes(list)
+      endif
+      goto 10
+
+      98 continue
+      print *, ERRMSG, "Error while parsing visual indexes."
+      call releaseMemory(-34)
+      return
+
+      10 is_visual_ = .true.
+      return
+   end subroutine
+
+
+
+   subroutine extractListFromString_(string, list)
+      character(len = *), intent(in) :: string
+      integer, intent(out) :: list(3)
+      integer :: idx, p, i, l
+
+      l = len_trim(string)
+      i = 1
+      p = 1
+      do
+         if (p > l .or. i == 4) exit
+         idx = scan(string(p : l), '-')
+         if (idx == 0) then
+            idx = l+1
+         else
+            idx = idx + p - 1
+         endif
+         read(unit=string(p : idx-1), fmt='(i)') list(i)
+         p = idx + 1
+         i = i + 1
+      enddo
+   end subroutine
 
 
 
@@ -502,7 +584,11 @@ contains ! utility procedures
       call bsa_setExportFileFormat(i_exprt_form_)
       call bsa_setExportAppendMode(i_exprt_mode_)
 
-      call bsa_setBRMExportDefaultMode(BSA_EXPORT_BRM_MODE_NONE)
+      if (is_visual_) then
+         call bsa_enableVisualMode()
+      else
+         call bsa_setBRMExportDefaultMode(BSA_EXPORT_BRM_MODE_NONE)
+      endif
 
       call bsa_setBfmMLR(.false.)
       call bsa_setValidateDeltasPolicy(BSA_VALIDATE_DELTAS_POLICY_NONE)

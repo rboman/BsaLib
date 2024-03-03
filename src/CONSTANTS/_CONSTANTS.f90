@@ -140,6 +140,8 @@
    character(len = *), parameter :: BSA_EXPORT_M3MF_MSH_FNAME   = "m3mf_msh"
    character(len = *), parameter :: BSA_EXPORT_M3MR_MSH_FNAME   = "m3mr_msh"
 
+   character(len = *), parameter :: BRM_EXPORT_FNAME = 'bsaexport.brm'
+   character(len = *), parameter :: BRN_EXPORT_FNAME = 'bsaexport.brn'
 
    abstract interface
       subroutine exportBRMinterf_vect_(f1, f2, brm, pdata)

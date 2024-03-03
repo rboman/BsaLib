@@ -18,6 +18,7 @@ submodule(BsaLib) BsaLib_Impl
    use BsaLib_Data
    use BsaLib_Utility
    use BsaLib_IO
+   use BsaLib_Functions, only: NMODES_EFF, MODES
    implicit none (type, external)
 
    character(len = :), allocatable :: out_dir_ ! output directory
@@ -91,12 +92,6 @@ contains
 
 
 
-   module subroutine bsa_forceBsaClsExecution(bool)
-      logical, intent(in) :: bool
-      force_cls_execution_ = bool
-   end subroutine
-
-
 
    module subroutine bsa_setMaxBkgPeakRestriction(bool)
       logical, intent(in) :: bool
@@ -126,16 +121,93 @@ contains
 
 
 
+   module subroutine bsa_enableVisualMode()
+      is_visual_ = .true.
+   end subroutine
+
+
+   module subroutine bsa_setVisualModeModalIndexes(modes)
+      integer(bsa_int_t), intent(in) :: modes(3)
+
+      visual_indexes_ = modes
+   end subroutine
+
+
+   module subroutine bsa_setVisualModeNodalIndexes(node, dof)
+      integer(bsa_int_t), value :: node, dof
+
+      is_brn_export_ = .true.
+      visual_indexes_(1) = node
+      visual_indexes_(2) = dof
+   end subroutine
+
+
+
+   module subroutine bsa_setOnlyPremesh()
+      is_only_premesh_ = .true.
+   end subroutine
+
+
+
+
    module subroutine bsa_Run(m2mf_cls, m2mr_cls, m2o2mr_cls, m3mf_msh, m3mr_msh, m3mf_cls, m3mr_cls)
       use BsaLib_Functions
       real(bsa_real_t), target, allocatable, dimension(:) :: &
          m2mf_cls, m2mr_cls, m2o2mr_cls, m3mf_msh, m3mr_msh, m3mf_cls, m3mr_cls
 
-      ! user asked for nothing ??
-      if (settings%i_compute_psd_ == 0 .and. settings%i_compute_bisp_ == 0) then
-         print '(1x, 2a)', &
-            WARNMSG, 'Both  PSD  and  BISP  computation are disabled.'
-         return
+
+      call io_setExportSpecifiers()
+
+      if (is_visual_ .or. do_export_brm_) then
+         block
+            character(len = :), allocatable :: fname_
+            integer :: iost
+
+            ! open Bisp export file
+            if (is_visual_ .and. is_brn_export_) then
+
+               if (visual_indexes_(1) > struct_data%nn_) then
+                  call bsa_Abort("Node index exceeds max n. of nodes")
+               endif
+               if (visual_indexes_(2) > struct_data%nlibs_) then
+                  call bsa_Abort("DOF index exceeds max n. of DOFs per node")
+               endif
+               visual_idx_ = (visual_indexes_(1) - 1)*struct_data%nlibs_ + visual_indexes_(2)
+
+               fname_ = BRN_EXPORT_FNAME
+            else
+               fname_ = BRM_EXPORT_FNAME
+            endif
+            write_brm_fptr_ => exportBRM_base_internal_
+
+            open(&
+               unit=unit_dump_brm_,       &
+               file=fname_,               &
+               form=IO_FORM_UNFORMATTED,  &
+               access=IO_ACCESS_STREAM,   &
+               status=IO_STATUS_REPLACE,  &
+               action=IO_ACTION_WRITE,    &
+               iostat=iost)
+
+            if (iost /= 0) then
+               print '(1x, 4a)', &
+                  WARNMSG, 'Error while opening export file  "', fname_, '".'
+               if (is_visual_) then
+                  return
+               else
+                  print '(1x, 2a)', MSGCONT, 'Disabling exporting.'
+               endif
+               do_export_brm_  = .false.
+               write_brm_fptr_ => exportBRM_void_internal_
+            endif
+         end block
+      else
+         if (settings%i_compute_psd_ == 0 .and. settings%i_compute_bisp_ == 0) then
+            ! user asked for nothing ??
+            print '(1x, 2a)', &
+               WARNMSG, 'Both  PSD  and  BISP  computation are disabled.'
+            return
+         endif
       endif
 
 
@@ -143,13 +215,8 @@ contains
       block
          integer(int32) :: itmp
 
-         call io_setExportSpecifiers()
-
          call validateAll_() ! check before doing some bad things..
-
-         ! NOTE: recall this function since validateAll_() might have changed some..
-         call setBsaFunctionLocalVars()
-
+         call setBsaFunctionLocalVars()   ! NOTE: reset internal state, if something has been changed
          call io_printUserData()
 
 ! BUG: force GPU usage for the moment. Testing only
@@ -212,8 +279,10 @@ contains
             itmp        = struct_data%nn_load_ * struct_data%nlibs_load_
             dimNf_psd_  = itmp
             dimNf_bisp_ = itmp
+
             dimM_psd_   = struct_data%modal_%nm_eff_
             dimM_bisp_  = dimM_psd_
+
             dimNr_psd_  = struct_data%ndofs_
             dimNr_bisp_ = struct_data%ndofs_
 
@@ -230,6 +299,7 @@ contains
             getBFM_msh => getFM_diag_tnm_scalar_msh_
             getBRM_msh => getRM_diag_scalar_msh_
 
+            getBRN => getBRN_diag_scalar_
          else ! == 0, full
 
             itmp        = struct_data%nn_load_ * struct_data%nlibs_load_
@@ -259,20 +329,47 @@ contains
                getBFM_msh => getFM_full_tm_scalar_msh_POD_
             endif
             getBRM_msh => getRM_full_scalar_msh_
+
+            getBRN => getBRN_full_scalar_
          end if
 
 
-         if (.not. do_export_brm_ .and. .not. associated(write_brm_fptr_)) &
+         if (.not.(do_export_brm_ .or. is_visual_) .and. .not.associated(write_brm_fptr_)) &
             write_brm_fptr_ => exportBRM_void_internal_
 
 #ifdef _BSA_CHECK_NOD_COH_SVD
          settings%i_suban_type_   = 2  ! force MSH execution
 #endif
 
+         ! Fix settings if we are in visual mode
+         if (is_visual_) then
+            if (is_brn_export_) then
+               dimM_psd_post_  = dimM_psd_
+               dimM_bisp_post_ = dimM_bisp_
+            else
+               dimM_psd_post_  = 1
+               dimM_bisp_post_ = 1
+               if (settings%i_only_diag_ == 0) then
+                  associate (nm => struct_data%modal_%nm_eff_)
+                     visual_idx_ = &
+                        (visual_indexes_(3) - 1) * (nm * nm) + &
+                        (visual_indexes_(2) - 1) * nm + visual_indexes_(1)
+                  end associate
+               else
+                  visual_idx_ = visual_indexes_(1)
+               endif
+            endif
+            settings%i_suban_type_ = 2
+            force_cls_execution_   = .false.
+         else
+            dimM_psd_post_  = dimM_psd_
+            dimM_bisp_post_ = dimM_bisp_
+         endif
+
 
 #ifdef BSA_USE_GPU
          ! BUG: this has to be removed. Use GPU also with mesher
-         if (is_gpu_enabled_) then
+         if (is_gpu_enabled_ .and. .not.is_visual_) then
             settings%i_suban_type_   = 1  ! force CLS execution
             settings%i_compute_bisp_ = 1
             settings%i_compute_psd_  = 0
@@ -597,7 +694,7 @@ contains
          if (.not. allocated(out_dir_)) out_dir_ = BSA_OUT_DIRNAME_DEFAULT
          exp_dir_ = out_dir_
       endif
-   end subroutine 
+   end subroutine
 
 
 
@@ -1575,6 +1672,53 @@ contains
 
 
 
+
+   real(bsa_real_t) function getBRN_diag_scalar_(brm) result(brn)
+      real(bsa_real_t), intent(in) :: brm(:)
+      integer(int32) :: im, m, id
+
+      brn = 0._bsa_real_t
+      id  = 1
+      associate(mat => struct_data%modal_%phi_)
+         do im = 1, NMODES_EFF
+            m   = MODES(im)
+            brn = brn + &
+               mat(visual_idx_, m) * mat(visual_idx_, m) * mat(visual_idx_, m) * brm(id)
+            id = id + 1
+         enddo
+      end associate
+   end function
+
+
+   real(bsa_real_t) function getBRN_full_scalar_(brm) result(brn)
+      real(bsa_real_t), intent(in) :: brm(:)
+      integer(int32) :: im, in, io
+      integer(int32) :: m, n, o, id
+
+      brn = 0._bsa_real_t
+      id  = 1
+      associate(mat => struct_data%modal_%phi_)
+         do io = 1, NMODES_EFF
+            o = MODES(io)
+            do in = 1, NMODES_EFF
+               n = MODES(in)
+               do im = 1, NMODES_EFF
+                  m   = MODES(in)
+                  brn = brn + &
+                     mat(visual_idx_, m) * mat(visual_idx_, n) * mat(visual_idx_, o) * brm(id)
+                  id = id + 1
+               enddo
+            enddo
+         enddo
+      end associate
+   end function
+
+
+
+
+
+
+
    ! BUG: should also providfe a way to pass pointer to user defined exporting data 
    !      structure that has to be finally dereferenced in actual exporting routine!
    module subroutine bsa_setBRMExportFunction(fptr)
@@ -1633,6 +1777,7 @@ contains
       class(*), pointer, intent(in) :: pdata
 
       ! Need to verify if to print headers
+      ! !$omp critical
       if (associated(pdata)) then
          select type (pdata)
             type is (BrmExportBaseData_t)
@@ -1643,14 +1788,26 @@ contains
       endif
 
       block
-         integer(int32) :: i, siz
+         integer(int32)   :: i, s
+         real(bsa_real_t) :: rval
 
-         siz = size(fi)
-         do i= 1, siz
-            write(unit_dump_brm_) real(fi(i), kind=real32), real(fj(i), kind=real32), real(brm(:, i), kind=real32)
+         s = size(fi)
+         do i = 1, s
+            if (is_visual_) then
+               if (is_brn_export_) then
+                  rval = getBRN(brm(:, i))
+               else
+                  rval = brm(visual_idx_, i)
+               endif
+               write(unit_dump_brm_) real(fi(i), kind=real32), real(fj(i), kind=real32), real(rval, kind=real32)
+            else
+               write(unit_dump_brm_) real(fi(i), kind=real32), real(fj(i), kind=real32), real(brm(:, i), kind=real32)
+            endif
          enddo
       endblock
+      ! !$omp end critical
    end subroutine
+
 
 
 
@@ -1667,26 +1824,8 @@ contains
          case default  ! includes  (BSA_EXPORT_BRM_MODE_BASE)
             if (.not. imode == BSA_EXPORT_BRM_MODE_BASE) &
                print '(1x, a, a)', WARNMSG, 'Unknown BRM export mode. Setting default  (base).'
-
             do_export_brm_ = .true.
-            write_brm_fptr_  => exportBRM_base_internal_
       end select
-
-      open(&
-         unit=unit_dump_brm_,        &
-         file=brm_export_file_name_, &
-         form=IO_FORM_UNFORMATTED,   &
-         access=IO_ACCESS_STREAM,    &
-         status=IO_STATUS_REPLACE,   &
-         iostat=iost)
-
-      if (iost /= 0) then
-         print '(1x, 4a)', &
-            WARNMSG, 'Error while opening BRM export file  "', brm_export_file_name_, '".'
-         print '(1x, 2a)', MSGCONT, 'Disabling exporting.'
-         do_export_brm_  = .false.
-         write_brm_fptr_ => null()
-      endif
    end subroutine
 
 

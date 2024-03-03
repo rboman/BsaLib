@@ -66,6 +66,10 @@ set_target_properties( ${project}
 )
 
 
+# TODO: experimental
+target_compile_definitions( ${project} PRIVATE BSA_USE_POD_DATA_CACHING )
+
+
 # TODO: see if we can manage this better
 # NOTE: disabling anoying -O2 default release flag...
 set( CMAKE_Fortran_FLAGS_RELEASE-default ${CMAKE_Fortran_FLAGS_RELEASE} PARENT_SCOPE )
@@ -99,6 +103,12 @@ if (enable-openmp)
       target_compile_options( ${project} PRIVATE "-Qopenmp" )
    else()
       target_compile_options( ${project} PRIVATE "-fopenmp" )
+   endif()
+else()
+   if (intel-compiler)
+      target_compile_options( ${project} PRIVATE "-assume:nocc_omp" )
+   else()
+      message( WARNING "Check how to disable omp preproc in gfortran & others.")
    endif()
 endif()
 

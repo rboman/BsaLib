@@ -24,8 +24,8 @@ module BsaLib_Functions
    ! make a local internal copy
    integer(bsa_int_t) :: NFREQS, NNODES, NNODESL, NLIBS, NLIBSL
    integer(bsa_int_t) :: NMODES, NMODES_EFF
-   integer(bsa_int_t), allocatable :: MODES(:)
    integer(bsa_int_t) :: NPSDEL, NTCOMPS, NDIRS = 1
+   integer(bsa_int_t), allocatable :: MODES(:)
    integer(bsa_int_t), allocatable :: TCOMPS(:), DIRS(:)
 
    integer              :: MSHR_SVD_LWORK = - 1

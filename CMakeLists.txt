@@ -87,7 +87,6 @@ if (enable-sequential-code)
    set( enable-openmp   OFF )
    set( enable-mkl      OFF )
    set( enable-gpu-code OFF )
-   message( STATUS "OMP: ${enable-openmp};  MKL: ${enable-mkl};  GPU: ${enable-gpu-code}")
 endif()
 
 # check if intel compiler or not
@@ -178,6 +177,9 @@ foreach(config ${CMAKE_CONFIGURATION_TYPES})
    endif()
 endforeach()
 
-
 add_subdirectory( app )
 
+message( STATUS "NOTE: Build status:")
+message( STATUS "        - OMP: ${enable-openmp}")
+message( STATUS "        - MKL: ${enable-mkl}")
+message( STATUS "        - GPU: ${enable-gpu-code}")

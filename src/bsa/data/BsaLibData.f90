@@ -50,9 +50,39 @@ module BsaLib_Data
    real(bsa_real_t), allocatable :: peak_exts_(:)
    logical :: do_restrict_bkgpeak_ = .false.
 
+   !> If true, stops at pre-mesh phase.
+   logical :: is_only_premesh_ = .false.
+
+
+   ! Modal dimensions in Post phase.
+   integer(bsa_int_t) :: dimM_psd_post_, dimM_bisp_post_
+
+   !> If true, post-mesh for generating Bispectrums.
+   logical :: is_visual_ = .false.
+
+   !> Stores visual indexes (both modal and nodal)
+   integer(bsa_int_t), target :: visual_indexes_(3) = 0
+
+   ! BUG: this only valid for nodal visual mode (make it more general)
+   !> If visual, allows to export Nodal Bispectrum instead of modal
+   logical :: is_brn_export_ = .false.
+
+   !> Final offset indexing value in visual mode
+   integer(bsa_int_t), target :: visual_idx_ = 1
+
+   procedure(getBRN_), pointer :: getBRN => null()
+   abstract interface
+      function getBRN_(brm)
+         import :: bsa_real_t
+         real(bsa_real_t), intent(in) :: brm(:)
+         real(bsa_real_t) :: getBRN_
+      end function
+   end interface
+
+
+   !> If true, exports all BRM data to file (NOT visual!)
    logical :: do_export_brm_ = .false.
    integer(bsa_int_t) :: i_brmexport_mode_ = BSA_EXPORT_BRM_MODE_BASE
-   character(len = *), parameter :: brm_export_file_name_ = 'bsaexport.brm'
    procedure(exportBRMinterf_vect_), pointer :: write_brm_fptr_  => null()
    type, public :: BrmExportBaseData_t
 
@@ -68,6 +98,7 @@ module BsaLib_Data
       integer(bsa_int_t) :: nI_     = 0
       integer(bsa_int_t) :: nJ_     = 0
    end type
+
 
 
    logical :: is_gpu_enabled_ = .false.
@@ -175,6 +206,13 @@ module BsaLib_Data
 
    !> Tot n. of zones counter.
    integer(bsa_int_t), public, target :: msh_NZones = 0
+
+   !> Flag to signal whether POD CACHING has been used
+#ifdef BSA_USE_POD_DATA_CACHING
+   integer(bsa_int_t), parameter :: POD_CACHING_FLAG = 1_bsa_int_t
+#else
+   integer(bsa_int_t), parameter :: POD_CACHING_FLAG = 0_bsa_int_t
+#endif
 
    !> Controls whether employing new BFM MLR method or not
    logical :: test_no_bfm_mlr_ = .false.

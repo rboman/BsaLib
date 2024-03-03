@@ -1252,12 +1252,12 @@ contains
 
 
 
-#if (defined(_BSA_USE_CACHED_POD_DATA)) || (defined(_OPENMP))
+#if (defined(BSA_USE_POD_DATA_CACHING)) || (defined(_OPENMP))
 # define __new_interp_proc__
 #endif
 
    module subroutine interpolateRZ( this &
-#ifndef _BSA_USE_CACHED_POD_DATA
+#ifndef BSA_USE_POD_DATA_CACHING
 # define __bfm_undump__ bfm, 
       & , bfm &
 #else
@@ -1266,7 +1266,7 @@ contains
       & , pdata )
       !! Implementation of rect zone interpolation wrapper routine
       class(MRectZone_t), intent(inout) :: this
-#ifndef _BSA_USE_CACHED_POD_DATA
+#ifndef BSA_USE_POD_DATA_CACHING
       real(bsa_real_t), intent(in)  :: bfm(:, :)
 #endif
       class(*), pointer, intent(in) :: pdata

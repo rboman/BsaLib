@@ -97,6 +97,30 @@ module BsaLib
       end subroutine
 
 
+
+      module subroutine bsa_enableVisualMode()
+      end subroutine
+
+
+      module subroutine bsa_setVisualModeModalIndexes(modes)
+         import :: bsa_int_t
+         integer(bsa_int_t), intent(in) :: modes(3)
+      end subroutine
+
+
+      module subroutine bsa_setVisualModeNodalIndexes(node, dof)
+         import :: bsa_int_t
+         integer(bsa_int_t), value :: node, dof
+      end subroutine
+
+
+
+      module subroutine bsa_setOnlyPremesh()
+      end subroutine
+
+
+
+
       module subroutine bsa_doValidateModalData(bool)
          logical, intent(in) :: bool
       end subroutine

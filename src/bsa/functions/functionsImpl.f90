@@ -467,7 +467,7 @@ contains
       real(bsa_real_t), intent(in), contiguous :: fi(:), fj(:)
       real(bsa_real_t) :: bfm(dimM_bisp_, size(fi)*size(fj))
 
-#ifdef _BSA_USE_CACHED_POD_DATA
+#ifdef BSA_USE_POD_DATA_CACHING
 
 # define __EGVL_w2 D_S_uvw_w2_ptr
 # define __EGVT_w2 S_uvw_w2_ptr
@@ -519,7 +519,7 @@ contains
 
       bfm = 0._bsa_real_t
 
-#ifdef _BSA_USE_CACHED_POD_DATA
+#ifdef BSA_USE_POD_DATA_CACHING
       nfi_ = size(fi)
       nfj_ = size(fj)
       if (do_trunc_POD_) allocate(npodw2(nfj_))
@@ -549,7 +549,7 @@ contains
          posf = 1
 
 
-#ifdef _BSA_USE_CACHED_POD_DATA
+#ifdef BSA_USE_POD_DATA_CACHING
          do ifj = 1, nfj_
 
             S_uvw_w2(:, 1:1, ifj) = &
@@ -587,7 +587,7 @@ contains
          enddo ! nfj
 
 
-#else  ! _BSA_USE_CACHED_POD_DATA  not defined
+#else  ! BSA_USE_POD_DATA_CACHING  not defined
 
 
          !
@@ -684,11 +684,11 @@ contains
          endif
 # endif
 
-#endif  ! _BSA_USE_CACHED_POD_DATA
+#endif  ! BSA_USE_POD_DATA_CACHING
 
 
 
-#ifdef _BSA_USE_CACHED_POD_DATA
+#ifdef BSA_USE_POD_DATA_CACHING
 
    if (.not. do_trunc_POD_) then
       if (nPODmodes_set_) then
@@ -746,9 +746,9 @@ contains
          if (do_trunc_POD_) nmw2 = npodw2(ifj)
 
          fiPfj_(1) = fi_ + fj(ifj)
-#else  ! _BSA_USE_CACHED_POD_DATA  not defined
+#else  ! BSA_USE_POD_DATA_CACHING  not defined
          fiPfj_(1) = fi(1) + fj(1)
-#endif ! _BSA_USE_CACHED_POD_DATA
+#endif ! BSA_USE_POD_DATA_CACHING
 
          S_uvw_w1w2(:, 1:1) = &
             reshape(wd%evalPSD(1, fiPfj_, NNODESL, struct_data%n_load_, 1, tc), [NNODESL, 1])
@@ -786,20 +786,20 @@ contains
 
 
          if (do_trunc_POD_) then
-#ifndef _BSA_USE_CACHED_POD_DATA
+#ifndef BSA_USE_POD_DATA_CACHING
             nmw1   = getNPODModesByThreshold_(D_S_uvw_w1, POD_trunc_lim_)
             nmw2   = getNPODModesByThreshold_(D_S_uvw_w2, POD_trunc_lim_)
 #endif
             nmw1w2 = getNPODModesByThreshold_(D_S_uvw_w1w2, POD_trunc_lim_)
          else
             if (nPODmodes_set_) then
-#ifndef _BSA_USE_CACHED_POD_DATA
+#ifndef BSA_USE_POD_DATA_CACHING
                nmw1   = nmodes_POD_
                nmw2   = nmodes_POD_
 #endif
                nmw1w2 = nmodes_POD_
             else
-#ifndef _BSA_USE_CACHED_POD_DATA
+#ifndef BSA_USE_POD_DATA_CACHING
                nmw1   = NNODESL
                nmw2   = NNODESL
 #endif
@@ -982,7 +982,7 @@ contains
          enddo ! p = 1, nmw1w2
 
 
-#ifdef _BSA_USE_CACHED_POD_DATA
+#ifdef BSA_USE_POD_DATA_CACHING
          posf = posf + 1
       enddo ! nfj_
    enddo ! nfi_
