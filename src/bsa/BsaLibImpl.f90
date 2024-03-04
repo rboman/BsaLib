@@ -1816,7 +1816,6 @@ contains
 
    module subroutine bsa_setBRMExportDefaultMode(imode)
       integer(int32), intent(in) :: imode
-      integer(int32) :: iost
 
       select case (imode)
 

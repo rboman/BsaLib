@@ -2762,9 +2762,6 @@ contains
       integer(int32) :: ink, inj
       integer(int32) :: nj, nk
 
-      ! libs indexed values
-      integer(int32) :: ilk !, ilj, ili
-
       ! modes indexed values
       real(bsa_real_t), dimension(NMODES_EFF, 2) :: phik_, phij_
       real(bsa_real_t) :: phij_Ub_, phij_u_, phik_Ub_, phik_u_
@@ -3299,12 +3296,12 @@ contains
       integer(int32) :: i_pos_nk, i_pos_nj
       integer(int32) :: pos_nk, pos_nj
       integer(int32) :: ink, inj
-      integer(int32) :: nj, nk, ilk
+      integer(int32) :: nj, nk
 
       ! local nodal correlations
       real(bsa_real_t) :: corrJK
 
-      integer(int32) :: tc, imk, imj
+      integer(int32) :: tc
       real(bsa_real_t), dimension(NLIBSL, 1) :: akU, phij_
       real(bsa_real_t), dimension(1, NLIBSL) :: ajU, phik_
 
