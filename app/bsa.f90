@@ -23,7 +23,9 @@ module data
    logical :: l_formmode = .false.
    logical :: fin_data_read_ = .false.
    logical :: bsa_data_read_ = .false.
-   character(len = :), allocatable :: FINFILE_FNAME_
+
+   character(len = *), parameter :: BSA_DATA_FNAME = "bsa.bsadata"
+   character(len = *), parameter :: EXT_DATA_FNAME = "bsa.extdata"
 
 
    integer(int32) :: i_suban, i_vers, i_defsc, i_psd, i_bisp, i_onlyd, i_test
@@ -128,11 +130,7 @@ program bsa
    call bsa_printBSAHeader()
    call printTool()
    call parseArgs()
-
-   ! set defaults for entities not provided by user.
-   if (.not. allocated(FINFILE_FNAME_)) FINFILE_FNAME_ = 'bsa.findata'
    call readDataFiles()
-
    call setup()
 
 #ifdef BSA_SINGLE_FLOATING_PRECISION
@@ -486,9 +484,6 @@ contains ! utility procedures
                   currargc = currargc + 1
                   call getVisualCLIInfo_(currargc)
 
-               case default ! input file
-                  FINFILE_FNAME_ = arg_(1 : len_trim(arg_))
-
             end select
 
             if (currargc == argc) exit ! parsing finished
@@ -754,7 +749,7 @@ contains ! utility procedures
       endif
 
       open(unit=IUN_FINDATA    &
-         , file=FINFILE_FNAME_ &
+         , file=EXT_DATA_FNAME &
          , iostat=istat   &
          , form=form_     &
          , access=access_ &
@@ -1037,7 +1032,7 @@ contains ! utility procedures
       if (.not. fin_data_read_) return
 
       open(unit=IUN_BSADATA   &
-         , file='bsa.bsadata' &
+         , file=BSA_DATA_FNAME &
          , form='formatted'   &
          , action=IO_ACTION_READ)
 
