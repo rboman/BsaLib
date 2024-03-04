@@ -497,9 +497,10 @@ contains
    !>       Better not to give user the chance to do it.
    subroutine validateModalInfo_()
       real(bsa_real_t), dimension(struct_data%modal_%nm_) :: maxvals
-      integer(int32) :: i, j, nskip, ilocmax(1), ilib
+      integer(int32) :: j, nskip, ilocmax(1), ilib
       integer(int32) :: nmk, istat
-      integer(int32), allocatable :: modesk(:)
+      integer(bsa_int_t) :: i
+      integer(bsa_int_t), allocatable :: modesk(:)
       character(len = 256) :: emsg
 
       maxvals = maxval(abs(struct_data%modal_%phi_), dim=1)
@@ -546,7 +547,7 @@ contains
       enddo
 
       struct_data%modal_%nm_eff_ = nmk
-      struct_data%modal_%modes_  = int(modesk, kind=bsa_int_t)
+      struct_data%modal_%modes_  = modesk
       deallocate(modesk, stat=istat)
    end subroutine validateModalInfo_
 
