@@ -366,8 +366,8 @@ contains ! utility procedures
       print *, ' NOTE: every command option can be preceded by "-", "--" or "/"'
       print *
       print *, ' Options:'
-      print *, '   readmode  <val>'
-      print *, '        valid  <val>  values:'
+      print *, '   readmode  <mode>'
+      print *, '        valid  <mode>  options:'
       print *, '           "formatted", "unformatted" (default)'
       print *
       print *, '   append-exports'
