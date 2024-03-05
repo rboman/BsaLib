@@ -389,10 +389,6 @@ contains ! utility procedures
       print *, '           -n  nodal'
       print *, '        If no flag is given, "-m" is assumed.'
       print *, '        idx{1,2,3} is an integer.'
-      print *
-      print *, ' file: input file name.'
-      print *, '       If none is passed, automatically searches it into'
-      print *, '       the current directory (from where the program is invoked)'
 
       call releaseMemory(1)
    end subroutine
