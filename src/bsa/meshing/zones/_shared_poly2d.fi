@@ -40,14 +40,17 @@
 __mod_sub_compute subroutine __sub_name_compute(this)
    !! Zone computation (pre-meshing phase).
    use BsaLib_Data, only: &
-      dimM_bisp_, getBFM_msh     &
+      getBFM_msh                 &
 #ifdef _BSA_M3MF_ONLY_PREMESH
       , settings, m3mf_msh_ptr_  &
 #endif
 #ifdef _BSA_EXPORT_POD_TRUNC_INFO
       , do_export_POD_trunc_     &
 #endif
-      , msh_NZones, msh_bfmpts_pre_
+#ifndef BSA_USE_POD_DATA_CACHING
+      , dimM_bisp_, msh_bfmpts_pre_ &
+#endif
+      , msh_NZones
 
 #ifdef __triang_zone__
    use BsaLib_MPoint, only: MPoint_t
