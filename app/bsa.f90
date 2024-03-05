@@ -19,9 +19,9 @@ module data
    implicit none (type, external)
    public
    integer(int32), parameter :: IUN_BSADATA = 22222
-   integer(int32), parameter :: IUN_FINDATA = 22223
+   integer(int32), parameter :: IUN_EXTDATA = 22223
    logical :: l_formmode = .false.
-   logical :: fin_data_read_ = .false.
+   logical :: ext_data_read_ = .false.
    logical :: bsa_data_read_ = .false.
 
    character(len = *), parameter :: BSA_DATA_FNAME = "bsa.bsadata"
@@ -722,7 +722,7 @@ contains ! utility procedures
       call getExtData()
       call getBsaData()
 
-      if (.not. (bsa_data_read_ .and. fin_data_read_)) then
+      if (.not. (bsa_data_read_ .and. ext_data_read_)) then
          print '(1x, a, a)', &
             ERRMSG, 'Error reading input data from files.'
          call releaseMemory(5)
@@ -736,7 +736,7 @@ contains ! utility procedures
 
 
 
-   subroutine openFinelgInputFile()
+   subroutine openExtInputFile()
       integer :: istat
       character(len = :), allocatable :: form_, access_
 
@@ -748,7 +748,7 @@ contains ! utility procedures
          access_ = 'stream'
       endif
 
-      open(unit=IUN_FINDATA    &
+      open(unit=IUN_EXTDATA    &
          , file=EXT_DATA_FNAME &
          , iostat=istat   &
          , form=form_     &
@@ -759,7 +759,7 @@ contains ! utility procedures
 #ifdef _DEBUG
          print '(1x, a, a)', DBGMSG, 'Input file correctly opened.'
 #endif
-         rewind(IUN_FINDATA)
+         rewind(IUN_EXTDATA)
          return
       endif
 
@@ -775,18 +775,18 @@ contains ! utility procedures
       integer :: istat, itmp
       character(len = 132) :: emsg
 
-      call openFinelgInputFile()
+      call openExtInputFile()
 
       if (l_formmode) then
-         read(IUN_FINDATA, *) i_nnodes
-         read(IUN_FINDATA, *) i_nlibs
-         read(IUN_FINDATA, *) i_nnodesl
-         read(IUN_FINDATA, *) i_nlibsl
+         read(IUN_EXTDATA, *) i_nnodes
+         read(IUN_EXTDATA, *) i_nlibs
+         read(IUN_EXTDATA, *) i_nnodesl
+         read(IUN_EXTDATA, *) i_nlibsl
       else
-         read(IUN_FINDATA) i_nnodes
-         read(IUN_FINDATA) i_nlibs
-         read(IUN_FINDATA) i_nnodesl
-         read(IUN_FINDATA) i_nlibsl
+         read(IUN_EXTDATA) i_nnodes
+         read(IUN_EXTDATA) i_nlibs
+         read(IUN_EXTDATA) i_nnodesl
+         read(IUN_EXTDATA) i_nlibsl
       endif
 
       allocate(nodesl(i_nnodesl), stat=istat, errmsg=emsg)
@@ -799,34 +799,34 @@ contains ! utility procedures
       if (istat /= 0) call errAllocVarMsg_('nod_cords', istat, emsg)
 
       if (l_formmode) then
-         read(IUN_FINDATA, *) nodesl
-         read(IUN_FINDATA, *) libsl
-         read(IUN_FINDATA, *) nod_cords
+         read(IUN_EXTDATA, *) nodesl
+         read(IUN_EXTDATA, *) libsl
+         read(IUN_EXTDATA, *) nod_cords
       else
-         read(IUN_FINDATA) nodesl
-         read(IUN_FINDATA) libsl
-         read(IUN_FINDATA) nod_cords
+         read(IUN_EXTDATA) nodesl
+         read(IUN_EXTDATA) libsl
+         read(IUN_EXTDATA) nod_cords
       endif
       nod_cords = transpose(nod_cords)
 
 
 
       if (l_formmode) then
-         read(IUN_FINDATA, *) i_varu
-         read(IUN_FINDATA, *) i_su
-         read(IUN_FINDATA, *) i_vert
-         read(IUN_FINDATA, *) i_degw
-         read(IUN_FINDATA, *) r_aird
-         read(IUN_FINDATA, *) r_rotW2G
-         read(IUN_FINDATA, *) i_nzones
+         read(IUN_EXTDATA, *) i_varu
+         read(IUN_EXTDATA, *) i_su
+         read(IUN_EXTDATA, *) i_vert
+         read(IUN_EXTDATA, *) i_degw
+         read(IUN_EXTDATA, *) r_aird
+         read(IUN_EXTDATA, *) r_rotW2G
+         read(IUN_EXTDATA, *) i_nzones
       else
-         read(IUN_FINDATA) i_varu
-         read(IUN_FINDATA) i_su
-         read(IUN_FINDATA) i_vert
-         read(IUN_FINDATA) i_degw
-         read(IUN_FINDATA) r_aird
-         read(IUN_FINDATA) r_rotW2G
-         read(IUN_FINDATA) i_nzones
+         read(IUN_EXTDATA) i_varu
+         read(IUN_EXTDATA) i_su
+         read(IUN_EXTDATA) i_vert
+         read(IUN_EXTDATA) i_degw
+         read(IUN_EXTDATA) r_aird
+         read(IUN_EXTDATA) r_rotW2G
+         read(IUN_EXTDATA) i_nzones
       endif
 
       allocate(r_Zref_z(i_nzones), stat=istat, errmsg=emsg)
@@ -865,39 +865,39 @@ contains ! utility procedures
       if (istat /= 0) call errAllocVarMsg_('r_corrNod', istat, emsg)
 
       if (l_formmode) then
-         read(IUN_FINDATA, *) r_Zref_z
-         read(IUN_FINDATA, *) r_UBref_z
-         read(IUN_FINDATA, *) r_alph_z
-         read(IUN_FINDATA, *) r_L_z
-         read(IUN_FINDATA, *) r_std_z
-         read(IUN_FINDATA, *) r_corrC_z
-         read(IUN_FINDATA, *) r_corrEx_z
-         read(IUN_FINDATA, *) r_lims_z
-         read(IUN_FINDATA, *) r_rotW2G_z
-         read(IUN_FINDATA, *) r_incang_z
-         read(IUN_FINDATA, *) i_wzNod
-         read(IUN_FINDATA, *) r_wAltNod
-         read(IUN_FINDATA, *) r_UBnod
-         read(IUN_FINDATA, *) r_corrNod
+         read(IUN_EXTDATA, *) r_Zref_z
+         read(IUN_EXTDATA, *) r_UBref_z
+         read(IUN_EXTDATA, *) r_alph_z
+         read(IUN_EXTDATA, *) r_L_z
+         read(IUN_EXTDATA, *) r_std_z
+         read(IUN_EXTDATA, *) r_corrC_z
+         read(IUN_EXTDATA, *) r_corrEx_z
+         read(IUN_EXTDATA, *) r_lims_z
+         read(IUN_EXTDATA, *) r_rotW2G_z
+         read(IUN_EXTDATA, *) r_incang_z
+         read(IUN_EXTDATA, *) i_wzNod
+         read(IUN_EXTDATA, *) r_wAltNod
+         read(IUN_EXTDATA, *) r_UBnod
+         read(IUN_EXTDATA, *) r_corrNod
 
-         read(IUN_FINDATA, *) r_wfc
+         read(IUN_EXTDATA, *) r_wfc
       else
-         read(IUN_FINDATA) r_Zref_z
-         read(IUN_FINDATA) r_UBref_z
-         read(IUN_FINDATA) r_alph_z
-         read(IUN_FINDATA) r_L_z
-         read(IUN_FINDATA) r_std_z
-         read(IUN_FINDATA) r_corrC_z
-         read(IUN_FINDATA) r_corrEx_z
-         read(IUN_FINDATA) r_lims_z
-         read(IUN_FINDATA) r_rotW2G_z
-         read(IUN_FINDATA) r_incang_z
-         read(IUN_FINDATA) i_wzNod
-         read(IUN_FINDATA) r_wAltNod
-         read(IUN_FINDATA) r_UBnod
-         read(IUN_FINDATA) r_corrNod
+         read(IUN_EXTDATA) r_Zref_z
+         read(IUN_EXTDATA) r_UBref_z
+         read(IUN_EXTDATA) r_alph_z
+         read(IUN_EXTDATA) r_L_z
+         read(IUN_EXTDATA) r_std_z
+         read(IUN_EXTDATA) r_corrC_z
+         read(IUN_EXTDATA) r_corrEx_z
+         read(IUN_EXTDATA) r_lims_z
+         read(IUN_EXTDATA) r_rotW2G_z
+         read(IUN_EXTDATA) r_incang_z
+         read(IUN_EXTDATA) i_wzNod
+         read(IUN_EXTDATA) r_wAltNod
+         read(IUN_EXTDATA) r_UBnod
+         read(IUN_EXTDATA) r_corrNod
 
-         read(IUN_FINDATA) r_wfc
+         read(IUN_EXTDATA) r_wfc
       endif
 
 #ifdef BSA_SINGLE_FLOATING_PRECISION
@@ -947,11 +947,11 @@ contains ! utility procedures
 
 
       if (l_formmode) then
-         read(IUN_FINDATA, *) i_nm
-         read(IUN_FINDATA, *) i_ndofs
+         read(IUN_EXTDATA, *) i_nm
+         read(IUN_EXTDATA, *) i_ndofs
       else
-         read(IUN_FINDATA) i_nm
-         read(IUN_FINDATA) i_ndofs
+         read(IUN_EXTDATA) i_nm
+         read(IUN_EXTDATA) i_ndofs
       endif
       allocate(r_natf(i_nm), stat=istat, errmsg=emsg)
       if (istat /= 0) call errAllocVarMsg_('r_natf', istat, emsg)
@@ -968,21 +968,21 @@ contains ! utility procedures
       allocate(r_xsiad(i_nm), stat=istat, errmsg=emsg)
       if (istat /= 0) call errAllocVarMsg_('r_xsiad', istat, emsg)
       if (l_formmode) then
-         read(IUN_FINDATA, *) r_natf
-         read(IUN_FINDATA, *) r_modm
-         read(IUN_FINDATA, *) r_Mg
-         read(IUN_FINDATA, *) r_Kg
-         read(IUN_FINDATA, *) r_Cg
-         read(IUN_FINDATA, *) r_xsist
-         read(IUN_FINDATA, *) r_xsiad
+         read(IUN_EXTDATA, *) r_natf
+         read(IUN_EXTDATA, *) r_modm
+         read(IUN_EXTDATA, *) r_Mg
+         read(IUN_EXTDATA, *) r_Kg
+         read(IUN_EXTDATA, *) r_Cg
+         read(IUN_EXTDATA, *) r_xsist
+         read(IUN_EXTDATA, *) r_xsiad
       else
-         read(IUN_FINDATA) r_natf
-         read(IUN_FINDATA) r_modm
-         read(IUN_FINDATA) r_Mg
-         read(IUN_FINDATA) r_Kg
-         read(IUN_FINDATA) r_Cg
-         read(IUN_FINDATA) r_xsist
-         read(IUN_FINDATA) r_xsiad
+         read(IUN_EXTDATA) r_natf
+         read(IUN_EXTDATA) r_modm
+         read(IUN_EXTDATA) r_Mg
+         read(IUN_EXTDATA) r_Kg
+         read(IUN_EXTDATA) r_Cg
+         read(IUN_EXTDATA) r_xsist
+         read(IUN_EXTDATA) r_xsiad
       endif
 
 
@@ -1009,13 +1009,11 @@ contains ! utility procedures
       deallocate(r_xsiad)
 #endif
 
-
-
-      fin_data_read_ = .true.
-      close(IUN_FINDATA)
+      ext_data_read_ = .true.
+      close(IUN_EXTDATA)
 #ifdef _BSA_DEBUG
       print '(1x, a, a)', &
-         INFOMSG, 'FINELG data read correctly.'
+         INFOMSG, 'Ext data read correctly.'
 #endif
    end subroutine
 
@@ -1029,7 +1027,7 @@ contains ! utility procedures
       integer :: i
 
 
-      if (.not. fin_data_read_) return
+      if (.not. ext_data_read_) return
 
       open(unit=IUN_BSADATA   &
          , file=BSA_DATA_FNAME &
@@ -1288,8 +1286,8 @@ contains ! utility procedures
 
       if (.not. bsa_isCleaned()) call bsa_Finalise()
 
-      inquire(unit=IUN_FINDATA, opened=lflag)
-      if (lflag) close(IUN_FINDATA)
+      inquire(unit=IUN_EXTDATA, opened=lflag)
+      if (lflag) close(IUN_EXTDATA)
       inquire(unit=IUN_BSADATA, opened=lflag)
       if (lflag) close(IUN_BSADATA)
 
