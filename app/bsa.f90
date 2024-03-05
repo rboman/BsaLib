@@ -368,7 +368,7 @@ contains ! utility procedures
       print *, ' Options:'
       print *, '   readmode  <val>'
       print *, '        valid  <val>  values:'
-      print *, '           formatted, unformatted (default)'
+      print *, '           "formatted", "unformatted" (default)'
       print *
       print *, '   append-exports'
       print *, '        Appends to instead of overriding existing export files.'
