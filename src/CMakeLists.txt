@@ -115,8 +115,10 @@ if (enable-openmp)
 else()
    if (intel-compiler)
       target_compile_options( ${project} PRIVATE "-assume:nocc_omp" )
+      target_compile_options( ${project} PRIVATE "-Qparallel" )  # BUG: to avoid warning about locality info
    else()
       message( WARNING "Check how to disable omp preproc in gfortran & others.")
+      target_compile_options( ${project} PRIVATE "-parallel" )  # BUG: to avoid warning about locality info
    endif()
 endif()
 
