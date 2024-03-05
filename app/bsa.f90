@@ -719,7 +719,7 @@ contains ! utility procedures
 
    subroutine readDataFiles()
 
-      call getFinData()
+      call getExtData()
       call getBsaData()
 
       if (.not. (bsa_data_read_ .and. fin_data_read_)) then
@@ -771,7 +771,7 @@ contains ! utility procedures
 
 
 
-   subroutine getFinData()
+   subroutine getExtData()
       integer :: istat, itmp
       character(len = 132) :: emsg
 
