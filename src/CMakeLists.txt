@@ -67,13 +67,19 @@ set_target_properties( ${project}
 
 
 # # TODO: experimental
-# target_compile_definitions( ${project} PRIVATE BSA_USE_POD_DATA_CACHING )
+target_compile_definitions( ${project} PRIVATE BSA_USE_POD_DATA_CACHING )
+
+
+# # BUG: using OMP in post-meshing phase will result in slower runtime 
+# #      due to critical sections synchronisation where accessing shared 
+# #      file I/O. For better performances, consider rethinking about the
+# #      logic related, otherwise better use 1 thread only.
 # target_compile_definitions( ${project} PRIVATE BSA_USE_POST_MESH_OMP )
 
 
 
 # TODO: see if we can manage this better
-# NOTE: disabling anoying -O2 default release flag...
+# NOTE: disabling annoying -O2 default release flag...
 set( CMAKE_Fortran_FLAGS_RELEASE-default ${CMAKE_Fortran_FLAGS_RELEASE} PARENT_SCOPE )
 set( CMAKE_Fortran_FLAGS_RELEASE "" )
 
