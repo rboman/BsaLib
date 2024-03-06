@@ -923,14 +923,20 @@ end subroutine __sub_name_compute
 
       ! TODO: maybe use two concurrent threads ?? 
       !       (we might already be in a threaded env)
+#ifdef _OPENMP
       !$omp simd
+#endif
       do i = 0, ni_bfm_ref_-1
          fi_v_(i+1) = i * dfI_bfm_ref_
       enddo
+
+#ifdef _OPENMP
       !$omp simd
+#endif
       do i = 0, nj_bfm_ref_-1
          fj_v_(i+1) = i * dfJ_bfm_ref_
       enddo
+
       if     (this%rot_ < CST_PId2)   then  ! < 90
       elseif (this%rot_ < CST_PIGREC) then  ! < 180
          fi_v_ = - fi_v_
