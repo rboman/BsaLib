@@ -824,6 +824,7 @@ contains ! utility procedures
          read(IUN_EXTDATA) r_rotW2G
          read(IUN_EXTDATA) i_nzones
       endif
+      if (i_varu == 5) i_varu = 1
 
       allocate(r_Zref_z(i_nzones), stat=istat, errmsg=emsg)
       if (istat /= 0) call errAllocVarMsg_('r_Zref_z', istat, emsg)
