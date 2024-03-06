@@ -134,8 +134,8 @@ contains
 
    module subroutine SetKeptModesDefault(this)
       class(StructureData_t), intent(inout) :: this
-      integer(int32) :: istat
       character(len = 256) :: emsg
+      integer(int32) :: istat
 
       if (this%modal_%nm_ == 0) call bsa_Abort('Trying to allocate modes when NM==0 yet.')
 
@@ -144,7 +144,9 @@ contains
          if (istat /= 0) call allocKOMsg('this % modal_%modes_', istat, emsg)
       endif
 
-      this%modal_%modes_ = [1 : this%modal_%nm_]
+      do concurrent (istat = 1 : this%modal_%nm_)
+         this%modal_%modes_(istat) = istat
+      enddo
    end subroutine SetKeptModesDefault
 
 

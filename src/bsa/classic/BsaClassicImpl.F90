@@ -466,7 +466,6 @@ contains
          if (mod(setts%nfreqs_, 2) == 0) call bsa_Abort('Needing odd n. of frequencies.')
          allocate(f(setts%nfreqs_))
          f = [-nfreqs_1 : nfreqs_1] * setts%df_
-
       else ! ==2 (frequencies conventions)  [WARNING]
 
          if (mod(nfreqs_1, 2) /= 0) nfreqs_1 = nfreqs_1 + 1 ! make nfreqs-1 even
@@ -474,8 +473,13 @@ contains
          setts%nfreqs_ = nfreqs_1 + 1 ! NOTE: +1 because we consider 0 as well.
          allocate(f(setts%nfreqs_))
          f = [0 : nfreqs_1] * setts%df_
-
       endif
+
+      ! !$omp simd
+      ! do i = nfreqs_0, nfreqs_1
+      !    f(i) = i
+      ! enddo
+      ! f = f * setts%df_
 
 #ifdef BSA_DEBUG
       write(unit_debug_, *) INFOMSG, '@BsaClassicImpl::computeFreqsVect_() : computing frequencies -- ok.' 
