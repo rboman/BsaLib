@@ -2218,7 +2218,6 @@ contains
 
                itmp = 0
 
-!DIR$ UNROLL= 10
                do ifrj = 1, NFREQS
 
                   Suvw_N_w1w2(:, ifrj) = Suvw_N_pad(ifrj : NFREQS+itmp)
@@ -2254,7 +2253,6 @@ contains
                      ajU = wd%wfc_(lj, tc,   in)
                      aj  = wd%wfc_(lj, tcP3, in)
 
-!DIR$ UNROLL= 6
                      do ili = 1, NLIBSL
 
                         li   = struct_data%libs_load_(ili)
@@ -2303,7 +2301,6 @@ contains
 
                akU = wd%wfc_(lk, tc, in)
 
-!DIR$ UNROLL= 6
                do ilj = 1, NLIBSL
 
                   lj   = struct_data%libs_load_(ilj)
@@ -2315,7 +2312,6 @@ contains
 
                   PSDF_jk_JJ_w = ajU * akU * Suvw(:, tc_pos)
 
-!DIR$ UNROLL= 10
                   do im = 1, NMODES_EFF
 
                      psd(:, im) = psd(:, im) + &
