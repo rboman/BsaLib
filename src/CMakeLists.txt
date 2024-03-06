@@ -86,16 +86,6 @@ set( CMAKE_Fortran_FLAGS_RELEASE-default ${CMAKE_Fortran_FLAGS_RELEASE} PARENT_S
 set( CMAKE_Fortran_FLAGS_RELEASE "" )
 
 
-# optional compile flags
-if (enable-par-compilation)
-   message( STATUS "NOTE: Enabling parallel sources compilation" )
-   if (intel-compiler)
-      target_compile_options( ${project} PRIVATE "-MP" )
-   else()
-      message( WARNING "Enable parallel source compilation for non MSVC!" )
-   endif()
-endif()
-
 if (intel-compiler AND enable-mkl)
    message( STATUS "NOTE: Using Intel MKL libraries." )
    target_compile_options( ${project} PRIVATE "-Qmkl:parallel" )
