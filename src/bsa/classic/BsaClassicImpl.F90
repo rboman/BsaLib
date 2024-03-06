@@ -375,7 +375,7 @@ contains
       real(bsa_real_t), allocatable, intent(out) :: f(:)
 
       logical :: l_df_big = .false.
-      integer(int32)   :: nfreqs_1
+      integer(int32)   :: i, nfreqs_0, nfreqs_1
       real(bsa_real_t) :: df_ref, max_freq, max_freq_ref
 
       if (setts%nfreqs_ == 0 .or. setts%df_ == 0._bsa_real_t) &
@@ -465,21 +465,22 @@ contains
          setts%nfreqs_ = (nfreqs_1 * 2) + 1
          if (mod(setts%nfreqs_, 2) == 0) call bsa_Abort('Needing odd n. of frequencies.')
          allocate(f(setts%nfreqs_))
-         f = [-nfreqs_1 : nfreqs_1] * setts%df_
+         nfreqs_0 = -nfreqs_1
+
       else ! ==2 (frequencies conventions)  [WARNING]
 
          if (mod(nfreqs_1, 2) /= 0) nfreqs_1 = nfreqs_1 + 1 ! make nfreqs-1 even
 
          setts%nfreqs_ = nfreqs_1 + 1 ! NOTE: +1 because we consider 0 as well.
          allocate(f(setts%nfreqs_))
-         f = [0 : nfreqs_1] * setts%df_
+         nfreqs_0 = 0
       endif
 
-      ! !$omp simd
-      ! do i = nfreqs_0, nfreqs_1
-      !    f(i) = i
-      ! enddo
-      ! f = f * setts%df_
+      !$omp simd
+      do i = nfreqs_0, nfreqs_1
+         f(i - nfreqs_0 + 1) = i
+      enddo
+      f = f * setts%df_
 
 #ifdef BSA_DEBUG
       write(unit_debug_, *) INFOMSG, '@BsaClassicImpl::computeFreqsVect_() : computing frequencies -- ok.' 
