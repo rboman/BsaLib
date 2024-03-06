@@ -103,13 +103,11 @@ module BsaLib
 
 
       module subroutine bsa_setVisualModeModalIndexes(modes)
-         import :: bsa_int_t
          integer(bsa_int_t), intent(in) :: modes(3)
       end subroutine
 
 
       module subroutine bsa_setVisualModeNodalIndexes(node, dof)
-         import :: bsa_int_t
          integer(bsa_int_t), value :: node, dof
       end subroutine
 

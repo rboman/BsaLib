@@ -253,7 +253,6 @@ module BsaLib_Data
 
    interface
       module function evaluatePSD(f, nf, itc) result(PSD)
-         import :: bsa_int_t, bsa_real_t
          integer(bsa_int_t), intent(in) :: nf, itc
          real(bsa_real_t), intent(in)   :: f(nf)
          real(bsa_real_t), allocatable, target :: PSD(:, :)

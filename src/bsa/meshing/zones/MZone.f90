@@ -34,7 +34,7 @@ module BsaLib_MZone
    ! integer, public, parameter :: MZone_TRIANGLE  = 2
    ! integer, public, parameter :: MZone_LINEAR    = 3
 
-   
+
    type, abstract, public :: MZone_t
 
       character(len = 64) :: name_   = ''
@@ -42,7 +42,7 @@ module BsaLib_MZone
 
       !> Pointer to index of zone's interest modes
       integer(bsa_int_t), public :: id_im_
-   
+
    contains
       procedure, pass :: zoneName
       procedure, pass :: setPolicy
@@ -202,7 +202,11 @@ contains
 # define __decl__ real(bsa_real_t), allocatable, intent(inout) :: bfm_undump(:, :)
 #endif
    subroutine UndumpZone(z  __bfm_dump__ )
+#ifndef BSA_USE_POD_DATA_CACHING
+# ifdef _OPENMP
       use BsaLib_Data, only: dimM_bisp_
+# endif
+#endif
       class(MZone_t), intent(inout) :: z
       __decl__
       character(len = 64) :: name_hdr
