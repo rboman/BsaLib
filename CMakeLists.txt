@@ -76,9 +76,7 @@ option(enable-cuda             "IF GPU code enabled, use CUDA instead of OpenCL 
 option(enable-gpu-double       "Enable double precision in GPU kernel code (discouraged)"       OFF)
 
 
-if (WIN32)
-   set( CMAKE_DEBUG_POSTFIX "d" )
-endif()
+set( CMAKE_DEBUG_POSTFIX "d" )
 
 
 ###########################################################
