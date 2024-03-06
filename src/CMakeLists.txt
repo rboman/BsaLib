@@ -28,34 +28,34 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 set(SRC
-   ${CMAKE_CURRENT_SOURCE_DIR}/BsaLib.f90
-   ${CMAKE_CURRENT_SOURCE_DIR}/CONSTANTS/CONSTANTS.f90
-   ${CMAKE_CURRENT_SOURCE_DIR}/IO/BsaIO.f90
-   ${CMAKE_CURRENT_SOURCE_DIR}/IO/BsaIOImpl.f90
-   ${CMAKE_CURRENT_SOURCE_DIR}/bsa/BsaLibImpl.f90
-   ${CMAKE_CURRENT_SOURCE_DIR}/bsa/classic/BsaClassicImpl.f90
-   ${CMAKE_CURRENT_SOURCE_DIR}/bsa/data/BsaLibData.f90
-   ${CMAKE_CURRENT_SOURCE_DIR}/bsa/data/BsaLibDataImpl.f90
-   ${CMAKE_CURRENT_SOURCE_DIR}/bsa/functions/functions.f90
-   ${CMAKE_CURRENT_SOURCE_DIR}/bsa/functions/functionsImpl.f90
-   ${CMAKE_CURRENT_SOURCE_DIR}/bsa/meshing/BsaMesherImpl.f90
-   ${CMAKE_CURRENT_SOURCE_DIR}/bsa/meshing/point/MPoint.f90
-   ${CMAKE_CURRENT_SOURCE_DIR}/bsa/meshing/policy/MPolicy.f90
-   ${CMAKE_CURRENT_SOURCE_DIR}/bsa/meshing/zones/M2DPolygZone.f90
-   ${CMAKE_CURRENT_SOURCE_DIR}/bsa/meshing/zones/MRectZone.f90
-   ${CMAKE_CURRENT_SOURCE_DIR}/bsa/meshing/zones/MRectZoneImpl.f90
-   ${CMAKE_CURRENT_SOURCE_DIR}/bsa/meshing/zones/MTriangZone.f90
-   ${CMAKE_CURRENT_SOURCE_DIR}/bsa/meshing/zones/MTriangZoneImpl.f90
-   ${CMAKE_CURRENT_SOURCE_DIR}/bsa/meshing/zones/MZone.f90
-   ${CMAKE_CURRENT_SOURCE_DIR}/settings/Settings.f90
-   ${CMAKE_CURRENT_SOURCE_DIR}/settings/SettingsImpl.f90
-   ${CMAKE_CURRENT_SOURCE_DIR}/structure/StructureData.f90
-   ${CMAKE_CURRENT_SOURCE_DIR}/structure/StructureImpl.f90
-   ${CMAKE_CURRENT_SOURCE_DIR}/timing/Timer.f90
-   ${CMAKE_CURRENT_SOURCE_DIR}/utils/utility.f90
-   ${CMAKE_CURRENT_SOURCE_DIR}/wind/WindPSDImpl.f90
-   ${CMAKE_CURRENT_SOURCE_DIR}/wind/WindSetImpl.f90
-   ${CMAKE_CURRENT_SOURCE_DIR}/wind/WindType.f90
+   ${CMAKE_CURRENT_SOURCE_DIR}/BsaLib.F90
+   ${CMAKE_CURRENT_SOURCE_DIR}/CONSTANTS/CONSTANTS.F90
+   ${CMAKE_CURRENT_SOURCE_DIR}/IO/BsaIO.F90
+   ${CMAKE_CURRENT_SOURCE_DIR}/IO/BsaIOImpl.F90
+   ${CMAKE_CURRENT_SOURCE_DIR}/bsa/BsaLibImpl.F90
+   ${CMAKE_CURRENT_SOURCE_DIR}/bsa/classic/BsaClassicImpl.F90
+   ${CMAKE_CURRENT_SOURCE_DIR}/bsa/data/BsaLibData.F90
+   ${CMAKE_CURRENT_SOURCE_DIR}/bsa/data/BsaLibDataImpl.F90
+   ${CMAKE_CURRENT_SOURCE_DIR}/bsa/functions/functions.F90
+   ${CMAKE_CURRENT_SOURCE_DIR}/bsa/functions/functionsImpl.F90
+   ${CMAKE_CURRENT_SOURCE_DIR}/bsa/meshing/BsaMesherImpl.F90
+   ${CMAKE_CURRENT_SOURCE_DIR}/bsa/meshing/point/MPoint.F90
+   ${CMAKE_CURRENT_SOURCE_DIR}/bsa/meshing/policy/MPolicy.F90
+   ${CMAKE_CURRENT_SOURCE_DIR}/bsa/meshing/zones/M2DPolygZone.F90
+   ${CMAKE_CURRENT_SOURCE_DIR}/bsa/meshing/zones/MRectZone.F90
+   ${CMAKE_CURRENT_SOURCE_DIR}/bsa/meshing/zones/MRectZoneImpl.F90
+   ${CMAKE_CURRENT_SOURCE_DIR}/bsa/meshing/zones/MTriangZone.F90
+   ${CMAKE_CURRENT_SOURCE_DIR}/bsa/meshing/zones/MTriangZoneImpl.F90
+   ${CMAKE_CURRENT_SOURCE_DIR}/bsa/meshing/zones/MZone.F90
+   ${CMAKE_CURRENT_SOURCE_DIR}/settings/Settings.F90
+   ${CMAKE_CURRENT_SOURCE_DIR}/settings/SettingsImpl.F90
+   ${CMAKE_CURRENT_SOURCE_DIR}/structure/StructureData.F90
+   ${CMAKE_CURRENT_SOURCE_DIR}/structure/StructureImpl.F90
+   ${CMAKE_CURRENT_SOURCE_DIR}/timing/Timer.F90
+   ${CMAKE_CURRENT_SOURCE_DIR}/utils/utility.F90
+   ${CMAKE_CURRENT_SOURCE_DIR}/wind/WindPSDImpl.F90
+   ${CMAKE_CURRENT_SOURCE_DIR}/wind/WindSetImpl.F90
+   ${CMAKE_CURRENT_SOURCE_DIR}/wind/WindType.F90
 )
 
 
@@ -105,7 +105,7 @@ else()
       message( SEND_ERROR "Could not find LAPACK." )
    endif()
    target_link_libraries( ${project} ${LAPACK_LIBRARIES} )
-   target_link_options( ${project} AFTER PUBLIC ${LAPACK_LINKER_FLAGS} )
+   # target_link_options( ${project} AFTER PUBLIC ${LAPACK_LINKER_FLAGS} )
 endif()
 
 if (enable-openmp)
