@@ -19,7 +19,7 @@ module BsaLib
    implicit none (type, external)
    public
 
-#include "./CONSTANTS/_CONSTANTS.f90"
+#include "_CONSTANTS.f90"
 
    private :: mainClassic_, mainMesher_
 

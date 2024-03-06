@@ -65,6 +65,8 @@ set_target_properties( ${project}
    PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX}
 )
 
+target_include_directories( ${project} AFTER PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/CONSTANTS )
+
 
 # # TODO: experimental
 target_compile_definitions( ${project} PRIVATE BSA_USE_POD_DATA_CACHING )
