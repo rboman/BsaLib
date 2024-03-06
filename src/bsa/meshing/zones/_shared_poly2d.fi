@@ -921,19 +921,27 @@ end subroutine __sub_name_compute
       if (ist /= 0) call bsa_Abort("Error allocating ""fj"" in interpolating RZ.")
       fj_v_ = 0._bsa_real_t
 
+      ! TODO: maybe use two concurrent threads ?? 
+      !       (we might already be in a threaded env)
+      !$omp simd
+      do i = 0, ni_bfm_ref_-1
+         fi_v_(i+1) = i * dfI_bfm_ref_
+      enddo
+      !$omp simd
+      do i = 0, nj_bfm_ref_-1
+         fj_v_(i+1) = i * dfJ_bfm_ref_
+      enddo
       if     (this%rot_ < CST_PId2)   then  ! < 90
-         fi_v_ = ([0 : ni_bfm_ref_-1] * ( dfI_bfm_ref_)) + fi_baseptI
-         fj_v_ = ([0 : nj_bfm_ref_-1] * ( dfJ_bfm_ref_)) + fj_baseptI
       elseif (this%rot_ < CST_PIGREC) then  ! < 180
-         fi_v_ = ([0 : ni_bfm_ref_-1] * (-dfI_bfm_ref_)) + fi_baseptI
-         fj_v_ = ([0 : nj_bfm_ref_-1] * ( dfJ_bfm_ref_)) + fj_baseptI
+         fi_v_ = - fi_v_
       elseif (this%rot_ < CST_PIt3d2) then  ! < 270
-         fi_v_ = ([0 : ni_bfm_ref_-1] * (-dfI_bfm_ref_)) + fi_baseptI
-         fj_v_ = ([0 : nj_bfm_ref_-1] * (-dfJ_bfm_ref_)) + fj_baseptI
+         fi_v_ = - fi_v_
+         fj_v_ = - fj_v_
       elseif (this%rot_ < CST_PIt2)   then  ! < 360
-         fi_v_ = ([0 : ni_bfm_ref_-1] * ( dfI_bfm_ref_)) + fi_baseptI
-         fj_v_ = ([0 : nj_bfm_ref_-1] * (-dfJ_bfm_ref_)) + fj_baseptI
+         fj_v_ = - fj_v_
       endif
+      fi_v_ = fi_v_ + fi_baseptI
+      fj_v_ = fj_v_ + fj_baseptI
 
       ! Compute BFM at all (refined) meshing points
       bfm_undump = getBFM_msh(fi_v_, fj_v_)
