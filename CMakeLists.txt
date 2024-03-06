@@ -107,8 +107,8 @@ if (WIN32)
    )
 else()
    add_compile_options(
-      $<$<COMPILE_LANGUAGE:Fortran>:-warn all>
-      $<$<COMPILE_LANGUAGE:Fortran>:-stand f18>
+      $<$<COMPILE_LANGUAGE:Fortran>:"-Wall -Wimplicit-interface -Wunused-parameter -pedantic">
+      $<$<COMPILE_LANGUAGE:Fortran>:-std=f2018>
       )
 endif()
 
