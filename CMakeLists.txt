@@ -64,6 +64,8 @@ option(enable-shared-runtime   "Link to shared Fortran runtime libraries"       
 option(enable-openmp           "Enable OpenMP parallelisation"                      ON)
 option(enable-mkl              "Enable Intel MKL libraries (Intel compilers only)"  ON)
 option(enable-sym-ev-routine   "Enable usage of 'dsyev' instead of 'dgesvd'"        ON)
+
+# NOTE: this can be directly done from CLI using cmake's --parallel <N> flag !!
 option(enable-par-compilation  "Enable parallelisation of sources compilation"      ON)
 
 # GPU options
