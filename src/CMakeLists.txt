@@ -79,6 +79,13 @@ target_compile_definitions( ${project} PRIVATE BSA_USE_POD_DATA_CACHING )
 # target_compile_definitions( ${project} PRIVATE BSA_USE_POST_MESH_OMP )
 
 
+if (intel-compiler)
+   add_compile_options( -fpp )
+else()
+   add_compile_options( -cpp )
+endif()
+
+
 
 # TODO: see if we can manage this better
 # NOTE: disabling annoying -O2 default release flag...
@@ -88,35 +95,48 @@ set( CMAKE_Fortran_FLAGS_RELEASE "" )
 
 if (intel-compiler AND enable-mkl)
    message( STATUS "NOTE: Using Intel MKL libraries." )
-   target_compile_options( ${project} PRIVATE "-Qmkl:parallel" )
+   if (WIN32)
+      target_compile_options( ${project} PRIVATE "-Qmkl:parallel" )
+   else()
+      target_compile_options( ${project} PRIVATE "-qmkl=parallel" )
+   endif()
 else()
    find_package( LAPACK REQUIRED )
    if (NOT LAPACK_FOUND )
       message( SEND_ERROR "Could not find LAPACK." )
    endif()
    target_link_libraries( ${project} ${LAPACK_LIBRARIES} )
-   # target_link_options( ${project} AFTER PUBLIC ${LAPACK_LINKER_FLAGS} )
 endif()
 
 if (enable-openmp)
    if (intel-compiler)
-      target_compile_options( ${project} PRIVATE "-Qopenmp" )
+      if (WIN32)
+         target_compile_options( ${project} PRIVATE "-Qopenmp" )
+      else()
+         target_compile_options( ${project} PRIVATE "-qopenmp" )
+      endif()
    else()
       target_compile_options( ${project} PRIVATE "-fopenmp" )
    endif()
 else()
    if (intel-compiler)
-      target_compile_options( ${project} PRIVATE "-assume:nocc_omp" )
-      target_compile_options( ${project} PRIVATE "-Qparallel" )  # BUG: to avoid warning about locality info
-   else()
-      message( WARNING "Check how to disable omp preproc in gfortran & others.")
-      target_compile_options( ${project} PRIVATE "-parallel" )  # BUG: to avoid warning about locality info
+      if (WIN32)
+         target_compile_options( ${project} PRIVATE "-assume:nocc_omp" )
+         target_compile_options( ${project} PRIVATE "-Qparallel" )  # BUG: to avoid warning about locality info
+      else()
+         target_compile_options( ${project} PRIVATE "-assume nocc_omp" )
+         target_compile_options( ${project} PRIVATE "-qparallel" )  # BUG: to avoid warning about locality info
+      endif()
    endif()
 endif()
 
+
 if (NOT enable-shared-runtime)
    if (intel-compiler)
-      target_compile_options( ${project} PUBLIC "-libs:static")
+      if (WIN32)
+         target_compile_options( ${project} PUBLIC "-libs:static")
+      else()
+      endif()
    else()
       message( WARNING "Check how to link to static runtime libraries for non MSVC!" )
    endif()
@@ -124,12 +144,14 @@ else()
    message( STATUS "NOTE: Using SHARED runtime libraries!")
 endif()
 
-if (NOT enable-sym-ev-routine)
+
+if (enable-sym-ev-routine)
+   message( STATUS "NOTE: Using 'dsyev'  method")
+else()
    message( STATUS "NOTE: Using 'dgesvd' method")
    target_compile_definitions( ${project} PRIVATE "-DBSA_USE_SVD_METHOD" )
-else()
-   message( STATUS "NOTE: Using 'dsyev'  method")
 endif()
+
 
 if (enable-gpu-code)
    target_compile_definitions( ${project} PRIVATE BSA_USE_GPU )
@@ -147,9 +169,9 @@ if(NOT EXISTS "${LIB_MOD_DIR}")
 endif()
 set_target_properties( ${project} PROPERTIES Fortran_MODULE_DIRECTORY ${LIB_MOD_DIR} )
 
-# target_include_directories(${project} 
-#    PUBLIC
-#    $<BUILD_INTERFACE:${LIB_MOD_DIR}>
-#    $<INSTALL_INTERFACE:${CMAKE_INSTALL_MODULEDIR}>
-# )
+target_include_directories( ${project} 
+   PUBLIC
+   $<BUILD_INTERFACE:${LIB_MOD_DIR}>
+   $<INSTALL_INTERFACE:${CMAKE_INSTALL_MODULEDIR}>
+)
 

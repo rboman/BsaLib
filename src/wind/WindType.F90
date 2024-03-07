@@ -15,9 +15,10 @@
 !! along with BSA Library.  If not, see <https://www.gnu.org/licenses/>.
 module BsaLib_WindData
 
-   use BsaLib_IO
-   use BsaLib_CONSTANTS
+   use BsaLib_CONSTANTS, only: bsa_int_t, bsa_real_t, real64, int32       &
+                              , INFOMSG, WARNMSG, ERRMSG, MSGCONT, DBGMSG, BSA_WIND_DATA_DUMPFILE
    use BsaLib_Settings
+   use BsaLib_IO
    implicit none (type, external)
    private
 
@@ -219,8 +220,8 @@ module BsaLib_WindData
          integer(bsa_int_t), intent(in) :: innl        ! n. actual nodes loaded
          integer(bsa_int_t), intent(in) :: idir        ! wind direction
          integer(bsa_int_t), intent(in) :: itc         ! turb component id
-         real(bsa_real_t), intent(in)   :: freqs(nf)           ! frequencies
-         integer(bsa_int_t), intent(in) :: nodes_loaded(innl)     ! list of actual loaded nodes
+         real(bsa_real_t), intent(in)   :: freqs(:)           ! frequencies
+         integer(bsa_int_t), intent(in) :: nodes_loaded(:)     ! list of actual loaded nodes
          real(bsa_real_t), dimension(nf, innl) :: PSD
       end function
    end interface
@@ -381,7 +382,6 @@ module BsaLib_WindData
 
 
       module subroutine SetPSDFunction(this, func)
-         import :: psd_t
          class(psd_t) :: this
          procedure(PSDfunc), intent(in), pointer :: func
       end subroutine
@@ -393,8 +393,8 @@ module BsaLib_WindData
       module function evalPSD_(this, nf, f, innl, nnl, idir, itc) result(PSD)
          class(WindData_t), intent(in)  :: this
          integer(bsa_int_t), intent(in) :: nf, innl, idir, itc
-         integer(bsa_int_t), intent(in) :: nnl(innl)
-         real(bsa_real_t), intent(in)   :: f(nf)
+         integer(bsa_int_t), intent(in) :: nnl(:)
+         real(bsa_real_t), intent(in)   :: f(:)
          real(bsa_real_t) :: PSD(nf, innl)
       end function
 

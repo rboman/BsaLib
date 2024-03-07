@@ -134,7 +134,7 @@ module BsaLib_Functions
       !> BUG: this routine is adapted to the case where we use
       !>      convention on PULSATION.
       !>      Please, adapt it to the case of convention over FREQUENCIES.
-      module pure subroutine getFM_full_tnlm_scalar_cls_(ii, ij, fi, fj, Suvw, Suvw_pad, psd, bisp)
+      pure module subroutine getFM_full_tnlm_scalar_cls_(ii, ij, fi, fj, Suvw, Suvw_pad, psd, bisp)
          integer(bsa_int_t), intent(in)  :: ii, ij
          real(bsa_real_t), intent(in)    :: fi, fj
          real(bsa_real_t), intent(in)    :: Suvw(NFREQS, NPSDEL)
@@ -144,7 +144,7 @@ module BsaLib_Functions
 
 
 
-      module pure subroutine getFM_full_tnm_scalar_cls_(ii, ij, fi, fj, Suvw, Suvw_pad, psd, bisp)
+      pure module subroutine getFM_full_tnm_scalar_cls_(ii, ij, fi, fj, Suvw, Suvw_pad, psd, bisp)
          integer(bsa_int_t), intent(in)  :: ii, ij
          real(bsa_real_t), intent(in)    :: fi, fj
          real(bsa_real_t), intent(in)    :: Suvw(NFREQS, NPSDEL)
@@ -165,7 +165,7 @@ module BsaLib_Functions
       !> BUG: this routine is adapted to the case where we use
       !>      convention on PULSATION.
       !>      Please, adapt it to the case of convention over FREQUENCIES.
-      module pure subroutine getFM_diag_tnlm_scalar_cls_(ii, ij, fi, fj, Suvw, Suvw_pad, psd, bisp)
+      pure module subroutine getFM_diag_tnlm_scalar_cls_(ii, ij, fi, fj, Suvw, Suvw_pad, psd, bisp)
          integer(bsa_int_t), intent(in)  :: ii, ij
          real(bsa_real_t), intent(in)    :: fi, fj
          real(bsa_real_t), intent(in)    :: Suvw(NFREQS, NPSDEL)
@@ -185,7 +185,7 @@ module BsaLib_Functions
 
 
 
-      module pure subroutine getBR_SFm_val_(nm, Suvw, fnat, im, m, psd)
+      pure module subroutine getBR_SFm_val_(nm, Suvw, fnat, im, m, psd)
          integer(bsa_int_t), intent(in)  :: im, m, nm
          real(bsa_real_t), intent(in)    :: Suvw(nm, NPSDEL), fnat
          real(bsa_real_t), intent(inout) :: psd

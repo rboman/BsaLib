@@ -94,14 +94,14 @@ module BsaLib_MRectZone
 
 
       !> Gets rect base along I-dir
-      module elemental function baseI_rct(this) result(res)
+      elemental module function baseI_rct(this) result(res)
          class(MRectZone_t), intent(in) :: this
          real(bsa_real_t) :: res
       end function
 
 
       !> Gets rect base along J-dir
-      module elemental function baseJ_rct(this) result(res)
+      elemental module function baseJ_rct(this) result(res)
          class(MRectZone_t), intent(in) :: this
          real(bsa_real_t) :: res
       end function
@@ -111,7 +111,7 @@ module BsaLib_MRectZone
       !> Get A point.
       !> A point is the point defined, starting from I point, 
       !> along the J-dir (Y-axis) parallel side.
-      module pure function getAPoint(this) result(pt)
+      pure module function getAPoint(this) result(pt)
          class(MRectZone_t), intent(in) :: this
          type(MPoint_t) :: pt
       end function
@@ -120,7 +120,7 @@ module BsaLib_MRectZone
       !> Get B point.
       !> B point is the point defined, starting from I point, 
       !> along the I-dir (X-axis) parallel side.
-      module pure function getBPoint(this) result(pt)
+      pure module function getBPoint(this) result(pt)
          class(MRectZone_t), intent(in) :: this
          type(MPoint_t) :: pt
       end function
@@ -262,7 +262,7 @@ module BsaLib_MRectZone
 
 
       ! !> Avoid setting a delta smaller than given limit
-      ! module elemental impure subroutine validateDeltas(this, lval)
+      ! elemental module impure subroutine validateDeltas(this, lval)
       !    class(MRectZone_t), intent(inout) :: this
       !    real(bsa_real_t), intent(in) :: lval
       ! end subroutine
@@ -308,7 +308,7 @@ module BsaLib_MRectZone
 
       !> Gets vertex point pt coordinates in Nth quadrant
       !> w.r.t. Center point, in zone's LRS.
-      module pure function getNthQuadVtx(this, iquad) result(pt)
+      pure module function getNthQuadVtx(this, iquad) result(pt)
          class(MRectZone_t), intent(in) :: this
          integer, intent(in) :: iquad
          type(MPoint_t) :: pt

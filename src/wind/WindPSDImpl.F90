@@ -19,17 +19,16 @@ submodule(BsaLib_WindData) BsaLib_WindPSDImpl
 # define __use_concurrent_loops__
 #endif
 
-   use BsaLib_CONSTANTS, only: bsa_int_t, bsa_real_t, real64, int32       &
-                              , INFOMSG, WARNMSG, ERRMSG, MSGCONT, DBGMSG
    implicit none (type, external)
 
-   type :: arr_proc_pointer_t
-      procedure(PSDfunc), pointer, nopass :: ptr => null()
-   end type arr_proc_pointer_t
+   ! type :: arr_proc_pointer_t
+   !    procedure(PSDfunc), pointer, nopass :: ptr => null()
+   ! end type arr_proc_pointer_t
 
-   ! TODO: might be statically initialised (parameter)
-   type(arr_proc_pointer_t), dimension(5) :: psd_funcs
+   ! ! TODO: might be statically initialised (parameter)
+   ! type(arr_proc_pointer_t), dimension(5) :: psd_funcs
 
+   procedure(PSDfunc), pointer  :: psd_func_internal_ => null()
 
 contains
 
@@ -52,13 +51,18 @@ contains
       allocate(this%psd_, stat=istat, errmsg=emsg)
       if (istat /= 0) call allocKOMsg('this % psd_', istat, emsg)
 
-      ! setting function pointer array 
-      psd_funcs(1)%ptr => vonKarmanPSD_
-      psd_funcs(2)%ptr => kaimalPSD_
-      psd_funcs(3)%ptr => davenportPSD_Greisch_
-      psd_funcs(5)%ptr => davenportPSD_Uliege_
+      select case (ipsd)
+      case (1)
+         psd_func_internal_ => vonKarmanPSD_
+      case (2)
+         psd_func_internal_ => kaimalPSD_
+      case (3)
+         psd_func_internal_ => davenportPSD_Greisch_
+      case (5)
+         psd_func_internal_ => davenportPSD_Uliege_
+      end select
 
-      call this%psd_%SetPSDFunction(psd_funcs(ipsd)%ptr)
+      call this%psd_%SetPSDFunction(psd_func_internal_)
 
 ! #ifdef BSA_DEBUG
 !       print *, INFOMSG, '@WindImpl::SetPSDType() : PSD type set to ', this%i_psd_type_
@@ -84,8 +88,12 @@ contains
       absf = abs(f)
 
 #ifdef __use_concurrent_loops__
+# ifdef __GFORTRAN__
+      do concurrent (i = 1 : innl)
+# else
       do concurrent (i = 1 : innl) &
             local(ni, nj, id) shared(PSDvec, nodesl, innl, struct_data, this, absf)
+# endif
 #else
       do i = 1, innl
 #endif
@@ -107,7 +115,7 @@ contains
       procedure(PSDfunc), intent(in), pointer :: func
 
       this%psd_fct_ptr => func
-   end subroutine SetPSDFunction
+   end subroutine
 
 
 
@@ -116,8 +124,8 @@ contains
       use BsaLib_Data, only: settings
       class(WindData_t),  intent(in) :: this
       integer(bsa_int_t), intent(in) :: nf, innl, idir, itc
-      integer(bsa_int_t), intent(in) :: nnl(innl)
-      real(bsa_real_t),   intent(in) :: f(nf)
+      real(bsa_real_t),   intent(in) :: f(:)
+      integer(bsa_int_t), intent(in) :: nnl(:)
       real(bsa_real_t) :: PSD(nf, innl)
 
       if (idir /= 1) then
@@ -144,8 +152,8 @@ contains
       integer(bsa_int_t), intent(in) :: innl     ! n. actual nodes loaded
       integer(bsa_int_t), intent(in) :: idir     ! wind direction
       integer(bsa_int_t), intent(in) :: itc      ! 
-      real(bsa_real_t),   intent(in) :: freqs(nf)       ! frequencies
-      integer(bsa_int_t), intent(in) :: nnl(innl)   ! list of actual loaded nodes
+      real(bsa_real_t),   intent(in) :: freqs(:)       ! frequencies
+      integer(bsa_int_t), intent(in) :: nnl(:)   ! list of actual loaded nodes
       real(bsa_real_t) :: PSD(nf, innl)
       ! local
       real(bsa_real_t), dimension(1, innl) :: L
@@ -164,10 +172,14 @@ contains
          PSD   = PSD * PSD ! square
          rtmp1 = rtmp1 * reshape(wd%sigmaUVW_wz_(itc, wd%wz_node_(1 : innl))**2, [1, innl])
          PSD   = (1 + 70.7_bsa_real_t * PSD)**(5._bsa_real_t/6._bsa_real_t)
-         
+
 
 #ifdef __use_concurrent_loops__
+# ifdef __GFORTRAN__
+         do concurrent (i = 1 : innl)
+# else
          do concurrent (i = 1 : innl) shared(innl, rtmp1)
+# endif
 #else
          do i = 1, innl
 #endif
@@ -208,11 +220,11 @@ contains
       integer(bsa_int_t), intent(in) :: innl          ! n. actual nodes loaded
       integer(bsa_int_t), intent(in) :: idir          ! wind direction
       integer(bsa_int_t), intent(in) :: itc           ! 
-      integer(bsa_int_t), intent(in) :: nnl(innl)     ! list of actual loaded nodes
-      real(bsa_real_t),   intent(in) :: freqs(nf)     ! frequencies
+      integer(bsa_int_t), intent(in) :: nnl(:)     ! list of actual loaded nodes
+      real(bsa_real_t),   intent(in) :: freqs(:)     ! frequencies
       real(bsa_real_t) :: PSD(nf, innl)
 
-      
+
       PSD = 0._bsa_real_t
    end function kaimalPSD_
 
@@ -226,10 +238,10 @@ contains
       integer(bsa_int_t), intent(in) :: innl        ! n. actual nodes loaded
       integer(bsa_int_t), intent(in) :: idir        ! wind direction
       integer(bsa_int_t), intent(in) :: itc         ! 
-      integer(bsa_int_t), intent(in) :: nnl(innl)   ! list of actual loaded nodes
-      real(bsa_real_t),   intent(in) :: freqs(nf)   ! frequencies
+      integer(bsa_int_t), intent(in) :: nnl(:)   ! list of actual loaded nodes
+      real(bsa_real_t),   intent(in) :: freqs(:)   ! frequencies
       real(bsa_real_t) :: PSD(nf, innl)
-      
+
       real(bsa_real_t), parameter :: cst1 = 0.65_bsa_real_t * 1200._bsa_real_t
       integer(int32)   :: i, n
 
@@ -252,8 +264,8 @@ contains
       integer(bsa_int_t), intent(in) :: innl                  ! n. actual nodes loaded
       integer(bsa_int_t), intent(in) :: idir                  ! wind direction
       integer(bsa_int_t), intent(in) :: itc                   ! 
-      integer(bsa_int_t), intent(in) :: nnl(innl)     ! list of actual loaded nodes
-      real(bsa_real_t),   intent(in) :: freqs(nf)   ! frequencies
+      integer(bsa_int_t), intent(in) :: nnl(:)     ! list of actual loaded nodes
+      real(bsa_real_t),   intent(in) :: freqs(:)   ! frequencies
       real(bsa_real_t) :: PSD(nf, innl)
 
       real(bsa_real_t) :: cstL_U(1, innl), cstFL_U(nf, innl)
@@ -264,8 +276,12 @@ contains
       cstFL_U      = matmul(reshape(abs(freqs), [nf, 1]), cstL_U)
 
 #ifdef __use_concurrent_loops__
+# ifdef __GFORTRAN__
+      do concurrent (i = 1 : innl)
+# else
       do concurrent (i = 1 : innl) &
             shared(cstFL_U, innl, nnl, cstL_U, itc, wd) local(n)
+# endif
 #else
       do i = 1, innl
 #endif

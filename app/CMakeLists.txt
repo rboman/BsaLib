@@ -27,17 +27,24 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.enable_language( Fortran )
 
-add_executable( bsa bsa.f90 )
+add_executable( bsa bsa.F90 )
 
 if (enable-openmp)
-   set_target_properties( bsa PROPERTIES OUTPUT_NAME bsa_omp )
+   message( STATUS "NOTE: setting bsa target name to 'bsa_omp'")
+   set_target_properties( bsa PROPERTIES OUTPUT_NAME "bsa_omp" )
 endif()
 
 target_link_libraries( bsa BsaLib )
 
-if (intel-compiler)
+if (intel-compiler AND WIN32)
    target_compile_options( bsa PRIVATE -w )
 endif()
+
+
+if (GNU)
+   target_compile_options( bsa <$<CONFIG:DEBUG>:-fbacktrace> )
+endif()
+
 
 if (enable-gpu-code)
    if (enable-cuda)
@@ -61,7 +68,13 @@ if(NOT EXISTS "${LIB_MOD_DIR}")
   make_directory("${LIB_MOD_DIR}")
 endif()
 set_target_properties( bsa
-   PROPERTIES
-   Fortran_MODULE_DIRECTORY ${LIB_MOD_DIR}
+   PROPERTIES Fortran_MODULE_DIRECTORY ${LIB_MOD_DIR}
 )
+
+target_include_directories( ${project} 
+   PUBLIC
+   $<BUILD_INTERFACE:${LIB_MOD_DIR}>
+   $<INSTALL_INTERFACE:${CMAKE_INSTALL_MODULEDIR}>
+)
+
 unset( LIB_MOD_DIR )

@@ -11,6 +11,9 @@ cmake ^
    -D enable-gpu-double=OFF ^
    -S . -B build_cmake %~1
 
-cmake --build build_cmake --config Debug --clean-first
-cmake --build build_cmake --config Release --clean-first
+set "cleanfirst=--clean-first"
+REM set "cleanfirst="
+
+cmake --build build_cmake --config Debug %cleanfirst%
+cmake --build build_cmake --config Release %cleanfirst%
 endlocal

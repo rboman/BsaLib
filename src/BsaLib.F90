@@ -184,7 +184,7 @@ module BsaLib
       ! --------------------------         SETTINGS       ---------------------------------
 
 
-      module elemental function bsa_isFullComp() result(bool)
+      elemental module function bsa_isFullComp() result(bool)
          logical :: bool
       end function
 
@@ -445,7 +445,7 @@ module BsaLib
 
 
 
-      module pure function bsa_getUsedModeShapes() result(modes)
+      pure module function bsa_getUsedModeShapes() result(modes)
          integer(bsa_int_t), allocatable :: modes(:)
       end function
 

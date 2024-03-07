@@ -87,11 +87,11 @@ if (enable-sequential-code)
 endif()
 
 # check if intel compiler or not
+message( STATUS "NOTE: Compiler ID:  ${CMAKE_Fortran_COMPILER_ID}")
 if (CMAKE_Fortran_COMPILER_ID MATCHES "^Intel")
    message( STATUS "NOTE: Using Intel compiler")
    set(intel-compiler ON)
 else()
-   message( STATUS "NOTE: Compiler ID:  ${CMAKE_Fortran_COMPILER_ID}")
    set(intel-compiler OFF)
 endif()
 
@@ -103,24 +103,42 @@ if (WIN32)
       $<$<COMPILE_LANGUAGE:Fortran>:-stand:f18>
    )
 else()
-   add_compile_options(
-      $<$<COMPILE_LANGUAGE:Fortran>:"-Wall -Wimplicit-interface -Wunused-parameter -pedantic">
-      $<$<COMPILE_LANGUAGE:Fortran>:-std=f2018>
+   if (intel-compiler)
+      add_compile_options(
+         $<$<COMPILE_LANGUAGE:Fortran>:-warn all>
+         $<$<COMPILE_LANGUAGE:Fortran>:-stand f18>
       )
+   else()
+      add_compile_options(
+         $<$<COMPILE_LANGUAGE:Fortran>:-Wall>
+         $<$<COMPILE_LANGUAGE:Fortran>:-Wimplicit-interface>
+         $<$<COMPILE_LANGUAGE:Fortran>:-Wunused-parameter>
+         $<$<COMPILE_LANGUAGE:Fortran>:-pedantic>
+         $<$<COMPILE_LANGUAGE:Fortran>:-std=f2018>
+      )
+   endif()
 endif()
 
 
 # Configuration specific options
-if (intel-compiler AND enable-heap-arrays)
-   add_compile_options( $<$<COMPILE_LANGUAGE:Fortran>:-heap-arrays0> )
+if (enable-heap-arrays)
+   if (intel-compiler)
+      if (WIN32)
+         add_compile_options( $<$<COMPILE_LANGUAGE:Fortran>:-heap-arrays0> )
+      else()
+         add_compile_options( $<$<COMPILE_LANGUAGE:Fortran>:-heap-arrays 0> )
+      endif()
+   else()
+      add_compile_options( $<$<COMPILE_LANGUAGE:Fortran>:-fmax-stack-var-size=0> )
+   endif()
 endif()
 
 if (intel-compiler)
-   add_compile_options(
-      $<$<AND:$<CONFIG:RELEASE>,$<COMPILE_LANGUAGE:Fortran>>:-O3>
-      $<$<AND:$<CONFIG:RELEASE>,$<COMPILE_LANGUAGE:Fortran>>:-Ob1>
-   )
-   add_compile_options( $<$<COMPILE_LANGUAGE:Fortran>:-Qdiag-disable:8291> ) # field widths recommendation
+   add_compile_options( $<$<AND:$<CONFIG:RELEASE>,$<COMPILE_LANGUAGE:Fortran>>:-O3> )
+   if (WIN32)
+      add_compile_options( $<$<AND:$<CONFIG:RELEASE>,$<COMPILE_LANGUAGE:Fortran>>:-Ob1> )
+      add_compile_options( $<$<COMPILE_LANGUAGE:Fortran>:-Qdiag-disable:8291> ) # field widths recommendation
+   endif()
 else()
    add_compile_options(
       $<$<AND:$<CONFIG:RELEASE>,$<COMPILE_LANGUAGE:Fortran>>:-Ofast>
@@ -134,9 +152,8 @@ add_compile_definitions( $<$<CONFIG:DEBUG>:BSA_DEBUG> )
 if (enable-single)
    message( STATUS "NOTE: enabling single precision floating point arithmetic")
    add_compile_definitions( BSA_SINGLE_FLOATING_PRECISION )
-   set( enable-gpu-double OFF )
+   set( enable-gpu-double OFF ) # make sure also GPU code is built in single
 endif()
-
 
 
 # Disable annoying warning of incompatible RT libraries

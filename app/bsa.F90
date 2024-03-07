@@ -206,8 +206,10 @@ program bsa
 
 
             ! TODO: introduce proper T variable
-            call bsa_computePeakFactors(m2_r_diag, m2o2_r_diag, 600._bsa_real_t, peak_pos_r_diag_g, sk_r_diag, peak_pos_r_diag_ng, peak_neg_r_diag_ng)
-            call bsa_computePeakFactors(m2_r_full, m2o2_r_full, 600._bsa_real_t, peak_pos_r_full_g, sk_r_full, peak_pos_r_full_ng, peak_neg_r_full_ng)
+            call bsa_computePeakFactors(m2_r_diag, m2o2_r_diag, 600._bsa_real_t, &
+               peak_pos_r_diag_g, sk_r_diag, peak_pos_r_diag_ng, peak_neg_r_diag_ng)
+            call bsa_computePeakFactors(m2_r_full, m2o2_r_full, 600._bsa_real_t, &
+               peak_pos_r_full_g, sk_r_full, peak_pos_r_full_ng, peak_neg_r_full_ng)
 
 
             if (allocated(sk_r_full)) then
@@ -554,7 +556,7 @@ contains ! utility procedures
          else
             idx = idx + p - 1
          endif
-         read(unit=string(p : idx-1), fmt='(i)') list(i)
+         read(unit=string(p : idx-1), fmt=*) list(i)
          p = idx + 1
          i = i + 1
       enddo
@@ -1020,7 +1022,7 @@ contains ! utility procedures
 
    subroutine getBsaData()
       character(len = 256) :: label
-      character(len = *), parameter :: fmt_a = '(a)', fmt_i = '(i)', fmt_f = '(f)'
+      character(len = *), parameter :: fmt_a = '(a)', fmt_i = '(i8)'
       integer :: i
 
 
@@ -1044,7 +1046,7 @@ contains ! utility procedures
 
       read(IUN_BSADATA, fmt_a) label
       read(IUN_BSADATA, fmt_i) i_nfreqs
-      read(IUN_BSADATA, fmt_f) r_df
+      read(IUN_BSADATA,     *) r_df
 
       read(IUN_BSADATA, fmt_a) label
       read(IUN_BSADATA, fmt_i) i_svd

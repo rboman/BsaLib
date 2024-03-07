@@ -104,14 +104,14 @@ module BsaLib_MTriangZone
 
 
       !> Gets rect base along I-dir
-      module elemental function baseI_triang(this) result(res)
+      elemental module function baseI_triang(this) result(res)
          class(MTriangZone_t), intent(in) :: this
          real(bsa_real_t) :: res
       end function
 
 
       !> Gets rect base along J-dir
-      module elemental function baseJ_triang(this) result(res)
+      elemental module function baseJ_triang(this) result(res)
          class(MTriangZone_t), intent(in) :: this
          real(bsa_real_t) :: res
       end function
@@ -126,7 +126,7 @@ module BsaLib_MTriangZone
 
       !> Returns total N of zone's meshing points.
       !> NOTE: for the moment, ONLY triangles rectangles supported
-      module pure function zoneTotNPts_triang(this) result(npt)
+      pure module function zoneTotNPts_triang(this) result(npt)
          class(MTriangZone_t), intent(in) :: this
          integer(bsa_int_t) :: npt
       end function
