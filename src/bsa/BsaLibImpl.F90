@@ -685,16 +685,13 @@ contains
    module subroutine bsa_setOutFileName(fname)
       character(len=*), intent(in) :: fname
 
-      undebug_fname_ = fname
+      BSA_DEBUG_FNAME = fname
    end subroutine
 
 
 
    subroutine setExportPathPrefix_()
-      if (export_in_cwd_) then
-         exp_dir_ = ' '
-         out_dir_ = ' '
-      else
+      if (.not. export_in_cwd_) then
          if (allocated(exp_dir_)) return
          if (.not. allocated(out_dir_)) out_dir_ = BSA_OUT_DIRNAME_DEFAULT
          exp_dir_ = out_dir_
@@ -1464,10 +1461,9 @@ contains
       !! BUG: not really adapted to logic...
 
       ! DEBUG unit
-      if (.not. allocated(undebug_fname_)) undebug_fname_ = 'bsadebug.bsa'
-      call io_getVerifiedFile(unit_debug_, undebug_fname_)
+      call io_getVerifiedFile(unit_debug_, BSA_DEBUG_FNAME)
       open(unit=unit_debug_          & 
-         , file=undebug_fname_       &
+         , file=BSA_DEBUG_FNAME      &
          , status=IO_STATUS_REPLACE  &
          , form=IO_FORM_FORMATTED    &
          , action=IO_ACTION_WRITE )
@@ -1516,7 +1512,7 @@ contains
       real(bsa_real_t), intent(in)   :: vec(:)
       integer(int32) :: iun, i, dim
 
-      iun = io_openExportFileByName(exp_dir_ // fname)
+      iun = io_openExportFileByName(fname)
       if (iun == 0) call bsa_Abort()
       dim = size(vec)
       write(iun, *) dim
@@ -1633,7 +1629,7 @@ contains
       real(bsa_real_t), intent(in)   :: vec(:)
       integer(int32) :: iun, i, dim
       logical :: is_modal
-      iun = io_openExportFileByName(exp_dir_ // fname)
+      iun = io_openExportFileByName(fname)
       if (iun == 0) call bsa_Abort()
 
       dim = size(vec)
@@ -1878,7 +1874,7 @@ contains
       real(bsa_real_t), allocatable :: tmp(:)
       integer(int32) :: s1, s2, iun, j
 
-      iun = io_openExportFileByName(exp_dir_ // fname)
+      iun = io_openExportFileByName(fname)
       if (iun == 0) call bsa_Abort()
 
       s1 = size(psd, 1)
@@ -1914,7 +1910,7 @@ contains
 
       integer(int32) :: s1, s2, s3, iun, i, j
 
-      iun = io_openExportFileByName(exp_dir_ // fname)
+      iun = io_openExportFileByName(fname)
       if (iun == 0) call bsa_Abort()
 
       s1 = size(bisp, 1)
