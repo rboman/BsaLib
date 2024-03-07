@@ -166,7 +166,11 @@ contains
                      integer :: i
 
                      omegas = f * CST_PIt2
+# ifdef __GFORTRAN__
+                     do concurrent (i = 1 : dimM_psd_)
+# else
                      do concurrent (i = 1 : dimM_psd_) shared(omegas, psd)
+# endif
                         psd(:, i) = psd(:, i) * omegas(:) * omegas(:)
                      enddo
                      call intgSpectraVect_(settings%nfreqs_, f, psd=psd, m2=m2o2mr_cls)
