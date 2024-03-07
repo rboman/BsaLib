@@ -29,15 +29,15 @@ module BsaLib_IO
    integer(int32) :: unit_dump_brm_ = 1204_int32
 
    ! debug
-   integer(int32)                  :: unit_debug_ = 99999_int32
-   character(len = :), allocatable :: undebug_fname_
+   integer(int32)      :: unit_debug_ = 99999_int32
+   character(len = 64) :: BSA_DEBUG_FNAME = 'bsadebug.bsa'
 
 
    !**************************************************************************
    !  EXPORTING STATE VARIABLES
    !**************************************************************************
    logical                         :: export_in_cwd_ = .true.
-   character(len = :), allocatable :: exp_dir_ ! either export, or default (out) if none set.
+   character(len = :), allocatable :: exp_dir_     ! either export, or default (out) if none set.
 
    character(len = :), private, allocatable :: export_file_access_
    character(len = :), private, allocatable :: export_file_action_
@@ -91,10 +91,6 @@ contains
    end subroutine
 
 
-   subroutine io_setExportPathPrefix()
-      if (export_in_cwd_ .or. .not.allocated(exp_dir_)) exp_dir_ = ''
-   end subroutine
-
 
 
    subroutine io_setExportFileFormat(iform)
@@ -120,7 +116,7 @@ contains
       exp_form_ = export_file_form_
       if (present(form)) export_file_form_ = form
 
-      iun = io_openExportFileByName(exp_dir_ // fname)
+      iun = io_openExportFileByName(fname)
       if (iun == 0) return
       dim = size(vec)
       if (export_file_form_ == IO_FORM_FORMATTED) then
@@ -172,14 +168,25 @@ contains
       integer(int32) :: iun
       integer(int32) :: ierr_
 
-      open(newunit=iun, file=file          &
-         , iostat=ierr_                    &
-         , access=export_file_access_      &
-         , action=export_file_action_      &
-         , asynchronous=export_file_async_ &
-         , form=export_file_form_          &
-         , position=export_file_position_  &
-         , status=export_file_status_)
+      if (allocated(exp_dir_)) then
+         open(newunit=iun, file=exp_dir_//file  &
+            , iostat=ierr_                      &
+            , access=export_file_access_        &
+            , action=export_file_action_        &
+            , asynchronous=export_file_async_   &
+            , form=export_file_form_            &
+            , position=export_file_position_    &
+            , status=export_file_status_)
+      else
+         open(newunit=iun, file=file          &
+            , iostat=ierr_                    &
+            , access=export_file_access_      &
+            , action=export_file_action_      &
+            , asynchronous=export_file_async_ &
+            , form=export_file_form_          &
+            , position=export_file_position_  &
+            , status=export_file_status_)
+      endif
 
 
       if (ierr_ == 0) return
@@ -204,49 +211,35 @@ contains
 
       ! VERIFY UNIT
       ! IF is open, it mean it is already in use -> use it!
-      ! NOTE: get its actual name!
+      ! BUG: get its actual name to avoid unwanted outcomes!
       inquire(unit=iun, opened=is_opn)
       if (is_opn) then
          inquire(unit=iun, name=fname)
          return
       endif
 
-
-      ! VERIFY FILENAME (and unit by consequence)
-      ! NOTE: unit not opened
-
+      ! Unit available. Verify filename (and unit by consequence)
       inquire(file=fname, opened=is_opn)
-
-      ! set default name. 
-      ! Since unic unit, surely name is available. However, double check
       if (is_opn) then
-
-         ! first check by setting default filename (accounts for unit number)
-         fname = setDefFileNameFromUnitNum_(iun)
-         inquire(file=fname, opened=is_opn)
-
          do while (is_opn)
-
-            ! invalid first default name, increment unit number
-            iun = iun + 1
-
             fname = setDefFileNameFromUnitNum_(iun)
             inquire(file=fname, opened=is_opn)
-
-            ! if valid filename, yet check if valid unit
-            ! If not open, we found combination.
-            if (.not. is_opn) Then
-               inquire(unit=iun, opened=is_opn)
-            endif
+            if (.not. is_opn) inquire(unit=iun, opened=is_opn)
+            iun = iun + 1
          enddo
+         iun = iun - 1
       endif
 
-      if (present(openfile) .and. openfile) then
-         open(unit=iun, file=fname &
-            , status='replace'     &
-            , form='formatted'     &
-            , access='sequential'  &
-            , action='write')
+      ! BUG: customise ??
+      if (present(openfile)) then
+         if (openfile) then
+            open(unit=iun              &
+               , file=fname            &
+               , status='replace'      &
+               , form='formatted'      &
+               , access='sequential'   &
+               , action='write')
+         endif
       endif
    end subroutine
 
