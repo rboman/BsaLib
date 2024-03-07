@@ -236,18 +236,18 @@ module BsaLib_Data
    procedure(getMshBFM), pointer :: getBFM_msh => null()
    procedure(getMshBRM), pointer :: getBRM_msh => null()
    abstract interface
-      function getMshBFM(fi, fj) result(bfm)
-         import :: bsa_real_t, dimM_bisp_
-         real(bsa_real_t), intent(in), contiguous :: fi(:), fj(:)
-         real(bsa_real_t) :: bfm(dimM_bisp_, size(fi)*size(fj))
-      end function
+      subroutine getMshBFM(bfm, fi, fj)
+         import :: bsa_real_t
+         real(bsa_real_t), intent(inout), contiguous :: bfm(:, :)
+         real(bsa_real_t), intent(in), contiguous    :: fi(:), fj(:)
+      end subroutine
 
-      function getMshBRM(fi, fj, bfm) result(brm)
-         import :: bsa_real_t, dimM_bisp_
+      subroutine getMshBRM(brm, fi, fj, bfm)
+         import :: bsa_real_t
+         real(bsa_real_t), intent(inout), contiguous :: brm(:, :)
          real(bsa_real_t), intent(in), contiguous :: fi(:), fj(:)
-         real(bsa_real_t), intent(in) :: bfm(dimM_bisp_, size(fi)*size(fj))
-         real(bsa_real_t) :: brm(dimM_bisp_, size(fi)*size(fj))
-      end function
+         real(bsa_real_t), intent(in), contiguous :: bfm(:, :)
+      end subroutine
    end interface
 
 

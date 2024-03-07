@@ -227,7 +227,7 @@ __mod_sub_compute subroutine __sub_name_compute(this)
 
       fi(1) = base_fi(1)
       fj(1) = base_fj(1)
-      bfm(:, 1:1) = getBFM_msh(fi, fj)
+      call getBFM_msh(bfm(:, 1:1), fi, fj)
 # ifdef _BSA_M3MF_ONLY_PREMESH
       intg = bfm(:, 1) * vtx_infl
 #   ifdef __local_debug_write__
@@ -250,7 +250,7 @@ __mod_sub_compute subroutine __sub_name_compute(this)
          fi(1) = fi(1) + dfJi
          fj(1) = fj(1) + dfJj
 
-         bfm(:, j:j) = getBFM_msh(fi, fj)
+         call getBFM_msh(bfm(:, j:j), fi, fj)
 # ifdef _BSA_M3MF_ONLY_PREMESH
          intg = intg + bfm(:, j) * brd_infl
 #   ifdef __local_debug_write__
@@ -270,7 +270,7 @@ __mod_sub_compute subroutine __sub_name_compute(this)
 #  endif
 
       i_bfm = j
-      bfm(:, i_bfm:i_bfm) = getBFM_msh(fi, fj)
+      call getBFM_msh(bfm(:, i_bfm:i_bfm), fi, fj)
 #  ifdef _BSA_M3MF_ONLY_PREMESH
       intg = intg + bfm(:, i_bfm) * vtx_infl_t
 #  endif
@@ -309,7 +309,7 @@ __mod_sub_compute subroutine __sub_name_compute(this)
          fj(1)      = base_fj(1)
 
          i_bfm = i_bfm + 1
-         bfm(:, i_bfm:i_bfm) = getBFM_msh(fi, fj)
+         call getBFM_msh(bfm(:, i_bfm:i_bfm), fi, fj)
 # ifdef _BSA_M3MF_ONLY_PREMESH
          intg = intg + bfm(:, i_bfm) * brd_infl
 #   ifdef __local_debug_write__
@@ -328,7 +328,7 @@ __mod_sub_compute subroutine __sub_name_compute(this)
             fj(1) = fj(1) + dfJj
 
             i_bfm = i_bfm + 1
-            bfm(:, i_bfm:i_bfm) = getBFM_msh(fi, fj)
+            call getBFM_msh(bfm(:, i_bfm:i_bfm), fi, fj)
 # ifdef _BSA_M3MF_ONLY_PREMESH
             intg = intg + bfm(:, i_bfm) * ctr_infl
 # endif
@@ -341,7 +341,7 @@ __mod_sub_compute subroutine __sub_name_compute(this)
          fj(1) = fj(1) + dfJj
 
          i_bfm = i_bfm + 1
-         bfm(:, i_bfm:i_bfm) = getBFM_msh(fi, fj)
+         call getBFM_msh(bfm(:, i_bfm:i_bfm), fi, fj)
 #   ifdef _BSA_M3MF_ONLY_PREMESH
          intg = intg + bfm(:, i_bfm) * brd_infl
 #   endif
@@ -371,7 +371,7 @@ __mod_sub_compute subroutine __sub_name_compute(this)
 #  endif
 
       i_bfm = i_bfm + 1
-      bfm(:, i_bfm:i_bfm) = getBFM_msh(base_fi, base_fj)
+      call getBFM_msh(bfm(:, i_bfm:i_bfm), base_fi, base_fj)
 #  ifdef _BSA_M3MF_ONLY_PREMESH
       intg = intg + bfm(:, i_bfm) * vtx_infl_t
 #  endif
@@ -951,7 +951,11 @@ end subroutine __sub_name_compute
       fj_v_ = fj_v_ + fj_baseptI
 
       ! Compute BFM at all (refined) meshing points
-      bfm_undump = getBFM_msh(fi_v_, fj_v_)
+      if (.not. allocated(bfm_undump)) then
+         allocate(bfm_undump( dimM_bisp_, ni_bfm_ref_ * nj_bfm_ref_ ), stat=ist)
+         if (ist /= 0) call bsa_Abort("Error allocating ""bfm_undump"" in interpolating RZ.")
+      endif
+      call getBFM_msh(bfm_undump, fi_v_, fj_v_)
 
 #   ifdef __local_debug_write__
       fi_v_save_ = fi_v_
@@ -1032,7 +1036,7 @@ end subroutine __sub_name_compute
 #endif
       bfm_new_left(:, 1) = bfmtail(:, 1)
 
-      brm(:, 1:1) = getBRM_msh(fi, fj, bfmtail)
+      call getBRM_msh(brm(:, 1:1), fi, fj, bfmtail)
 #if (defined(_OPENMP)) && (defined(BSA_USE_POST_MESH_OMP))
       __FREQ_I_
       __FREQ_J_
@@ -1055,7 +1059,7 @@ end subroutine __sub_name_compute
             i_bfm   = i_bfm + 1
             bfmhead = bfm_undump(:, i_bfm:i_bfm)
 #else
-            bfmhead = getBFM_msh(fi_baseptJ, fj_baseptJ)
+             call getBFM_msh(bfmhead, fi_baseptJ, fj_baseptJ)
 #endif
 #ifdef __update_m3mf__
             intg_bfm   = intg_bfm + bfmhead(:, 1) * __brd_infl_r_bfm
@@ -1076,7 +1080,7 @@ end subroutine __sub_name_compute
                ! NOTE: save BFM for later use.
                i_brm = i_brm + 1
                bfm_new_left(:, i_brm:i_brm) = (bfmhead * dfJtail + bfmtail * dfJhead) / dfJ_bfm_ref_
-               brm(:, i_brm:i_brm)          = getBRM_msh(fi, fj, bfm_new_left(:, i_brm:i_brm))
+               call getBRM_msh(brm(:, i_brm:i_brm), fi, fj, bfm_new_left(:, i_brm:i_brm))
 #if (defined(_OPENMP)) && (defined(BSA_USE_POST_MESH_OMP))
                __FREQ_I_
                __FREQ_J_
@@ -1104,7 +1108,7 @@ end subroutine __sub_name_compute
 
             i_brm                  = i_brm + 1
             bfm_new_left(:, i_brm) = bfmhead(:, 1)
-            brm(:, i_brm:i_brm)    = getBRM_msh(fi, fj, bfm_new_left(:, i_brm:i_brm))
+            call getBRM_msh(brm(:, i_brm:i_brm), fi, fj, bfm_new_left(:, i_brm:i_brm))
 #if (defined(_OPENMP)) && (defined(BSA_USE_POST_MESH_OMP))
             __FREQ_I_
             __FREQ_J_
@@ -1157,7 +1161,7 @@ end subroutine __sub_name_compute
             ! NOTE: save it for later use.
             i_brm = i_brm + 1
             bfm_new_left(:, i_brm:i_brm) = (bfmhead * dfJtail + bfmtail * dfJhead) / dfJ_bfm_ref_
-            brm(:, i_brm:i_brm)          = getBRM_msh(fi, fj, bfm_new_left(:, i_brm:i_brm))
+            call getBRM_msh(brm(:, i_brm:i_brm), fi, fj, bfm_new_left(:, i_brm:i_brm))
 #if (defined(_OPENMP)) && (defined(BSA_USE_POST_MESH_OMP))
             __FREQ_I_
             __FREQ_J_
@@ -1187,7 +1191,7 @@ end subroutine __sub_name_compute
 
          i_brm = i_brm + 1
          bfm_new_left(:, i_brm) = bfmhead(:, 1)
-         brm(:, i_brm:i_brm)    = getBRM_msh(fi, fj, bfm_new_left(:, i_brm:i_brm))
+         call getBRM_msh(brm(:, i_brm:i_brm), fi, fj, bfm_new_left(:, i_brm:i_brm))
 #if (defined(_OPENMP)) && (defined(BSA_USE_POST_MESH_OMP))
          __FREQ_I_
          __FREQ_J_
@@ -1240,7 +1244,7 @@ end subroutine __sub_name_compute
             do pJhead = 1, nipI
                njNew_tmp   = njNew_tmp - 1
                i_brm_shift = i_brm_shift + njNew_tmp
-            enddo       
+            enddo
 #else
             i_brm_shift  = i_brm + i_brm_offsetJ
 #endif
@@ -1257,7 +1261,7 @@ end subroutine __sub_name_compute
             i_bfm   = i_bfm + 1
             bfmtail = bfm_undump(:, i_bfm:i_bfm)
 #else
-            bfmtail = getBFM_msh(fi, fj)
+             call getBFM_msh(bfmtail, fi, fj)
 #endif
 #ifdef __update_m3mf__
             intg_bfm = intg_bfm + bfmtail(:, 1) * __brd_infl_r_bfm
@@ -1272,7 +1276,7 @@ end subroutine __sub_name_compute
 
 
             i_brm_shift = i_brm_shift + 1
-            brm(:, i_brm_shift:i_brm_shift) = getBRM_msh(fi, fj, bfm_new_right(:, 1:1))
+            call getBRM_msh(brm(:, i_brm_shift:i_brm_shift), fi, fj, bfm_new_right(:, 1:1))
 
             ! call write_brm_fptr_(fi_ptr, fj_ptr, brm(:, i_brm_shift), pdata_ptr)
 #if (defined(_OPENMP)) && (defined(BSA_USE_POST_MESH_OMP))
@@ -1296,7 +1300,7 @@ end subroutine __sub_name_compute
                   i_bfm   = i_bfm + 1
                   bfmhead = bfm_undump(:, i_bfm:i_bfm)
 #else
-                  bfmhead = getBFM_msh(fi_baseptJ, fj_baseptJ)
+                   call getBFM_msh(bfmhead, fi_baseptJ, fj_baseptJ)
 #endif
 #ifdef __update_m3mf__
                   intg_bfm = intg_bfm + bfmhead(:, 1) * __ctr_infl_r_bfm
@@ -1320,8 +1324,8 @@ end subroutine __sub_name_compute
                         (bfmhead * dfJtail + bfmtail * dfJhead) / dfJ_bfm_ref_
 
                      i_brm_shift = i_brm_shift + 1
-                     brm(:, i_brm_shift:i_brm_shift) = &
-                        getBRM_msh(fi, fj, bfm_new_right(:, i_bfm_interpJ:i_bfm_interpJ))
+                     call getBRM_msh(brm(:, i_brm_shift:i_brm_shift), &
+                           fi, fj, bfm_new_right(:, i_bfm_interpJ:i_bfm_interpJ))
 
                      ! call write_brm_fptr_(fi_ptr, fj_ptr, brm(:, i_brm_shift), pdata_ptr)
 #if (defined(_OPENMP)) && (defined(BSA_USE_POST_MESH_OMP))
@@ -1348,8 +1352,8 @@ end subroutine __sub_name_compute
                   bfm_new_right(:, i_bfm_interpJ) = bfmhead(:, 1)
 
                   i_brm_shift = i_brm_shift + 1
-                  brm(:, i_brm_shift:i_brm_shift) = &
-                     getBRM_msh(fi, fj, bfm_new_right(:, i_bfm_interpJ:i_bfm_interpJ))
+                  call getBRM_msh(brm(:, i_brm_shift:i_brm_shift), &
+                        fi, fj, bfm_new_right(:, i_bfm_interpJ:i_bfm_interpJ))
 
                   ! call write_brm_fptr_(fi_ptr, fj_ptr, brm(:, i_brm_shift), pdata_ptr)
 #if (defined(_OPENMP)) && (defined(BSA_USE_POST_MESH_OMP))
@@ -1372,7 +1376,7 @@ end subroutine __sub_name_compute
                i_bfm   = i_bfm + 1
                bfmhead = bfm_undump(:, i_bfm:i_bfm)
 #else
-               bfmhead = getBFM_msh(fi_baseptJ, fj_baseptJ)
+                call getBFM_msh(bfmhead, fi_baseptJ, fj_baseptJ)
 #endif
 #ifdef __update_m3mf__
                intg_bfm = intg_bfm + bfmhead(:, 1) * __vtx_infl_r_bfm
@@ -1396,8 +1400,8 @@ end subroutine __sub_name_compute
                      (bfmhead * dfJtail + bfmtail * dfJhead) / dfJ_bfm_ref_
 
                   i_brm_shift = i_brm_shift + 1
-                  brm(:, i_brm_shift:i_brm_shift) = &
-                     getBRM_msh(fi, fj, bfm_new_right(:, i_bfm_interpJ:i_bfm_interpJ))
+                  call getBRM_msh(brm(:, i_brm_shift:i_brm_shift), &
+                        fi, fj, bfm_new_right(:, i_bfm_interpJ:i_bfm_interpJ))
 
                   ! call write_brm_fptr_(fi_ptr, fj_ptr, brm(:, i_brm_shift), pdata_ptr)
 #if (defined(_OPENMP)) && (defined(BSA_USE_POST_MESH_OMP))
@@ -1416,8 +1420,8 @@ end subroutine __sub_name_compute
                bfm_new_right(:, i_bfm_interpJ) = bfmhead(:, 1)
 
                i_brm_shift = i_brm_shift + 1
-               brm(:, i_brm_shift:i_brm_shift) = &
-                  getBRM_msh(fi, fj, bfm_new_right(:, i_bfm_interpJ:i_bfm_interpJ))
+               call getBRM_msh(brm(:, i_brm_shift:i_brm_shift), &
+                     fi, fj, bfm_new_right(:, i_bfm_interpJ:i_bfm_interpJ))
 
                ! call write_brm_fptr_(fi_ptr, fj_ptr, brm(:, i_brm_shift), pdata_ptr)
 #if (defined(_OPENMP)) && (defined(BSA_USE_POST_MESH_OMP))
@@ -1445,7 +1449,7 @@ end subroutine __sub_name_compute
                i_bfm   = i_bfm + 1
                bfmhead = bfm_undump(:, i_bfm:i_bfm)
 # else
-               bfmhead = getBFM_msh(fi_baseptJ, fj_baseptJ)
+                call getBFM_msh(bfmhead, fi_baseptJ, fj_baseptJ)
 # endif
 # ifdef __update_m3mf__
                intg_bfm = intg_bfm + bfmhead(:, 1) * __ctr_infl_r_bfm
@@ -1466,8 +1470,8 @@ end subroutine __sub_name_compute
                         (bfmhead * dfJtail + bfmtail * dfJhead) / dfJ_bfm_ref_
 
                   i_brm_shift = i_brm_shift + 1
-                  brm(:, i_brm_shift:i_brm_shift) = &
-                     getBRM_msh(fi, fj, bfm_new_right(:, i_bfm_interpJ:i_bfm_interpJ))
+                  call getBRM_msh(brm(:, i_brm_shift:i_brm_shift), &
+                        fi, fj, bfm_new_right(:, i_bfm_interpJ:i_bfm_interpJ))
 
                   ! call write_brm_fptr_(fi_ptr, fj_ptr, brm(:, i_brm_shift), pdata_ptr)
 # if (defined(_OPENMP)) && (defined(BSA_USE_POST_MESH_OMP))
@@ -1485,8 +1489,8 @@ end subroutine __sub_name_compute
                bfm_new_right(:, i_bfm_interpJ) = bfmhead(:, 1)
 
                i_brm_shift = i_brm_shift + 1
-               brm(:, i_brm_shift:i_brm_shift) = &
-                  getBRM_msh(fi, fj, bfm_new_right(:, i_bfm_interpJ:i_bfm_interpJ))
+               call getBRM_msh(brm(:, i_brm_shift:i_brm_shift), &
+                     fi, fj, bfm_new_right(:, i_bfm_interpJ:i_bfm_interpJ))
 
                ! call write_brm_fptr_(fi_ptr, fj_ptr, brm(:, i_brm_shift), pdata_ptr)
 # if (defined(_OPENMP)) && (defined(BSA_USE_POST_MESH_OMP))
@@ -1547,7 +1551,7 @@ end subroutine __sub_name_compute
                fj(1) = fj_baseptI + (dfIj_brm_interp * pIprev)
 
                i_brm = i_brm + 1
-               brm(:, i_brm:i_brm) = getBRM_msh(fi, fj, bfm_interp(:, 1:1))
+               call getBRM_msh(brm(:, i_brm:i_brm), fi, fj, bfm_interp(:, 1:1))
 #if (defined(_OPENMP)) && (defined(BSA_USE_POST_MESH_OMP))
                __FREQ_I_
                __FREQ_J_
@@ -1565,7 +1569,7 @@ end subroutine __sub_name_compute
                   fj(1) = fj(1) + dfJj_brm_interp
 
                   i_brm = i_brm + 1
-                  brm(:, i_brm:i_brm) = getBRM_msh(fi, fj, bfm_interp(:, pJtail:pJtail))
+                  call getBRM_msh(brm(:, i_brm:i_brm), fi, fj, bfm_interp(:, pJtail:pJtail))
 #if (defined(_OPENMP)) && (defined(BSA_USE_POST_MESH_OMP))
                   __FREQ_I_
                   __FREQ_J_
@@ -1606,8 +1610,8 @@ end subroutine __sub_name_compute
                      (bfmhead * dfJtail + &
                         dfJhead * bfm_interp(:, njNew_picurr:njNew_picurr)) / dfJ_oldtmp
 
-                  i_brm               = i_brm + 1
-                  brm(:, i_brm:i_brm) = getBRM_msh(fi, fj, bfm_interp(:, ipos:ipos))
+                  i_brm = i_brm + 1
+                  call getBRM_msh(brm(:, i_brm:i_brm), fi, fj, bfm_interp(:, ipos:ipos))
 # if (defined(_OPENMP)) && (defined(BSA_USE_POST_MESH_OMP))
                   __FREQ_I_
                   __FREQ_J_
@@ -1621,7 +1625,7 @@ end subroutine __sub_name_compute
                fi(1) = fi(1) + dfJi_brm_interp
                fj(1) = fj(1) + dfJj_brm_interp
                i_brm               = i_brm + 1
-               brm(:, i_brm:i_brm) = getBRM_msh(fi, fj, bfmhead)
+               call getBRM_msh(brm(:, i_brm:i_brm), fi, fj, bfmhead)
 # if (defined(_OPENMP)) && (defined(BSA_USE_POST_MESH_OMP))
                __FREQ_I_
                __FREQ_J_
@@ -1715,7 +1719,7 @@ end subroutine __sub_name_compute
 #endif
 
          i_brm_shift = i_brm_shift + 1
-         brm(:, i_brm_shift:i_brm_shift) = getBRM_msh(fi, fj, bfm_new_right(:, 1:1))
+         call getBRM_msh(brm(:, i_brm_shift:i_brm_shift), fi, fj, bfm_new_right(:, 1:1))
 
          ! call write_brm_fptr_(fi_ptr, fj_ptr, brm(:, i_brm_shift), pdata_ptr)
 #if (defined(_OPENMP)) && (defined(BSA_USE_POST_MESH_OMP))
@@ -1740,7 +1744,7 @@ end subroutine __sub_name_compute
                i_bfm   = i_bfm + 1
                bfmhead = bfm_undump(:, i_bfm:i_bfm)
 #else
-               bfmhead = getBFM_msh(fi_baseptJ, fj_baseptJ)
+                call getBFM_msh(bfmhead, fi_baseptJ, fj_baseptJ)
 #endif
 #ifdef __update_m3mf__
                intg_bfm = intg_bfm + bfmhead(:, 1) * __ctr_infl_r_bfm
@@ -1764,8 +1768,8 @@ end subroutine __sub_name_compute
                      (bfmhead * dfJtail + bfmtail * dfJhead) / dfJ_bfm_ref_
 
                   i_brm_shift = i_brm_shift + 1
-                  brm(:, i_brm_shift:i_brm_shift) = &
-                     getBRM_msh(fi, fj, bfm_new_right(:, i_bfm_interpJ:i_bfm_interpJ))
+                  call getBRM_msh(brm(:, i_brm_shift:i_brm_shift), &
+                        fi, fj, bfm_new_right(:, i_bfm_interpJ:i_bfm_interpJ))
 
                   ! call write_brm_fptr_(fi_ptr, fj_ptr, brm(:, i_brm_shift), pdata_ptr)
 #if (defined(_OPENMP)) && (defined(BSA_USE_POST_MESH_OMP))
@@ -1785,8 +1789,8 @@ end subroutine __sub_name_compute
                bfm_new_right(:, i_bfm_interpJ) = bfmhead(:, 1)
 
                i_brm_shift = i_brm_shift + 1
-               brm(:, i_brm_shift:i_brm_shift) = &
-                  getBRM_msh(fi, fj, bfm_new_right(:, i_bfm_interpJ:i_bfm_interpJ))
+               call getBRM_msh(brm(:, i_brm_shift:i_brm_shift), &
+                     fi, fj, bfm_new_right(:, i_bfm_interpJ:i_bfm_interpJ))
 
                ! call write_brm_fptr_(fi_ptr, fj_ptr, brm(:, i_brm_shift), pdata_ptr)
 #if (defined(_OPENMP)) && (defined(BSA_USE_POST_MESH_OMP))
@@ -1836,8 +1840,8 @@ end subroutine __sub_name_compute
                   (bfmhead * dfJtail + bfmtail * dfJhead) / dfJ_bfm_ref_
 
                i_brm_shift = i_brm_shift + 1
-               brm(:, i_brm_shift:i_brm_shift) = &
-                  getBRM_msh(fi, fj, bfm_new_right(:, i_bfm_interpJ:i_bfm_interpJ))
+               call getBRM_msh(brm(:, i_brm_shift:i_brm_shift), &
+                     fi, fj, bfm_new_right(:, i_bfm_interpJ:i_bfm_interpJ))
 
                ! call write_brm_fptr_(fi_ptr, fj_ptr, brm(:, i_brm_shift), pdata_ptr)
 #if (defined(_OPENMP)) && (defined(BSA_USE_POST_MESH_OMP))
@@ -1857,8 +1861,8 @@ end subroutine __sub_name_compute
             bfm_new_right(:, i_bfm_interpJ) = bfmhead(:, 1)
 
             i_brm_shift = i_brm_shift + 1
-            brm(:, i_brm_shift:i_brm_shift) = &
-               getBRM_msh(fi, fj, bfm_new_right(:, i_bfm_interpJ:i_bfm_interpJ))
+            call getBRM_msh(brm(:, i_brm_shift:i_brm_shift), &
+                  fi, fj, bfm_new_right(:, i_bfm_interpJ:i_bfm_interpJ))
 
             ! call write_brm_fptr_(fi_ptr, fj_ptr, brm(:, i_brm_shift), pdata_ptr)
 #if (defined(_OPENMP)) && (defined(BSA_USE_POST_MESH_OMP))
@@ -1926,7 +1930,7 @@ end subroutine __sub_name_compute
             fj(1) = fj_baseptI + (dfIj_brm_interp * pIprev)
 
             i_brm = i_brm + 1
-            brm(:, i_brm:i_brm) = getBRM_msh(fi, fj, bfm_interp(:, 1:1))
+            call getBRM_msh(brm(:, i_brm:i_brm), fi, fj, bfm_interp(:, 1:1))
 #if (defined(_OPENMP)) && (defined(BSA_USE_POST_MESH_OMP))
             __FREQ_I_
             __FREQ_J_
@@ -1941,7 +1945,7 @@ end subroutine __sub_name_compute
                fj(1) = fj(1) + dfJj_brm_interp
 
                i_brm = i_brm + 1
-               brm(:, i_brm:i_brm) = getBRM_msh(fi, fj, bfm_interp(:, pJtail:pJtail))
+               call getBRM_msh(brm(:, i_brm:i_brm), fi, fj, bfm_interp(:, pJtail:pJtail))
 #if (defined(_OPENMP)) && (defined(BSA_USE_POST_MESH_OMP))
                __FREQ_I_
                __FREQ_J_
@@ -1982,7 +1986,7 @@ end subroutine __sub_name_compute
                      dfJhead * bfm_interp(:, njNew_picurr:njNew_picurr)) / dfJ_oldtmp
 
                i_brm               = i_brm + 1
-               brm(:, i_brm:i_brm) = getBRM_msh(fi, fj, bfm_interp(:, ipos:ipos))
+               call getBRM_msh(brm(:, i_brm:i_brm), fi, fj, bfm_interp(:, ipos:ipos))
 # if (defined(_OPENMP)) && (defined(BSA_USE_POST_MESH_OMP))
                __FREQ_I_
                __FREQ_J_
@@ -1997,7 +2001,7 @@ end subroutine __sub_name_compute
             fj(1) = fj(1) + dfJj_brm_interp
 
             i_brm               = i_brm + 1
-            brm(:, i_brm:i_brm) = getBRM_msh(fi, fj, bfmhead)
+            call getBRM_msh(brm(:, i_brm:i_brm), fi, fj, bfmhead)
 
 # if (defined(_OPENMP)) && (defined(BSA_USE_POST_MESH_OMP))
             __FREQ_I_

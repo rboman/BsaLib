@@ -47,37 +47,37 @@ module BsaLib_Functions
 
 
 
-      module function getFM_full_tnm_scalar_msh_(fi, fj) result(bfm)
+      module subroutine getFM_full_tnm_scalar_msh_(bfm, fi, fj)
+         real(bsa_real_t), intent(inout), contiguous :: bfm(:, :)
          real(bsa_real_t), intent(in), contiguous :: fi(:), fj(:)
-         real(bsa_real_t) :: bfm(dimM_bisp_, size(fi)*size(fj))
-      end function
+      end subroutine
 
 
-      module function getFM_full_tm_scalar_msh_POD_(fi, fj) result(bfm)
+      module subroutine getFM_full_tm_scalar_msh_POD_(bfm, fi, fj)
+         real(bsa_real_t), intent(inout), contiguous :: bfm(:, :)
          real(bsa_real_t), intent(in), contiguous :: fi(:), fj(:)
-         real(bsa_real_t) :: bfm(dimM_bisp_, size(fi)*size(fj))
-      end function
+      end subroutine
 
 
-      module function getRM_full_scalar_msh_(fi, fj, bfm) result(brm)
+      module subroutine getRM_full_scalar_msh_(brm, fi, fj, bfm)
+         real(bsa_real_t), intent(inout), contiguous :: brm(:, :)
          real(bsa_real_t), intent(in), contiguous :: fi(:), fj(:)
-         real(bsa_real_t), intent(in) :: bfm(dimM_bisp_, size(fi)*size(fj))
-         real(bsa_real_t) :: brm(dimM_bisp_, size(fi)*size(fj))
-      end function
+         real(bsa_real_t), intent(in), contiguous :: bfm(:, :)
+      end subroutine
 
 
 
-      module function getFM_diag_tnm_scalar_msh_(fi, fj) result(bfm)
+      module subroutine getFM_diag_tnm_scalar_msh_(bfm, fi, fj)
+         real(bsa_real_t), intent(inout), contiguous :: bfm(:, :)
          real(bsa_real_t), intent(in), contiguous :: fi(:), fj(:)
-         real(bsa_real_t) :: bfm(dimM_bisp_, size(fi)*size(fj))
-      end function
+      end subroutine
 
 
-      module function getRM_diag_scalar_msh_(fi, fj, bfm) result(brm)
+      module subroutine getRM_diag_scalar_msh_(brm, fi, fj, bfm)
+         real(bsa_real_t), intent(inout), contiguous :: brm(:, :)
          real(bsa_real_t), intent(in), contiguous :: fi(:), fj(:)
-         real(bsa_real_t), intent(in) :: bfm(dimM_bisp_, size(fi)*size(fj))
-         real(bsa_real_t) :: brm(dimM_bisp_, size(fi)*size(fj))
-      end function
+         real(bsa_real_t), intent(in), contiguous :: bfm(:, :)
+      end subroutine
 
 
 
