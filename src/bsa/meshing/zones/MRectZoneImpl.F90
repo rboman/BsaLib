@@ -134,7 +134,9 @@ contains
       logical, intent(in), optional     :: adapt
       logical :: do_adapt = .false.
 
-      if (present(adapt) .and. adapt) do_adapt = .true.
+      if (present(adapt)) then
+         if (adapt) do_adapt = .true.
+      endif
 
       this%deltaf_I_   = dfi
       this%deltaf_J_   = dfj
@@ -279,11 +281,9 @@ contains
          real(bsa_real_t) :: fi, fj, bi, bj
          integer(int32)   :: ni, nj
 
-
-         if (present(force) .and. force) then
-            do_force = .true.
-         else
-            do_force = .false.
+         do_force = .false.
+         if (present(force)) then
+            if (force) do_force = .true.
          endif
 
          ! initialise
@@ -360,7 +360,9 @@ contains
 
 
                ! defaults
-               if (present(exceed) .and. exceed) do_exceed= .true.
+               if (present(exceed)) then
+                  if (exceed) do_exceed = .true.
+               endif
                di = dfi
                dj = dfj
                ni = 1

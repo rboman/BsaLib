@@ -99,7 +99,9 @@ contains
       logical :: is_deg = .false.
       integer(int32) :: n2pirot = 0
 
-      if (present(deg) .and. deg) is_deg = .true.
+      if (present(deg)) then
+         if (deg) is_deg = .true.
+      endif
 
       if (is_deg) rot = rot / 180 * CST_PIGREC
 
@@ -142,7 +144,9 @@ contains
       logical, intent(in), optional  :: force
       logical :: do_force = .false.
 
-      if (present(force) .and. force) do_force = .true.
+      if (present(force)) then
+         if (force) do_force = .true.
+      endif
 
       if (do_force) then ! usually, when reconstructing
 
