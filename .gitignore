@@ -63,7 +63,7 @@ build*/
 images/
 My *
 app/**
-!app/*.f90
+!app/*.[fF]90
 !app/CMakeLists.txt
 compile_flags.txt
 resources/cmake/
