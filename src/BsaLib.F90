@@ -279,8 +279,13 @@ module BsaLib
 
 
       module subroutine bsa_setWindZoneLimits(lim, ilim)
+#if  ((defined(__INTEL_COMPILER_BUILD_DATE)) && (__INTEL_COMPILER_BUILD_DATE >= 20221019))
          real(bsa_real_t), intent(in) :: lim(..)
          integer(bsa_int_t), intent(in), optional :: ilim(..)
+#else
+         real(bsa_real_t), intent(in), target     :: lim(:)
+         integer(bsa_int_t), intent(in), optional :: ilim(:)   ! limits' index passed
+#endif
       end subroutine
 
 

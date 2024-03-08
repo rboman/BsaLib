@@ -59,7 +59,7 @@ contains
 
    module subroutine SetWindZoneLimits(this, lim, ilim)
       class(WindData_t), intent(inout) :: this
-#if  (! defined(__INTEL_COMPILER_BUILD_DATE)) || (__INTEL_COMPILER_BUILD_DATE >= 20221019)
+#if  ((defined(__INTEL_COMPILER_BUILD_DATE)) && (__INTEL_COMPILER_BUILD_DATE >= 20221019))
       real(bsa_real_t), intent(in), target     :: lim(..)
       integer(bsa_int_t), intent(in), optional :: ilim(..)
 #else
@@ -67,7 +67,7 @@ contains
       integer(bsa_int_t), intent(in), optional :: ilim(:)   ! limits' index passed
 #endif
 
-#if  (! defined(__INTEL_COMPILER_BUILD_DATE)) || (__INTEL_COMPILER_BUILD_DATE >= 20221019)
+#if  ((defined(__INTEL_COMPILER_BUILD_DATE)) && (__INTEL_COMPILER_BUILD_DATE >= 20221019))
       select rank (lim)
       rank (0)
 
@@ -86,7 +86,7 @@ contains
 
          if (present(ilim)) then
 
-#if  (! defined(__INTEL_COMPILER_BUILD_DATE)) || (__INTEL_COMPILER_BUILD_DATE >= 20221019)
+#if  ((defined(__INTEL_COMPILER_BUILD_DATE)) && (__INTEL_COMPILER_BUILD_DATE >= 20221019))
             select rank (ilim)
             rank (1)
 #endif
@@ -95,7 +95,7 @@ contains
 
                this%limits_wz_(ilim(:)) = lim(:)
 
-#if  (! defined(__INTEL_COMPILER_BUILD_DATE)) || (__INTEL_COMPILER_BUILD_DATE >= 20221019)
+#if  ((defined(__INTEL_COMPILER_BUILD_DATE)) && (__INTEL_COMPILER_BUILD_DATE >= 20221019))
             rank default
                call bsa_Abort('expecting "ilim" to be a 1-rank array.')
             endselect
@@ -112,7 +112,7 @@ contains
             this%limits_wz_ => lim(:)
          endif ! present ilim
 
-#if  (! defined(__INTEL_COMPILER_BUILD_DATE)) || (__INTEL_COMPILER_BUILD_DATE >= 20221019)
+#if  ((defined(__INTEL_COMPILER_BUILD_DATE)) && (__INTEL_COMPILER_BUILD_DATE >= 20221019))
       rank default
          call bsa_Abort('Expeting "lim" either to be a scalar or a 1-rank array.')
       endselect

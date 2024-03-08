@@ -259,7 +259,7 @@ module BsaLib_WindData
 
       module subroutine SetWindZoneLimits(this, lim, ilim)
          class(WindData_t), intent(inout) :: this
-#if  (! defined(__INTEL_COMPILER_BUILD_DATE)) || (__INTEL_COMPILER_BUILD_DATE >= 20221019)
+#if  ((defined(__INTEL_COMPILER_BUILD_DATE)) && (__INTEL_COMPILER_BUILD_DATE >= 20221019))
          real(bsa_real_t), intent(in), target     :: lim(..)
          integer(bsa_int_t), intent(in), optional :: ilim(..)
 #else
