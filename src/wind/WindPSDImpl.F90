@@ -209,6 +209,8 @@ contains
             PSD   = rtmp1 + rtmp1
          end block
       endif
+
+      if (allocated(rtmp1)) deallocate(rtmp1)
    end function vonKarmanPSD_
 
 

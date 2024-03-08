@@ -422,9 +422,6 @@ contains
 #endif
 
 
-      ! __return_debug__
-
-
       ! ALL OTHER ZONES (IF NOT BKG COVERS EVERYTHING)
 
       write(*, '(1x, a, a, /, 10(" ", f10.4))') &
@@ -467,7 +464,7 @@ contains
          real(bsa_real_t) :: df_I, df_J
          integer(int32)   :: sign_dir
          real(bsa_real_t) :: maxF, base_i_
-         real(bsa_real_t), allocatable :: maxext_sym_(:), bases_i_(:)
+         real(bsa_real_t) :: maxext_sym_(4), bases_i_(4)
 
          logical :: warn_zone_over_limits = .false.
 
@@ -524,7 +521,6 @@ contains
             bkgz%Ipt_         &
          ]
 
-         allocate(bases_i_(4))
          if (settings%i_bisp_sym_ == BSA_SPATIAL_SYM_HALF) then
             n_dirs_ = N_DIRS_HALF
             bases_i_(1) = base_i
@@ -682,8 +678,6 @@ contains
          enddo ! n dirs
          !$omp end parallel do
 
-         deallocate(bases_i_)
-
          ! BUG: might be removed, code duplication for little CPU improvement..
 #ifndef _OPENMP
          refmts(1:2, NLimsP1)  = rz%refinements()
@@ -713,7 +707,7 @@ contains
 
 
             block
-               character(len = 1), allocatable :: bases_ch(:)
+               character(len=1) :: bases_ch(4)
                real(bsa_real_t) :: init_freq_, rbase_
                real(bsa_real_t) :: main_rz_rot_, left_rz_rot_, right_rz_rot_
                real(bsa_real_t) :: delta_main_rz_, rlimit_
@@ -724,7 +718,6 @@ contains
 
                if (allocated(zone_title)) deallocate(zone_title)
                if (allocated(rots))       deallocate(rots)
-               allocate(bases_ch(N_DIRS_FULL))
                bases_ch = ' '
 
                ! reset correct base points (per direction)
@@ -1237,8 +1230,6 @@ contains
             df_I = df_I_ref * pol%delta_fI_fct_
             df_J = df_J_ref * pol%delta_fJ_fct_
 
-            allocate(maxext_sym_(4))  ! BUG: default allocate with max (4) elements
-
             if (settings%i_bisp_sym_ == BSA_SPATIAL_SYM_HALF) then
                basePts(1) = MPoint(0._bsa_real_t, maxF)
                basePts(2) = MPoint( maxF, maxF)
@@ -1292,16 +1283,23 @@ contains
             enddo ! ndirs
             !$omp end parallel do
 
-            deallocate(maxext_sym_)
-
          endif ! (.not. warn_zone_over_limits .and. (settings%i_full_coverage_))
 
          print '(1x, a, a, i0, a/)', &
             INFOMSG, 'Done with   ', msh_NZones, '  pre meshing zones.'
+
+         if (allocated(rots))   deallocate(rots)
+         if (allocated(deltas)) deallocate(deltas)
+         if (allocated(refmts)) deallocate(refmts)
+         if (allocated(int_modes_))   deallocate(int_modes_)
+         if (allocated(inter_modes_)) deallocate(inter_modes_)
       endblock
 
 
       998 continue
+      if (allocated(limits))     deallocate(limits)
+      if (allocated(policies))   deallocate(policies)
+      if (allocated(zone_title)) deallocate(zone_title)
 
 
       ! NOTE: Dump modal info if needed, before rewinding..
@@ -1384,8 +1382,8 @@ contains
 # endif
 #endif
 
+      type(BrmExportBaseData_t), target :: brm_export_base_data_
       class(*), pointer :: brm_export_data_ => null()
-      type(BrmExportBaseData_t), allocatable, target :: brm_export_base_data_
       logical :: do_export_brm_base_
 
 
@@ -1420,7 +1418,6 @@ contains
                            (do_export_brm_ .and. i_brmexport_mode_ == BSA_EXPORT_BRM_MODE_BASE)
       if (do_export_brm_base_) then
          n_threads = 1  ! NOTE: to avoid dead-locks!
-         allocate(brm_export_base_data_)
          if (is_visual_) then
             if (is_brn_export_) then
                brm_export_base_data_%nm_     = 2
@@ -1534,7 +1531,7 @@ contains
 
 
    function getEquivalentLooperIterator_char(dim, pattern) result(LoopIter)
-      integer, intent(in) :: dim
+      integer(int32),     intent(in) :: dim
       character(len = *), intent(in) :: pattern
       character(len = 1)             :: LoopIter(dim)
 
@@ -1562,7 +1559,7 @@ contains
 
 
    function getEquivalentLooperIterator_real(dim, vals) result(LoopIter)
-      integer, intent(in) :: dim
+      integer(int32),   intent(in) :: dim
       real(bsa_real_t), intent(in) :: vals(:)
       real(bsa_real_t)             :: LoopIter(dim)
 
@@ -1654,10 +1651,10 @@ contains
 
       block
          ! local instances, to move using move_alloc()
-         real(bsa_real_t), allocatable :: limits_(:)
-         type(MPolicy_t), allocatable  :: policies_(:)
          integer(int32)                :: NLims_
-         integer(int32), allocatable   :: inter_modes_(:)
+         real(bsa_real_t), allocatable :: limits_(:)
+         integer(int32),   allocatable :: inter_modes_(:)
+         type(MPolicy_t),  allocatable :: policies_(:)
 
          integer(int32) :: itmp, iim, jim, im, istat, nmode
          character(len = 256) :: emsg
@@ -1817,14 +1814,13 @@ contains
          limits_      = limits_(1 : NLims_)
          call move_alloc(limits_, limits)
 
-
          inter_modes_ = inter_modes_(1 : jim) ! TODO: maybe do it here as well +1 ??
          call move_alloc(inter_modes_, inter_modes)
-
 
          allocate(policies(NLims_), stat=istat, errmsg=emsg)
          if (istat /= 0) call allocKOMsg('policies', istat, emsg)
          policies = policies_(1 : NLims_)
+         if (allocated(policies_)) deallocate(policies_)
       end block
    end subroutine ! prefetch zone limits
 

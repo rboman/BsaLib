@@ -123,8 +123,8 @@ module BsaLib_Structure
 
       module subroutine SetNodalCoords(this, nn, coords)
          class(StructureData_t), intent(inout) :: this
-         integer(bsa_int_t), intent(in)         :: nn
-         real(bsa_real_t), target, allocatable        :: coords(:, :)
+         integer(bsa_int_t), intent(in)        :: nn
+         real(bsa_real_t), target, allocatable :: coords(:, :)
       end subroutine
 
       module subroutine SetNOfNodalDOFs(this, nlibs)

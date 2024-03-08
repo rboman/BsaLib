@@ -170,7 +170,6 @@ module BsaLib_WindData
       real(bsa_real_t), pointer :: incAng_wz_(:) => null()
 
 
-
       !> internal PSD type variable
       type(psd_t), allocatable, private :: psd_
 

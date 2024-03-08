@@ -469,7 +469,6 @@ contains
       real(bsa_real_t), intent(in), contiguous :: fi(:), fj(:)
 
 #ifdef BSA_USE_POD_DATA_CACHING
-
 # define __EGVL_w2 D_S_uvw_w2_ptr
 # define __EGVT_w2 S_uvw_w2_ptr
 
@@ -483,7 +482,6 @@ contains
       real(bsa_real_t), allocatable, target  :: S_uvw_w2(:, :, :)
       real(bsa_real_t),              pointer :: S_uvw_w2_ptr(:, :)
 #else
-
 # define __EGVL_w2 D_S_uvw_w2
 # define __EGVT_w2 S_uvw_w2
 
@@ -991,6 +989,17 @@ contains
 
       enddo ! itc = 1, NTCOMPS
       99 return
+
+#ifdef BSA_USE_POD_DATA_CACHING
+      if (do_trunc_POD_) then
+         if (allocated(npodw2)) deallocate(npodw2)
+      endif
+      if (allocated(D_S_uvw_w2)) deallocate(D_S_uvw_w2)
+#endif
+      if (allocated(S_uvw_w1))   deallocate(S_uvw_w1)
+      if (allocated(S_uvw_w2))   deallocate(S_uvw_w2)
+      if (allocated(S_uvw_w1w2)) deallocate(S_uvw_w1w2)
+      if (allocated(work_arr))   deallocate(work_arr)
    end subroutine getFM_full_tm_scalar_msh_POD_
 
 
@@ -1638,21 +1647,19 @@ contains
             i_pos_nk = i_pos_nk + 1
          enddo ! k node
 
-
       enddo ! itc
 
 
-
       ! deallocation
-      if (allocated(S_uvw_i)) deallocate(S_uvw_i)
-      if (allocated(S_uvw_j)) deallocate(S_uvw_j)
-      if (allocated(S_uvw_k)) deallocate(S_uvw_k)
-      if (allocated(PSDF_jk_JK_w)) deallocate(PSDF_jk_JK_w)
-      if (allocated(S_uvw_JK)) deallocate(S_uvw_JK)
-      if (allocated(S_uvw_IK)) deallocate(S_uvw_IK)
-      if (allocated(S_uvw_IJ)) deallocate(S_uvw_IJ)
-      if (allocated(S_uvw_IK_w1w2)) deallocate(S_uvw_IK_w1w2)
-      if (allocated(S_uvw_IJ_w1w2)) deallocate(S_uvw_IJ_w1w2)
+      if (allocated(S_uvw_i))         deallocate(S_uvw_i)
+      if (allocated(S_uvw_j))         deallocate(S_uvw_j)
+      if (allocated(S_uvw_k))         deallocate(S_uvw_k)
+      if (allocated(PSDF_jk_JK_w))    deallocate(PSDF_jk_JK_w)
+      if (allocated(S_uvw_JK))        deallocate(S_uvw_JK)
+      if (allocated(S_uvw_IK))        deallocate(S_uvw_IK)
+      if (allocated(S_uvw_IJ))        deallocate(S_uvw_IJ)
+      if (allocated(S_uvw_IK_w1w2))   deallocate(S_uvw_IK_w1w2)
+      if (allocated(S_uvw_IJ_w1w2))   deallocate(S_uvw_IJ_w1w2)
       if (allocated(BF_ijk_IJK_w_w2)) deallocate(BF_ijk_IJK_w_w2)
 
 #ifdef BSA_DEBUG
@@ -2051,7 +2058,6 @@ contains
          endif
       enddo
 
-
       ! first deallocation
       if (allocated(r_part)) deallocate(r_part)
       if (allocated(i_part)) deallocate(i_part)
@@ -2358,8 +2364,8 @@ contains
       integer(int32) :: imi, mi
 
       real(bsa_real_t) :: omegas(NFREQS, 1)
-      real(bsa_real_t), allocatable :: r_part(:, :), i_part(:, :), h_tmp(:, :)
       real(bsa_real_t) :: Mgi, Kgi, Cgi
+      real(bsa_real_t), allocatable :: r_part(:, :), i_part(:, :), h_tmp(:, :)
       real(bsa_real_t), allocatable :: Hr_w(:), Hi_w(:)
       real(bsa_real_t), allocatable :: Hr_w1w2(:, :), Hi_w1w2(:, :)
 

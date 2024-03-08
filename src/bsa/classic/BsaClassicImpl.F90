@@ -173,6 +173,7 @@ contains
 # endif
                         psd(:, i) = psd(:, i) * omegas(:) * omegas(:)
                      enddo
+                     if (allocated(omegas)) deallocate(omegas)
                      call intgSpectraVect_(settings%nfreqs_, f, psd=psd, m2=m2o2mr_cls)
                   end block
 
@@ -209,9 +210,9 @@ contains
                         write(idx, '(*(g, 2x))') f(im), psd_r(im, :)
                      enddo
                      close(idx)
+                     if (allocated(psd_r)) deallocate(psd_r)
                   end block
 #  endif
-
 
                   if (allocated(psd))  deallocate(psd)
                   if (allocated(bisp)) deallocate(bisp)
@@ -256,7 +257,6 @@ contains
                   allocate(S_uvw_pad(idim2, lpad))
                   S_uvw_pad(:, indxi : indxe) = transpose(S_uvw)
 
-
                   if (settings%i_compute_bisp_ == 0) then
                      jfr_ext => one_ext
                   else
@@ -294,9 +294,12 @@ contains
                         INFOMSG, ifr*settings%nfreqs_, '  out of  ', settings%nfreqs_**2, '  done...'
 
                   enddo ! j freqs
+                  if (allocated(S_uvw_pad)) deallocate(S_uvw_pad)
                end block
 
             endif ! vect/scalar versions
+
+            if (allocated(S_uvw)) deallocate(S_uvw)
          end block
 
 #ifdef BSA_USE_GPU

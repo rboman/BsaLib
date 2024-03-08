@@ -423,6 +423,10 @@ __mod_sub_compute subroutine __sub_name_compute(this)
       ! eventually, update zone with max N of points
       if (zNp > msh_max_zone_NPts) msh_max_zone_NPts = zNp
 
+      if (allocated(bfm))  deallocate(bfm)
+# ifdef _BSA_M3MF_ONLY_PREMESH
+      if (allocated(intg)) deallocate(intg)
+# endif
 
 #else  ! BSA_USE_POD_DATA_CACHING  defined
 
@@ -589,7 +593,6 @@ end subroutine __sub_name_compute
       integer, save :: iun = 430000
       real(RK), allocatable :: fi_v_save_(:), fj_v_save_(:)
 #endif
-
 
       real(RK), allocatable :: brm(:, :)
       real(RK)              :: intg(dimM_bisp_)
@@ -2148,4 +2151,16 @@ end subroutine __sub_name_compute
 
       msh_brmpts_post_ = msh_brmpts_post_ + nPtsPost
       !$omp end critical
+
+      if (allocated(brm))     deallocate(brm)
+#ifndef __triang_zone__
+      if (allocated(inter_modes_)) deallocate(inter_modes_)
+#endif
+#ifdef __new_interp_proc__
+      if (allocated(fi_v_))   deallocate(fi_v_)
+      if (allocated(fj_v_))   deallocate(fj_v_)
+# ifdef BSA_USE_POD_DATA_CACHING
+      if (allocated(bfm_undump)) deallocate(bfm_undump)
+# endif
+#endif
    end subroutine

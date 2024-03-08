@@ -207,6 +207,7 @@ contains
       do i_ = 1, innl
          res((i_-1)*nf_ + 1 : (i_*nf_)) = real(res_(:, i_), kind=c_double)
       enddo
+      if (allocated(res_)) deallocate(res_)
    end subroutine
 
 

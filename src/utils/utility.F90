@@ -48,12 +48,12 @@ contains
 #endif
       ierr = 0
       call execute_command_line(cmd, .true., ierr)
-      if (ierr == 0) return
-      
+      if (ierr == 0) goto 10
+
       print '(1x, 3a)', &
-         ERRMSG,  'Cannot create directory  ', dirname
-      print '(1x, a, a, i0, a)', &
-         MSGCONT, 'Command execution returned error code  ', ierr, '. Aborting..'
+         ERRMSG,  'Cannot create directory  ', trim(dirname)
+
+      10 if (allocated(cmd)) deallocate(cmd)
    end function
 
 

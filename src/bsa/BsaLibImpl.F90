@@ -200,6 +200,8 @@ contains
                do_export_brm_  = .false.
                write_brm_fptr_ => exportBRM_void_internal_
             endif
+
+            if (allocated(fname_)) deallocate(fname_)
          end block
       else
          if (settings%i_compute_psd_ == 0 .and. settings%i_compute_bisp_ == 0) then
@@ -1254,7 +1256,6 @@ contains
             real(bsa_real_t) :: fnat, SFm_fnat, rtmp(1), Km_loc2_
             real(bsa_real_t), allocatable :: S_uvw(:, :), S_pad(:)
 
-
             ! NOTE: backup this data, for later reset to right values
             !       We want ONLY PSDs here..
             ipsd       = settings%i_compute_psd_
@@ -1268,11 +1269,9 @@ contains
             settings%i_compute_bisp_ = 0
 
 
-
             ! BUG: avoid code copy-paste !!
             idim2 = struct_data%nn_load_ * wd%i_ndirs_ * wd%i_ntc_
             allocate(S_uvw(nm, idim2))
-            allocate(S_pad(idim2))
 
             idxi = 1
             idxe = struct_data%nn_load_
@@ -1291,6 +1290,7 @@ contains
             enddo ! i turb comp
 
 
+            ! allocate(S_pad(idim2))
             ! do concurrent (im = 1 : nm) local(fnat, SFm_fnat, m, Km_loc2_) &
             !       shared(bkg, res, Km, f, modes, S_pad, S_uvw, rtmp)
 
@@ -1345,6 +1345,8 @@ contains
             dimM_psd_  = dimPSD
             dimM_bisp_ = dimBSP
 
+            if (allocated(S_uvw)) deallocate(S_uvw)
+            if (allocated(S_pad)) deallocate(S_pad)
          end block
       end associate
 
@@ -1387,7 +1389,6 @@ contains
       peak_g = peak_g + beta
 
       if (allocated(sk)) then
-
          block
             real(real64), parameter :: PI2 = CST_PIGREC * CST_PIGREC
             real(bsa_real_t), allocatable :: rtmp(:), g4(:), h3(:), h40(:), h4(:)
@@ -1433,9 +1434,20 @@ contains
                peak_ng_neg = pk_ng_neg_ + peak_g
                peak_ng_neg = peak_ng_neg * k
             endif
+
+            if (allocated(rtmp)) deallocate(rtmp)
+            if (allocated(g4))   deallocate(g4)
+            if (allocated(h3))   deallocate(h3)
+            if (allocated(h40))  deallocate(h40)
+            if (allocated(h4))   deallocate(h4)
+            if (allocated(k))    deallocate(k)
+            if (allocated(beta2)) deallocate(beta2)
+            if (allocated(beta3)) deallocate(beta3)
+            if (allocated(pk_ng_neg_)) deallocate(pk_ng_neg_)
          end block
       endif
 
+      if (allocated(beta)) deallocate(beta)
    end subroutine
 
 

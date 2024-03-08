@@ -36,7 +36,7 @@ contains
             call bsa_Abort('Nodal info does not match in setting nodal coordinates. Check again.')
       endif
 
-      this%coords_ => coords
+      if (allocated(coords)) this%coords_ => coords
    end subroutine SetNodalCoords
 
 

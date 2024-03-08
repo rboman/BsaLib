@@ -111,9 +111,7 @@ contains
       real(bsa_real_t), intent(in)   :: vec(:)
       character(len = *), intent(in), optional :: form
       integer(int32) :: iun, i, dim
-      character(len = :), allocatable :: exp_form_
 
-      exp_form_ = export_file_form_
       if (present(form)) export_file_form_ = form
 
       iun = io_openExportFileByName(fname)
@@ -248,7 +246,7 @@ contains
 
    function setDefFileNameFromUnitNum_(iun) result(fname)
       integer(int32), intent(in) :: iun
-      character(len = :), allocatable :: fname
+      character(len = 64) :: fname
       character(len = 64) :: tmpfname
 
       write(unit=tmpfname, fmt='(a, i0, a)') BSA_OUT_FILENAME_PREFIX_DEFAULT_, iun, '.bsa'
@@ -261,15 +259,15 @@ contains
    function io_appendFilesep(path) result(res)
       character(len = *), intent(in)  :: path
       character(len = :), allocatable :: res
-      character(len = 1) :: filesep
+      character(len = 1), parameter   :: filesep = &
+#ifdef _WIN32
+         & '\'
+#else
+         & '/'
+#endif
       integer(int32) :: ilen
 
       ilen = len_trim(path)
-#ifdef _WIN32
-      filesep = '\'
-#else
-      filesep = '/'
-#endif
       if (path(ilen:ilen) == filesep) then
          res = path
       else
