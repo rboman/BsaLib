@@ -59,10 +59,11 @@ set(SRC
 )
 
 
+
 # TODO: at some point, enable shared library generation
 add_library( ${project} STATIC ${SRC} )
-set_target_properties( ${project} 
-   PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX}
+set_target_properties( ${project} PROPERTIES
+   DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX}
 )
 
 target_include_directories( ${project} AFTER PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/CONSTANTS )

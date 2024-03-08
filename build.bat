@@ -3,7 +3,6 @@
 setlocal
 if not exist "build_cmake" mkdir "build_cmake"
 cmake ^
-   -D CMAKE_BUILD_TYPE=Debug ^
    -D BUILD_SHARED_LIBS=OFF ^
    -D enable-openmp=OFF ^
    -D enable-sym-ev-routine=OFF ^
