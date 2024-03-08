@@ -196,7 +196,8 @@ __mod_sub_compute subroutine __sub_name_compute(this)
       !       couple of nodal indexes, returning a 
       !       dimBISP 1D vector, so better memory access.
       !       However, later maybe better invert.
-      allocate(bfm(dimM_bisp_, zNp))
+      allocate(bfm(dimM_bisp_, zNp), stat=i)
+      if (i /= 0) call bsa_Abort("Failed to allocate 'bfm' in pre-meshing")
 
 
       !============================================================
