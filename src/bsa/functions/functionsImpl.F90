@@ -477,10 +477,10 @@ contains
       integer(int32), allocatable   :: npodw2(:)
 
       real(bsa_real_t), allocatable, target  :: D_S_uvw_w2(:, :)
-      real(bsa_real_t),              pointer :: D_S_uvw_w2_ptr(:)
+      real(bsa_real_t),              pointer :: D_S_uvw_w2_ptr(:) => null()
 
       real(bsa_real_t), allocatable, target  :: S_uvw_w2(:, :, :)
-      real(bsa_real_t),              pointer :: S_uvw_w2_ptr(:, :)
+      real(bsa_real_t),              pointer :: S_uvw_w2_ptr(:, :) => null()
 #else
 # define __EGVL_w2 D_S_uvw_w2
 # define __EGVT_w2 S_uvw_w2
