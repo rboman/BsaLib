@@ -1122,7 +1122,7 @@ contains
 
       real(bsa_real_t) :: fiPfj(1)
 
-      integer(int32) :: itc, tc, tcP3, posm, imode
+      integer(int32) :: itc, tc, tcP3, imode
       integer(int32) :: posi, inode, node, ilibk
 
       real(bsa_real_t), dimension(1, NNODESL) :: Suvw_fi, Suvw_fj, Suvw_fiPfj
@@ -1195,16 +1195,14 @@ contains
                )
 
 
-               posm = 1
                do imode = 1, NMODES_EFF
 
-                  bfm(posm, 1) = bfm(posm, 1) + &
-                     sum( &
-                        BF_ijk_I * &
+                  bfm(imode, 1) = bfm(imode, 1) + &
+                     sum( BF_ijk_I * &
                            (matmul(phi_(:, imode:imode), transpose(phi_(:, imode:imode))) &
-                              * phik(imode)) )
-
-                  posm = posm + 1
+                              * phik(imode)
+                           )
+                     )
                enddo ! modes
 
             enddo ! libs loaded (k)
