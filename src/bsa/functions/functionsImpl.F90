@@ -96,6 +96,150 @@ contains
 
 
 
+
+   module subroutine prefetchSVDWorkDim_()
+      real(bsa_real_t) :: tmpmat(NNODESL, NNODESL)
+      ! real(bsa_real_t), allocatable :: tmpmat(:, :)
+
+      real(bsa_real_t), dimension(NNODESL) :: tmpv
+
+      real(bsa_real_t), dimension(1) :: optWork
+      real(bsa_real_t), dimension(1) :: tmp1arr
+
+      integer(int32) :: istat
+      character(len = 256) :: emsg
+
+      if (.not. allocated(MSHR_SVD_INFO)) then
+         allocate(MSHR_SVD_INFO, stat=istat, errmsg=emsg)
+         if (istat /= 0) call allocKOMsg('MSHR_SVD_INFO', istat, emsg)
+      endif
+
+      MSHR_SVD_INFO = 0
+#ifdef BSA_USE_SVD_METHOD
+   call POD__(&
+           'O' &        ! min(M,N) columns of U are returned in array U
+         , 'N' &        ! no rows of V are computed
+         , NNODESL &    ! n. of rows M
+         , NNODESL &    ! n. of cols N
+         , tmpmat  &    ! A matrix
+         , NNODESL &
+         , tmpv    &
+         , tmp1arr &    ! U array
+         , 1       & 
+         , tmp1arr &
+         , 1       &
+         , optWork &
+         , MSHR_SVD_LWORK &
+         , MSHR_SVD_INFO  &
+      )
+#else
+      call POD__('V', 'L', &
+         NNODESL, tmpmat, NNODESL, tmp1arr, optWork, MSHR_SVD_LWORK, MSHR_SVD_INFO)
+#endif
+
+      if (MSHR_SVD_INFO == 0) then
+
+         MSHR_SVD_LWORK = int(optWork(1))
+
+#ifdef BSA_DEBUG
+         print '(1x, a, a, i0 /)', &
+            DBGMSG, 'WORK query ok. Optimal work dimension = ', MSHR_SVD_LWORK
+#endif
+
+         if (allocated(MSHR_SVD_WORK)) then
+            if (size(MSHR_SVD_WORK) /= MSHR_SVD_LWORK) then
+               deallocate(MSHR_SVD_WORK)
+               allocate(MSHR_SVD_WORK(MSHR_SVD_LWORK), stat=istat, errmsg=emsg)
+               if (istat /= 0) call allocKOMsg('MSHR_SVD_WORK', istat, emsg)
+            endif
+         else
+            allocate(MSHR_SVD_WORK(MSHR_SVD_LWORK), stat=istat, errmsg=emsg)
+            if (istat /= 0) call allocKOMsg('MSHR_SVD_WORK', istat, emsg)
+         endif
+         return ! correct execution flow
+      endif
+
+
+      print '(1x, a, a, i0)', &
+         ERRMSG, 'WORK query for SVD decomposition returned code   ', MSHR_SVD_INFO
+      print '(1x, a, a)', &
+         MSGCONT, 'Please, check again.'
+      call bsa_Abort()
+   end subroutine
+
+
+
+
+   module subroutine cleanSVDWorkInfo_()
+      integer(int32) :: istat
+      character(len = 256) :: emsg
+
+      ! NOTE: reset to -1 so that next call is going to query again.
+      MSHR_SVD_LWORK = - 1
+
+      if (allocated(MSHR_SVD_INFO)) then
+         deallocate(MSHR_SVD_INFO, stat=istat, errmsg=emsg)
+         if (istat /= 0) call deallocKOMsg('MSHR_SVD_INFO', istat, emsg)
+      endif
+
+      if (allocated(MSHR_SVD_WORK)) then
+         deallocate(MSHR_SVD_WORK, stat=istat, errmsg=emsg)
+         if (istat /= 0) call deallocKOMsg('MSHR_SVD_WORK', istat, emsg)
+      endif
+
+#ifdef BSA_DEBUG
+      print '(1x, a, a)', &
+         INFOMSG, 'SVD related data cleaned -- ok.'
+#endif
+   end subroutine
+
+
+
+
+   integer(int32) pure function getNPODModesByThreshold_(eigvals, rlim) result(nPODmodes)
+#if (_WIN32 & __INTEL_COMPILER)
+!DIR$ ATTRIBUTES FORCEINLINE :: getNPODModesByThreshold_
+#endif
+      real(bsa_real_t), intent(in), contiguous :: eigvals(:)
+      real(bsa_real_t), intent(in) :: rlim
+      real(bsa_real_t) :: limval
+
+#ifdef BSA_USE_SVD_METHOD
+# define __IDX 1
+# define __OP  +
+#else
+# define __IDX NNODESL
+# define __OP  -
+#endif
+
+      nPODmodes = 1
+      if (any(eigvals /= eigvals(__IDX))) then
+         limval    = rlim * eigvals(__IDX)
+         nPODmodes = 2
+         do while (eigvals(nPODmodes) >= limval)
+            nPODmodes = nPODmodes __OP 1
+         enddo
+         nPODmodes = nPODmodes - 1
+      endif
+#undef __IDX
+#undef __OP
+   end function getNPODModesByThreshold_
+
+
+
+
+
+
+
+!!========================================================================================
+!!========================================================================================
+!!
+!!  mesher (implicit scalar)
+!!
+!!========================================================================================
+!!========================================================================================
+
+
    module subroutine getFM_full_tnm_scalar_msh_(bfm, fi, fj)
       real(bsa_real_t), intent(inout), contiguous :: bfm(:, :)
       real(bsa_real_t), intent(in), contiguous :: fi(:), fj(:)
@@ -318,138 +462,6 @@ contains
 
 
 
-
-
-
-
-
-   module subroutine prefetchSVDWorkDim_()
-      real(bsa_real_t) :: tmpmat(NNODESL, NNODESL)
-      ! real(bsa_real_t), allocatable :: tmpmat(:, :)
-
-      real(bsa_real_t), dimension(NNODESL) :: tmpv
-
-      real(bsa_real_t), dimension(1) :: optWork
-      real(bsa_real_t), dimension(1) :: tmp1arr
-
-      integer(int32) :: istat
-      character(len = 256) :: emsg
-
-      if (.not. allocated(MSHR_SVD_INFO)) then
-         allocate(MSHR_SVD_INFO, stat=istat, errmsg=emsg)
-         if (istat /= 0) call allocKOMsg('MSHR_SVD_INFO', istat, emsg)
-      endif
-
-      MSHR_SVD_INFO = 0
-#ifdef BSA_USE_SVD_METHOD
-   call POD__(&
-           'O' &        ! min(M,N) columns of U are returned in array U
-         , 'N' &        ! no rows of V are computed
-         , NNODESL &    ! n. of rows M
-         , NNODESL &    ! n. of cols N
-         , tmpmat  &    ! A matrix
-         , NNODESL &
-         , tmpv    &
-         , tmp1arr &    ! U array
-         , 1       & 
-         , tmp1arr &
-         , 1       &
-         , optWork &
-         , MSHR_SVD_LWORK &
-         , MSHR_SVD_INFO  &
-      )
-#else
-      call POD__('V', 'L', &
-         NNODESL, tmpmat, NNODESL, tmp1arr, optWork, MSHR_SVD_LWORK, MSHR_SVD_INFO)
-#endif
-
-      if (MSHR_SVD_INFO == 0) then
-
-         MSHR_SVD_LWORK = int(optWork(1))
-
-#ifdef BSA_DEBUG
-         print '(1x, a, a, i0 /)', &
-            DBGMSG, 'WORK query ok. Optimal work dimension = ', MSHR_SVD_LWORK
-#endif
-
-         if (allocated(MSHR_SVD_WORK)) then
-            if (size(MSHR_SVD_WORK) /= MSHR_SVD_LWORK) then
-               deallocate(MSHR_SVD_WORK)
-               allocate(MSHR_SVD_WORK(MSHR_SVD_LWORK), stat=istat, errmsg=emsg)
-               if (istat /= 0) call allocKOMsg('MSHR_SVD_WORK', istat, emsg)
-            endif
-         else
-            allocate(MSHR_SVD_WORK(MSHR_SVD_LWORK), stat=istat, errmsg=emsg)
-            if (istat /= 0) call allocKOMsg('MSHR_SVD_WORK', istat, emsg)
-         endif
-         return ! correct execution flow
-      endif
-
-
-      print '(1x, a, a, i0)', &
-         ERRMSG, 'WORK query for SVD decomposition returned code   ', MSHR_SVD_INFO
-      print '(1x, a, a)', &
-         MSGCONT, 'Please, check again.'
-      call bsa_Abort()
-   end subroutine
-
-
-
-
-   module subroutine cleanSVDWorkInfo_()
-      integer(int32) :: istat
-      character(len = 256) :: emsg
-
-      ! NOTE: reset to -1 so that next call is going to query again.
-      MSHR_SVD_LWORK = - 1
-
-      if (allocated(MSHR_SVD_INFO)) then
-         deallocate(MSHR_SVD_INFO, stat=istat, errmsg=emsg)
-         if (istat /= 0) call deallocKOMsg('MSHR_SVD_INFO', istat, emsg)
-      endif
-
-      if (allocated(MSHR_SVD_WORK)) then
-         deallocate(MSHR_SVD_WORK, stat=istat, errmsg=emsg)
-         if (istat /= 0) call deallocKOMsg('MSHR_SVD_WORK', istat, emsg)
-      endif
-
-#ifdef BSA_DEBUG
-      print '(1x, a, a)', &
-         INFOMSG, 'SVD related data cleaned -- ok.'
-#endif
-   end subroutine
-
-
-
-
-   integer(int32) pure function getNPODModesByThreshold_(eigvals, rlim) result(nPODmodes)
-#if (_WIN32 & __INTEL_COMPILER)
-!DIR$ ATTRIBUTES FORCEINLINE :: getNPODModesByThreshold_
-#endif
-      real(bsa_real_t), intent(in), contiguous :: eigvals(:)
-      real(bsa_real_t), intent(in) :: rlim
-      real(bsa_real_t) :: limval
-
-#ifdef BSA_USE_SVD_METHOD
-# define __IDX 1
-# define __OP  +
-#else
-# define __IDX NNODESL
-# define __OP  -
-#endif
-
-      nPODmodes = 1
-      if (any(eigvals /= eigvals(__IDX))) then
-         limval    = rlim * eigvals(__IDX)
-         nPODmodes = 2
-         do while (eigvals(nPODmodes) >= limval)
-            nPODmodes = nPODmodes __OP 1
-         enddo
-         nPODmodes = nPODmodes - 1
-      endif
-#undef __IDX
-#undef __OP
-   end function getNPODModesByThreshold_
 
 
 
@@ -1104,10 +1116,6 @@ contains
 
 
 
-
-
-
-
    module subroutine getFM_diag_tnm_scalar_msh_(bfm, fi, fj)
       real(bsa_real_t), intent(inout), contiguous :: bfm(:, :)
       real(bsa_real_t), intent(in), contiguous :: fi(:), fj(:)
@@ -1208,6 +1216,9 @@ contains
 
 
 
+
+
+
    module subroutine getRM_diag_scalar_msh_(brm, fi, fj, bfm)
       real(bsa_real_t), intent(inout), contiguous :: brm(:, :)
       real(bsa_real_t), intent(in), contiguous :: fi(:), fj(:)
@@ -1284,11 +1295,9 @@ contains
 
 !!========================================================================================
 !!========================================================================================
-!!========================================================================================
 !!
-!!  classic
+!!  classic - VECTORISED
 !!
-!!========================================================================================
 !!========================================================================================
 !!========================================================================================
 
@@ -2075,6 +2084,13 @@ contains
 
 
 
+!!========================================================================================
+!!========================================================================================
+!!
+!!  classic - SCALAR
+!!
+!!========================================================================================
+!!========================================================================================
 
 
    !> BUG: this routine is adapted to the case where we use
