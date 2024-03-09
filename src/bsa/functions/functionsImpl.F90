@@ -1200,8 +1200,8 @@ contains
                   bfm(imode, 1) = bfm(imode, 1) + &
                      sum( BF_ijk_I * &
                            (matmul(phi_(:, imode:imode), transpose(phi_(:, imode:imode))) &
-                              * phik(imode)
-                           )
+                              * phik(imode) &
+                           ) &
                      )
                enddo ! modes
 
@@ -1312,6 +1312,9 @@ contains
 
       integer(int32) :: innl3
       integer(int32) :: iin, ien, itmp, ifrj
+#ifdef _OPENMP
+      integer(int32) :: itmp_
+#endif
       integer(int32) :: i_n_pad, i_pad_len
 
       ! turb components related
@@ -1392,15 +1395,6 @@ contains
 
          allocate(bf_ijk_IJK_w_w2(NFREQS), stat=itc, errmsg=emsg)
          if (itc /= 0) call allocKOMsg('bf_ijk_IJK_w_w2', itc, emsg)
-
-         allocate(tmp1(NFREQS), stat=itc, errmsg=emsg)
-         if (itc /= 0) call allocKOMsg('tmp1', itc, emsg)
-
-         allocate(tmp2(NFREQS), stat=itc, errmsg=emsg)
-         if (itc /= 0) call allocKOMsg('tmp2', itc, emsg)
-
-         allocate(tmp3(NFREQS), stat=itc, errmsg=emsg)
-         if (itc /= 0) call allocKOMsg('tmp3', itc, emsg)
 
          allocate(S_uvw_i(NFREQS), stat=itc, errmsg=emsg)
          if (itc /= 0) call allocKOMsg('S_uvw_i', itc, emsg)
@@ -1487,9 +1481,27 @@ contains
 
 
                      ! loop on frequencies (second dimension, j)
+#ifdef _OPENMP
+                     itmp_ = NFREQS - 1
+
+                     !$omp parallel do                &
+                     !$omp   default(firstprivate),   &
+                     !$omp   shared(bisp, itmp_, NMODES_EFF, NFREQS  &
+                     !$omp      , S_uvw_IJ, S_uvw_IK, S_uvw_JK       &
+                     !$omp      , S_uvw_IJ_w1w2, S_uvw_IK_w1w2       &
+                     !$omp      , phik_, phij_, phii_),              &
+                     !$omp   num_threads(8)
+#else
                      itmp = NFREQS
+#endif
                      do ifrj = 1, NFREQS
 
+#ifdef _OPENMP
+                        itmp = itmp_ + ifrj
+#endif
+
+                        ! make use of implicit allocation
+                        ! NOTE: in OpenMP, better to copy a nullptr
                         tmp1 = S_uvw_IJ                   * S_uvw_IK(ifrj)
                         tmp2 = S_uvw_IJ_w1w2(ifrj : itmp) * S_uvw_JK(ifrj)
                         tmp3 = S_uvw_JK                   * S_uvw_IK_w1w2(ifrj : itmp)
@@ -1505,7 +1517,10 @@ contains
                               phij_Ub_ = phij_(imj, 1)
                               phij_u_  = phij_(imj, 2)
 
-                              ! TODO: this loop can be suppressed
+
+                              ! BUG: this loop can be optimised??
+                              !       Could we use SIMD lanes?
+                              !       Maybe not, loop acts on non-contiguous memory...
                               do imi = 1, NMODES_EFF
 
                                  bisp(:, ifrj, posm_) = bisp(:, ifrj, posm_) + &
@@ -1520,7 +1535,9 @@ contains
                            enddo ! j mode
                         enddo ! k mode
 
+#ifndef _OPENMP
                         itmp = itmp + 1
+#endif
                      enddo ! n freqs j
 
                      i_pos_ni = i_pos_ni + 1
@@ -1531,7 +1548,6 @@ contains
                   print '(1x, a, a, f10.4, " %")', &
                      INFOMSG, ' done  ', real(i_ncycles, bsa_real_t)/innl3*100
 ! #endif
-
                endif ! bisp computation
 
 
