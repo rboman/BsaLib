@@ -87,16 +87,6 @@ module BsaLib_Functions
 
 
 
-      !> BUG: this routine is adapted to the case where we use
-      !>      convention on PULSATION.
-      !>      Please, adpapt it to the case of convention over FREQUENCIES.
-      module subroutine getFM_full_tnlm_vect_cls_(f, Suvw, psd, bisp)
-         real(bsa_real_t), intent(in)         :: f(NFREQS)
-         real(bsa_real_t), intent(in)         :: Suvw(NFREQS, NPSDEL)
-         real(bsa_real_t), allocatable, intent(inout) :: psd(:, :), bisp(:, :, :)
-      end subroutine
-
-
       module subroutine getFM_full_tnm_vect_cls_(f, Suvw, psd, bisp)
          real(bsa_real_t), intent(in) :: f(NFREQS)
          real(bsa_real_t), intent(in) :: Suvw(NFREQS, NPSDEL)
@@ -128,19 +118,6 @@ module BsaLib_Functions
 
 
 
-
-
-
-      !> BUG: this routine is adapted to the case where we use
-      !>      convention on PULSATION.
-      !>      Please, adapt it to the case of convention over FREQUENCIES.
-      pure module subroutine getFM_full_tnlm_scalar_cls_(ii, ij, fi, fj, Suvw, Suvw_pad, psd, bisp)
-         integer(bsa_int_t), intent(in)  :: ii, ij
-         real(bsa_real_t), intent(in)    :: fi, fj
-         real(bsa_real_t), intent(in)    :: Suvw(NFREQS, NPSDEL)
-         real(bsa_real_t), intent(in)    :: Suvw_pad(NPSDEL)
-         real(bsa_real_t), intent(inout) :: psd(dimM_psd_), bisp(dimM_bisp_)
-      end subroutine
 
 
 

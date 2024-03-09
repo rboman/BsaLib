@@ -1295,391 +1295,6 @@ contains
 
 
 
-
-   !> BUG: this routine is adapted to the case where we use
-   !>      convention on PULSATION.
-   !>      Please, adapt it to the case of convention over FREQUENCIES.
-   module subroutine getFM_full_tnlm_vect_cls_(f, Suvw, psd, bisp)
-      real(bsa_real_t), intent(in) :: f(NFREQS)
-      real(bsa_real_t), intent(in) :: Suvw(NFREQS, NPSDEL)
-      real(bsa_real_t), allocatable, intent(inout) :: psd(:, :), bisp(:, :, :)
-
-      integer(int32) :: innl3
-      integer(int32) :: iin, ien, itmp, ifrj
-      integer(int32) :: i_n_pad, i_pad_len
-
-      ! turb components related
-      integer(int32) :: itc, tc, tc_posN, tc_pk, tc_pj, tc_pi
-
-      ! nodes indexed values
-      integer(int32) :: i_pos_nk, i_pos_nj, i_pos_ni
-      integer(int32) :: pos_nk, pos_nj, pos_ni
-      integer(int32) :: ink, inj, ini
-      integer(int32) :: ni, nj, nk
-
-      ! libs indexed values
-      integer(int32) :: ilk, ilj, ili
-      ! integer(int32) :: li, lj, lk
-
-      ! modes indexed values
-      real(bsa_real_t), dimension(NLIBSL, NMODES_EFF) :: phik_, phij_, phii_
-      real(bsa_real_t) :: phik, phij, phii
-      integer(int32) :: posm_
-      integer(int32) :: imk, imj, imi
-      ! integer(int32) :: mi, mj, mk
-
-      integer(int32) :: i_ncycles
-
-      real(bsa_real_t) :: f_abs(NFREQS)
-
-      ! local nodal correlations
-      real(bsa_real_t) :: corrJK, corrIK, corrIJ
-
-      ! wfc extractions
-      integer(bsa_int_t)   :: tcP3
-      real(bsa_real_t), dimension(NLIBSL) :: aiU, ai, akU, ak
-      real(bsa_real_t), dimension(NLIBSL) :: ajU, aj
-
-      ! PSDs local
-      real(bsa_real_t), allocatable :: S_uvw_i(:), S_uvw_j(:), S_uvw_k(:), PSDF_jk_JK_w(:)
-      real(bsa_real_t), allocatable :: S_uvw_JK(:), S_uvw_IK(:), S_uvw_IJ(:)
-      real(bsa_real_t), allocatable :: S_uvw_IK_w1w2(:), S_uvw_IJ_w1w2(:)
-
-      ! BF local
-      real(bsa_real_t), allocatable :: BF_ijk_IJK_w_w2(:)
-
-      character(len = 256) :: emsg
-      !========================================================================                                 
-
-
-#ifdef BSA_DEBUG
-      write(unit_debug_, '(2a)') &
-         INFOMSG, '@BsaClassicImpl::getFM_full_tnlm_vect_cls_() : computing modal forces spectra...'
-#endif
-
-
-      f_abs = abs(f)
-
-
-      ! getting padded length and relative init/end indices (non zero zone)
-      itmp      = NFREQS - 1     ! do not consider 0 (point of symmetry)
-      i_n_pad   = itmp / 2       ! spread it on the two sides (left / right)
-      ! iin      = i_n_pad + 1
-      ! ien      = in + itmp
-      ien       = i_n_pad + NFREQS
-      iin       = i_n_pad + 1
-      i_pad_len = itmp + NFREQS
-
-
-#ifdef BSA_DEBUG
-      print '(1x, a, i5)', '@BsaClassicImpl::getFM_full_tnlm_vect_cls_() : i pad length = ', i_pad_len
-      print '(1x, a, i5)', '@BsaClassicImpl::getFM_full_tnlm_vect_cls_() : init index   = ', iin
-      print '(1x, a, i5)', '@BsaClassicImpl::getFM_full_tnlm_vect_cls_() : end  index   = ', ien
-      print '(1x, a, i5)', '@BsaClassicImpl::getFM_full_tnlm_vect_cls_() : pad range    = ', ien - iin + 1
-#endif
-
-
-      ! these are needed regardlessly of if PSDs or BISPs
-
-      allocate(psd(NFREQS, dimM_psd_), stat=ilk, errmsg=emsg)
-      if (ilk /= 0) call allocKOMsg('psd', ilk, emsg)
-      psd = 0._bsa_real_t
-
-      allocate(S_uvw_k(NFREQS), stat=ilk, errmsg=emsg)
-      if (ilk /= 0) call allocKOMsg('S_uvw_k', ilk, emsg)
-
-      allocate(S_uvw_j(NFREQS), stat=ilk, errmsg=emsg)
-      if (ilk /= 0) call allocKOMsg('S_uvw_j', ilk, emsg)
-
-      allocate(S_uvw_JK(NFREQS), stat=ilk, errmsg=emsg)
-      if (ilk /= 0) call allocKOMsg('S_uvw_JK', ilk, emsg)
-
-      allocate(PSDF_jk_JK_w(NFREQS), stat=ilk, errmsg=emsg)
-      if (ilk /= 0) call allocKOMsg('PSDF_jk_JK_w', ilk, emsg)
-
-      if (settings%i_compute_bisp_ == 1) then
-
-         allocate(bisp(NFREQS, NFREQS, dimM_bisp_), stat=ilk, errmsg=emsg)
-         if (ilk /= 0) call allocKOMsg('bisp', ilk, emsg)
-         bisp = 0._bsa_real_t
-
-         allocate(bf_ijk_IJK_w_w2(NFREQS), stat=ilk, errmsg=emsg)
-         if (ilk /= 0) call allocKOMsg('bf_ijk_IJK_w_w2', ilk, emsg)
-
-         allocate(S_uvw_i(NFREQS), stat=ilk, errmsg=emsg)
-         if (ilk /= 0) call allocKOMsg('S_uvw_i', ilk, emsg)
-
-         allocate(S_uvw_IK(NFREQS), stat=ilk, errmsg=emsg)
-         if (ilk /= 0) call allocKOMsg('S_uvw_IK', ilk, emsg)
-
-         allocate(S_uvw_IJ(NFREQS), stat=ilk, errmsg=emsg)
-         if (ilk /= 0) call allocKOMsg('S_uvw_IJ', ilk, emsg)
-
-         allocate(S_uvw_IK_w1w2(i_pad_len), stat=ilk, errmsg=emsg)
-         if (ilk /= 0) call allocKOMsg('S_uvw_IK_w1w2', ilk, emsg)
-
-         allocate(S_uvw_IJ_w1w2(i_pad_len), stat=ilk, errmsg=emsg)
-         if (ilk /= 0) call allocKOMsg('S_uvw_IJ_w1w2', ilk, emsg)
-
-      endif
-
-
-      i_ncycles = 0
-      innl3     = NNODESL**3 * NTCOMPS
-
-
-      !========================================================================
-      ! BUG: for the moment, only considering correlation
-      !      between same turbulence component (u, v, w).
-      !      No cross-correlation between turbulent components
-      !      i.e. E[uv]==E[uw]==E[vw] === 0
-      do itc = 1, NTCOMPS
-
-         tc      = wd%tc_(itc) ! get actual turbulent component
-         tcP3    = tc + 3   ! quadratic term coeff
-         tc_posN = (itc - 1) * NNODESL
-
-
-         i_pos_nk = 1
-         do ink = 1, NNODESL
-
-            nk     = struct_data%n_load_(ink)
-            pos_nk = (nk - 1) * NLIBS
-            tc_pk  = tc_posN + i_pos_nk
-
-            phik_ = struct_data%modal_%phi_(pos_nk + struct_data%libs_load_, MODES)
-
-            akU(:) = wd%wfc_(struct_data%libs_load_, tc,   ink)
-            ak (:) = wd%wfc_(struct_data%libs_load_, tcP3, ink)
-
-            S_uvw_k = Suvw(:, tc_pk)
-            ! if (settings%i_only_psd_ == 0) S_uvw_pad_k(iin : ien) = S_uvw_k
-
-
-            i_pos_nj = 1
-            do inj = 1, NNODESL
-
-               nj     = struct_data%n_load_(inj)
-               pos_nj = (nj - 1) * NLIBS
-               tc_pj  = tc_posN + i_pos_nj
-
-               phij_ = struct_data%modal_%phi_(pos_nj + struct_data%libs_load_, MODES)
-
-               ajU(:) = wd%wfc_(struct_data%libs_load_, tc,   inj)
-               aj (:) = wd%wfc_(struct_data%libs_load_, tcP3, inj)
-
-               ! BUG: inserted itc, was 1
-               corrJK = wd%nod_corr_(util_getCorrVectIndex(nj, nk, NNODES), tc)
-
-
-               S_uvw_j = Suvw(:, tc_pj)
-               ! if (settings%i_only_psd_ == 0) S_uvw_pad_j(iin : ien) = S_uvw_j
-
-               S_uvw_JK = corrJK**(f_abs) * sqrt(S_uvw_k * S_uvw_j)
-
-
-               !! BISPs
-               if (settings%i_compute_bisp_ == 1) then
-
-                  i_pos_ni = 1
-                  do ini = 1, NNODESL
-
-                     ni     = struct_data%n_load_(ini)
-                     pos_ni = (ni - 1) * NLIBS
-                     tc_pi  = tc_posN + i_pos_ni
-
-                     phii_ = struct_data%modal_%phi_(pos_ni + struct_data%libs_load_, MODES)
-
-                     aiU(:) = wd%wfc_(struct_data%libs_load_, tc,   ini)
-                     ai (:) = wd%wfc_(struct_data%libs_load_, tcP3, ini)
-
-                     corrIK = wd%nod_corr_(util_getCorrVectIndex(ni, nk, NNODES), tc)
-                     corrIJ = wd%nod_corr_(util_getCorrVectIndex(ni, nj, NNODES), tc)
-
-                     S_uvw_i = Suvw(:, tc_pi)
-
-
-                     S_uvw_IK = corrIK**(f_abs) * sqrt(S_uvw_i * S_uvw_k)
-                     S_uvw_IK_w1w2(iin : ien) = S_uvw_IK
-
-
-                     S_uvw_IJ = corrIJ**(f_abs) * sqrt(S_uvw_i * S_uvw_j)
-                     S_uvw_IJ_w1w2(iin : ien) = S_uvw_IJ
-
-
-
-                     ! loop on frequencies (second dimension, j)
-                     itmp = NFREQS
-                     do ifrj = 1, NFREQS
-
-
-                        do ilk = 1, NLIBSL
-
-                           ! lk = struct_data%libs_load_(ilk)
-
-                           do ilj = 1, NLIBSL
-
-                              ! lj   = struct_data%libs_load_(ilj)
-
-
-                              do ili = 1, NLIBSL
-
-                                 ! li   = struct_data%libs_load_(ili)
-
-
-                                 BF_ijk_IJK_w_w2 = 2 * (&
-                                    ai (ili) * ajU(ilj) * akU(ilk) * (S_uvw_IJ * S_uvw_IK(ifrj)) + &
-                                    aiU(ili) * aj (ilj) * akU(ilk) * (S_uvw_IJ_w1w2(ifrj : itmp) * S_uvw_JK(ifrj)) + &
-                                    aiU(ili) * ajU(ilj) * ak (ilk) * (S_uvw_JK * S_uvw_IK_w1w2(ifrj : itmp)) &
-                                 &)
-
-
-                                 ! if (all(BF_ijk_IJK_w_w2 == 0._bsa_real_t)) cycle
-
-
-                                 posm_ = 1
-                                 do imk = 1, NMODES_EFF
-
-                                    ! mk   = struct_data%modal_%modes_(imk)
-                                    phik = phik_(ilk, imk)
-
-                                    do imj = 1, NMODES_EFF
-
-                                       ! mj   = struct_data%modal_%modes_(imj)
-                                       phij = phij_(ilj, imj)
-
-
-                                       ! TODO: this loop can be suppressed
-                                       do imi = 1, NMODES_EFF
-
-                                          ! mi   = struct_data%modal_%modes_(imi)
-                                          phii = phii_(ili, imi)
-
-                                          bisp(:, ifrj, posm_) = bisp(:, ifrj, posm_) + &
-                                             phik * phij * phii * BF_ijk_IJK_w_w2
-
-                                          posm_ = posm_ + 1
-                                       enddo ! i mode
-                                    enddo ! j mode
-                                 enddo ! k mode                     
-
-                              enddo ! i lib
-                           enddo ! j lib
-                        enddo ! k lib
-
-                        itmp = itmp + 1
-                     enddo ! n freqs j
-
-
-                     i_pos_ni = i_pos_ni + 1
-                  enddo ! i node
-
-#ifdef BSA_DEBUG
-                  i_ncycles = i_ncycles + NNODESL
-                  print '(1x, a, a, f10.4, " %")', &
-                     INFOMSG, ' done  ', &
-                        (real(i_ncycles, bsa_real_t)/innl3)*100
-#endif
-
-               endif ! bisp computation
-
-
-
-               !! PSDs
-               do ilk = 1, NLIBSL
-
-                  ! lk   = struct_data%libs_load_(ilk)
-                  ! if (akU(ilk) == 0.0_bsa_real_t) cycle
-
-
-                  do ilj = 1, NLIBSL
-
-                     ! lj   = struct_data%libs_load_(ilj)
-                     ! if (ajU(ilj) == 0.0_bsa_real_t) cycle
-
-
-                     ! PSD f
-                     PSDF_jk_JK_w = ajU(ilj) * akU(ilk) * S_uvw_JK
-
-                     ! if (all(PSDF_jk_JK_w == 0.0_bsa_real_t)) cycle
-
-
-                     posm_ = 1
-                     do imk = 1, NMODES_EFF
-
-                        ! mk   = struct_data%modal_%modes_(imk)
-                        phik = phik_(ilk, imk)
-                        ! if (phik == 0.0_bsa_real_t) cycle
-
-                        do imj = 1, NMODES_EFF
-
-                           ! mj   = struct_data%modal_%modes_(imj)
-                           phij = phij_(ilj, imj)
-                           ! if (phij == 0.0_bsa_real_t) cycle
-
-                           psd(:, posm_) = psd(:, posm_) + &
-                              phik * phij * PSDF_jk_JK_w
-
-! #ifdef BSA_DEBUG
-!                            write(unit_debug_, &
-! 										   '(1x, a, 5(i0, ", "), i0,  "  ; ",  2(2x, g0, " - ", g0) )') &
-! 										'  nk, nj, lk, lj, mk, mj :  ', &
-!                               nk, nj, &
-!                               struct_data%libs_load_(ilk), struct_data%libs_load_(ilj), &
-!                               imk, imj, &
-! 										akU(ilk), ajU(ilj), &
-! 										phik, phij
-! #endif
-
-
-                           posm_ = posm_ + 1
-                        enddo ! j mode
-                     enddo ! k mode
-
-                  enddo ! j lib
-               enddo ! k lib
-
-
-               i_pos_nj = i_pos_nj + 1
-            enddo ! j node
-
-
-            i_pos_nk = i_pos_nk + 1
-         enddo ! k node
-
-      enddo ! itc
-
-
-      ! deallocation
-      if (allocated(S_uvw_i))         deallocate(S_uvw_i)
-      if (allocated(S_uvw_j))         deallocate(S_uvw_j)
-      if (allocated(S_uvw_k))         deallocate(S_uvw_k)
-      if (allocated(PSDF_jk_JK_w))    deallocate(PSDF_jk_JK_w)
-      if (allocated(S_uvw_JK))        deallocate(S_uvw_JK)
-      if (allocated(S_uvw_IK))        deallocate(S_uvw_IK)
-      if (allocated(S_uvw_IJ))        deallocate(S_uvw_IJ)
-      if (allocated(S_uvw_IK_w1w2))   deallocate(S_uvw_IK_w1w2)
-      if (allocated(S_uvw_IJ_w1w2))   deallocate(S_uvw_IJ_w1w2)
-      if (allocated(BF_ijk_IJK_w_w2)) deallocate(BF_ijk_IJK_w_w2)
-
-#ifdef BSA_DEBUG
-      write(unit_debug_, '(2a)') &
-         INFOMSG, '@BsaClassicImpl::getFM_full_tnlm_vect_cls_() : computing modal forces spectra -- ok.'
-#endif
-   end subroutine getFM_full_tnlm_vect_cls_
-
-
-
-
-
-
-
-
-
-
-
-
-
    !> BUG: this routine is adapted to the case where we use
    !>      convention on PULSATION.
    !>      Please, adapt it to the case of convention over FREQUENCIES.
@@ -1728,21 +1343,11 @@ contains
       character(len = 256) :: emsg
       !========================================================================                                 
 
-
-#ifdef BSA_DEBUG
-      write(unit_debug_, '(2a)') &
-         INFOMSG, '@BsaClassicImpl::getFM_full_tnm_vect_cls_() : computing modal forces spectra...'
-#endif
-
-
       f_abs = abs(f)
-
 
       ! getting padded length and relative init/end indices (non zero zone)
       itmp      = NFREQS - 1     ! do not consider 0 (point of symmetry)
       i_n_pad   = itmp / 2       ! spread it on the two sides (left / right)
-      ! iin      = i_n_pad + 1
-      ! ien      = in + itmp
       ien       = i_n_pad + NFREQS
       iin       = i_n_pad + 1
       i_pad_len = itmp + NFREQS
@@ -1757,7 +1362,6 @@ contains
 
 
       ! these are needed regardlessly of if PSDs or BISPs
-
       allocate(psd(NFREQS, dimM_psd_), stat=itc, errmsg=emsg)
       if (itc /= 0) call allocKOMsg('psd', itc, emsg)
       psd = 0._bsa_real_t
@@ -1775,7 +1379,6 @@ contains
       if (itc /= 0) call allocKOMsg('PSDF_jk_JK_w', itc, emsg)
 
       if (settings%i_compute_bisp_ == 1) then
-
          allocate(bisp(NFREQS, NFREQS, dimM_bisp_), stat=itc, errmsg=emsg)
          if (itc /= 0) call allocKOMsg('bisp', itc, emsg)
          bisp = 0._bsa_real_t
@@ -1806,7 +1409,6 @@ contains
 
          allocate(S_uvw_IJ_w1w2(i_pad_len), stat=itc, errmsg=emsg)
          if (itc /= 0) call allocKOMsg('S_uvw_IJ_w1w2', itc, emsg)
-
       endif ! i bisp allocation
 
 
@@ -1823,7 +1425,6 @@ contains
          tc      = wd%tc_(itc) ! get actual turbulent component
          tcP3    = tc + 3   ! quadratic term coeff
          tc_posN = (itc - 1) * NNODESL
-
 
          i_pos_nk = 1
          do ink = 1, NNODESL
@@ -1915,7 +1516,6 @@ contains
                         itmp = itmp + 1
                      enddo ! n freqs j
 
-
                      i_pos_ni = i_pos_ni + 1
                   enddo ! i node
 
@@ -1943,16 +1543,12 @@ contains
                   enddo ! j mode
                enddo ! k mode
 
-
                i_pos_nj = i_pos_nj + 1
             enddo ! j node
 
-
             i_pos_nk = i_pos_nk + 1
          enddo ! k node
-
       enddo ! itc
-
 
 
       ! deallocation
@@ -1996,12 +1592,7 @@ contains
       real(bsa_real_t), allocatable :: r_part(:, :), i_part(:, :), h_tmp(:, :), h_tmp2(:, :)
       real(bsa_real_t), allocatable :: Hr_w(:, :), Hi_w(:, :)
       real(bsa_real_t), allocatable :: Hr_w1w2(:, :, :), Hi_w1w2(:, :, :)
-
-
-#ifdef BSA_DEBUG
-      write(unit_debug_, '(2a)') &
-         INFOMSG, '@BsaClassicImpl::getRM_full_vect_cls_() : computing modal responses spectra...'
-#endif
+      !=====================================================================================
 
       ! BUG: check logic if correct
       if (settings%i_compute_bisp_ == 1) then
@@ -2023,15 +1614,11 @@ contains
          return
       endif
 
-
-      ! TRANSFER FUNCTION COMPUTATION
-
-      omegas(:, 1) = f * CST_PIt2
-
+      ! these allocations are neede regardlessly
       allocate(Hr_w(NFREQS, NMODES_EFF))
       allocate(Hi_w(NFREQS, NMODES_EFF))
 
-
+      omegas(:, 1) = f * CST_PIt2
       do imi = 1, NMODES_EFF
 
          mi = MODES(imi)
@@ -2058,7 +1645,7 @@ contains
          endif
       enddo
 
-      ! first deallocation
+      ! free mem as soon as possible
       if (allocated(r_part)) deallocate(r_part)
       if (allocated(i_part)) deallocate(i_part)
 
@@ -2101,8 +1688,6 @@ contains
          enddo ! j mode
       enddo ! k mode
 
-
-      ! deallocate what s remained
       if (allocated(Hr_w)) deallocate(Hr_w)
       if (allocated(Hi_w)) deallocate(Hi_w)
       if (allocated(h_tmp)) deallocate(h_tmp)
@@ -2330,9 +1915,8 @@ contains
 
 #ifdef BSA_DEBUG
             print '(1x, 2a, f10.4, " %")', &
-               INFOMSG, 'getFM_diag_tnlm_vect_cls_() :   done  ', real(in, bsa_real_t) / NNODESL * 100
+               INFOMSG, '  done  ', real(in, bsa_real_t) / NNODESL * 100
 #endif
-
          enddo ! nodes
       enddo ! turb comps
 
@@ -2350,6 +1934,9 @@ contains
          INFOMSG, '@BsaClassicImpl::getFM_diag_tnlm_vect_cls_() : computing modal forces spectra -- ok.'
 #endif
    end subroutine
+
+
+
 
 
 
@@ -2480,259 +2067,6 @@ contains
          INFOMSG, '@BsaClassicImpl::getRM_diag_vect_cls_() : computing modal responses spectra -- ok.'
 #endif
    end subroutine getRM_diag_vect_cls_
-
-
-
-
-
-
-
-
-
-
-
-
-   !> BUG: this routine is adapted to the case where we use
-   !>      convention on PULSATION.
-   !>      Please, adapt it to the case of convention over FREQUENCIES.
-   pure module subroutine getFM_full_tnlm_scalar_cls_(ii, ij, fi, fj, Suvw, Suvw_pad, psd, bisp)
-      integer(bsa_int_t), intent(in)  :: ii, ij
-      real(bsa_real_t), intent(in)    :: fi, fj
-      real(bsa_real_t), intent(in)    :: Suvw(NFREQS, NPSDEL)
-      real(bsa_real_t), intent(in)    :: Suvw_pad(NPSDEL)
-      real(bsa_real_t), intent(inout) :: psd(dimM_psd_), bisp(dimM_bisp_)
-
-      ! turb components related
-      integer(int32) :: itc, tc_posN, tc_pk, tc_pj, tc_pi
-
-      ! freqs related
-      real(bsa_real_t) :: fiabs, fjabs, fiPfj, fiPfjabs
-
-      ! nodes indexed values
-      integer(int32) :: i_pos_nk, i_pos_nj, i_pos_ni
-      integer(int32) :: pos_nk, pos_nj, pos_ni
-      integer(int32) :: ink, inj, ini
-      integer(int32) :: ni, nj, nk
-
-      ! libs indexed values
-      integer(int32) :: ilk !, ilj, ili
-
-      ! modes indexed values
-      real(bsa_real_t), dimension(NLIBSL, NMODES_EFF) :: phik_, phij_, phii_
-      real(bsa_real_t) :: phik(NMODES_EFF), phikk, phij(1, NLIBSL), phii(NLIBSL, 1)
-      integer   :: posm
-      integer   :: imk, imj, imi 
-      ! integer(int32) :: mi, mj, mk
-
-      ! local nodal correlations
-      real(bsa_real_t) :: corrJK, corrIK, corrIJ
-
-      ! wfc extractions
-      integer(int32) :: tc, tcP3
-      real(bsa_real_t), dimension(NLIBSL, 1) :: aiU, ai, akU, ak
-      real(bsa_real_t), dimension(1, NLIBSL) :: ajU, aj
-
-      ! PSDs local
-      real(bsa_real_t) :: S_uvw_i_i, S_uvw_i_j, S_uvw_i_ij
-      real(bsa_real_t) :: S_uvw_j_i, S_uvw_j_j, S_uvw_j_ij
-      real(bsa_real_t) :: S_uvw_k_i, S_uvw_k_j, S_uvw_k_ij
-      real(bsa_real_t) :: S_uvw_JK_i, S_uvw_JK_j
-      real(bsa_real_t) :: S_uvw_IK_j, S_uvw_IK_ij
-      real(bsa_real_t) :: S_uvw_IJ_i, S_uvw_IJ_ij
-
-      ! BF local
-      real(bsa_real_t), dimension(NLIBSL, NLIBSL) :: BF_ijk_IJK_w_w2, PSD_jk_JK_w
-      real(bsa_real_t), dimension(NLIBSL, NLIBSL) :: tmp1, tmp2, tmp3
-      !========================================================================
-
-      psd = 0._bsa_real_t
-      bisp= 0._bsa_real_t
-
-      fiabs = abs(fi)
-      fjabs = abs(fj)
-
-      fiPfj    = fi + fj
-      fiPfjabs = abs(fiPfj)
-
-
-      !========================================================================
-      ! BUG: for the moment, only considering correlation
-      !      between same turbulence component (u, v, w).
-      !      No cross-correlation between turbulent components
-      !      i.e. E[uv]==E[uw]==E[vw] === 0
-      do itc = 1, wd%i_ntc_
-
-         tc_posN = (itc - 1) * NNODESL
-         tc      = wd%tc_(itc) ! get actual turbulent component
-         tcP3    = tc + 3      ! quadratic term coeff
-
-
-         i_pos_nk = 1
-         do ink = 1, NNODESL
-
-            nk     = struct_data%n_load_(ink)
-            pos_nk = (nk - 1) * NLIBS
-            tc_pk  = tc_posN + i_pos_nk
-
-            phik_  = struct_data%modal_%phi_(pos_nk + struct_data%libs_load_, MODES)
-
-            S_uvw_k_i  = Suvw(ii, tc_pk)
-            S_uvw_k_j  = Suvw(ij, tc_pk)
-            S_uvw_k_ij = Suvw_pad(tc_pk)
-
-
-            akU(:, 1) = wd%wfc_(struct_data%libs_load_, tc,   ink)
-            ak (:, 1) = wd%wfc_(struct_data%libs_load_, tcP3, ink)
-
-
-            i_pos_nj = 1
-            do inj = 1, NNODESL
-
-               nj     = struct_data%n_load_(inj)
-               pos_nj = (nj - 1) * NLIBS
-               tc_pj  = tc_posN + i_pos_nj
-
-               phij_  = struct_data%modal_%phi_(pos_nj + struct_data%libs_load_, MODES)
-
-               corrJK = wd%nod_corr_(util_getCorrVectIndex(nj, nk, NNODES), tc)
-
-               S_uvw_j_i  = Suvw(ii, tc_pj)
-               S_uvw_j_j  = Suvw(ij, tc_pj)
-               S_uvw_j_ij = Suvw_pad(tc_pj)
-
-
-               S_uvw_JK_i = corrJK**(fiabs) * sqrt(S_uvw_j_i * S_uvw_k_i)
-               S_uvw_JK_j = corrJK**(fjabs) * sqrt(S_uvw_j_j * S_uvw_k_j)
-
-
-               ajU(1, :) = wd%wfc_(struct_data%libs_load_, tc,   inj)
-               aj (1, :) = wd%wfc_(struct_data%libs_load_, tcP3, inj)
-
-
-
-               !! BISPs
-
-               if (settings%i_compute_bisp_ == 1) then
-
-                  i_pos_ni = 1
-                  do ini = 1, NNODESL
-
-                     ni     = struct_data%n_load_(ini)
-                     pos_ni = (ni - 1) * NLIBS
-                     tc_pi  = tc_posN + i_pos_ni
-
-                     phii_  = struct_data%modal_%phi_(pos_ni + struct_data%libs_load_, MODES)
-
-                     corrIK = wd%nod_corr_(util_getCorrVectIndex(ni, nk, NNODES), tc)
-                     corrIJ = wd%nod_corr_(util_getCorrVectIndex(ni, nj, NNODES), tc)
-
-                     S_uvw_i_i  = Suvw(ii, tc_pi)
-                     S_uvw_i_j  = Suvw(ij, tc_pi)
-                     S_uvw_i_ij = Suvw_pad(tc_pi)
-
-
-                     S_uvw_IK_j  = corrIK**(fjabs)    * sqrt(S_uvw_i_j  * S_uvw_k_j )
-                     S_uvw_IK_ij = corrIK**(fiPfjabs) * sqrt(S_uvw_i_ij * S_uvw_k_ij)
-
-
-                     S_uvw_IJ_i  = corrIJ**(fiabs)    * sqrt(S_uvw_i_i  * S_uvw_j_i )
-                     S_uvw_IJ_ij = corrIJ**(fiPfjabs) * sqrt(S_uvw_i_ij * S_uvw_j_ij)
-
-
-                     aiU(:, 1) = wd%wfc_(struct_data%libs_load_, tc,   ini)
-                     ai (:, 1) = wd%wfc_(struct_data%libs_load_, tcP3, ini)
-
-
-                     tmp1 = matmul(ai, ajU ) * S_uvw_IJ_i  * S_uvw_IK_j
-                     tmp2 = matmul(aiU, aj ) * S_uvw_IJ_ij * S_uvw_JK_j
-                     tmp3 = matmul(aiU, ajU) * S_uvw_JK_i  * S_uvw_IK_ij
-
-
-                     do ilk = 1, NLIBSL
-
-                        phik = phik_(ilk, :)
-
-
-                        BF_ijk_IJK_w_w2 = 2 * (&
-                           tmp1 * akU(ilk, 1) + &
-                           tmp2 * akU(ilk, 1) + &
-                           tmp3 * ak (ilk, 1)   &
-                        &)
-
-
-                        ! if (all(BF_ijk_IJK_w_w2 == 0._bsa_real_t)) cycle
-
-
-                        posm = 1
-                        do imk = 1, NMODES_EFF
-
-                           phikk = phik(imk)
-
-                           do imj = 1, NMODES_EFF
-
-                              phij(1, :) = phij_(:, imj)
-
-                              do imi = 1, NMODES_EFF
-
-                                 phii(:, 1) = phii_(:, imi)
-
-                                 bisp(posm) = bisp(posm) + &
-                                    sum(matmul(phii, phij) * BF_ijk_IJK_w_w2 * phikk)
-
-                                 posm = posm + 1
-                              enddo ! i mode
-                           enddo ! j mode
-                        enddo ! k mode                     
-
-
-                     enddo ! k lib
-
-
-                     i_pos_ni = i_pos_ni + 1
-                  enddo ! i node
-
-               endif ! bisp computation
-
-
-               !! PSDs
-               if (ij == 1) then
-
-
-                  ! PSD f
-                  PSD_jk_JK_w = matmul(akU, ajU) * S_uvw_JK_i
-
-
-                  posm = 1
-                  do imk = 1, NMODES_EFF
-
-                     ! NOTE: reusing variable, but naming is wrong!!!
-                     phii = phik_(:, imk:imk)
-
-                     do imj = 1, NMODES_EFF
-
-                        phij(1, :) = phij_(:, imj)
-
-                        psd(posm) = psd(posm) + &
-                           sum(matmul(phii, phij) * PSD_jk_JK_w)
-!                                     phik, phij
-
-                        posm = posm + 1
-                     enddo ! j mode
-                  enddo ! k mode
-
-               endif ! PSD computation
-
-
-               i_pos_nj = i_pos_nj + 1
-            enddo ! j node
-
-            i_pos_nk = i_pos_nk + 1
-         enddo ! k node
-
-      enddo ! itc
-
-   end subroutine getFM_full_tnlm_scalar_cls_
-
 
 
 
