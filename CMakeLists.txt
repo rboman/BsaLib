@@ -105,8 +105,8 @@ if (WIN32)
 else()
    if (intel-compiler)
       add_compile_options(
-         $<$<COMPILE_LANGUAGE:Fortran>:-warn all>
-         $<$<COMPILE_LANGUAGE:Fortran>:-stand f18>
+         "$<$<COMPILE_LANGUAGE:Fortran>:-warn;all>"
+         "$<$<COMPILE_LANGUAGE:Fortran>:-stand;f18>"
       )
    else()
       add_compile_options(
@@ -126,7 +126,7 @@ if (enable-heap-arrays)
       if (WIN32)
          add_compile_options( $<$<COMPILE_LANGUAGE:Fortran>:-heap-arrays0> )
       else()
-         add_compile_options( $<$<COMPILE_LANGUAGE:Fortran>:-heap-arrays 0> )
+         add_compile_options( "$<$<COMPILE_LANGUAGE:Fortran>:-heap-arrays;0>" )
       endif()
    else()
       add_compile_options( $<$<COMPILE_LANGUAGE:Fortran>:-fmax-stack-var-size=0> )
@@ -182,7 +182,6 @@ endif()
 
 add_subdirectory( src )
 
-
 # reset default flags, if ever changed (hopefully backed up!)
 foreach(config ${CMAKE_CONFIGURATION_TYPES})
    string( TOUPPER ${config} config )
@@ -192,6 +191,7 @@ foreach(config ${CMAKE_CONFIGURATION_TYPES})
 endforeach()
 
 add_subdirectory( app )
+
 
 message( STATUS "NOTE: Build status:")
 message( STATUS "        - OMP: ${enable-openmp}")
