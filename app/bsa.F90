@@ -436,7 +436,7 @@ contains ! utility procedures
       if (argc == 0) return
 
       block
-         integer :: i, currargc, istat
+         integer :: currargc, istat
          character(len = 64) :: arg
          character(len = :), allocatable :: arg_
 
