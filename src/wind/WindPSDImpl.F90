@@ -247,9 +247,17 @@ contains
       real(bsa_real_t), parameter :: cst1 = 0.65_bsa_real_t * 1200._bsa_real_t
       integer(int32)   :: i, n
 
+#ifdef __use_concurrent_loops__
+# ifdef __GFORTRAN__
+      do concurrent (i = 1 : innl)
+# else
+      do concurrent (i = 1 : innl) &
+         shared(innl, nnl, wd, freqs, itc) local(n)
+# endif
+#else
       do i = 1, innl
-
-         n = nnl(i)
+#endif
+         n         = nnl(i)
          PSD(:, i) = &
             cst1 * (wd%sigmaUVW_wz_(itc, wd%wz_node_(n)))**2 / wd%u_mean_ref_wz_(wd%wz_node_(n)) / &
             (1 + (cst1 * freqs / wd%u_mean_ref_wz_(wd%wz_node_(n)))**2._bsa_real_t)**(5._bsa_real_t / 6._bsa_real_t)
