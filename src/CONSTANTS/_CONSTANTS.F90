@@ -54,6 +54,10 @@
    integer(IK), parameter :: BSA_VALIDATE_DELTAS_POLICY_HIGH    = 4_IK
    integer(IK), parameter :: BSA_VALIDATE_DELTAS_POLICY_STRICT  = 5_IK
 
+   integer(IK), parameter :: BSA_CLASSIC_MODE_VECTOR  = 0_IK
+   integer(IK), parameter :: BSA_CLASSIC_MODE_SCALAR  = 1_IK
+
+
    !**************************************************************************************
    !   BSA  I/O  DEFAULTS
    !**************************************************************************************

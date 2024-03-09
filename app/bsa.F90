@@ -29,7 +29,7 @@ module data
 
 
    integer(int32) :: i_suban, i_vers, i_defsc, i_psd, i_bisp, i_onlyd, i_test
-   integer(int32) :: i_bispsym, i_3dsym, i_nfreqs
+   integer(int32) :: i_bispsym, i_3dsym, i_scalar, i_nfreqs
    real(real64)   :: r_df
    integer(int32) :: i_svd, i_bkgrfmt, i_bkgaext, i_genpaext, i_maxaext, i_fcov, i_dumpmod
 
@@ -604,6 +604,7 @@ contains ! utility procedures
       call bsa_setSymmetries(i_bispsym, i_3dsym)
       call bsa_setTestMode(i_test)
       call bsa_setupClassic(i_nfreqs, real(r_df, kind=bsa_real_t))
+      call bsa_setClassicMode(i_scalar)
       call bsa_setupMesher(&
          i_svd, i_bkgrfmt, i_bkgaext, i_genpaext, i_maxaext, i_fcov, i_dumpmod)
       call bsa_setWindDirections(dirs(1 : i_ndirs), i_ndirs)
@@ -1045,6 +1046,7 @@ contains ! utility procedures
       read(IUN_BSADATA, fmt_i) i_test
 
       read(IUN_BSADATA, fmt_a) label
+      read(IUN_BSADATA, fmt_i) i_scalar
       read(IUN_BSADATA, fmt_i) i_nfreqs
       read(IUN_BSADATA,     *) r_df
 

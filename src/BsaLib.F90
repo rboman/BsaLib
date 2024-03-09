@@ -194,6 +194,10 @@ module BsaLib
       end subroutine
 
 
+      module subroutine bsa_setClassicMode(i_mode)
+         integer(bsa_int_t), intent(in) :: i_mode
+      end subroutine
+
 
       module subroutine bsa_setVersion(ivers)
          integer(bsa_int_t), intent(in) :: ivers

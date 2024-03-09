@@ -134,10 +134,6 @@ contains
             call checkMaxAllocation_()
 
 
-            ! BUG: set it from .dat file
-            settings%i_scalar_vers_ = 0  ! 0=vectorised, 1=scalar
-
-
             if (settings%i_scalar_vers_ == 0) then ! VECTORISED
 
                print '(/1x, 2a)', INFOMSG, 'Using  VECTORISED  version'

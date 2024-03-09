@@ -423,6 +423,12 @@ contains
 
       call setExportPathPrefix_()
 
+      associate (ivers => settings%i_scalar_vers_)
+         if (.not. (ivers == BSA_CLASSIC_MODE_VECTOR .or. ivers == BSA_CLASSIC_MODE_SCALAR)) then
+            ivers = BSA_CLASSIC_MODE_VECTOR
+         endif
+      end associate
+
       if (do_trunc_POD_) then
          if (POD_trunc_lim_ == 0.0_real64 .or. POD_trunc_lim_ == 1.0_real64)   do_trunc_POD_  = .false.
       endif
@@ -854,6 +860,13 @@ contains
       integer(bsa_int_t), intent(in) :: isuban
 
       call settings%SetSubanType(isuban)
+   end subroutine
+
+
+   module subroutine bsa_setClassicMode(i_mode)
+      integer(bsa_int_t), intent(in) :: i_mode
+
+      settings%i_scalar_vers_ = i_mode
    end subroutine
 
 
