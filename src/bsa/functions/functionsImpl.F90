@@ -1539,6 +1539,9 @@ contains
                         itmp = itmp + 1
 #endif
                      enddo ! n freqs j
+#ifdef _OPENMP
+                     !$omp end parallel do
+#endif
 
                      i_pos_ni = i_pos_ni + 1
                   enddo ! i node
