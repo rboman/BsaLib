@@ -1659,9 +1659,15 @@ contains
 
          if (settings%i_compute_bisp_ == 1) then
             ! H12
+#ifdef _OPENMP
+            !$omp parallel do shared(NFREQS, omegas, h_tmp) num_threads(8)
+#endif
             do ifrj = 1, NFREQS
                h_tmp(:, ifrj) = omegas(:, 1) + omegas(ifrj, 1)
             enddo
+#ifdef _OPENMP
+            !$omp end parallel do
+#endif
             r_part = - (h_tmp*h_tmp * struct_data%modal_%Mm_(mi)) + struct_data%modal_%Km_(mi)
             i_part = h_tmp * struct_data%modal_%Cm_(mi, mi)
             h_tmp  = r_part*r_part + i_part*i_part
@@ -1696,6 +1702,12 @@ contains
 
                do imi = 1, NMODES_EFF
 
+#ifdef _OPENMP
+                  !$omp parallel do &
+                  !$omp   shared(NFREQS, posm_bisp, bisp    &
+                  !$omp      , Hr_w, Hi_w, h_tmp, h_tmp2 ), &
+                  !$omp   num_threads(8)
+#endif
                   do ifrj = 1, NFREQS
 
                      bisp(:, ifrj, posm_bisp) = &
@@ -1705,6 +1717,9 @@ contains
                            Hi_w(:, imi) * Hr_w(ifrj, imj) * h_tmp2(:, ifrj) - &
                            Hi_w(:, imi) * Hi_w(ifrj, imj) * h_tmp(:, ifrj) )
                   enddo
+#ifdef _OPENMP
+                  !$omp end parallel do
+#endif
 
                   posm_bisp = posm_bisp + 1
                enddo ! i mode
