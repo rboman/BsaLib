@@ -134,7 +134,7 @@ contains
             call checkMaxAllocation_()
 
 
-            if (settings%i_scalar_vers_ == 0) then ! VECTORISED
+            if (settings%i_scalar_vers_ == BSA_CLASSIC_MODE_VECTOR) then
 
                print '(/1x, 2a)', INFOMSG, 'Using  VECTORISED  version'
 
