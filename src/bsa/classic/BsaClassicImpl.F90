@@ -253,6 +253,7 @@ contains
                   allocate(S_uvw_pad(idim2, lpad))
                   S_uvw_pad(:, indxi : indxe) = transpose(S_uvw)
 
+
                   if (settings%i_compute_bisp_ == 0) then
                      jfr_ext => one_ext
                   else
@@ -286,8 +287,8 @@ contains
                         m2o2mr_cls = m2o2mr_cls + r_tmp * omg*omg
                      endif
 
-                     print '(1x, a, 2(i12, a))', &
-                        INFOMSG, ifr*settings%nfreqs_, '  out of  ', settings%nfreqs_**2, '  done...'
+                     print '(1x, a, f8.3, " %   done...")', &
+                        INFOMSG, ( real(ifr*settings%nfreqs_, kind=real64) / settings%nfreqs_**2) * 100
 
                   enddo ! j freqs
                   if (allocated(S_uvw_pad)) deallocate(S_uvw_pad)
