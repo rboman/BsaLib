@@ -480,13 +480,7 @@ contains
       if (.not. (allocated(wd%tc_) .and. allocated(wd%dirs_))) &
          call wd%SetTurbCompsAndDirsDefault()
 
-      if (.not. associated(wd%phi_times_A_ndegw_)) then
-         print '(1x, a, a)', &
-            WARNMSG, 'Using local PHItimesC instance.'
-         print '(1x, a, a /)', &
-            MSGCONT, 'Consider using external for less memory usage.'
-         call setPhitimesCLocalInstance_()
-      endif
+      if (.not. associated(wd%phi_times_A_ndegw_)) call setPhitimesCLocalInstance_()
    end subroutine validateAll_
 
 
