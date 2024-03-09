@@ -229,10 +229,14 @@ contains
                   real(bsa_real_t) :: fi, fj, dw, dw2, omg
                   real(bsa_real_t), allocatable :: S_uvw_pad(:, :)
 
-                  integer, pointer :: jfr_ext => null()
-                  integer, target  :: one_ext = 1
+                  integer(int32), pointer :: jfr_ext => null()
+                  integer(int32), target  :: one_ext = 1
 
-                  integer :: lpad, indxi, indxe
+                  integer(int32) :: lpad, indxi, indxe
+#ifdef _OPENMP
+                  integer(int32) :: nt  !! n. of threads
+#endif
+
 
                   real(bsa_real_t), target, dimension(dimM_psd_)  :: psdfm, psdrm, r_tmp
                   real(bsa_real_t), target, dimension(dimM_bisp_) :: bispfm, bisprm
@@ -260,25 +264,49 @@ contains
                      jfr_ext => settings%nfreqs_
                   endif
 
+#ifdef _OPENMP
+                  nt = min(jfr_ext, 8)
+#endif
 
                   do ifr = 1, settings%nfreqs_
 
                      fi  = f(ifr)
                      omg = fi * CST_PIt2
 
+#ifdef _OPENMP
+                     !$omp parallel do                   &
+                     !$omp    default(firstprivate),     &
+                     !$omp    shared(jfr_ext, f, S_uvw, S_uvw_pad    &
+                     !$omp         , ifr, dw2, m3mf_cls, m3mr_cls),  &
+                     !$omp    num_threads(nt)
+#endif
                      do jfr = 1, jfr_ext
 
                         fj = f(jfr)
 
                         call getBFM_scalar_cls(ifr, jfr, fi, fj, S_uvw, S_uvw_pad(:, ifr - 1 + jfr), psdfm, bispfm)
 
-                        ! NOTE: using same infl area for each point in space!
-                        m3mf_cls = m3mf_cls + bispfm * dw2
-
+#ifdef _OPENMP
+                        !$omp critical
+#endif
+                        m3mf_cls = m3mf_cls + bispfm * dw2 ! NOTE: using same infl area for each point in space!
+#ifdef _OPENMP
+                        !$omp end critical
+#endif
 
                         call getBRM_scalar_cls(ifr, jfr, fi, fj, psdfm, psdrm, bispfm, bisprm)
+
+#ifdef _OPENMP
+                        !$omp critical
+#endif
                         m3mr_cls = m3mr_cls + bisprm * dw2
+#ifdef _OPENMP
+                        !$omp end critical
+#endif
                      enddo ! i freqs
+#ifdef _OPENMP
+                     !$omp end parallel do
+#endif
 
                      if (settings%i_compute_psd_ == 1) then
                         m2mf_cls   = m2mf_cls + psdfm * dw
