@@ -237,7 +237,6 @@ contains
                   integer(int32) :: nt  !! n. of threads
 #endif
 
-
                   real(bsa_real_t), target, dimension(dimM_psd_)  :: psdfm, psdrm, r_tmp
                   real(bsa_real_t), target, dimension(dimM_bisp_) :: bispfm, bisprm
 
@@ -319,6 +318,7 @@ contains
                         INFOMSG, ( real(ifr*settings%nfreqs_, kind=real64) / settings%nfreqs_**2) * 100
 
                   enddo ! j freqs
+
                   if (allocated(S_uvw_pad)) deallocate(S_uvw_pad)
                end block
 
