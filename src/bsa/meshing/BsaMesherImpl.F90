@@ -114,7 +114,7 @@ contains
       if (lflag) close(unit_dump_bfm_)
 
 
-      if (.not. is_visual_) then
+      ! if (.not. is_visual_) then
          print *
          print '(1x, a, a)', &
             INFOMSG, ' Resume of total n. of points in meshing procedure:'
@@ -123,7 +123,7 @@ contains
 #endif
          print '(1x, a, a, i0)', MSGCONT, ' POST-MESH  (BFM) : ', msh_bfmpts_post_
          print '(1x, a, a, i0)', MSGCONT, ' POST-MESH  (BRM) : ', msh_brmpts_post_
-      endif
+      ! endif
 
 
 #ifdef BSA_DEBUG
@@ -551,7 +551,9 @@ contains
          !$omp          , NMODES, NMODES_EFF, MODES &
          !$omp          , NPSDEL, NTCOMPS, NDIRS, TCOMPS, DIRS          &
          !$omp          , MSHR_SVD_INFO, MSHR_SVD_LWORK, MSHR_SVD_WORK  &
+#ifdef _BSA_EXPORT_POD_TRUNC_INFO
          !$omp          , do_export_POD_trunc_   &
+#endif
          !$omp          , msh_NZones, msh_bfmpts_pre_, msh_max_zone_NPts, m3mf_msh_ptr_), &
          !$omp   num_threads(n_dirs_)
          do idir = 1, n_dirs_
@@ -1382,9 +1384,8 @@ contains
 # endif
 #endif
 
-      type(BrmExportBaseData_t), target :: brm_export_base_data_
-      class(*), pointer :: brm_export_data_ => null()
-      logical :: do_export_brm_base_
+      type(BsaExportBaseData_t), target :: export_data_base_local_
+      class(*), pointer :: export_data_base_ptr_ => null()
 
 
       ! skip them, we already have them stored in module variables
@@ -1414,28 +1415,11 @@ contains
       print '(1x, a)', '--------------------    POST - MESH    --------------------'
       print '(1x, a)', '-----------------------------------------------------------'
 
-      do_export_brm_base_ = is_visual_ .or. &
-                           (do_export_brm_ .and. i_brmexport_mode_ == BSA_EXPORT_BRM_MODE_BASE)
-      if (do_export_brm_base_) then
+      if (do_export_base_) then
          n_threads = 1  ! NOTE: to avoid dead-locks!
-         if (is_visual_) then
-            if (is_brn_export_) then
-               brm_export_base_data_%nm_     = 2
-               brm_export_base_data_%modes_  => visual_indexes_(1 : 2)
-            else
-               brm_export_base_data_%nm_     = 3
-               brm_export_base_data_%modes_  => visual_indexes_(1 : 3)
-            endif
-            brm_export_base_data_%ncomb_ = 1
-         else
-            brm_export_base_data_%nm_    = struct_data%modal_%nm_eff_
-            brm_export_base_data_%ncomb_ = dimM_bisp_
-            brm_export_base_data_%modes_  => struct_data%modal_%modes_
-         endif
-         brm_export_base_data_%ispsym_ =  settings%i_bisp_sym_
-         brm_export_base_data_%nzones_ =  nzones
-
-         brm_export_data_ => brm_export_base_data_
+         export_data_base_%nzones_ =  nzones
+         export_data_base_local_   =  export_data_base_
+         export_data_base_ptr_     => export_data_base_local_
       else
          n_threads = 16
       endif
@@ -1445,30 +1429,32 @@ contains
       read(unit_dump_bfm_) izone_id
       print '(1x, a, a, i6, a, i0 )', &
          INFOMSG, 'Interpolating zone n. ', 1, ', with ID=  ', izone_id
-      if (do_export_brm_ .or. is_visual_) brm_export_base_data_%idZone_ = izone_id
+      if (do_export_base_) export_data_base_local_%idZone_ = izone_id
       call UndumpZone( rz   __bfm_undump__)
-      call rz%interpolate(__bfm_undump_interp__   brm_export_data_)
-      if (do_export_brm_base_) brm_export_base_data_%i_doNotPrintGenHeader_ = 1   ! now we can disable gen header print
+      call rz%interpolate(__bfm_undump_interp__   export_data_base_ptr_)
+
 
 #ifndef BSA_USE_POD_DATA_CACHING
 # if  (defined(_OPENMP)) && (defined(BSA_USE_POST_MESH_OMP))
       deallocate(bfm_undump)  !<-- better to copy a null pointer than a whole bunch of memory.
-      if (associated(brm_export_data_)) brm_export_data_ => null()
+      if (associated(export_data_base_ptr_)) export_data_base_ptr_ => null()
 # endif
 #endif
 
+
       izone = 1
+
 
       ! NOTE: no need to check for EOF. We know how many zones we have dumped.
       !
 #if  (defined(_OPENMP)) && (defined(BSA_USE_POST_MESH_OMP))
       !$omp parallel do &
-      !$omp   firstprivate(brm_export_base_data_, brm_export_data_), &
+      !$omp   firstprivate(export_data_base_local_, export_data_base_ptr_), &
       !$omp   private(z, rz, tz, izone_id), &
 # ifndef BSA_USE_POD_DATA_CACHING
       !$omp   private(bfm_undump), &
 # endif
-      !$omp   shared(struct_data, wd, settings                                 &
+      !$omp   shared(struct_data, wd, settings, do_export_base_                &
       !$omp          , NFREQS, NNODES, NNODESL, NLIBS, NLIBSL, NMODES_EFF      &
       !$omp          , NPSDEL, NTCOMPS, NDIRS, TCOMPS, DIRS, NMODES, MODES     &
       !$omp          , MSHR_SVD_INFO, MSHR_SVD_LWORK, MSHR_SVD_WORK            &
@@ -1501,12 +1487,11 @@ contains
          !$omp end critical
 #endif
 
-         ! brm_export_base_data_%i_doNotPrintZonHeader_ = 0
-         if (do_export_brm_base_) then
-            brm_export_base_data_%idZone_ = izone_id
-            if (.not. associated(brm_export_data_)) brm_export_data_ => brm_export_base_data_
+         if (do_export_base_) then
+            export_data_base_local_%idZone_ = izone_id
+            if (.not. associated(export_data_base_ptr_)) export_data_base_ptr_ => export_data_base_local_
          endif
-         call z%interpolate(__bfm_undump_interp__   brm_export_data_)
+         call z%interpolate(__bfm_undump_interp__   export_data_base_ptr_)
       enddo ! nZones
 #if  (defined(_OPENMP)) && (defined(BSA_USE_POST_MESH_OMP))
       !$omp end parallel do

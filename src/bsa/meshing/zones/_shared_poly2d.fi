@@ -478,7 +478,7 @@ end subroutine __sub_name_compute
 #endif
          , m3mr_msh_ptr_, settings  &
          , msh_bfmpts_post_, msh_brmpts_post_               &
-         , BrmExportBaseData_t, do_export_brm_, is_visual_  &
+         , BsaExportBaseData_t, do_export_brm_, is_visual_  &
 #ifndef __triang_zone__
          , do_validate_deltas_, msh_ZoneLimsInterestModes, peak_exts_ &
          , I_BKG_PEAK_DELTAF_BFM_REFMT_FCT_, I_RES_PEAK_DELTAF_BFM_REFMT_FCT_ &
@@ -997,7 +997,7 @@ end subroutine __sub_name_compute
 
       if ((is_visual_ .or. do_export_brm_) .and. associated(pdata)) then
          select type (pdata)
-            class is (BrmExportBaseData_t)
+            class is (BsaExportBaseData_t)
                pdata%nI_ = ni
                pdata%nJ_ = nj
             ! class default

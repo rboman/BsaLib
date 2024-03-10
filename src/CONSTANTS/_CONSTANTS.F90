@@ -27,16 +27,20 @@
    integer, parameter, public :: RK = real64
 #endif
 
-   !**************************************************************************************
-   !   BSA  integer/real types selected kinds
-   !**************************************************************************************
+
+!**************************************************************************************
+!   BSA  integer/real types selected kinds
+!**************************************************************************************
+
    integer, parameter :: bsa_int_t  = IK
    integer, parameter :: bsa_real_t = RK
 
 
-   !**************************************************************************************
-   !   BSA  GENERICS
-   !**************************************************************************************
+
+!**************************************************************************************
+!   BSA  GENERICS
+!**************************************************************************************
+
    integer(IK), parameter :: BSA_SPATIAL_SYM_NONE = 0_IK
    integer(IK), parameter :: BSA_SPATIAL_SYM_HALF = 2_IK
    integer(IK), parameter :: BSA_SPATIAL_SYM_FOUR = 4_IK
@@ -58,9 +62,10 @@
    integer(IK), parameter :: BSA_CLASSIC_MODE_SCALAR  = 1_IK
 
 
-   !**************************************************************************************
-   !   BSA  I/O  DEFAULTS
-   !**************************************************************************************
+!**************************************************************************************
+!   BSA  I/O  DEFAULTS
+!**************************************************************************************
+
    character(len = *), parameter :: BSA_OUT_DIRNAME_DEFAULT          = '.\bsaresults\'
    character(len = *), parameter :: BSA_OUT_FILENAME_PREFIX_DEFAULT_ = 'bsaout_def'
    character(len = *), parameter :: BSA_STRUCT_DATA_DUMPFILE         = 'dumpstruct'
@@ -79,9 +84,10 @@
 
 
 
-   !**************************************************************************************
-   !   LOGGING TAGs
-   !**************************************************************************************
+!**************************************************************************************
+!   LOGGING TAGs
+!**************************************************************************************
+
    character(len = *), parameter :: MSGCONT = '             '
    character(len = *), parameter :: INFOMSG = '  --[info]   '
    character(len = *), parameter :: NOTEMSG = '  --[note]   '
@@ -90,9 +96,11 @@
    character(len = *), parameter :: DBGMSG  = '  --[debug]  '
 
 
-   !**************************************************************************
-   !  I/O CONSTANTs
-   !**************************************************************************
+
+!**************************************************************************
+!  I/O CONSTANTs
+!**************************************************************************
+
    character(len = *), parameter :: IO_ACCESS_DIRECT = 'DIRECT'
    character(len = *), parameter :: IO_ACCESS_SEQUEN = 'SEQUENTIAL'
    character(len = *), parameter :: IO_ACCESS_STREAM = 'STREAM'
@@ -120,9 +128,11 @@
    character(len = *), parameter :: IO_STATUS_UNKNOWN = 'UNKNOWN'
 
 
-   !**************************************************************************
-   !  EXPORT CONSTANTs
-   !**************************************************************************
+
+!**************************************************************************
+!  EXPORT CONSTANTs
+!**************************************************************************
+
    integer(IK), parameter :: BSA_EXPORT_FORMAT_FORMATTED   = 0_IK
    integer(IK), parameter :: BSA_EXPORT_FORMAT_UNFORMATTED = 1_IK
    integer(IK), parameter :: BSA_EXPORT_MODE_REPLACE = 0_IK
@@ -144,11 +154,14 @@
    character(len = *), parameter :: BSA_EXPORT_M3MF_MSH_FNAME   = "m3mf_msh"
    character(len = *), parameter :: BSA_EXPORT_M3MR_MSH_FNAME   = "m3mr_msh"
 
-   character(len = *), parameter :: BRM_EXPORT_FNAME = 'bsaexport.brm'
-   character(len = *), parameter :: BRN_EXPORT_FNAME = 'bsaexport.brn'
+   character(len = *), parameter :: BRM_EXPORT_FNAME_CLS = 'bsaexport_cls.brm'
+   character(len = *), parameter :: BRN_EXPORT_FNAME_CLS = 'bsaexport_cls.brn'
+   character(len = *), parameter :: BRM_EXPORT_FNAME_MSH = 'bsaexport_msh.brm'
+   character(len = *), parameter :: BRN_EXPORT_FNAME_MSH = 'bsaexport_msh.brn'
+
 
    abstract interface
-      subroutine exportBRMinterf_vect_(f1, f2, brm, pdata)
+      subroutine exportInterf_vect_(f1, f2, brm, pdata)
          import :: bsa_real_t
          real(bsa_real_t), intent(in)  :: f1(:), f2(:), brm(:, :)
          class(*), pointer, intent(in) :: pdata
@@ -158,9 +171,9 @@
 
 
 
-   !**************************************************************************************
-   !   NUMERICs
-   !**************************************************************************************
+!**************************************************************************************
+!   NUMERICs
+!**************************************************************************************
 
    !> TO AVOID CRASHING BECAUSE OF MACHINE FLOATING PRECISION ERRORS
    real(RK), parameter :: MACHINE_PRECISION = 1e-12_RK

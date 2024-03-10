@@ -19,7 +19,11 @@ submodule(BsaLib_Functions) BsaLib_FunctionsImpl
    use BsaLib_IO
    use BsaLib_CONSTANTS, only: INFOMSG, WARNMSG, ERRMSG, MSGCONT, DBGMSG, NOTEMSG
    use BsaLib_Data,      only: bsa_Abort &
-      , do_trunc_POD_, POD_trunc_lim_, nPODmodes_set_, nmodes_POD_, do_export_POD_trunc_
+      , do_trunc_POD_, POD_trunc_lim_ &
+#ifdef _BSA_EXPORT_POD_TRUNC_INFO
+      , do_export_POD_trunc_ &
+#endif
+      , nPODmodes_set_, nmodes_POD_
    implicit none (type, external)
 
 
@@ -1389,6 +1393,7 @@ contains
       if (itc /= 0) call allocKOMsg('PSDF_jk_JK_w', itc, emsg)
 
       if (settings%i_compute_bisp_ == 1) then
+
          allocate(bisp(NFREQS, NFREQS, dimM_bisp_), stat=itc, errmsg=emsg)
          if (itc /= 0) call allocKOMsg('bisp', itc, emsg)
          bisp = 0._bsa_real_t

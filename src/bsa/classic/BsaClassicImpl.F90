@@ -43,6 +43,7 @@ contains
 
       ! local
       real(bsa_real_t), allocatable :: f(:)
+      ! =============================================================================
 
 
       call computeFreqsVect_(settings, struct_data, f)
@@ -51,7 +52,6 @@ contains
 
       if (settings%i_suban_type_ == 1) call io_printUserData()
 
-      ! some shared memory allocation
       if (settings%i_compute_psd_ == 1) then
          allocate(m2mf_cls(dimM_psd_))
          m2mf_cls = 0._bsa_real_t
@@ -90,7 +90,7 @@ contains
 
          block
             real(bsa_real_t), allocatable :: S_uvw(:, :)
-            integer :: itc_, idir_, idxi, idxe, idim2
+            integer :: itc_, idir_, idxi, idxe, idim2, i
 
 #ifdef BSA_DEBUG
             print '(1x, a, a, i0)', INFOMSG, 'n. of frequencies to be computed=', settings%nfreqs_
@@ -139,27 +139,63 @@ contains
                print '(/1x, 2a)', INFOMSG, 'Using  VECTORISED  version'
 
                block
+                  use BsaLib_MZone, only: MZone_ID
+                  integer(int32) :: j
                   real(bsa_real_t), allocatable :: psd(:, :), bisp(:, :, :)
+                  class(*), pointer :: export_data_base_ptr_ => null()
 
-                  !===========================================================
-                  ! MODAL FORCES
-                  !
                   call getBFM_vect_cls(f, S_uvw, psd, bisp)
                   if (allocated(S_uvw)) deallocate(S_uvw)
                   call intgSpectraVect_(settings%nfreqs_, f, psd=psd, m2=m2mf_cls, bisp=bisp, m3=m3mf_cls)
                   if (settings%i_compute_psd_ == 1) call bsa_exportPSDToFile('psdmf.txt', psd, f)
 
 
-                  !===========================================================
-                  ! MODAL RESPONSES
-                  !
                   call getBRM_vect_cls(f, psd, bisp)
                   call intgSpectraVect_(settings%nfreqs_, f, psd=psd, m2=m2mr_cls, bisp=bisp, m3=m3mr_cls)
                   if (settings%i_compute_psd_ == 1) call bsa_exportPSDToFile('psdmr.txt', psd, f)
 
+
+                  if (settings%i_compute_bisp_ == 1 .and. is_visual_ .and. .not.is_brn_export_) then
+                     export_data_base_%i_doNotPrintGenHeader_ = 0
+                     export_data_base_%nzones_ = 1
+
+                     export_data_base_%idZone_ = MZone_ID%RECTANGLE
+                     export_data_base_%nI_ = NFREQS
+                     export_data_base_%nJ_ = NFREQS
+
+                     export_data_base_ptr_ => export_data_base_
+
+                     print '( /, 1x, a, a, i0, " x ", i0, a )', &
+                        INFOMSG, 'Exporting  BRM  to file...  (', NFREQS, NFREQS, ")"
+
+                     block
+                        integer :: k
+                        real(bsa_real_t) :: b_temp(dimM_bisp_, 1)
+
+
+                        ! BUG: too many memcpy !!
+                        do j = 1, NFREQS
+                           do i = 1, NFREQS
+#ifdef _OPENMP
+                              !$omp parallel do &
+                              !$omp    default(firstprivate), &
+                              !$omp    shared(bisp, i, j),    &
+                              !$omp    num_threads(8)
+#endif
+                              do k = 1, dimM_bisp_
+                                 b_temp(k, 1) = bisp(i, j, k)
+                              enddo
+#ifdef _OPENMP
+                              !$omp end parallel do
+#endif
+                              call write_brm_fptr_(f(i:i), f(j:j), b_temp, export_data_base_ptr_)
+                           enddo
+                        enddo
+                     end block
+                  endif
+
                   block
                      real(bsa_real_t), allocatable :: omegas(:)
-                     integer :: i
 
                      omegas = f * CST_PIt2
 # ifdef __GFORTRAN__

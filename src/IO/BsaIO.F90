@@ -26,7 +26,8 @@ module BsaLib_IO
    !**************************************************************************
    ! dumpfile
    integer(int32) :: unit_dump_bfm_ = 999_int32
-   integer(int32) :: unit_dump_brm_ = 1204_int32
+   integer(int32) :: un_export_bisp_cls_ = 1203_int32
+   integer(int32) :: un_export_bisp_msh_ = 1204_int32
 
    ! debug
    integer(int32)      :: unit_debug_ = 99999_int32
@@ -231,12 +232,12 @@ contains
       ! BUG: customise ??
       if (present(openfile)) then
          if (openfile) then
-            open(unit=iun              &
-               , file=fname            &
-               , status='replace'      &
-               , form='formatted'      &
-               , access='sequential'   &
-               , action='write')
+            open(unit=iun                    &
+               , file=fname                  &
+               , form=IO_FORM_UNFORMATTED    &
+               , access=IO_ACCESS_STREAM     &
+               , status=IO_STATUS_REPLACE    &
+               , action=IO_ACTION_WRITE)
          endif
       endif
    end subroutine

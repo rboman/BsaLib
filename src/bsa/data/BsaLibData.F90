@@ -28,9 +28,25 @@ module BsaLib_Data
    public
 
 
-   !====================================
-   ! MODULE VARIABLES
-   !====================================
+   interface
+      module function evaluatePSD(f, nf, itc) result(PSD)
+         integer(bsa_int_t), intent(in) :: nf, itc
+         real(bsa_real_t), intent(in)   :: f(nf)
+         real(bsa_real_t), allocatable, target :: PSD(:, :)
+      end function
+
+      module subroutine cleanBSAData_()
+      end subroutine
+
+      module subroutine bsa_Abort(emsg)
+         character(len = *), intent(in), optional :: emsg
+      end subroutine
+   end interface
+
+
+! **********************************************************************
+!   GLOBAL control data
+! **********************************************************************
 
    type(settings_t),      allocatable, target :: settings
    type(WindData_t),      allocatable, target :: wd
@@ -47,14 +63,14 @@ module BsaLib_Data
 
    real(bsa_real_t), allocatable, target :: PHItimesC_local_(:, :, :)
 
-   real(bsa_real_t), allocatable :: peak_exts_(:)
-   logical :: do_restrict_bkgpeak_ = .false.
 
-   !> If true, stops at pre-mesh phase.
-   logical :: is_only_premesh_ = .false.
+! **********************************************************************
+!   Spectra exporting control data
+! **********************************************************************
 
-
-   ! Modal dimensions in Post phase.
+   ! BUG: unused!
+   ! TODO: if visual for modal bisp, we don't need to compute the full set.
+   !> Modal dimensions in Post phase.
    integer(bsa_int_t) :: dimM_psd_post_, dimM_bisp_post_
 
    !> If true, post-mesh for generating Bispectrums.
@@ -67,8 +83,38 @@ module BsaLib_Data
    !> If visual, allows to export Nodal Bispectrum instead of modal
    logical :: is_brn_export_ = .false.
 
+   !> Tracks I/O handle to which exporting bispectrum data
+   integer(int32) :: bisp_export_iun_internal_ = 0
+
    !> Final offset indexing value in visual mode
    integer(bsa_int_t), target :: visual_idx_ = 1
+
+   !> If true, exports all BRM data to file (NOT visual!)
+   logical :: do_export_brm_ = .false.
+
+   integer(bsa_int_t) :: i_brmexport_mode_ = BSA_EXPORT_BRM_MODE_BASE
+
+   !> Base exporting data type
+   type, public :: BsaExportBaseData_t
+
+      integer(bsa_int_t) :: i_doNotPrintGenHeader_ = 0   ! == 0  means DO PRINT !!
+      integer(bsa_int_t) :: ncomb_  = 0
+      integer(bsa_int_t) :: ispsym_ = 0
+      integer(bsa_int_t) :: nzones_ = 0
+      integer(bsa_int_t) :: nm_     = 0
+      integer(bsa_int_t), pointer :: modes_(:) => null()
+
+      integer(bsa_int_t) :: idZone_ = 0
+      integer(bsa_int_t) :: nI_     = 0
+      integer(bsa_int_t) :: nJ_     = 0
+   end type
+
+   !> Function pointer to Bispectrum exporting procedure
+   procedure(exportInterf_vect_), pointer :: write_brm_fptr_  => null()
+   type(BsaExportBaseData_t), target      :: export_data_base_
+
+   !> If true, means we need to export, using base internal version.
+   logical :: do_export_base_ = .false.
 
    procedure(getBRN_), pointer :: getBRN => null()
    abstract interface
@@ -80,26 +126,9 @@ module BsaLib_Data
    end interface
 
 
-   !> If true, exports all BRM data to file (NOT visual!)
-   logical :: do_export_brm_ = .false.
-   integer(bsa_int_t) :: i_brmexport_mode_ = BSA_EXPORT_BRM_MODE_BASE
-   procedure(exportBRMinterf_vect_), pointer :: write_brm_fptr_  => null()
-   type, public :: BrmExportBaseData_t
-
-      integer(bsa_int_t) :: i_doNotPrintGenHeader_ = 0   ! == 0  means DO PRINT !!
-      integer(bsa_int_t) :: nm_     = 0
-      integer(bsa_int_t) :: ncomb_  = 0
-      integer(bsa_int_t) :: ispsym_ = 0
-      integer(bsa_int_t) :: nzones_ = 0
-      integer(bsa_int_t), pointer :: modes_(:) => null()
-
-      integer(bsa_int_t) :: i_doNotPrintZonHeader_ = 0
-      integer(bsa_int_t) :: idZone_ = 0
-      integer(bsa_int_t) :: nI_     = 0
-      integer(bsa_int_t) :: nJ_     = 0
-   end type
-
-
+! **********************************************************************
+!   GPU control data
+! **********************************************************************
 
    logical :: is_gpu_enabled_ = .false.
 #ifdef BSA_USE_GPU
@@ -113,9 +142,11 @@ module BsaLib_Data
 #endif
 
 
-   ! =========================
-   ! ==== classic related
-   !
+
+! **********************************************************************
+!   CLASSIC control data
+! **********************************************************************
+
    logical :: force_cls_execution_ = .false.
    integer(int64), parameter :: MAX_VECT_ALLOC_ELEMS = 1000000000 ! 1B -> almost 8Gb
    integer(bsa_int_t) :: ifr = 0, jfr = 0
@@ -165,13 +196,21 @@ module BsaLib_Data
 
 
 
-   ! =========================
-   ! ==== mesher related
-   !
+! **********************************************************************
+!   MESHER control data
+! **********************************************************************
+
    real(bsa_real_t), pointer :: m3mf_msh_ptr_(:) => null(), m3mr_msh_ptr_(:) => null()
 
+   !> If true, stops at pre-mesh phase.
+   logical :: is_only_premesh_ = .false.
+
+   !> Premeshing scheme type
    integer(bsa_int_t), public :: ipre_mesh_type = BSA_PREMESH_TYPE_DIAG_CREST_NO
+
+   !> Premeshing scheme mode
    integer(bsa_int_t), public :: ipre_mesh_mode = BSA_PREMESH_MODE_ZONE_REFINED
+
    integer(bsa_int_t), public :: msh_iZone
 
    !> Tracks zone with max N. of points
@@ -179,6 +218,15 @@ module BsaLib_Data
 
    !> Controls if checking zone's deltas or not.
    logical :: do_validate_deltas_ = .true.
+
+   !> If true, restricts back-peak computation to only first column
+   logical :: do_restrict_bkgpeak_ = .false.
+
+   !> Stores width of background peak
+   real(bsa_real_t) :: bkg_peakw_ = 0._bsa_real_t
+
+   !> Array of resonant peak extensions (widths)
+   real(bsa_real_t), allocatable :: peak_exts_(:)
 
    integer(bsa_int_t), public :: I_BKG_PEAK_DELTAF_BFM_REFMT_FCT_ = 2
    integer(bsa_int_t), public :: I_RES_PEAK_DELTAF_BFM_REFMT_FCT_ = 3
@@ -219,18 +267,22 @@ module BsaLib_Data
 
    !> Controls whether to perform modal truncation or not
    logical          :: do_trunc_POD_  = .false.
+
+   !> POD truncation limit
    real(bsa_real_t) :: POD_trunc_lim_ = 0._bsa_real_t
+
+   !> If true, keeps specified n. of POD modes
    logical          :: nPODmodes_set_ = .false.
+
+   !> N. of POD modes to be kept
    integer(int32)   :: nmodes_POD_    = 0_int32
-   logical, allocatable :: do_export_POD_trunc_(:)    !<-- BUG: this is because of OMP.
+
+
 #ifdef _BSA_EXPORT_POD_TRUNC_INFO
+   logical, allocatable :: do_export_POD_trunc_(:)    !<-- BUG: this is because of OMP.
    integer(int32),     parameter :: iun_POD_trunc_ = 659_int32
    character(len = *), parameter :: iun_POD_trunc_fname_ = 'POD_trunc_info.txt'
 #endif
-
-
-   !> Stores width of background peak
-   real(bsa_real_t) :: bkg_peakw_ = 0._bsa_real_t
 
    ! Mesher function pointer (pre/post meshing)
    procedure(getMshBFM), pointer :: getBFM_msh => null()
@@ -249,22 +301,5 @@ module BsaLib_Data
          real(bsa_real_t), intent(in), contiguous :: bfm(:, :)
       end subroutine
    end interface
-
-
-   interface
-      module function evaluatePSD(f, nf, itc) result(PSD)
-         integer(bsa_int_t), intent(in) :: nf, itc
-         real(bsa_real_t), intent(in)   :: f(nf)
-         real(bsa_real_t), allocatable, target :: PSD(:, :)
-      end function
-
-      module subroutine cleanBSAData_()
-      end subroutine
-
-      module subroutine bsa_Abort(emsg)
-         character(len = *), intent(in), optional :: emsg
-      end subroutine
-   end interface
-
 
 end module BsaLib_Data

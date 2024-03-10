@@ -115,8 +115,11 @@ contains
       inquire(unit = unit_dump_bfm_, opened = isopn)
       if (isopn) close(unit_dump_bfm_)
 
-      inquire(unit = unit_dump_brm_, opened = isopn)
-      if (isopn) close(unit_dump_brm_)
+      inquire(unit = un_export_bisp_cls_, opened = isopn)
+      if (isopn) close(un_export_bisp_cls_)
+
+      inquire(unit = un_export_bisp_msh_, opened = isopn)
+      if (isopn) close(un_export_bisp_msh_)
 
 #ifdef _BSA_EXPORT_POD_TRUNC_INFO
       inquire(unit = iun_POD_trunc_, opened = isopn)

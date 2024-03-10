@@ -156,70 +156,89 @@ contains
          m2mf_cls, m2mr_cls, m2o2mr_cls, m3mf_msh, m3mr_msh, m3mf_cls, m3mr_cls
 
 
-      call io_setExportSpecifiers()
-
-      if (is_visual_ .or. do_export_brm_) then
-         block
-            character(len = :), allocatable :: fname_
-            integer :: iost
-
-            ! open Bisp export file
-            if (is_visual_ .and. is_brn_export_) then
-
-               if (visual_indexes_(1) > struct_data%nn_) then
-                  call bsa_Abort("Node index exceeds max n. of nodes")
-               endif
-               if (visual_indexes_(2) > struct_data%nlibs_) then
-                  call bsa_Abort("DOF index exceeds max n. of DOFs per node")
-               endif
-               visual_idx_ = (visual_indexes_(1) - 1)*struct_data%nlibs_ + visual_indexes_(2)
-
-               fname_ = BRN_EXPORT_FNAME
-            else
-               fname_ = BRM_EXPORT_FNAME
-            endif
-            write_brm_fptr_ => exportBRM_base_internal_
-
-            open(&
-               unit=unit_dump_brm_,       &
-               file=fname_,               &
-               form=IO_FORM_UNFORMATTED,  &
-               access=IO_ACCESS_STREAM,   &
-               status=IO_STATUS_REPLACE,  &
-               action=IO_ACTION_WRITE,    &
-               iostat=iost)
-
-            if (iost /= 0) then
-               print '(1x, 4a)', &
-                  WARNMSG, 'Error while opening export file  "', fname_, '".'
-               if (is_visual_) then
-                  return
-               else
-                  print '(1x, 2a)', MSGCONT, 'Disabling exporting.'
-               endif
-               do_export_brm_  = .false.
-               write_brm_fptr_ => exportBRM_void_internal_
-            endif
-
-            if (allocated(fname_)) deallocate(fname_)
-         end block
-      else
-         if (settings%i_compute_psd_ == 0 .and. settings%i_compute_bisp_ == 0) then
-            ! user asked for nothing ??
-            print '(1x, 2a)', &
-               WARNMSG, 'Both  PSD  and  BISP  computation are disabled.'
-            return
-         endif
+      if (settings%i_compute_psd_ == 0 .and. settings%i_compute_bisp_ == 0) then
+         ! user asked for nothing ??
+         print '(1x, 2a)', &
+            WARNMSG, 'Both  PSD  and  BISP  computation are disabled.'
+         return
       endif
 
 
-#if (defined(_OPENMP)) && (defined(BSA_DEBUG))
-      print '(1x, a, a)', NOTEMSG, 'This version has been compiled with OpenMP support.'
-#endif
-      print *
+      call io_setExportSpecifiers()
+
 
       block
+         character(len = :), allocatable :: fname_cls_, fname_msh_
          integer(int32) :: itmp
+
+         write_brm_fptr_ => exportBRM_void_internal_
+         do_export_base_ = is_visual_ .or. &
+                              (do_export_brm_ .and. i_brmexport_mode_ == BSA_EXPORT_BRM_MODE_BASE)
+
+         if (is_visual_ .or. do_export_brm_) then
+
+            write_brm_fptr_ => exportBRM_base_internal_
+            export_data_base_%ispsym_ = settings%i_bisp_sym_
+
+            ! NOTE: here we set common export data
+            if (is_visual_) then
+
+               export_data_base_%ncomb_ = 1
+
+               ! open Bisp export file
+               if (is_brn_export_) then
+
+                  export_data_base_%nm_     = 2
+                  export_data_base_%modes_  => visual_indexes_(1 : 2)
+
+                  if (visual_indexes_(1) > struct_data%nn_) then
+                     call bsa_Abort("Node index exceeds max n. of nodes")
+                  endif
+                  if (visual_indexes_(2) > struct_data%nlibs_) then
+                     call bsa_Abort("DOF index exceeds max n. of DOFs per node")
+                  endif
+                  visual_idx_ = (visual_indexes_(1) - 1)*struct_data%nlibs_ + visual_indexes_(2)
+
+                  fname_cls_ = BRN_EXPORT_FNAME_CLS
+                  fname_msh_ = BRN_EXPORT_FNAME_MSH
+               else
+
+                  export_data_base_%nm_     = 3
+                  export_data_base_%modes_  => visual_indexes_(1 : 3)
+
+                  fname_cls_ = BRM_EXPORT_FNAME_CLS
+                  fname_msh_ = BRM_EXPORT_FNAME_MSH
+               endif
+
+               associate (isuban => settings%i_suban_type_)
+                  if (isuban == 1 .or. isuban == 3) then
+                     call io_getVerifiedFile(un_export_bisp_cls_, fname_cls_, openfile=.true.)
+                     rewind(un_export_bisp_cls_)
+                  endif
+                  if (isuban == 2 .or. isuban == 3) then
+                     call io_getVerifiedFile(un_export_bisp_msh_, fname_msh_, openfile=.true.)
+                     rewind(un_export_bisp_msh_)
+                  endif
+               end associate
+
+               if (allocated(fname_cls_)) deallocate(fname_cls_)
+               if (allocated(fname_msh_)) deallocate(fname_msh_)
+
+            else ! compute
+
+               export_data_base_%ncomb_ = dimM_bisp_
+               export_data_base_%nm_    = struct_data%modal_%nm_eff_
+               export_data_base_%modes_ => struct_data%modal_%modes_
+
+            endif
+         endif
+
+
+#if (defined(_OPENMP)) && (defined(BSA_DEBUG))
+         print '(1x, a, a)', NOTEMSG, 'This version has been compiled with OpenMP support.'
+#endif
+         print *
+
 
          call validateAll_()              ! check before doing some bad things..
          call setBsaFunctionLocalVars()   ! NOTE: reset internal state, if something has been changed
@@ -340,14 +359,11 @@ contains
          end if
 
 
-         if (.not.(do_export_brm_ .or. is_visual_) .and. .not.associated(write_brm_fptr_)) &
-            write_brm_fptr_ => exportBRM_void_internal_
-
 #ifdef _BSA_CHECK_NOD_COH_SVD
          settings%i_suban_type_   = 2  ! force MSH execution
 #endif
 
-         ! Fix settings if we are in visual mode
+         ! NOTE: adjust settings if we are in visual mode
          if (is_visual_) then
             if (is_brn_export_) then
                dimM_psd_post_  = dimM_psd_
@@ -355,6 +371,8 @@ contains
             else
                dimM_psd_post_  = 1
                dimM_bisp_post_ = 1
+
+               ! NOTE: this has to be here cause we need data validation!
                if (settings%i_only_diag_ == 0) then
                   associate (nm => struct_data%modal_%nm_eff_)
                      visual_idx_ = &
@@ -365,8 +383,6 @@ contains
                   visual_idx_ = visual_indexes_(1)
                endif
             endif
-            settings%i_suban_type_ = 2
-            force_cls_execution_   = .false.
          else
             dimM_psd_post_  = dimM_psd_
             dimM_bisp_post_ = dimM_bisp_
@@ -383,19 +399,29 @@ contains
 #endif
 
          is_only_msh_ = settings%i_suban_type_ == 2
-         if (is_only_msh_ .or. settings%i_suban_type_ == 3) &
+         if (is_only_msh_ .or. settings%i_suban_type_ == 3) then
+            bisp_export_iun_internal_ = un_export_bisp_msh_
             call mainMesher_(m3mf_msh, m3mr_msh)
+            if (is_only_msh_ .and. is_visual_) then
+               if (force_cls_execution_) then
+                  print '( /, 1x, a, a )', &
+                     WARNMSG, 'Visual mode ON. Disabling CLS forced execution.'
+               endif
+               force_cls_execution_ = .false.
+            endif
+         endif
 
 #ifdef _BSA_CHECK_NOD_COH_SVD
          goto 998
 #endif
 
          ! NOTE: in case we cannot have 2nd order moments, force it here
-         if (.not. is_only_msh_ .or. force_cls_execution_) then
+         if (.not.is_only_msh_ .or. force_cls_execution_) then
             if (is_only_msh_) then ! only 2nd order stats
                settings%i_compute_bisp_ = 0
                settings%i_compute_psd_  = 1
             endif
+            bisp_export_iun_internal_ = un_export_bisp_cls_
             call mainClassic_(m2mf_cls, m2mr_cls, m2o2mr_cls, m3mf_cls, m3mr_cls)
          endif
       end block
@@ -1747,7 +1773,7 @@ contains
    ! BUG: should also providfe a way to pass pointer to user defined exporting data 
    !      structure that has to be finally dereferenced in actual exporting routine!
    module subroutine bsa_setBRMExportFunction(fptr)
-      procedure(exportBRMinterf_vect_), pointer, intent(in) :: fptr
+      procedure(exportInterf_vect_), pointer, intent(in) :: fptr
 
       write_brm_fptr_ => fptr
 
@@ -1770,29 +1796,27 @@ contains
 
    ! BUG: this should be called via a function pointer
    subroutine exportBRM_baseHeaderWriter_internal_(pdata)
-      type(BrmExportBaseData_t), pointer, intent(in) :: pdata
+      type(BsaExportBaseData_t), pointer, intent(in) :: pdata
 
       ! BUG: maybe general header written only ONCE in a separate procedure..
       ! do print general header
       if (pdata%i_doNotPrintGenHeader_ == 0) then
-         write(unit_dump_brm_) pdata%nm_
-         write(unit_dump_brm_) pdata%modes_
-         write(unit_dump_brm_) pdata%ncomb_
-         write(unit_dump_brm_) pdata%ispsym_
-         write(unit_dump_brm_) pdata%nzones_
+         write(bisp_export_iun_internal_) pdata%nm_
+         write(bisp_export_iun_internal_) pdata%modes_
+         write(bisp_export_iun_internal_) pdata%ncomb_
+         write(bisp_export_iun_internal_) pdata%ispsym_
+         write(bisp_export_iun_internal_) pdata%nzones_
+         pdata%i_doNotPrintGenHeader_ = 1
       endif
 
       ! do print zone info header
-      if (pdata%i_doNotPrintZonHeader_ == 0) then
-         write(unit_dump_brm_) pdata%idZone_
-         write(unit_dump_brm_) pdata%nI_
-         write(unit_dump_brm_) pdata%nJ_
-
+      write(bisp_export_iun_internal_) pdata%idZone_
+      write(bisp_export_iun_internal_) pdata%nI_
+      write(bisp_export_iun_internal_) pdata%nJ_
 ! #ifdef _OPENMP
 !          print *, ' Dumping zone with id, ni, nj  =  ', &
 !             pdata%idZone_, pdata%nI_, pdata%nJ_
 ! #endif
-      endif
    end subroutine
 
 
@@ -1804,10 +1828,10 @@ contains
       ! Need to verify if to print headers
       if (associated(pdata)) then
          select type (pdata)
-            type is (BrmExportBaseData_t)
+            type is (BsaExportBaseData_t)
                call exportBRM_baseHeaderWriter_internal_(pdata)
             class default
-               call bsa_Abort("Expecting pdata to be of type  ""BrmExportBaseData_t"".")
+               call bsa_Abort("Expecting pdata to be of type  ""BsaExportBaseData_t"".")
          end select
       endif
 
@@ -1817,15 +1841,18 @@ contains
 
          s = size(fi)
          do i = 1, s
+            write(bisp_export_iun_internal_) real(fi(i), kind=real32)
+            write(bisp_export_iun_internal_) real(fj(i), kind=real32)
             if (is_visual_) then
                if (is_brn_export_) then
                   rval = getBRN(brm(:, i))
                else
                   rval = brm(visual_idx_, i)
                endif
-               write(unit_dump_brm_) real(fi(i), kind=real32), real(fj(i), kind=real32), real(rval, kind=real32)
+               ! print *, real(fi(i), real32), real(fj(i), real32), real(rval, real32)
+               write(bisp_export_iun_internal_) real(rval,      kind=real32)
             else
-               write(unit_dump_brm_) real(fi(i), kind=real32), real(fj(i), kind=real32), real(brm(:, i), kind=real32)
+               write(bisp_export_iun_internal_) real(brm(:, i), kind=real32)
             endif
          enddo
       endblock
