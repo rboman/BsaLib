@@ -454,7 +454,7 @@ contains
          !> Signs to apply at limits, depending on N-E-S-W direction
          integer(int32), parameter :: LIM_SIGN_DIRS(4) = [1, 1, -1, -1]
 
-         integer(int32), parameter :: LEFT_RZ_SIGNS(4)  = [1, -1, -1, 1]
+         integer(int32), parameter :: LEFT_RZ_SIGNS(4) = [1, -1, -1, 1]
 
          real(real64), parameter :: DF_FCT_CST = 0._real64
 
@@ -536,6 +536,7 @@ contains
          endif
 
 
+#ifdef _OPENMP
          !$ if (allocated(zone_title)) deallocate(zone_title)
 
 
@@ -551,11 +552,12 @@ contains
          !$omp          , NMODES, NMODES_EFF, MODES &
          !$omp          , NPSDEL, NTCOMPS, NDIRS, TCOMPS, DIRS          &
          !$omp          , MSHR_SVD_INFO, MSHR_SVD_LWORK, MSHR_SVD_WORK  &
-#ifdef _BSA_EXPORT_POD_TRUNC_INFO
+# ifdef _BSA_EXPORT_POD_TRUNC_INFO
          !$omp          , do_export_POD_trunc_   &
-#endif
+# endif
          !$omp          , msh_NZones, msh_bfmpts_pre_, msh_max_zone_NPts, m3mf_msh_ptr_), &
          !$omp   num_threads(n_dirs_)
+#endif
          do idir = 1, n_dirs_
 
             n_bfm_pts_pre_ = 0
@@ -598,9 +600,13 @@ contains
                   int_modes_ = msh_ZoneLimsInterestModes(iim + 1  :  iim + nim)
 
 #ifdef BSA_DEBUG
+# ifdef _OPENMP
                   !$omp critical
+# endif
                   if (idir == 1) print *, int_modes_
+# ifdef _OPENMP
                   !$omp end critical
+# endif
 #endif
 
                   ! set current zone interest modes pointer (before update)
@@ -672,13 +678,19 @@ contains
 #ifndef BSA_USE_POD_DATA_CACHING
             n_bfm_pts_pre_ = n_bfm_pts_pre_ + rz%zoneTotNPts()
 
+# ifdef _OPENMP
             !$omp critical
+# endif
             call logZonePremeshingTotTime_(zone_title, timer%time(), n_bfm_pts_pre_)
+# ifdef _OPENMP
             !$omp end critical
+# endif
 #endif
 
          enddo ! n dirs
+#ifdef _OPENMP
          !$omp end parallel do
+#endif
 
          ! BUG: might be removed, code duplication for little CPU improvement..
 #ifndef _OPENMP
@@ -735,6 +747,7 @@ contains
 
                if (settings%i_bisp_sym_ == BSA_SPATIAL_SYM_HALF) n_dirs_ = n_dirs_ - 1  ! ==2
 
+#ifdef _OPENMP
                !$omp parallel do &
                !$omp   default(firstprivate), &
                !$omp   shared(ROTATIONS, LIM_SIGN_DIRS, main_refs_, bases_ch, inter_modes_ &
@@ -746,6 +759,7 @@ contains
                !$omp          , MSHR_SVD_INFO, MSHR_SVD_LWORK, MSHR_SVD_WORK  &
                !$omp          , msh_NZones, msh_bfmpts_pre_, msh_max_zone_NPts, m3mf_msh_ptr_), &
                !$omp   num_threads(n_dirs_)
+#endif
                do idir = 1, n_dirs_
 
                   call timer%init()
@@ -860,12 +874,18 @@ contains
                   enddo ! ilim = 2, NLimsP1
 
 #ifndef BSA_USE_POD_DATA_CACHING
+# ifdef _OPENMP
                   !$omp critical
+# endif
                   call logZonePremeshingTotTime_(z_name_, timer%time(), n_bfm_pts_pre_)
+# ifdef _OPENMP
                   !$omp end critical
+# endif
 #endif
                enddo ! idir
+#ifdef _OPENMP
                !$omp end parallel do
+#endif
 
                print '(1x, a, a, i0, a/)', &
                   INFOMSG, 'Done with   ', msh_NZones, '  pre meshing zones.'
@@ -891,7 +911,6 @@ contains
 
 #ifdef _OPENMP
             if (allocated(zone_title)) deallocate(zone_title)
-#endif
 
             !$omp parallel do &
             !$omp   default(firstprivate), &
@@ -905,6 +924,7 @@ contains
             !$omp          , MSHR_SVD_INFO, MSHR_SVD_LWORK, MSHR_SVD_WORK  &
             !$omp          , msh_NZones, msh_bfmpts_pre_, msh_max_zone_NPts, m3mf_msh_ptr_), &
             !$omp   num_threads(N_THREADS_MIN_)
+#endif
             do idir = 1, N_THREADS_MIN_
 
                call timer%init()
@@ -927,13 +947,19 @@ contains
                call rz%compute()
 
 #ifndef BSA_USE_POD_DATA_CACHING
+# ifdef _OPENMP
                !$omp critical
+# endif
                call logZonePremeshingTotTime_(zone_title, timer%time(), rz%zoneTotNPts())
+# ifdef _OPENMP
                !$omp end critical
+# endif
 #endif
 
             enddo ! idir
+#ifdef _OPENMP
             !$omp end parallel do
+#endif
 
             print '(1x, a, a, i0, a/)', &
                INFOMSG, 'Done with   ', msh_NZones, '  pre meshing zones.'
@@ -963,7 +989,6 @@ contains
                if (allocated(zone_title)) deallocate(zone_title)
                if (allocated(rots))       deallocate(rots)
                allocate(rots(NLimsP1 * 2))
-#endif
 
 
                !$omp parallel do &
@@ -981,6 +1006,7 @@ contains
                !$omp          , MSHR_SVD_INFO, MSHR_SVD_LWORK, MSHR_SVD_WORK  &
                !$omp          , msh_NZones, msh_bfmpts_pre_, msh_max_zone_NPts, m3mf_msh_ptr_), &
                !$omp   num_threads(N_THREADS_MIN_)
+#endif
                do idir = 1, N_THREADS_MIN_
 
                   n_bfm_pts_pre_ = 0
@@ -1039,11 +1065,15 @@ contains
                         do while(abs(ptI%freqI()) > limits(ilim_init_) .and. ilim_init_ <= NLims)
                            ilim_init_ = ilim_init_ + 1
                         enddo
+#ifdef _OPENMP
                         !$omp critical
+#endif
                         print '(/ 1x, a, a, i0, a)', &
                            WARNMSG, 'Init triang zone at diag-crest covers   ', &
                               ilim_init_ - 1, '   limit(s).'
+#ifdef _OPENMP
                         !$omp end critical
+#endif
                         warn_zone_over_limits = ilim_init_ == NLims + 1
                      endif
 
@@ -1196,14 +1226,20 @@ contains
                      endif ! closing triangle, if not warn_zone_over_limits
 
 #ifndef BSA_USE_POD_DATA_CACHING
+# ifdef _OPENMP
                      !$omp critical
+# endif
                      call logZonePremeshingTotTime_(zone_title, timer%time(), n_bfm_pts_pre_)
+# ifdef _OPENMP
                      !$omp end critical
+# endif
 #endif
                   endif ! pre mesh mode
 
                enddo ! idir
+#ifdef _OPENMP
                !$omp end parallel do
+#endif
 
                print '(1x, a, a, i0, a/)', &
                   INFOMSG, 'Done with   ', msh_NZones, '  pre meshing zones.'
@@ -1218,10 +1254,6 @@ contains
          ! EXTERNAL PADDING
          !
          if (.not. warn_zone_over_limits .and. (settings%i_full_coverage_ == 1)) then
-
-#ifdef _OPENMP
-            if (allocated(zone_title)) deallocate(zone_title)
-#endif
 
             ! BUG: check if it is ok setting this interest modes' pointer.
             call rz%setInterestModeIndexPtr(id_im_last)
@@ -1251,6 +1283,9 @@ contains
                maxext_sym_(:) = max_ext
             endif
 
+#ifdef _OPENMP
+            if (allocated(zone_title)) deallocate(zone_title)
+
             !$omp parallel do  &
             !$omp   default(firstprivate),   &
             !$omp   private(zone_title),     &
@@ -1262,6 +1297,7 @@ contains
             !$omp          , MSHR_SVD_INFO, MSHR_SVD_LWORK, MSHR_SVD_WORK           &
             !$omp          , msh_NZones, msh_bfmpts_pre_, msh_max_zone_NPts, m3mf_msh_ptr_), &
             !$omp   num_threads(n_dirs_)
+#endif
             do idir = 1, n_dirs_
 
                call timer%init()
@@ -1278,12 +1314,18 @@ contains
                call rz%compute()
 
 #ifndef BSA_USE_POD_DATA_CACHING
+# ifdef _OPENMP
                !$omp critical
+# endif
                call logZonePremeshingTotTime_(zone_title, timer%time(), rz%zoneTotNPts())
+# ifdef _OPENMP
                !$omp end critical
+# endif
 #endif
             enddo ! ndirs
+#ifdef _OPENMP
             !$omp end parallel do
+#endif
 
          endif ! (.not. warn_zone_over_limits .and. (settings%i_full_coverage_))
 
