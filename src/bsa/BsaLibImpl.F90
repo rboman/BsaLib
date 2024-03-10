@@ -420,6 +420,8 @@ contains
             if (is_only_msh_) then ! only 2nd order stats
                settings%i_compute_bisp_ = 0
                settings%i_compute_psd_  = 1
+               print '( //, 1x, a, a)', &
+                  NOTEMSG, "Computing 2nd order moments with Classic approach !"
             endif
             bisp_export_iun_internal_ = un_export_bisp_cls_
             call mainClassic_(m2mf_cls, m2mr_cls, m2o2mr_cls, m3mf_cls, m3mr_cls)
