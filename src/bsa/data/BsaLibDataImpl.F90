@@ -54,6 +54,15 @@ contains
          if (istat /= 0) call deallocKOMsg('PHItimesC_local_', istat, emsg)
       endif
 
+      if (allocated(peak_exts_)) then
+         deallocate(peak_exts_, stat=istat, errmsg=emsg)
+         if (istat /= 0) call deallocKOMsg('peak_exts_', istat, emsg)
+      endif
+
+      if (allocated(msh_ZoneLimsInterestModes)) then
+         deallocate(msh_ZoneLimsInterestModes, stat=istat, errmsg=emsg)
+         if (istat /= 0) call deallocKOMsg('msh_ZoneLimsInterestModes', istat, emsg)
+      endif
 
       if (allocated(peak_exts_)) then
          deallocate(peak_exts_, stat=istat, errmsg=emsg)
