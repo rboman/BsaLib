@@ -132,7 +132,7 @@ contains
    module subroutine bsa_Abort(emsg)
       character(len = *), intent(in), optional :: emsg
 
-      if (present(emsg)) print '(/ 1x, a, a/)', ERRMSG, emsg
+      if (present(emsg)) print '(/ 1x, 2a/)', ERRMSG, emsg
 
       call cleanBSAData_() ! free memory before halting
       error stop

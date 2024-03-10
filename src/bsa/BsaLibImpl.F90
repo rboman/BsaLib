@@ -235,7 +235,7 @@ contains
 
 
 #if (defined(_OPENMP)) && (defined(BSA_DEBUG))
-         print '(1x, a, a)', NOTEMSG, 'This version has been compiled with OpenMP support.'
+         print '(1x, 2a)', NOTEMSG, 'This version has been compiled with OpenMP support.'
 #endif
          print *
 
@@ -279,18 +279,18 @@ contains
 
             ierr_cl_ = bsacl_Init(1)
             if (ierr_cl_ /= 0) then
-               print '(1x, a, a)', ERRMSG, 'Failed to initialise BsaCL.'
+               print '(1x, 2a)', ERRMSG, 'Failed to initialise BsaCL.'
                goto 998
             endif
 
             ierr_cl_ = bsacl_InitDeviceMemory()
             if (ierr_cl_ /= 0) then
-               print '(1x, a, a)', ERRMSG, 'Failed to initialise BSACL device memory.'
+               print '(1x, 2a)', ERRMSG, 'Failed to initialise BSACL device memory.'
                goto 998
             endif
 #else
             print '(1x, 2a)', &
-               WARNMSG, 'This BSA version does not support GPU offloading. Using CPU only.'
+               WARNMSG, 'This version does not support GPU offloading. Using CPU only.'
             is_gpu_enabled_ = .false.
 #endif ! BSA_USE_GPU
          endif ! gpu enabled
@@ -404,7 +404,7 @@ contains
             call mainMesher_(m3mf_msh, m3mr_msh)
             if (is_only_msh_ .and. is_visual_) then
                if (force_cls_execution_) then
-                  print '( /, 1x, a, a )', &
+                  print '(/, 1x, 2a)', &
                      WARNMSG, 'Visual mode ON. Disabling CLS forced execution.'
                endif
                force_cls_execution_ = .false.
@@ -420,7 +420,7 @@ contains
             if (is_only_msh_) then ! only 2nd order stats
                settings%i_compute_bisp_ = 0
                settings%i_compute_psd_  = 1
-               print '( //, 1x, a, a)', &
+               print '(//, 1x, 2a)', &
                   NOTEMSG, "Computing 2nd order moments with Classic approach !"
             endif
             bisp_export_iun_internal_ = un_export_bisp_cls_
@@ -463,7 +463,7 @@ contains
       if (nPODmodes_set_) then
          if (nmodes_POD_ <= 0_int32 .or. nmodes_POD_ >= struct_data%nn_load_) nPODmodes_set_ = .false.
          if (nPODmodes_set_) &
-            print '(/ 1x, a, a, i0, a /)', INFOMSG, 'Using  ', nmodes_POD_, '  POD modes.'
+            print '(/ 1x, 2a, i0, a /)', INFOMSG, 'Using  ', nmodes_POD_, '  POD modes.'
       endif
       if (I_BKG_PEAK_DELTAF_BFM_REFMT_FCT_ <= 0) I_BKG_PEAK_DELTAF_BFM_REFMT_FCT_ = 2
       if (I_BKG_PEAK_DELTAF_BFM_REFMT_FCT_ <= 0) I_BKG_PEAK_DELTAF_BFM_REFMT_FCT_ = 3
@@ -472,9 +472,9 @@ contains
          if (.not. ( ibispsym == BSA_SPATIAL_SYM_NONE .or. &
                      ibispsym == BSA_SPATIAL_SYM_HALF .or. &
                      ibispsym == BSA_SPATIAL_SYM_FOUR )) then
-            print '(1x, a, a, i0)', WARNMSG, 'Unsupported value  "iBispSym"= ', ibispsym
-            print '(1x, a, a)',     MSGCONT, 'Valid values are:  0 (FULL, default), 2 (HALF), 4 (FOURTH).'
-            print '(1x, a, a)',     MSGCONT, 'Setting default value.'
+            print '(1x, 2a, i0)', WARNMSG, 'Unsupported value  "iBispSym"= ', ibispsym
+            print '(1x, 2a)',     MSGCONT, 'Valid values are:  0 (FULL, default), 2 (HALF), 4 (FOURTH).'
+            print '(1x, 2a)',     MSGCONT, 'Setting default value.'
             ibispsym = BSA_SPATIAL_SYM_NONE
          endif
 
@@ -482,8 +482,8 @@ contains
          if (ibispsym == BSA_SPATIAL_SYM_NONE) ibispsym = 1
 
          if (ibispsym == BSA_SPATIAL_SYM_FOUR .and. settings%i_3d_sym_ == 1) then
-            print '(1x, a, a)', WARNMSG, 'Cannot use 3D matrix symmetry if computing only 1/4 in space.'
-            print '(1x, a, a)', MSGCONT, 'Disabling it..'
+            print '(1x, 2a)', WARNMSG, 'Cannot use 3D matrix symmetry if computing only 1/4 in space.'
+            print '(1x, 2a)', MSGCONT, 'Disabling it..'
             settings%i_3d_sym_ = 0
          endif
       end associate
@@ -542,7 +542,7 @@ contains
          ! ! NOTE: might also be greater than 1..
          ! if (maxvals(i) < 1._RDP .or. maxvals(i) > 1._RDP + incr) then
 
-         print '(1x, a, a, i3, a)', &
+         print '(1x, 2a, i3, a)', &
             WARNMSG, 'Mode  ', i, '  is not 1-normalised. Ignoring it..'
 
          nskip = nskip + 1
@@ -551,7 +551,7 @@ contains
          ilocmax = maxloc(abs(struct_data%modal_%phi_(:, i)), kind = int32)
          ilib    = mod(ilocmax(1), struct_data%nlibs_)
          if (ilib == 0) ilib = struct_data%nlibs_
-         print '(1x, a, a, i0 /)', MSGCONT, 'Its local max abs value is for LIB= ', ilib
+         print '(1x, 2a, i0 /)', MSGCONT, 'Its local max abs value is for LIB= ', ilib
          ! endif
       enddo
 
@@ -648,7 +648,7 @@ contains
       call wd%SetPhitimesC(PHItimesC_local_)
 
 #ifdef BSA_DEBUG
-      write(unit_debug_, '(1x, a, a)') &
+      write(unit_debug_, '(1x, 2a)') &
          INFOMSG, '@BsaLibImpl::setPhitimesCLocalInstance_() : local PhiTimesC instance computed -- ok.'
 #endif
    end subroutine setPhitimesCLocalInstance_
@@ -1278,13 +1278,13 @@ contains
             integer(int32) :: istat
             allocate(bkg(nm), stat=istat)
             if (istat /= 0) then
-               print '(1x, a, a)', &
+               print '(1x, 2a)', &
                   ERRMSG, 'Cannot allocate resources for BR decomposition computation. Skipping.'
                return
             endif
             allocate(res(nm), stat=istat)
             if (istat /= 0) then
-               print '(1x, a, a)', &
+               print '(1x, 2a)', &
                   ERRMSG, 'Cannot allocate resources for BR decomposition computation. Skipping.'
                return
             endif
@@ -1412,7 +1412,7 @@ contains
       real(bsa_real_t), allocatable :: beta(:)
 
       if (all(m2o2 == 0)) then
-         print '(/ 1x, a, a)', &
+         print '(/ 1x, 2a)', &
             WARNMSG, '"m2_ord2"  is null. Cannot compute extremes. Skipping.'
          return
       endif
@@ -1651,7 +1651,7 @@ contains
 
 #ifdef BSA_DEBUG
                   if (ieee_is_nan(sk(pm3))) then
-                     print '(1x, a, a, 2i6)', &
+                     print '(1x, 2a, 2i6)', &
                         ERRMSG, 'SK is NaN at indexes   ', pm3, l
                      goto 99 ! exit loop
                   endif
@@ -1874,7 +1874,7 @@ contains
 
          case default  ! includes  (BSA_EXPORT_BRM_MODE_BASE)
             if (.not. imode == BSA_EXPORT_BRM_MODE_BASE) &
-               print '(1x, a, a)', WARNMSG, 'Unknown BRM export mode. Setting default  (base).'
+               print '(1x, 2a)', WARNMSG, 'Unknown BRM export mode. Setting default  (base).'
             do_export_brm_ = .true.
       end select
    end subroutine
@@ -1889,7 +1889,7 @@ contains
       integer(int32)  :: iun, istat, i, nn_
 
       if (.not. present(coords) .and. .not. associated(struct_data%coords_)) then
-         print '(1x, a, a)', &
+         print '(1x, 2a)', &
             WARNMSG, 'Cannot save coordinates to file. Data not provided. Skipping.'
          return
       endif

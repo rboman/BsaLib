@@ -76,13 +76,13 @@ contains
          call bsacl_AcquireComputationFreqs(0, NFREQS, f, NFREQS, f)
          ierr_cl_ = bsacl_SetKernelID(2)
          if (ierr_cl_ /= 0) then
-            print '(1x, a, a)', ERRMSG, &
+            print '(1x, 2a)', ERRMSG, &
                'Error in setting kernel identifier.'
             goto 998
          endif
          ierr_cl_ = bsacl_Run(0, m3mr_cls)
          if (ierr_cl_ /= 0) then
-            print '(1x, a, a)', ERRMSG, &
+            print '(1x, 2a)', ERRMSG, &
                'BSACL run() returned with error.'
          endif
       else
@@ -93,9 +93,9 @@ contains
             integer :: itc_, idir_, idxi, idxe, idim2, i
 
 #ifdef BSA_DEBUG
-            print '(1x, a, a, i0)', INFOMSG, 'n. of frequencies to be computed=', settings%nfreqs_
-            print '(1x, a, a, i0)', INFOMSG, 'PSD  modal extension=', dimM_psd_
-            print '(1x, a, a, i0)', INFOMSG, 'BISP modal extension=', dimM_bisp_
+            print '(1x, 2a, i0)', INFOMSG, 'n. of frequencies to be computed=', settings%nfreqs_
+            print '(1x, 2a, i0)', INFOMSG, 'PSD  modal extension=', dimM_psd_
+            print '(1x, 2a, i0)', INFOMSG, 'BISP modal extension=', dimM_bisp_
 
             write(unit_debug_, *) INFOMSG, '@BsaClassicImpl::mainClassic_() : computing nodal wind turbulence PSDs...'
 #endif
@@ -165,7 +165,7 @@ contains
 
                      export_data_base_ptr_ => export_data_base_
 
-                     print '( /, 1x, a, a, i0, " x ", i0, a )', &
+                     print '( /, 1x, 2a, i0, " x ", i0, a )', &
                         INFOMSG, 'Exporting  BRM  to file...  (', NFREQS, NFREQS, ")"
 
                      block
@@ -258,7 +258,7 @@ contains
 
                print '(/1x, 2a)', INFOMSG, 'Using    SCALAR    version'
 
-               print '(/ 1x, a, a /)', &
+               print '(/ 1x, 2a /)', &
                   WARNMSG, 'For scalar version, computation of m2o2_mr not yet implemented !'
 
                block
@@ -393,8 +393,8 @@ contains
 
             if (itmp > MAX_VECT_ALLOC_ELEMS) then
 
-               print '( /, 1x, a, a, i0, ")" )', WARNMSG, 'Too high allocation size for VECTORISED BSA version (', itmp
-               print '( 1x, a, a, / )', MSGCONT, 'Switching to SCALAR version.'
+               print '( /, 1x, 2a, i0, ")" )', WARNMSG, 'Too high allocation size for VECTORISED BSA version (', itmp
+               print '( 1x, 2a, / )', MSGCONT, 'Switching to SCALAR version.'
 
                settings%i_scalar_vers_ = 1
             endif
@@ -407,8 +407,8 @@ contains
                ! Still, check, better.
                if (settings%nfreqs_ * dimM_psd_ < MAX_VECT_ALLOC_ELEMS) then
 
-                  print '( /, 1x, a, a )', NOTEMSG, 'Requested SCALAR BSA version, but for only PSDs computation.' 
-                  print '(1x, a, a)', MSGCONT, 'Switching to VECTORISED for perf.'
+                  print '( /, 1x, 2a )', NOTEMSG, 'Requested SCALAR BSA version, but for only PSDs computation.' 
+                  print '(1x, 2a)', MSGCONT, 'Switching to VECTORISED for perf.'
                   settings%i_scalar_vers_ = 0
                endif
 
@@ -416,15 +416,15 @@ contains
 
                if (itmp < MAX_VECT_ALLOC_ELEMS) then
 
-                  print '( /, 1x, a, a )', NOTEMSG, 'Running SCALAR BSA version, but VECTORISED (preferable) is possible.'
-                  print '(1x, a, a)', MSGCONT, 'Consider changing setting.'
+                  print '( /, 1x, 2a )', NOTEMSG, 'Running SCALAR BSA version, but VECTORISED (preferable) is possible.'
+                  print '(1x, 2a)', MSGCONT, 'Consider changing setting.'
                endif
             endif
          endif
 
       else ! testing mode (==1, yes), keep things as such.
 
-         print '(/1x, a, a)', &
+         print '(/1x, 2a)', &
             WARNMSG, 'Frequency definition not being checked for optimal values !'
       endif
    end subroutine
@@ -467,7 +467,7 @@ contains
 
          print '( /, 1x, a, 2(a, f12.5))', WARNMSG, 'specified  df=', setts%df_, &
             '  is smaller than  1/10th  of suggested=', df_ref
-         print '(1x, a, a /)', MSGCONT, 'Consider increasing it.'
+         print '(1x, 2a /)', MSGCONT, 'Consider increasing it.'
       endif
 
       nfreqs_1 = setts%nfreqs_ - 1  ! NOTE: do not consider 0 freq
@@ -487,13 +487,13 @@ contains
                   nfreqs_1     = ceiling(max_freq_ref / df_ref)
                   max_freq     = max_freq_ref
 
-                  print '(/ 1x, a, a, i0, a )', &
+                  print '(/ 1x, 2a, i0, a )', &
                      WARNMSG, '"nfreq=', setts%nfreqs_, '"  is too small to reach max frequency (even with suggested "df").'
-                  print '( 1x, a, a, i0 /)', &
+                  print '( 1x, 2a, i0 /)', &
                      MSGCONT, 'To avoid errors in estimation, it is going to be considered nfreqs= ', nfreqs_1+1
                else
 
-                  print '( /, 1x, a, a, i0, a / )', &
+                  print '( /, 1x, 2a, i0, a / )', &
                      WARNMSG, 'with specified "nfreq', setts%nfreqs_, &
                         '", full frequency range coverage is ensured using suggested "df".'
                endif
@@ -505,10 +505,10 @@ contains
 
 
                nfreqs_1 = ceiling(max_freq_ref / setts%df_)
-               print '( /, 1x, a, a, i0, a /, 20x, a, i5, / )', &
+               print '( /, 1x, 2a, i0, a /, 20x, a, i5, / )', &
                   WARNMSG, '"nfreq=', setts%nfreqs_ ,'" is too small to reach max frequency.'
 
-               print '(1x, a, a, i0 /)', &
+               print '(1x, 2a, i0 /)', &
                   MSGCONT, 'To avoid errors in estimation, it is going to be considered   nfreqs=', nfreqs_1+1
 
                max_freq = max_freq_ref
@@ -518,7 +518,7 @@ contains
 
             if (l_df_big) then
 
-               print '( /, 1x, a, a, f12.5, " > ", f12.5, ")")', &
+               print '( /, 1x, 2a, f12.5, " > ", f12.5, ")")', &
                   WARNMSG, &
                   'chosen "df" is greater than suggested one (', setts%df_, df_ref
             endif

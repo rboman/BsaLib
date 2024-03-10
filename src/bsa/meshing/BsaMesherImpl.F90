@@ -58,7 +58,7 @@ contains
 #endif
 
 #ifdef BSA_USE_POD_DATA_CACHING
-      print '(1x, a, a/)', NOTEMSG, 'Using version with POD caching.' 
+      print '(1x, 2a/)', NOTEMSG, 'Using version with POD caching.' 
 #endif
 
       if (openBFMDumpFile_() /= 0_int32) call bsa_Abort("Failed to open BFM dump file.")
@@ -93,7 +93,7 @@ contains
       goto 998
 #else
       if (is_only_premesh_) then
-         print '(1x, a, a)', &
+         print '(1x, 2a)', &
             NOTEMSG, 'Skipping Post-meshing phase!'
          goto 998
       endif
@@ -116,13 +116,13 @@ contains
 
       ! if (.not. is_visual_) then
          print *
-         print '(1x, a, a)', &
+         print '(1x, 2a)', &
             INFOMSG, ' Resume of total n. of points in meshing procedure:'
 #ifndef BSA_USE_POD_DATA_CACHING
-         print '(1x, a, a, i0)', MSGCONT, ' PRE-MESH   (BFM) : ', msh_bfmpts_pre_
+         print '(1x, 2a, i0)', MSGCONT, ' PRE-MESH   (BFM) : ', msh_bfmpts_pre_
 #endif
-         print '(1x, a, a, i0)', MSGCONT, ' POST-MESH  (BFM) : ', msh_bfmpts_post_
-         print '(1x, a, a, i0)', MSGCONT, ' POST-MESH  (BRM) : ', msh_brmpts_post_
+         print '(1x, 2a, i0)', MSGCONT, ' POST-MESH  (BFM) : ', msh_bfmpts_post_
+         print '(1x, 2a, i0)', MSGCONT, ' POST-MESH  (BRM) : ', msh_brmpts_post_
       ! endif
 
 
@@ -424,7 +424,7 @@ contains
 
       ! ALL OTHER ZONES (IF NOT BKG COVERS EVERYTHING)
 
-      write(*, '(1x, a, a, /, 10(" ", f10.4))') &
+      write(*, '(1x, 2a, /, 10(" ", f10.4))') &
          INFOMSG, '  Limits frontiers:', limits
       write(*, *) ''
 
@@ -701,7 +701,7 @@ contains
          inter_modes_(NLimsP1) = id_im_last
 
 
-         print '(1x, a, a, i0, a/)', &
+         print '(1x, 2a, i0, a/)', &
             INFOMSG, 'Done with   ', msh_NZones, '  pre meshing zones.'
 
 
@@ -887,7 +887,7 @@ contains
                !$omp end parallel do
 #endif
 
-               print '(1x, a, a, i0, a/)', &
+               print '(1x, 2a, i0, a/)', &
                   INFOMSG, 'Done with   ', msh_NZones, '  pre meshing zones.'
             end block
 
@@ -961,7 +961,7 @@ contains
             !$omp end parallel do
 #endif
 
-            print '(1x, a, a, i0, a/)', &
+            print '(1x, 2a, i0, a/)', &
                INFOMSG, 'Done with   ', msh_NZones, '  pre meshing zones.'
 
 
@@ -1051,7 +1051,7 @@ contains
 
 
                      ! IMPLEMENT & VERIFY
-                     print '(1x, a, a)', &
+                     print '(1x, 2a)', &
                         ERRMSG, '"BASE"  pre mesh mode not yet implemented.'
                      call bsa_Abort()
 
@@ -1068,7 +1068,7 @@ contains
 #ifdef _OPENMP
                         !$omp critical
 #endif
-                        print '(/ 1x, a, a, i0, a)', &
+                        print '(/ 1x, 2a, i0, a)', &
                            WARNMSG, 'Init triang zone at diag-crest covers   ', &
                               ilim_init_ - 1, '   limit(s).'
 #ifdef _OPENMP
@@ -1241,7 +1241,7 @@ contains
                !$omp end parallel do
 #endif
 
-               print '(1x, a, a, i0, a/)', &
+               print '(1x, 2a, i0, a/)', &
                   INFOMSG, 'Done with   ', msh_NZones, '  pre meshing zones.'
 
             end block
@@ -1329,7 +1329,7 @@ contains
 
          endif ! (.not. warn_zone_over_limits .and. (settings%i_full_coverage_))
 
-         print '(1x, a, a, i0, a/)', &
+         print '(1x, 2a, i0, a/)', &
             INFOMSG, 'Done with   ', msh_NZones, '  pre meshing zones.'
 
          if (allocated(rots))   deallocate(rots)
@@ -1350,7 +1350,7 @@ contains
       write(unit_dump_bfm_) settings%i_dump_modal_
       if (settings%i_dump_modal_ == 1) then
 
-         print '(1x, a, a /)', &
+         print '(1x, 2a /)', &
             WARNMSG, 'Including modal info in dump file. Check if this can be avoided.'
 
          ! write kept modes, might serve after as well.
@@ -1367,7 +1367,7 @@ contains
             struct_data%modal_%Km_(struct_data%modal_%modes_)
 
 #ifdef BSA_DEBUG
-         print '(1x, a, a)', INFOMSG, 'Modal info dumped -- ok.'
+         print '(1x, 2a)', INFOMSG, 'Modal info dumped -- ok.'
 #endif
       endif
 
@@ -1469,7 +1469,7 @@ contains
       ! NOTE: Undump main Rect BKG Peak zone separately
       !
       read(unit_dump_bfm_) izone_id
-      print '(1x, a, a, i6, a, i0 )', &
+      print '(1x, 2a, i6, a, i0 )', &
          INFOMSG, 'Interpolating zone n. ', 1, ', with ID=  ', izone_id
       if (do_export_base_) export_data_base_local_%idZone_ = izone_id
       call UndumpZone( rz   __bfm_undump__)
@@ -1515,7 +1515,7 @@ contains
          read(unit_dump_bfm_) izone_id   ! fetch zone type ID
 
          izone = izone + 1
-         print '(1x, a, a, i6, a, i0 )', &
+         print '(1x, 2a, i6, a, i0 )', &
             INFOMSG, 'Interpolating zone n. ', izone, ', with ID=  ', izone_id
 
          if (izone_id == MZone_ID%RECTANGLE) then
@@ -1660,7 +1660,7 @@ contains
       imodesout = NM_EFF__ - skip
 
       if (imodesout == 0) then
-         print '(1x, a, a)', WARNMSG, 'All resonant peak fall within BKG peak !'
+         print '(1x, 2a)', WARNMSG, 'All resonant peak fall within BKG peak !'
          NLims = 0
          return
       endif

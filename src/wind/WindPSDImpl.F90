@@ -129,9 +129,9 @@ contains
       real(bsa_real_t) :: PSD(nf, innl)
 
       if (idir /= 1) then
-         print '(/ 1x, a, a, i1, a)', &
+         print '(/ 1x, 2a, i1, a)', &
             WARNMSG, 'IDIR=  ', idir, ', when usually SHOULD be 1 (X wind direction).'
-         print '(1x, a, a/, a, a)', &
+         print '(1x, 2a/, 2a)', &
             MSGCONT, '(It is uncommon to compute PSDs of wind turbulence assuming', &
             MSGCONT, ' that vortices do not move along X (idir=1), direction of mean wind)'
       endif

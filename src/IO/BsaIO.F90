@@ -191,9 +191,9 @@ contains
       if (ierr_ == 0) return
 
       iun = 0
-      print '(/ 1x, a, a, a, """.")', &
+      print '(/ 1x, 3a, """.")', &
          ERRMSG,  '@IO::io_openExportFileByName() : error trying opening export file  "', file
-      print '(1x, a, a, i0)', &
+      print '(1x, 2a, i0)', &
          MSGCONT, 'Exiting with status ', ierr_
    end function
 

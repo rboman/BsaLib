@@ -31,7 +31,7 @@ contains
       this%i_wind_prof_ = ivaru
 
 #ifdef BSA_DEBUG
-      write(unit_debug_, '(1x, a, a, a)') &
+      write(unit_debug_, '(1x, 3a)') &
          DBGMSG, &
          'Wind vertical profile set to  ', trim(CST_WIND_V_PROFILES(this%i_wind_prof_))
 #endif
@@ -240,7 +240,7 @@ contains
 
       if (present(ndirs)) then
          if (itmp /= ndirs) then
-            print '(1x, a, a/)', &
+            print '(1x, 2a/)', &
                ERRMSG, 'Size mismatch in setting spatial directions.'
             call bsa_Abort()
          endif
@@ -262,7 +262,7 @@ contains
 
       if (present(ntc)) then
          if (itmp /= ntc) then
-            print '(1x, a, a/)', &
+            print '(1x, 2a/)', &
                ERRMSG, 'Size mismatch in setting turbulent components.'
             call bsa_Abort()
          endif
@@ -308,7 +308,7 @@ contains
       this%dirs_(1) = 1
 
 #ifdef BSA_DEBUG
-      write(unit_debug_, '(1x, a, a)') &
+      write(unit_debug_, '(1x, 2a)') &
          INFOMSG, &
          'Default direction and turbulent components set -- ok.'
 #endif

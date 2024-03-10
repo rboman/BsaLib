@@ -722,13 +722,13 @@ contains ! utility procedures
       call getBsaData()
 
       if (.not. (bsa_data_read_ .and. ext_data_read_)) then
-         print '(1x, a, a)', &
+         print '(1x, 2a)', &
             ERRMSG, 'Error reading input data from files.'
          call releaseMemory(5)
       endif
 
 #ifdef _BSA_DEBUG
-      print '(1x, a, a)', &
+      print '(1x, 2a)', &
          INFOMSG, ' BSA   data read correctly.'
 #endif
    end subroutine
@@ -756,14 +756,14 @@ contains ! utility procedures
 
       if (istat == 0) then
 #ifdef _DEBUG
-         print '(1x, a, a)', DBGMSG, 'Input file correctly opened.'
+         print '(1x, 2a)', DBGMSG, 'Input file correctly opened.'
 #endif
          rewind(IUN_EXTDATA)
          return
       endif
 
       print *
-      print '(/1x, a, a, i0)', &
+      print '(/1x, 2a, i0)', &
          ERRMSG, 'Error opening input file. Error code  ', istat
       error stop
    end subroutine
@@ -1012,7 +1012,7 @@ contains ! utility procedures
       ext_data_read_ = .true.
       close(IUN_EXTDATA)
 #ifdef _BSA_DEBUG
-      print '(1x, a, a)', &
+      print '(1x, 2a)', &
          INFOMSG, 'Ext data read correctly.'
 #endif
    end subroutine
@@ -1143,7 +1143,7 @@ contains ! utility procedures
    !       error stop ERRMSG // ' IMPLEMENT ICOUNT=3'
    !    endif
 
-   !    100 print '(1x, a, a)', &
+   !    100 print '(1x, 2a)', &
    !       INFOMSG, 'List of loaded nodes'
    !    print '( 10( "  ", i6) )', &
    !       nodesl
@@ -1354,9 +1354,9 @@ contains ! utility procedures
       if (istat /= 0) call errDeallocVarMsg_('r_xsiad', istat, emsg)
 
       if (iexit == 0) then
-         print '(/ 1x, a, a)', INFOMSG, 'BSA terminated correctly.'
+         print '(/ 1x, 2a)', INFOMSG, 'BSA terminated correctly.'
       else
-         print '(/ 1x, a, a, i0)', &
+         print '(/ 1x, 2a, i0)', &
             ERRMSG, 'BSA terminated with error. Exit status code  ', iexit
       endif
       stop

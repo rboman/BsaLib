@@ -35,7 +35,7 @@ contains
 
       inquire(directory=dirname, exist=lflag)
       if (lflag) then
-         print '(1x, a, a)', &
+         print '(1x, 2a)', &
             INFOMSG, 'Directory  "'//dirname//'"  already exists.'
          return
       endif

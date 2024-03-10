@@ -146,7 +146,7 @@ contains
          MSHR_SVD_LWORK = int(optWork(1))
 
 #ifdef BSA_DEBUG
-         print '(1x, a, a, i0 /)', &
+         print '(1x, 2a, i0 /)', &
             DBGMSG, 'WORK query ok. Optimal work dimension = ', MSHR_SVD_LWORK
 #endif
 
@@ -164,9 +164,9 @@ contains
       endif
 
 
-      print '(1x, a, a, i0)', &
+      print '(1x, 2a, i0)', &
          ERRMSG, 'WORK query for SVD decomposition returned code   ', MSHR_SVD_INFO
-      print '(1x, a, a)', &
+      print '(1x, 2a)', &
          MSGCONT, 'Please, check again.'
       call bsa_Abort()
    end subroutine
@@ -192,7 +192,7 @@ contains
       endif
 
 #ifdef BSA_DEBUG
-      print '(1x, a, a)', &
+      print '(1x, 2a)', &
          INFOMSG, 'SVD related data cleaned -- ok.'
 #endif
    end subroutine
@@ -593,7 +593,7 @@ contains
                   work_arr, lwork, info)
 # endif
             if (info /= 0) then
-               print '(1x, a, a, i0)', &
+               print '(1x, 2a, i0)', &
                   ERRMSG, 'Error applying SVD to S_uvw_w2. Exit code  ', info
                call bsa_Abort()
             endif
@@ -657,7 +657,7 @@ contains
                         work_arr, lwork, info)
 # endif
          if (info /= 0) then
-            print '(1x, a, a, i0)', &
+            print '(1x, 2a, i0)', &
                ERRMSG, 'Error applying SVD to S_uvw_w1. Exit code  ', info
             call bsa_Abort()
          endif
@@ -683,7 +683,7 @@ contains
                work_arr, lwork, info)
 # endif
          if (info /= 0) then
-            print '(1x, a, a, i0)', &
+            print '(1x, 2a, i0)', &
                ERRMSG, 'Error applying SVD to S_uvw_w2. Exit code  ', info
             call bsa_Abort()
          endif
@@ -746,7 +746,7 @@ contains
             work_arr, lwork, info)
 # endif
       if (info /= 0) then
-         print '(1x, a, a, i0)', &
+         print '(1x, 2a, i0)', &
             ERRMSG, 'Error applying SVD to S_uvw_w1. Exit code  ', info
          call bsa_Abort()
       endif
@@ -789,7 +789,7 @@ contains
                work_arr, lwork, info)
 #endif ! BSA_USE_SVD_METHOD
          if (info /= 0) then
-            print '(1x, a, a, i0)', &
+            print '(1x, 2a, i0)', &
                ERRMSG, 'Error applying SVD to S_uvw_w1w2. Exit code  ', info
             call bsa_Abort()
          endif
@@ -1553,7 +1553,7 @@ contains
 
 ! #ifdef BSA_DEBUG
                   i_ncycles = i_ncycles + NNODESL
-                  print '(1x, a, a, f10.4, " %")', &
+                  print '(1x, 2a, f10.4, " %")', &
                      INFOMSG, ' done  ', real(i_ncycles, bsa_real_t)/innl3*100
 ! #endif
                endif ! bisp computation
