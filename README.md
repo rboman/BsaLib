@@ -105,6 +105,7 @@ There is one main known issue in the current version.
 
 # What's missing? Further developments
 
+- [ ] Adapt (very easy to do) Classic approach to dump BFM info as in Mesher
 - [ ] Integrate models for other non-Gaussian actions (waves, for instance)
 - [ ] Complete full support for spatial (in-plane) symmetries of a real-valued bispectrum
 - [ ] Compute nodal correlation internally (don't require it as user data)
