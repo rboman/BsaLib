@@ -605,7 +605,7 @@ end subroutine __sub_name_compute
       !      such to ensure having the SAME n. of points
       !      along both sides.
       !      Later, consider supporting more general approach.
-      interp_fact = max(this%policy_%interp_I_fct_, this%policy_%interp_J_fct_)
+      interp_fact = max(this%policy_%interp_brm_I_fct_, this%policy_%interp_brm_J_fct_)
 
       ! get unary delta freqs increments in I and J directions
       ! (old BFM values, to be interpolated)
@@ -806,14 +806,14 @@ end subroutine __sub_name_compute
       dfJj_bfm_ref_ = dfJj_bfm_lv0_ / n_segs_bfm_ref_j_
 
       ! get BRM interpolated deltas (GRS) (taken from refined BFM deltas this time)
-      dfIi_brm_interp = dfIi_bfm_ref_ / pol%interp_I_fct_
-      dfIj_brm_interp = dfIj_bfm_ref_ / pol%interp_I_fct_
-      dfJi_brm_interp = dfJi_bfm_ref_ / pol%interp_J_fct_
-      dfJj_brm_interp = dfJj_bfm_ref_ / pol%interp_J_fct_
+      dfIi_brm_interp = dfIi_bfm_ref_ / pol%interp_brm_I_fct_
+      dfIj_brm_interp = dfIj_bfm_ref_ / pol%interp_brm_I_fct_
+      dfJi_brm_interp = dfJi_bfm_ref_ / pol%interp_brm_J_fct_
+      dfJj_brm_interp = dfJj_bfm_ref_ / pol%interp_brm_J_fct_
 
       ! get absolute deltas (in LRS), along I and J directions
-      dfI_brm_interp_ = dfI_bfm_ref_ / pol%interp_I_fct_
-      dfJ_brm_interp_ = dfJ_bfm_ref_ / pol%interp_J_fct_
+      dfI_brm_interp_ = dfI_bfm_ref_ / pol%interp_brm_I_fct_
+      dfJ_brm_interp_ = dfJ_bfm_ref_ / pol%interp_brm_J_fct_
 
 
 # ifdef __update_m3mf__
@@ -835,15 +835,15 @@ end subroutine __sub_name_compute
       ! get actualised BFM-refined and BRM-interp  refinements (along borders)
       ni_bfm_ref_ = (this%ni_ - 1)
       nj_bfm_ref_ = (this%nj_ - 1)
-      ni          = ni_bfm_ref_ * (n_segs_bfm_ref_i_ * pol%interp_I_fct_) + 1
-      nj          = nj_bfm_ref_ * (n_segs_bfm_ref_j_ * pol%interp_J_fct_) + 1
+      ni          = ni_bfm_ref_ * (n_segs_bfm_ref_i_ * pol%interp_brm_I_fct_) + 1
+      nj          = nj_bfm_ref_ * (n_segs_bfm_ref_j_ * pol%interp_brm_J_fct_) + 1
       ni_bfm_ref_ = ni_bfm_ref_ * n_segs_bfm_ref_i_ + 1
       nj_bfm_ref_ = nj_bfm_ref_ * n_segs_bfm_ref_j_ + 1
 
       ! number of BRM points to interpolate (insert)
       ! between two know BFM (refined) points' direction lines.
-      nipI = pol%interp_I_fct_ - 1
-      nipJ = pol%interp_J_fct_ - 1
+      nipI = pol%interp_brm_I_fct_ - 1
+      nipJ = pol%interp_brm_J_fct_ - 1
       i_brm_offsetJ = nipI * nj
 
       nPtsPost = ni * nj
@@ -2077,7 +2077,7 @@ end subroutine __sub_name_compute
       if (i_brm /= nPtsPost) then
 # ifndef __triang_zone__
          print *, ' policy BFM-MLV factors      =  ', pol%interp_bfm_I_fct_, pol%interp_bfm_J_fct_
-         print *, ' policy   BRM   factors      =  ', pol%interp_I_fct_, pol%interp_J_fct_
+         print *, ' policy   BRM   factors      =  ', pol%interp_brm_I_fct_, pol%interp_brm_J_fct_
 # endif
          print *, ' ibrm, nPtsPost  = ', i_brm, nPtsPost
          call bsa_Abort('"i_brm" does not equal rect zone''s n. of (interpolated) points.')

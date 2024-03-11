@@ -49,8 +49,8 @@ module BsaLib_MPolicy
       integer(int32) :: delta_fJ_fct_     = 0
       integer(int32) :: interp_bfm_I_fct_ = 0
       integer(int32) :: interp_bfm_J_fct_ = 0
-      integer(int32) :: interp_I_fct_     = 0
-      integer(int32) :: interp_J_fct_     = 0
+      integer(int32) :: interp_brm_I_fct_     = 0
+      integer(int32) :: interp_brm_J_fct_     = 0
       integer(int32) :: n_interp_bfm_lvs_ = 0
       
       integer(int32), private :: id_pol_ = 0
@@ -90,16 +90,16 @@ contains
 
 
    elemental pure function MPolicy_constructor_integer(&
-      dfi, dfj, interp_bfm_i, interp_bfm_j, interpi, interpj, nlevs, id) result(pol)
-      integer, intent(in) :: dfi, dfj, interp_bfm_i, interp_bfm_j, interpi, interpj, nlevs, id
+      dfi, dfj, interp_bfm_i, interp_bfm_j, interp_brm_i, interp_brm_j, nlevs, id) result(pol)
+      integer, intent(in) :: dfi, dfj, interp_bfm_i, interp_bfm_j, interp_brm_i, interp_brm_j, nlevs, id
       type(MPolicy_t) :: pol
 
       pol%delta_fI_fct_     = int(dfi,          kind=int32)
       pol%delta_fJ_fct_     = int(dfj,          kind=int32)
       pol%interp_bfm_I_fct_ = int(interp_bfm_i, kind=int32)
       pol%interp_bfm_J_fct_ = int(interp_bfm_j, kind=int32)
-      pol%interp_I_fct_     = int(interpi,      kind=int32)
-      pol%interp_J_fct_     = int(interpj,      kind=int32)
+      pol%interp_brm_I_fct_ = int(interp_brm_i, kind=int32)
+      pol%interp_brm_J_fct_ = int(interp_brm_j, kind=int32)
       pol%n_interp_bfm_lvs_ = int(nlevs,        kind=int32)
       pol%id_pol_           = int(id,           kind=int32)
    end function
@@ -156,8 +156,8 @@ contains
       lhs%delta_fJ_fct_     = rhs_pol%delta_fJ_fct_
       lhs%interp_bfm_I_fct_ = rhs_pol%interp_bfm_I_fct_
       lhs%interp_bfm_J_fct_ = rhs_pol%interp_bfm_J_fct_
-      lhs%interp_I_fct_     = rhs_pol%interp_I_fct_
-      lhs%interp_J_fct_     = rhs_pol%interp_J_fct_
+      lhs%interp_brm_I_fct_ = rhs_pol%interp_brm_I_fct_
+      lhs%interp_brm_J_fct_ = rhs_pol%interp_brm_J_fct_
       lhs%n_interp_bfm_lvs_ = rhs_pol%n_interp_bfm_lvs_
       lhs%id_pol_           = rhs_pol%id_pol_
    end subroutine MPolicy_fromPol_sub
