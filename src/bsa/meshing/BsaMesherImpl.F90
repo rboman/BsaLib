@@ -113,9 +113,6 @@ contains
          write(unit_dump_bfm_) settings%i_dump_modal_
          if (settings%i_dump_modal_ == 1) then
 
-            print '(1x, 2a /)', &
-               WARNMSG, 'Including modal info in dump file. Check if this can be avoided.'
-
             ! write kept modes, might serve after as well.
             ! NOTE: in fact, nm_eff_ is the VERY FIRST thing which is dumped!
             !       But, at the very beginning, we don't yet how many modes will be kept, 
