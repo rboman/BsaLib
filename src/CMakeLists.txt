@@ -70,7 +70,7 @@ target_include_directories( ${project} AFTER PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
 
 
 # # TODO: experimental
-target_compile_definitions( ${project} PRIVATE BSA_USE_POD_DATA_CACHING )
+# target_compile_definitions( ${project} PRIVATE BSA_USE_POD_DATA_CACHING )
 
 
 # # BUG: using OMP in post-meshing phase will result in slower runtime 
