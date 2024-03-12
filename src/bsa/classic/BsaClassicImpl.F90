@@ -309,10 +309,13 @@ contains
                      omg = fi * CST_PIt2
 
 #ifdef _OPENMP
-                     !$omp parallel do                   &
-                     !$omp    default(firstprivate),     &
-                     !$omp    shared(jfr_ext, f, S_uvw, S_uvw_pad    &
-                     !$omp         , ifr, dw2, m3mf_cls, m3mr_cls),  &
+                     !$omp parallel do                      &
+                     !$omp    default(firstprivate),        &
+                     !$omp    shared(wd, settings, struct_data                &
+                     !$omp         , NFREQS, NPSDEL, NMODES_EFF               &
+                     !$omp         , NNODES, NNODESL, dimM_psd_, dimM_bisp_   &
+                     !$omp         , jfr_ext, f, S_uvw, S_uvw_pad             &
+                     !$omp         , ifr, dw2, m3mf_cls, m3mr_cls),           &
                      !$omp    num_threads(nt)
 #endif
                      do jfr = 1, jfr_ext
