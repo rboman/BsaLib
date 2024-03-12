@@ -597,7 +597,7 @@ module BsaLib
       end subroutine
 
 
-      module subroutine bsa_setBRMExportFunction(fptr)
+      module subroutine bsa_setBispExportCallback(fptr)
          procedure(exportInterf_vect_), pointer, intent(in) :: fptr
       end subroutine
 

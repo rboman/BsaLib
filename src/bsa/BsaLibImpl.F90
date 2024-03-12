@@ -1771,10 +1771,7 @@ contains
 
 
 
-
-   ! BUG: should also providfe a way to pass pointer to user defined exporting data 
-   !      structure that has to be finally dereferenced in actual exporting routine!
-   module subroutine bsa_setBRMExportFunction(fptr)
+   module subroutine bsa_setBispExportCallback(fptr)
       procedure(exportInterf_vect_), pointer, intent(in) :: fptr
 
       write_brm_fptr_ => fptr
