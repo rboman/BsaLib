@@ -324,7 +324,8 @@ contains
 #ifdef _OPENMP
                         !$omp critical
 #endif
-                        m3mf_cls = m3mf_cls + bispfm * dw2 ! NOTE: using same infl area for each point in space!
+                        if (settings%i_compute_bisp_ == 1) &
+                           m3mf_cls = m3mf_cls + bispfm * dw2 ! NOTE: using same infl area for each point in space!
 #ifdef _OPENMP
                         !$omp end critical
 #endif
@@ -334,7 +335,7 @@ contains
 #ifdef _OPENMP
                         !$omp critical
 #endif
-                        m3mr_cls = m3mr_cls + bisprm * dw2
+                        if (settings%i_compute_bisp_ == 1) m3mr_cls = m3mr_cls + bisprm * dw2
 #ifdef _OPENMP
                         !$omp end critical
 #endif
