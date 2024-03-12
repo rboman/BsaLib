@@ -423,8 +423,7 @@ __mod_sub_compute subroutine __sub_name_compute(this)
 
       ! eventually, update zone with max N of points
       if (zNp > msh_max_zone_NPts) msh_max_zone_NPts = zNp
-
-      if (allocated(bfm))  deallocate(bfm)
+      
 # ifdef _BSA_M3MF_ONLY_PREMESH
       if (allocated(intg)) deallocate(intg)
 # endif
@@ -436,6 +435,10 @@ __mod_sub_compute subroutine __sub_name_compute(this)
       msh_NZones = msh_NZones + 1            ! update n. of zones count
       call DumpZone(this  __bfm_dump__ )     ! dump zone info
       !$omp end critical
+
+#ifndef BSA_USE_POD_DATA_CACHING
+      if (allocated(bfm))  deallocate(bfm)
+#endif
    end block
 
 #undef __bfm_dump__
