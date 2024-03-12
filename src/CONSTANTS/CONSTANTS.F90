@@ -19,6 +19,6 @@ module BsaLib_CONSTANTS
    implicit none (type, external)
    public
 
-#include "_CONSTANTS.f90"
+#include "_CONSTANTS.F90"
 
 end module
