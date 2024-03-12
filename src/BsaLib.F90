@@ -41,7 +41,7 @@ module BsaLib
 
 
    !**************************************************************************************
-   !   INTERAFCE FOR PRIVATE PROCEDURES
+   !   INTERFACE FOR PRIVATE PROCEDURES
    !**************************************************************************************
    interface
       module subroutine mainClassic_(m2mf_cls, m2mr_cls, m2o2mr_cls, m3mf_cls, m3mr_cls)
