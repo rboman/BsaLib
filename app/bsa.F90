@@ -862,7 +862,7 @@ contains ! utility procedures
       if (istat /= 0) call errAllocVarMsg_('r_corrNod', istat, emsg)
 
       allocate(r_wfc(i_nlibsl, i_degw+3, i_nnodes), stat=istat, errmsg=emsg)
-      if (istat /= 0) call errAllocVarMsg_('r_corrNod', istat, emsg)
+      if (istat /= 0) call errAllocVarMsg_('r_wfc', istat, emsg)
 
       if (l_formmode) then
          read(IUN_EXTDATA, *) r_Zref_z
