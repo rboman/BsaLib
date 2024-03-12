@@ -107,6 +107,32 @@ contains
       m3mr_msh_ptr_ => m3mr_msh
       call Mesh()
 
+      ! NOTE: Dump modal info if needed, before rewinding..
+      if (.not. is_visual_) then
+
+         write(unit_dump_bfm_) settings%i_dump_modal_
+         if (settings%i_dump_modal_ == 1) then
+
+            print '(1x, 2a /)', &
+               WARNMSG, 'Including modal info in dump file. Check if this can be avoided.'
+
+            ! write kept modes, might serve after as well.
+            ! NOTE: in fact, nm_eff_ is the VERY FIRST thing which is dumped!
+            !       But, at the very beginning, we don't yet how many modes will be kept, 
+            !       this is why it is done now here.
+            write(unit_dump_bfm_) struct_data%modal_%modes_
+
+            write(unit_dump_bfm_) &
+               struct_data%modal_%Mm_(struct_data%modal_%modes_)
+            write(unit_dump_bfm_) &
+               struct_data%modal_%Cm_(struct_data%modal_%modes_, struct_data%modal_%modes_)
+            write(unit_dump_bfm_) &
+               struct_data%modal_%Km_(struct_data%modal_%modes_)
+
+            print '(1x, 2a)', INFOMSG, 'Modal info dumped -- ok.'
+         endif
+      endif
+
 
       ! cleanup
       998 if (lflag .and. .not. test_no_bfm_mlr_) call cleanSVDWorkInfo_()
@@ -1345,31 +1371,6 @@ contains
       if (allocated(policies))   deallocate(policies)
       if (allocated(zone_title)) deallocate(zone_title)
 
-
-      ! NOTE: Dump modal info if needed, before rewinding..
-      write(unit_dump_bfm_) settings%i_dump_modal_
-      if (settings%i_dump_modal_ == 1) then
-
-         print '(1x, 2a /)', &
-            WARNMSG, 'Including modal info in dump file. Check if this can be avoided.'
-
-         ! write kept modes, might serve after as well.
-         ! NOTE: in fact, nm_eff_ is the VERY FIRST thing which is dumped!
-         !       But, at the very beginning, we don't yet how many modes will be kept, 
-         !       this is why it is done now here.
-         write(unit_dump_bfm_) struct_data%modal_%modes_
-
-         write(unit_dump_bfm_) &
-            struct_data%modal_%Mm_(struct_data%modal_%modes_)
-         write(unit_dump_bfm_) &
-            struct_data%modal_%Cm_(struct_data%modal_%modes_, struct_data%modal_%modes_)
-         write(unit_dump_bfm_) &
-            struct_data%modal_%Km_(struct_data%modal_%modes_)
-
-#ifdef BSA_DEBUG
-         print '(1x, 2a)', INFOMSG, 'Modal info dumped -- ok.'
-#endif
-      endif
 
       ! NOTE: Ok, now that premesh has finished, before going to actual meshing, 
       !       rewind dump file and rewrite actual needed head information.
