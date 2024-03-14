@@ -63,9 +63,6 @@ module data
 #endif
 
    real(real64), target, allocatable :: r_wfc(:, :, :)
-#ifdef BSA_SINGLE_FLOATING_PRECISION
-   real(bsa_real_t), target, allocatable :: r_wfc_(:, :, :)
-#endif
 
    integer(int32) :: i_nm, i_ndofs
    real(real64), target, allocatable :: r_natf(:), r_modm(:, :)
@@ -649,10 +646,7 @@ contains ! utility procedures
       call bsa_setNodalWindAltitudes(r_wAltNod_)
       call bsa_setSpatialNodalCorr(r_corrNod_)
 
-      ! NOTE: in BSA, we want only LOADED NODES.
-      r_wfc_ = real(r_wfc(:, :, nodesl), kind=bsa_real_t)
-      deallocate(r_wfc)
-      call bsa_setWindFCoeffs(r_wfc_)
+      call bsa_setWindFCoeffs(r_wfc)
 
       ! MODAL
       call bsa_setModalInfo(i_ndofs, i_nm, r_modm_, r_natf_)
@@ -671,8 +665,6 @@ contains ! utility procedures
       call bsa_setNodalWindAltitudes(r_wAltNod)
       call bsa_setSpatialNodalCorr(r_corrNod)
 
-      ! NOTE: in BSA, we want only LOADED NODES.
-      r_wfc = r_wfc(:, :, nodesl)
       call bsa_setWindFCoeffs(r_wfc)
 
       ! MODAL
