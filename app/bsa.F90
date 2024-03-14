@@ -722,7 +722,7 @@ contains ! utility procedures
       allocate(libsl(i_nlibsl), stat=istat, errmsg=emsg)
       if (istat /= 0) call errAllocVarMsg_('libsl', istat, emsg)
 
-      allocate(nod_cords(i_nnodes, 3), stat=istat, errmsg=emsg)
+      allocate(nod_cords(3, i_nnodes), stat=istat, errmsg=emsg)
       if (istat /= 0) call errAllocVarMsg_('nod_cords', istat, emsg)
 
       if (l_formmode) then
@@ -734,8 +734,6 @@ contains ! utility procedures
          read(IUN_EXTDATA) libsl
          read(IUN_EXTDATA) nod_cords
       endif
-      nod_cords = transpose(nod_cords)
-
 
 
       if (l_formmode) then
@@ -755,14 +753,13 @@ contains ! utility procedures
          read(IUN_EXTDATA) r_rotW2G
          read(IUN_EXTDATA) i_nzones
       endif
-      if (i_varu == 5) i_varu = 1
 
       allocate(r_Zref_z(i_nzones), stat=istat, errmsg=emsg)
       if (istat /= 0) call errAllocVarMsg_('r_Zref_z', istat, emsg)
       allocate(r_UBref_z(i_nzones), stat=istat, errmsg=emsg)
       if (istat /= 0) call errAllocVarMsg_('r_UBref_z', istat, emsg)
-      allocate(r_alph_z(i_nzones), stat=istat, errmsg=emsg)
-      if (istat /= 0) call errAllocVarMsg_('r_alph_z', istat, emsg)
+      ! allocate(r_alph_z(i_nzones), stat=istat, errmsg=emsg)
+      ! if (istat /= 0) call errAllocVarMsg_('r_alph_z', istat, emsg)
       allocate(r_L_z(3, 3, i_nzones), stat=istat, errmsg=emsg)
       if (istat /= 0) call errAllocVarMsg_('r_L_z', istat, emsg)
       allocate(r_std_z(3, i_nzones), stat=istat, errmsg=emsg)
@@ -789,13 +786,13 @@ contains ! utility procedures
       allocate(r_corrNod(itmp, 3), stat=istat, errmsg=emsg)
       if (istat /= 0) call errAllocVarMsg_('r_corrNod', istat, emsg)
 
-      allocate(r_wfc(i_nlibsl, i_degw+3, i_nnodes), stat=istat, errmsg=emsg)
+      allocate(r_wfc(i_nlibsl, i_degw+3, i_nnodesl), stat=istat, errmsg=emsg)
       if (istat /= 0) call errAllocVarMsg_('r_wfc', istat, emsg)
 
       if (l_formmode) then
          read(IUN_EXTDATA, *) r_Zref_z
          read(IUN_EXTDATA, *) r_UBref_z
-         read(IUN_EXTDATA, *) r_alph_z
+         ! read(IUN_EXTDATA, *) r_alph_z
          read(IUN_EXTDATA, *) r_L_z
          read(IUN_EXTDATA, *) r_std_z
          read(IUN_EXTDATA, *) r_corrC_z
@@ -812,7 +809,7 @@ contains ! utility procedures
       else
          read(IUN_EXTDATA) r_Zref_z
          read(IUN_EXTDATA) r_UBref_z
-         read(IUN_EXTDATA) r_alph_z
+         ! read(IUN_EXTDATA) r_alph_z
          read(IUN_EXTDATA) r_L_z
          read(IUN_EXTDATA) r_std_z
          read(IUN_EXTDATA) r_corrC_z
@@ -848,8 +845,9 @@ contains ! utility procedures
       if (istat /= 0) call errAllocVarMsg_('r_Cg', istat, emsg)
       allocate(r_xsist(i_nm), stat=istat, errmsg=emsg)
       if (istat /= 0) call errAllocVarMsg_('r_xsist', istat, emsg)
-      allocate(r_xsiad(i_nm), stat=istat, errmsg=emsg)
-      if (istat /= 0) call errAllocVarMsg_('r_xsiad', istat, emsg)
+      ! allocate(r_xsiad(i_nm), stat=istat, errmsg=emsg)
+      ! if (istat /= 0) call errAllocVarMsg_('r_xsiad', istat, emsg)
+
       if (l_formmode) then
          read(IUN_EXTDATA, *) r_natf
          read(IUN_EXTDATA, *) r_modm
@@ -857,7 +855,7 @@ contains ! utility procedures
          read(IUN_EXTDATA, *) r_Kg
          read(IUN_EXTDATA, *) r_Cg
          read(IUN_EXTDATA, *) r_xsist
-         read(IUN_EXTDATA, *) r_xsiad
+         ! read(IUN_EXTDATA, *) r_xsiad
       else
          read(IUN_EXTDATA) r_natf
          read(IUN_EXTDATA) r_modm
@@ -865,7 +863,7 @@ contains ! utility procedures
          read(IUN_EXTDATA) r_Kg
          read(IUN_EXTDATA) r_Cg
          read(IUN_EXTDATA) r_xsist
-         read(IUN_EXTDATA) r_xsiad
+         ! read(IUN_EXTDATA) r_xsiad
       endif
 
 
@@ -1168,8 +1166,8 @@ contains ! utility procedures
       if (istat /= 0) call errDeallocVarMsg_('r_Zref_z', istat, emsg)
       if (allocated(r_UBref_z)) deallocate(r_UBref_z, stat=istat, errmsg=emsg)
       if (istat /= 0) call errDeallocVarMsg_('r_UBref_z', istat, emsg)
-      if (allocated(r_alph_z)) deallocate(r_alph_z, stat=istat, errmsg=emsg)
-      if (istat /= 0) call errDeallocVarMsg_('r_alph_z', istat, emsg)
+      ! if (allocated(r_alph_z)) deallocate(r_alph_z, stat=istat, errmsg=emsg)
+      ! if (istat /= 0) call errDeallocVarMsg_('r_alph_z', istat, emsg)
       if (allocated(r_L_z)) deallocate(r_L_z, stat=istat, errmsg=emsg)
       if (istat /= 0) call errDeallocVarMsg_('r_L_z', istat, emsg)
       if (allocated(r_std_z)) deallocate(r_std_z, stat=istat, errmsg=emsg)
@@ -1210,8 +1208,8 @@ contains ! utility procedures
       if (istat /= 0) call errDeallocVarMsg_('r_Cg', istat, emsg)
       if (allocated(r_xsist)) deallocate(r_xsist, stat=istat, errmsg=emsg)
       if (istat /= 0) call errDeallocVarMsg_('r_xsist', istat, emsg)
-      if (allocated(r_xsiad)) deallocate(r_xsiad, stat=istat, errmsg=emsg)
-      if (istat /= 0) call errDeallocVarMsg_('r_xsiad', istat, emsg)
+      ! if (allocated(r_xsiad)) deallocate(r_xsiad, stat=istat, errmsg=emsg)
+      ! if (istat /= 0) call errDeallocVarMsg_('r_xsiad', istat, emsg)
 
       if (iexit == 0) then
          print '(/ 1x, 2a)', INFOMSG, 'BSA terminated correctly.'
