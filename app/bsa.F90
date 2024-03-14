@@ -38,9 +38,6 @@ module data
    integer(int32) :: i_nnodes, i_nlibs, i_nnodesl, i_nlibsl
    integer(int32), target, allocatable :: nodesl(:), libsl(:)
    real(real64),   target, allocatable :: nod_cords(:, :)
-#ifdef BSA_SINGLE_FLOATING_PRECISION
-   real(bsa_real_t), target, allocatable :: nod_cords_(:, :)
-#endif
 
    integer(int32) :: i_varu, i_su, i_vert, i_degw
    integer(int32) :: i_nzones
@@ -49,18 +46,9 @@ module data
    real(real64), target, allocatable :: r_Zref_z(:), r_UBref_z(:), r_alph_z(:), r_lims_z(:)
    real(real64), target, allocatable :: r_L_z(:, :, :), r_std_z(:, :), r_corrC_z(:, :, :)
    real(real64), target, allocatable :: r_corrEx_z(:, :, :), r_rotW2G_z(:, :, :), r_incang_z(:)
-#ifdef BSA_SINGLE_FLOATING_PRECISION
-   real(bsa_real_t), target, allocatable :: r_Zref_z_(:), r_UBref_z_(:), r_alph_z_(:), r_lims_z_(:)
-   real(bsa_real_t), target, allocatable :: r_L_z_(:, :, :), r_std_z_(:, :), r_corrC_z_(:, :, :)
-   real(bsa_real_t), target, allocatable :: r_corrEx_z_(:, :, :), r_rotW2G_z_(:, :, :), r_incang_z_(:)
-#endif
 
    integer(int32), target, allocatable :: i_wzNod(:)
    real(real64),   target, allocatable :: r_wAltNod(:), r_UBnod(:), r_corrNod(:, :)
-#ifdef BSA_SINGLE_FLOATING_PRECISION
-   integer(bsa_int_t), target, allocatable :: i_wzNod_(:)
-   real(bsa_real_t),   target, allocatable :: r_wAltNod_(:), r_UBnod_(:), r_corrNod_(:, :)
-#endif
 
    real(real64), target, allocatable :: r_wfc(:, :, :)
 
@@ -68,11 +56,6 @@ module data
    real(real64), target, allocatable :: r_natf(:), r_modm(:, :)
    real(real64), target, allocatable :: r_Mg(:), r_Kg(:), r_Cg(:, :)
    real(real64), target, allocatable :: r_xsist(:), r_xsiad(:)
-#ifdef BSA_SINGLE_FLOATING_PRECISION
-   real(bsa_real_t), target, allocatable :: r_natf_(:), r_modm_(:, :)
-   real(bsa_real_t), target, allocatable :: r_Mg_(:), r_Kg_(:), r_Cg_(:, :)
-   real(bsa_real_t), target, allocatable :: r_xsist_(:), r_xsiad_(:)
-#endif
 
    integer(int32) :: i_exprt_mode_ = BSA_EXPORT_MODE_REPLACE
    integer(int32) :: i_exprt_form_ = BSA_EXPORT_FORMAT_FORMATTED
@@ -130,11 +113,7 @@ program bsa
    call readDataFiles()
    call setup()
 
-#ifdef BSA_SINGLE_FLOATING_PRECISION
-   call bsa_setTotDamping(r_xsist_)
-#else
    call bsa_setTotDamping(r_xsist)
-#endif
 
    ! BUG: allow bsa_Run to accept already allocated entities
    !      (check for size match).
@@ -159,11 +138,7 @@ program bsa
          if (allocated(m2mf_)) then
             call bsa_computeBRdecomp(m2mf_, bkg_, res_)
             fname = exp_prfx // 'm2_BR_decomp.txt'
-#ifdef BSA_SINGLE_FLOATING_PRECISION
-            call bsa_exportBRdecomp(fname, bkg_, res_, r_xsist_(modes_))
-#else
             call bsa_exportBRdecomp(fname, bkg_, res_, r_xsist(modes_))
-#endif
 
             fname = exp_prfx // 'm2_mf_' // cls_sffx // udscr // cmb_sffx // exp_fext
             call bsa_exportMomentToFile(fname, m2mf_)
@@ -183,22 +158,14 @@ program bsa
             if (allocated(m3mr_msh_)) then
                fname = exp_prfx // 'sk_mr_' // msh_sffx // udscr // cmb_sffx // exp_fext
                call bsa_exportSkewness(fname, nmodes_, m2mr_, m3mr_msh_)
-#ifdef BSA_SINGLE_FLOATING_PRECISION
-               call modalRecombination(r_modm_(:, modes_), m2mr_, m3mr_msh_, m2o2mr_)
-#else
                call modalRecombination(r_modm(:, modes_), m2mr_, m3mr_msh_, m2o2mr_)
-#endif
             endif
 
             if (allocated(m3mr_cls_)) then
                fname = exp_prfx // 'sk_mr_' // cls_sffx // udscr // cmb_sffx // exp_fext
                call bsa_exportSkewness(fname, nmodes_, m2mr_, m3mr_cls_)
                if (.not. allocated(m3mr_msh_)) &
-#ifdef BSA_SINGLE_FLOATING_PRECISION
-                  call modalRecombination(r_modm_(:, modes_), m2mr_, m3mr_cls_, m2o2mr_)
-#else
                   call modalRecombination(r_modm(:, modes_), m2mr_, m3mr_cls_, m2o2mr_)
-#endif
             endif
 
 
@@ -612,46 +579,16 @@ contains ! utility procedures
       call bsa_setNodalNOfDOFs(i_nlibs)
       call bsa_setLoadedNodes(nodesl)
       call bsa_setLoadedNodalDOFs(libsl)
-#ifdef BSA_SINGLE_FLOATING_PRECISION
-      nod_cords_ = real(nod_cords, kind=bsa_real_t)
-      deallocate(nod_cords)
-      call bsa_setNodalCoords(i_nnodes, nod_cords_)
-#else
       call bsa_setNodalCoords(i_nnodes, nod_cords)
-#endif
 
       ! WIND
       call bsa_setWindVertProf(i_varu)
       call bsa_setPSDType(i_su)
       call bsa_setWindAltDir(i_vert)
-#ifdef BSA_SINGLE_FLOATING_PRECISION
-      call bsa_setWindZoneLimits(r_lims_z_)
-#else
       call bsa_setWindZoneLimits(r_lims_z)
-#endif
       call bsa_setAirDensity(real(r_aird, kind=bsa_real_t))
       call bsa_setGlobalRotMatW2G(real(r_rotW2G, kind=bsa_real_t))
 
-#ifdef BSA_SINGLE_FLOATING_PRECISION
-      call bsa_setWZMeanWindVel(r_UBref_z_)
-      call bsa_setWZRefAlt(r_Zref_z_)
-      call bsa_setTurbWindScales(r_L_z_)
-      call bsa_setTurbWindSDT(r_std_z_)
-      call bsa_setWindCorrCoeffs(r_corrC_z_)
-      call bsa_setWindCorrExpnts(r_corrEx_z_)
-      call bsa_setWZRotMatW2G(r_rotW2G_z_)
-      call bsa_setIncidenceAngles(r_incang_z_)
-      call bsa_setNodalVel(r_UBnod_)
-      call bsa_setNodalWindZones(i_wzNod_)
-      call bsa_setNodalWindAltitudes(r_wAltNod_)
-      call bsa_setSpatialNodalCorr(r_corrNod_)
-
-      call bsa_setWindFCoeffs(r_wfc)
-
-      ! MODAL
-      call bsa_setModalInfo(i_ndofs, i_nm, r_modm_, r_natf_)
-      call bsa_setModalMatrices(i_nm, r_Mg_, r_Kg_, r_Cg_)
-#else
       call bsa_setWZMeanWindVel(r_UBref_z)
       call bsa_setWZRefAlt(r_Zref_z)
       call bsa_setTurbWindScales(r_L_z)
@@ -670,7 +607,6 @@ contains ! utility procedures
       ! MODAL
       call bsa_setModalInfo(i_ndofs, i_nm, r_modm, r_natf)
       call bsa_setModalMatrices(i_nm, r_Mg, r_Kg, r_Cg)
-#endif
 
    end subroutine setup
 
@@ -892,51 +828,6 @@ contains ! utility procedures
          read(IUN_EXTDATA) r_wfc
       endif
 
-#ifdef BSA_SINGLE_FLOATING_PRECISION
-      r_Zref_z_ = real(r_Zref_z, kind=bsa_real_t)
-      deallocate(r_Zref_z)
-
-      r_UBref_z_ = real(r_UBref_z, kind=bsa_real_t)
-      deallocate(r_UBref_z)
-
-      r_alph_z_ = real(r_alph_z, kind=bsa_real_t)
-      deallocate(r_alph_z)
-
-      r_L_z_ = real(r_L_z, kind=bsa_real_t)
-      deallocate(r_L_z)
-
-      r_std_z_ = real(r_std_z, kind=bsa_real_t)
-      deallocate(r_std_z)
-
-      r_corrC_z_ = real(r_corrC_z, kind=bsa_real_t)
-      deallocate(r_corrC_z)
-
-      r_corrEx_z_ = real(r_corrEx_z, kind=bsa_real_t)
-      deallocate(r_corrEx_z)
-
-      r_lims_z_ = real(r_lims_z, kind=bsa_real_t)
-      deallocate(r_lims_z)
-
-      r_rotW2G_z_ = real(r_rotW2G_z, kind=bsa_real_t)
-      deallocate(r_rotW2G_z)
-
-      r_incang_z_ = real(r_incang_z, kind=bsa_real_t)
-      deallocate(r_incang_z)
-
-      i_wzNod_ = int(i_wzNod, kind=bsa_int_t)
-      deallocate(i_wzNod)
-
-      r_wAltNod_ = real(r_wAltNod, kind=bsa_real_t)
-      deallocate(r_wAltNod)
-
-      r_UBnod_ = real(r_UBnod, kind=bsa_real_t)
-      deallocate(r_UBnod)
-
-      r_corrNod_ = real(r_corrNod, kind=bsa_real_t)
-      deallocate(r_corrNod)
-#endif
-
-
 
       if (l_formmode) then
          read(IUN_EXTDATA, *) i_nm
@@ -977,29 +868,6 @@ contains ! utility procedures
          read(IUN_EXTDATA) r_xsiad
       endif
 
-
-#ifdef BSA_SINGLE_FLOATING_PRECISION
-      r_natf_ = real(r_natf, kind=bsa_real_t)
-      deallocate(r_natf)
-
-      r_modm_ = real(r_modm, kind=bsa_real_t)
-      deallocate(r_modm)
-
-      r_Mg_ = real(r_Mg, kind=bsa_real_t)
-      deallocate(r_Mg)
-
-      r_Kg_ = real(r_Kg, kind=bsa_real_t)
-      deallocate(r_Kg)
-
-      r_Cg_ = real(r_Cg, kind=bsa_real_t)
-      deallocate(r_Cg)
-
-      r_xsist_ = real(r_xsist, kind=bsa_real_t)
-      deallocate(r_xsist)
-
-      r_xsiad_ = real(r_xsiad, kind=bsa_real_t)
-      deallocate(r_xsiad)
-#endif
 
       ext_data_read_ = .true.
       close(IUN_EXTDATA)
