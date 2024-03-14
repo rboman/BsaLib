@@ -1776,7 +1776,7 @@ contains
       ! libs related vars
       integer(int32) :: ilk, ilj, ili, lk, lj, li
 
-      ! modal amtrix related
+      ! modal matrix related
       real(bsa_real_t), dimension(NMODES_EFF) :: phik, phij, phii
       integer(int32) :: posk, posj, posi
 
