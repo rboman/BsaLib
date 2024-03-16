@@ -14,7 +14,7 @@
 !! You should have received a copy of the GNU General Public License
 !! along with BSA Library.  If not, see <https://www.gnu.org/licenses/>.
 module BsaLib_MPolicy
-   
+
    use BsaLib_CONSTANTS, only: int32
    implicit none (type, external)
    private
@@ -42,7 +42,7 @@ module BsaLib_MPolicy
    integer(int32), public, parameter :: MPolicy_PAD_ZONE_INTERN = 8
    integer(int32), public, parameter :: MPolicy_PAD_ZONE_EXTERN = 9
 
-   
+
    type, public :: MPolicy_t
 
       integer(int32) :: delta_fI_fct_     = 0
@@ -52,7 +52,7 @@ module BsaLib_MPolicy
       integer(int32) :: interp_brm_I_fct_     = 0
       integer(int32) :: interp_brm_J_fct_     = 0
       integer(int32) :: n_interp_bfm_lvs_ = 0
-      
+
       integer(int32), private :: id_pol_ = 0
    contains
 
@@ -113,34 +113,34 @@ contains
       select case (mpol)
          case (MPolicy_NULL)
             pol = MPolicy_t(0, 0,   0, 0,   0, 0,    0, MPolicy_NULL)
-         
+
          case (MPolicy_DEF)
             pol = MPolicy_t(2, 2,   2, 2,   2, 2,    1, MPolicy_DEF)
-         
+
          case (MPolicy_CONST)
             pol = MPolicy_t(1, 1,   1, 1,   1, 1,    1, MPolicy_CONST)
-         
+
          case (MPolicy_PRE_PEAK_1)
             pol = MPolicy_t(1, 4,   4, 4,   4, 2,    1, MPolicy_PRE_PEAK_1)
-         
+
          case (MPolicy_PRE_PEAK_2)
             pol = MPolicy_t(1, 8,   2, 2,   4, 2,    1, MPolicy_PRE_PEAK_2)
-         
+
          case (MPolicy_PEAK)
             pol = MPolicy_t(1, 1,   4, 4,   4, 4,    1, MPolicy_PEAK)
-         
+
          case (MPolicy_CREST)
             pol = MPolicy_t(1, 4,   4, 4,   4, 2,    1, MPolicy_CREST)
-         
+
          case (MPolicy_BASIN)
             pol = MPolicy_t(1, 4,   2, 2,   2, 2,    1, MPolicy_BASIN)
-         
+
          case (MPolicy_PAD_ZONE_INTERN)
             pol = MPolicy_t(4, 4,   1, 1,   2, 2,    1, MPolicy_PAD_ZONE_INTERN)
-         
+
          case (MPolicy_PAD_ZONE_EXTERN)
             pol = MPolicy_t(8, 8,   1, 1,   2, 2,    1, MPolicy_PAD_ZONE_EXTERN)
-         
+
          case default
             pol = MPolicy_t(2, 2,   2, 2,   2, 2,    1, MPolicy_DEF)
       end select
