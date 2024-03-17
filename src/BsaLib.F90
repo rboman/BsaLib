@@ -102,6 +102,12 @@ module BsaLib
       end subroutine
 
 
+
+      module subroutine bsa_generateBSAInputFiles()
+      end subroutine
+
+
+
       module subroutine bsa_setVisualModeModalIndexes(modes)
          integer(bsa_int_t), intent(in) :: modes(3)
       end subroutine

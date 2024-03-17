@@ -62,7 +62,6 @@ contains
       integer(int32) :: istat
       character(len = 256) :: emsg
 
-      if (.not. header_called_) call bsa_printBSAHeader()
 
       ! if (.not. allocated(out_dir_)) out_dir_ = BSA_OUT_DIRNAME_DEFAULT
       ! istat = util_createDirIfNotExist(out_dir_)
@@ -126,6 +125,14 @@ contains
    end subroutine
 
 
+
+   module subroutine bsa_generateBSAInputFiles()
+
+      do_gen_bsa_input_files_ = .true.
+   end subroutine
+
+
+
    module subroutine bsa_setVisualModeModalIndexes(modes)
       integer(bsa_int_t), intent(in) :: modes(3)
 
@@ -161,6 +168,14 @@ contains
          print '(1x, 2a)', &
             WARNMSG, 'Both  PSD  and  BISP  computation are disabled.'
          return
+      endif
+
+      if (.not. header_called_) call bsa_printBSAHeader()
+
+      if (do_gen_bsa_input_files_) then
+         print '(/ 1x, 2a)', INFOMSG, "Generating BSA-compatible input files."
+         call generateBSAInputFiles_()
+         goto 998
       endif
 
 
@@ -1978,6 +1993,105 @@ contains
       enddo
       close(iun)
    end subroutine
+
+
+
+
+
+
+
+   subroutine generateBSAInputFiles_()
+      integer(int32), parameter :: iun = 65478
+      integer(int32) :: ios
+
+      ! bsa data
+      open(unit=iun, file=BSA_DATA_FNAME, iostat=ios, form="formatted" &
+         , status="replace", action="write", access="sequential")
+      if (ios /= 0) call bsa_Abort("Error opening file  bsa.bsadata")
+
+      write(iun, '(a)') "-GENERAL:"
+      write(iun, '(i4)') settings%i_suban_type_
+      write(iun, '(i4)') settings%i_vers_
+      write(iun, '(i4)') settings%i_def_scaling_
+      write(iun, '(i4)') settings%i_compute_psd_
+      write(iun, '(i4)') settings%i_compute_bisp_
+      write(iun, '(i4)') settings%i_only_diag_
+      write(iun, '(i4)') settings%i_bisp_sym_
+      write(iun, '(i4)') settings%i_3d_sym_
+      write(iun, '(i4)') settings%i_test_mode_
+      write(iun, '(a)') "-CLASSIC:"
+      write(iun, '(i4)') settings%i_scalar_vers_
+      write(iun, '(i4)') settings%nfreqs_
+      write(iun, '(f9.4)') settings%df_
+      write(iun, '(a)') "-MESHER:"
+      write(iun, '(i4)') settings%i_use_svd_
+      write(iun, '(i4)') settings%bkg_base_rfmnt_
+      write(iun, '(i4)') settings%bkg_area_extension_
+      write(iun, '(i4)') settings%gen_peak_area_extension_
+      write(iun, '(i4)') settings%max_area_extension_
+      write(iun, '(i4)') settings%i_full_coverage_
+      write(iun, '(i4)') settings%i_dump_modal_
+      write(iun, '(a)') "-DIRECTIONS:"
+      write(iun, '(i4)') wd%i_ndirs_
+      do ios = 1, wd%i_ndirs_
+         write(iun, '(i4)') wd%dirs_(ios)
+      enddo
+      write(iun, '(a)') "-TURBULENCE:"
+      write(iun, '(i4)') wd%i_ntc_
+      do ios = 1, wd%i_ntc_
+         write(iun, '(i4)') wd%tc_(ios)
+      enddo
+      close(iun)
+
+
+      ! ext data
+      open(unit=iun, file=EXT_DATA_FNAME, iostat=ios, form="unformatted" &
+         , status="replace", action="write", access="stream")
+      if (ios /= 0) call bsa_Abort("Error opening file  bsa.extdata")
+
+      write(iun) struct_data%nn_
+      write(iun) struct_data%nlibs_
+      write(iun) struct_data%nn_load_
+      write(iun) struct_data%nlibs_load_
+
+      write(iun) struct_data%n_load_
+      write(iun) struct_data%libs_load_
+      write(iun) struct_data%coords_
+
+      write(iun) wd%i_wind_prof_
+      write(iun) wd%i_psd_type_
+      write(iun) wd%i_vert_
+      write(iun) size(wd%wfc_, dim=2)-3
+      write(iun) air_dens_
+      write(iun) rot_W2G_
+      write(iun) wd%nz_
+      write(iun) wd%Zref_wz_
+      write(iun) wd%u_mean_ref_wz_
+      write(iun) wd%turb_scales_wz_
+      write(iun) wd%sigmaUVW_wz_
+      write(iun) wd%corrCoeffs_wz_
+      write(iun) wd%corrExp_wz_
+      write(iun) wd%limits_wz_
+      write(iun) wd%rot_LW2G_wz_
+      write(iun) wd%incAng_wz_
+      write(iun) wd%wz_node_
+      write(iun) wd%wAlt_node_
+      write(iun) wd%u_node_
+      write(iun) wd%nod_corr_
+      write(iun) wd%wfc_
+
+      write(iun) struct_data%ndofs_
+      write(iun) struct_data%modal_%nm_
+      write(iun) struct_data%modal_%nat_freqs_
+      write(iun) struct_data%modal_%phi_
+      write(iun) struct_data%modal_%Mm_
+      write(iun) struct_data%modal_%Km_
+      write(iun) struct_data%modal_%Cm_
+      write(iun) struct_data%modal_%xsi_
+
+      close(iun)
+   end subroutine
+
 
 
 end submodule
