@@ -67,3 +67,4 @@ app/**
 !app/CMakeLists.txt
 compile_flags.txt
 resources/cmake/
+tests/
