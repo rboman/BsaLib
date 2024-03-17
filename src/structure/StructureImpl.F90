@@ -98,6 +98,7 @@ contains
       integer(bsa_int_t), intent(in) :: ndofs, nm
       real(bsa_real_t), intent(in), target :: Phi(ndofs, nm), natf(nm)
 
+      this%ndofs_     = ndofs
       this%modal_%nm_ = nm
       this%modal_%phi_       => Phi
       this%modal_%nat_freqs_ => natf
