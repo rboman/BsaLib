@@ -63,6 +63,9 @@ module BsaLib_Data
 
    real(bsa_real_t), allocatable, target :: PHItimesC_local_(:, :, :)
 
+   !> If true, in Run, only generates compatible files for BSA executable
+   logical :: do_gen_bsa_input_files_ = .false.
+
 
 ! **********************************************************************
 !   Spectra exporting control data
