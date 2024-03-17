@@ -1314,8 +1314,7 @@ contains
       real(bsa_real_t), intent(in) :: Suvw(NFREQS, NPSDEL)
       real(bsa_real_t), allocatable, intent(inout) :: psd(:, :), bisp(:, :, :)
 
-      integer(int32) :: innl3
-      integer(int32) :: iin, ien, itmp, ifrj
+      integer(int32) :: iin, ien, itmp, ifrj, i_cycle
 #ifdef _OPENMP
       integer(int32) :: itmp_
 #endif
@@ -1335,8 +1334,6 @@ contains
       real(bsa_real_t) :: phij_Ub_, phij_u_, phik_Ub_, phik_u_
       integer(int32) :: posm_
       integer(int32) :: imk, imj, imi
-
-      integer(int32) :: i_ncycles
 
       real(bsa_real_t) :: f_abs(NFREQS)
 
@@ -1418,8 +1415,7 @@ contains
       endif ! i bisp allocation
 
 
-      i_ncycles = 0
-      innl3     = NNODESL**3 * NTCOMPS
+      i_cycle = 0
 
       !========================================================================
       ! BUG: for the moment, only considering correlation
@@ -1551,13 +1547,7 @@ contains
                      i_pos_ni = i_pos_ni + 1
                   enddo ! i node
 
-! #ifdef BSA_DEBUG
-                  i_ncycles = i_ncycles + NNODESL
-                  print '(1x, 2a, f10.4, " %")', &
-                     INFOMSG, ' done  ', real(i_ncycles, bsa_real_t)/innl3*100
-! #endif
                endif ! bisp computation
-
 
 
                posm_ = 1
@@ -1577,22 +1567,26 @@ contains
                i_pos_nj = i_pos_nj + 1
             enddo ! j node
 
+            i_cycle = i_cycle + 1
+            print '(1x, a, " done ", f10.4, " %")', &
+               INFOMSG, real(i_cycle, bsa_real_t)/real(NNODESL*NTCOMPS, bsa_real_t) * 100._bsa_real_t
+
             i_pos_nk = i_pos_nk + 1
          enddo ! k node
       enddo ! itc
 
 
       ! deallocation
-      if (allocated(S_uvw_i)) deallocate(S_uvw_i)
-      if (allocated(S_uvw_j)) deallocate(S_uvw_j)
-      if (allocated(S_uvw_k)) deallocate(S_uvw_k)
-      if (allocated(PSDF_jk_JK_w)) deallocate(PSDF_jk_JK_w)
-      if (allocated(S_uvw_JK)) deallocate(S_uvw_JK)
-      if (allocated(S_uvw_IK)) deallocate(S_uvw_IK)
-      if (allocated(S_uvw_IJ)) deallocate(S_uvw_IJ)
-      if (allocated(S_uvw_IK_w1w2)) deallocate(S_uvw_IK_w1w2)
-      if (allocated(S_uvw_IJ_w1w2)) deallocate(S_uvw_IJ_w1w2)
-      if (allocated(BF_ijk_IJK_w_w2)) deallocate(BF_ijk_IJK_w_w2)
+      if (allocated(S_uvw_i))          deallocate(S_uvw_i)
+      if (allocated(S_uvw_j))          deallocate(S_uvw_j)
+      if (allocated(S_uvw_k))          deallocate(S_uvw_k)
+      if (allocated(PSDF_jk_JK_w))     deallocate(PSDF_jk_JK_w)
+      if (allocated(S_uvw_JK))         deallocate(S_uvw_JK)
+      if (allocated(S_uvw_IK))         deallocate(S_uvw_IK)
+      if (allocated(S_uvw_IJ))         deallocate(S_uvw_IJ)
+      if (allocated(S_uvw_IK_w1w2))    deallocate(S_uvw_IK_w1w2)
+      if (allocated(S_uvw_IJ_w1w2))    deallocate(S_uvw_IJ_w1w2)
+      if (allocated(BF_ijk_IJK_w_w2))  deallocate(BF_ijk_IJK_w_w2)
 
 #ifdef BSA_DEBUG
       write(unit_debug_, '(2a)') &
