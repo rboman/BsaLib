@@ -214,12 +214,12 @@ module BsaLib_WindData
    abstract interface
       function PSDfunc(wd, nf, freqs, innl, nodes_loaded, idir, itc) result(PSD)
          import :: WindData_t, bsa_real_t, bsa_int_t
-         class(WindData_t), intent(in)  :: wd
+         class(WindData_t),  intent(in) :: wd
          integer(bsa_int_t), intent(in) :: nf          ! n. frequencies
          integer(bsa_int_t), intent(in) :: innl        ! n. actual nodes loaded
          integer(bsa_int_t), intent(in) :: idir        ! wind direction
          integer(bsa_int_t), intent(in) :: itc         ! turb component id
-         real(bsa_real_t), intent(in)   :: freqs(:)           ! frequencies
+         real(bsa_real_t),   intent(in) :: freqs(:)           ! frequencies
          integer(bsa_int_t), intent(in) :: nodes_loaded(:)     ! list of actual loaded nodes
          real(bsa_real_t), dimension(nf, innl) :: PSD
       end function
@@ -390,21 +390,21 @@ module BsaLib_WindData
 
 
       module function evalPSD_(this, nf, f, innl, nnl, idir, itc) result(PSD)
-         class(WindData_t), intent(in)  :: this
+         class(WindData_t),  intent(in) :: this
          integer(bsa_int_t), intent(in) :: nf, innl, idir, itc
          integer(bsa_int_t), intent(in) :: nnl(:)
-         real(bsa_real_t), intent(in)   :: f(:)
+         real(bsa_real_t),   intent(in) :: f(:)
          real(bsa_real_t) :: PSD(nf, innl)
       end function
 
 
 
       module function getFullNodalPSD(this, innl, nodesl, PSDvec, f, idir) result(PSDmat)
-         class(WindData_t), intent(in)  :: this
+         class(WindData_t),  intent(in) :: this
          integer(bsa_int_t), intent(in) :: innl, idir
          integer(bsa_int_t), intent(in) :: nodesl(innl)
-         real(bsa_real_t), intent(in)   :: PSDvec(innl)
-         real(bsa_real_t), intent(in)   :: f
+         real(bsa_real_t),   intent(in) :: PSDvec(innl)
+         real(bsa_real_t),   intent(in) :: f
          real(bsa_real_t) :: PSDmat(innl, innl)
       end function
 

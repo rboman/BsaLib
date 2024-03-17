@@ -151,8 +151,8 @@ contains
       integer(bsa_int_t), intent(in) :: nf       ! n. frequencies
       integer(bsa_int_t), intent(in) :: innl     ! n. actual nodes loaded
       integer(bsa_int_t), intent(in) :: idir     ! wind direction
-      integer(bsa_int_t), intent(in) :: itc      ! 
-      real(bsa_real_t),   intent(in) :: freqs(:)       ! frequencies
+      integer(bsa_int_t), intent(in) :: itc      ! turb. component id
+      real(bsa_real_t),   intent(in) :: freqs(:) ! frequencies
       integer(bsa_int_t), intent(in) :: nnl(:)   ! list of actual loaded nodes
       real(bsa_real_t) :: PSD(nf, innl)
       ! local
