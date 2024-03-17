@@ -2133,7 +2133,6 @@ contains
       real(bsa_real_t) :: fiabs, fjabs, fiPfj, fiPfjabs
 
       ! nodes indexed values
-      integer(int32) :: i_pos_nk, i_pos_nj
       integer(int32) :: pos_nk, pos_nj
       integer(int32) :: ink, inj
       integer(int32) :: nj, nk
@@ -2178,12 +2177,11 @@ contains
          tcP3    = tc + 3      ! quadratic term coeff
 
 
-         i_pos_nk = 1
          do ink = 1, NNODESL
 
             nk     = struct_data%n_load_(ink)
             pos_nk = (nk - 1) * NLIBS
-            tc_pk  = tc_posN + i_pos_nk
+            tc_pk  = tc_posN + ink
 
             phik_(:, 1) = wd%phi_times_A_ndegw_(:, ink, tc  )
             phik_(:, 2) = wd%phi_times_A_ndegw_(:, ink, tcP3)
@@ -2193,12 +2191,11 @@ contains
             S_uvw_k_ij = Suvw_pad(tc_pk)
 
 
-            i_pos_nj = 1
             do inj = 1, NNODESL
 
                nj     = struct_data%n_load_(inj)
                pos_nj = (nj - 1) * NLIBS
-               tc_pj  = tc_posN + i_pos_nj
+               tc_pj  = tc_posN + inj
 
                phij_(:, 1) = wd%phi_times_A_ndegw_(:, inj, tc  )
                phij_(:, 2) = wd%phi_times_A_ndegw_(:, inj, tcP3)
@@ -2219,7 +2216,7 @@ contains
                if (settings%i_compute_bisp_ == 1) then
 
                   block
-                     integer(int32) :: i_pos_ni, ini, ni, pos_ni
+                     integer(int32) :: ini, ni, pos_ni
                      integer(int32) :: tc_pi
 
                      real(bsa_real_t) :: corrIK, corrIJ
@@ -2231,12 +2228,11 @@ contains
                      real(bsa_real_t), dimension(NMODES_EFF, 2) :: phii_
 
 
-                     i_pos_ni = 1
                      do ini = 1, NNODESL
 
                         ni     = struct_data%n_load_(ini)
                         pos_ni = (ni - 1) * NLIBS
-                        tc_pi  = tc_posN + i_pos_ni
+                        tc_pi  = tc_posN + ini
 
                         phii_(:, 1) = wd%phi_times_A_ndegw_(:, ini, tc  )
                         phii_(:, 2) = wd%phi_times_A_ndegw_(:, ini, tcP3)
@@ -2286,8 +2282,6 @@ contains
                            enddo ! j mode
                         enddo ! k mode
 
-
-                        i_pos_ni = i_pos_ni + 1
                      enddo ! i node
 
                   end block
@@ -2315,10 +2309,8 @@ contains
                endif ! PSD computation
 
 
-               i_pos_nj = i_pos_nj + 1
             enddo ! j node
 
-            i_pos_nk = i_pos_nk + 1
          enddo ! k node
 
       enddo ! itc
