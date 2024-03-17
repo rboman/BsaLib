@@ -126,7 +126,7 @@ contains
             write(unit_dump_bfm_) &
                struct_data%modal_%Km_(struct_data%modal_%modes_)
 
-            print '(1x, 2a)', INFOMSG, 'Modal info dumped -- ok.'
+            print '(/ 1x, 2a)', INFOMSG, 'Modal info dumped -- ok.'
          endif
       endif
 
