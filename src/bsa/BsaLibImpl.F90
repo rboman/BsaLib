@@ -417,12 +417,13 @@ contains
          if (is_only_msh_ .or. settings%i_suban_type_ == 3) then
             bisp_export_iun_internal_ = un_export_bisp_msh_
             call mainMesher_(m3mf_msh, m3mr_msh)
-            if (is_only_msh_ .and. is_visual_) then
-               if (force_cls_execution_) then
+            if (is_visual_) then
+               if (is_only_msh_ .and. force_cls_execution_) then
                   print '(/, 1x, 2a)', &
                      WARNMSG, 'Visual mode ON. Disabling CLS forced execution.'
+                  force_cls_execution_ = .false.
                endif
-               force_cls_execution_ = .false.
+               call writeNTotPtsToBispUn_(un_export_bisp_msh_, msh_brmpts_post_)
             endif
          endif
 
@@ -440,6 +441,9 @@ contains
             endif
             bisp_export_iun_internal_ = un_export_bisp_cls_
             call mainClassic_(m2mf_cls, m2mr_cls, m2o2mr_cls, m3mf_cls, m3mr_cls)
+            if (is_visual_) then
+               call writeNTotPtsToBispUn_(un_export_bisp_cls_, NFREQS*NFREQS)
+            endif
          endif
       end block
 
@@ -1807,6 +1811,25 @@ contains
    end subroutine
 
 
+   !> NOTE: here we might want to keep intent(in) and not by value
+   !>       to ensure data in not modified internally.
+   subroutine writeNTotPtsToBispUn_(iun, n)
+      integer(bsa_int_t), intent(in) :: iun, n
+      integer(bsa_int_t) :: i, j, itmp
+
+      rewind(iun)
+      read(iun) itmp
+      do i = 1, itmp
+         read(iun) j
+      enddo
+      read(iun) j
+      read(iun) j
+      read(iun) j
+      write(iun) n
+   end subroutine
+
+
+
 
    ! BUG: this should be called via a function pointer
    subroutine exportBRM_baseHeaderWriter_internal_(pdata)
@@ -1820,6 +1843,7 @@ contains
          write(bisp_export_iun_internal_) pdata%ncomb_
          write(bisp_export_iun_internal_) pdata%ispsym_
          write(bisp_export_iun_internal_) pdata%nzones_
+         write(bisp_export_iun_internal_) pdata%nm_      ! NOTE: this segment will hold tot. n. of meshing points
          pdata%i_doNotPrintGenHeader_ = 1
       endif
 
