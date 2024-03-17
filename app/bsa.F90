@@ -24,10 +24,6 @@ module data
    logical :: ext_data_read_ = .false.
    logical :: bsa_data_read_ = .false.
 
-   character(len = *), parameter :: BSA_DATA_FNAME = "bsa.bsadata"
-   character(len = *), parameter :: EXT_DATA_FNAME = "bsa.extdata"
-
-
    integer(int32) :: i_suban, i_vers, i_defsc, i_psd, i_bisp, i_onlyd, i_test
    integer(int32) :: i_bispsym, i_3dsym, i_scalar, i_nfreqs
    real(real64)   :: r_df
