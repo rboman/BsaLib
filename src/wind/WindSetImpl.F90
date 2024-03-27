@@ -22,13 +22,14 @@ contains
 
 
 
-   module subroutine SetWindvertProf(this, ivaru)
+   module subroutine SetWindvertProf(this, iwprof)
       class(WindData_t), intent(inout) :: this
-      integer(bsa_int_t), intent(in)   :: ivaru
+      integer(bsa_int_t), value :: iwprof
 
-      if (ivaru < 1 .or. ivaru > 3) call bsa_Abort('Invalid "ivaru" value.')
+      if (iwprof == 5) iwprof = 1
+      if (iwprof < 1 .or. iwprof > 3) call bsa_Abort('Invalid "iwprof" value.')
 
-      this%i_wind_prof_ = ivaru
+      this%i_wind_prof_ = iwprof
 
 #ifdef BSA_DEBUG
       write(unit_debug_, '(1x, 3a)') &
@@ -42,7 +43,7 @@ contains
 
    module subroutine SetMainvertDir(this, ivert)
       class(WindData_t), intent(inout) :: this
-      integer(bsa_int_t), intent(in)   :: ivert
+      integer(bsa_int_t), value :: ivert
 
       if (ivert < 1 .or. ivert > 3) call bsa_Abort('Invalid "ivert" value.')
       this%i_vert_ = ivert
@@ -124,7 +125,7 @@ contains
 
 
    module subroutine SetAirDensity(aird)
-      real(bsa_real_t), intent(in) :: aird
+      real(bsa_real_t), value :: aird
 
       if (aird < 0._bsa_real_t) call bsa_Abort('Air density has a negative value.')
       air_dens_ = aird
@@ -135,7 +136,7 @@ contains
 
    module subroutine SetGlobalW2G(mat)
       real(bsa_real_t), intent(in) :: mat(3, 3)
-      integer(int32) :: istat
+      integer(int32)       :: istat
       character(len = 256) :: emsg
 
       if (.not. allocated(rot_W2G_)) then
@@ -159,7 +160,7 @@ contains
 
 
    module subroutine SetWZRefAlt(this, Zref)
-      class(WindData_t), intent(inout) :: this
+      class(WindData_t), intent(inout)     :: this
       real(bsa_real_t), target, intent(in) :: Zref(this%nz_)
 
       this%Zref_wz_ => Zref
@@ -233,7 +234,7 @@ contains
    module subroutine setWindDirections(this, dirs, ndirs)
       class(WindData_t) :: this
       integer(bsa_int_t), intent(in) :: dirs(:)
-      integer(bsa_int_t), intent(in), optional :: ndirs
+      integer(bsa_int_t), value, optional :: ndirs
       integer(int32) :: itmp
 
       itmp = size(dirs)
@@ -255,7 +256,7 @@ contains
    module subroutine setTurbComps(this, tc, ntc)
       class(WindData_t) :: this
       integer(bsa_int_t), intent(in) :: tc(:)
-      integer(bsa_int_t), intent(in), optional :: ntc
+      integer(bsa_int_t), value, optional :: ntc
       integer(int32) :: itmp
 
       itmp = size(tc)
@@ -363,7 +364,7 @@ contains
    module subroutine getFull2DNodCorrMat(this, nn, nodcorr2d)
       use BsaLib_Utility, only: util_getCorrVectIndex
       class(WindData_t), intent(in)  :: this
-      integer(bsa_int_t), intent(in) :: nn
+      integer(bsa_int_t), value      :: nn
       real(bsa_real_t), allocatable, intent(inout) :: nodcorr2d(:, :)
       integer(int32) :: i_ = 0, j_, id_
 

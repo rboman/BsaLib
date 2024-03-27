@@ -101,7 +101,7 @@ contains
 
 
    module subroutine bsa_setPODTruncationThreshold(rval)
-      real(real64), intent(in) :: rval
+      real(real64), value :: rval
 
       if (rval > 0.0_real64) then
          do_trunc_POD_ = .true.
@@ -111,7 +111,7 @@ contains
 
 
    module subroutine bsa_setPODNOfModesKept(nmodes)
-      integer(int32), intent(in) :: nmodes
+      integer(bsa_int_t), value :: nmodes
 
       nPODmodes_set_ = .true.
       nmodes_POD_    = nmodes
@@ -184,7 +184,7 @@ contains
 
       block
          character(len = :), allocatable :: fname_cls_, fname_msh_
-         integer(int32) :: itmp
+         integer(bsa_int_t) :: itmp
 
          write_brm_fptr_ => exportBRM_void_internal_
          do_export_base_ = is_visual_ .or. &
@@ -249,6 +249,8 @@ contains
          endif
 
 
+
+
 #if (defined(_OPENMP)) && (defined(BSA_DEBUG))
          print '(1x, 2a)', NOTEMSG, 'This version has been compiled with OpenMP support.'
 #endif
@@ -258,6 +260,8 @@ contains
          call validateAll_()              ! check before doing some bad things..
          call setBsaFunctionLocalVars()   ! NOTE: reset internal state, if something has been changed
          call io_printUserData()
+
+
 
 ! BUG: force GPU usage for the moment. Testing only
 #ifdef BSA_USE_GPU
@@ -726,7 +730,7 @@ contains
 
 
    module subroutine bsa_setOutUnit(iunit)
-      integer(bsa_int_t), intent(in) :: iunit
+      integer(bsa_int_t), value :: iunit
 
       unit_debug_ = iunit
    end subroutine
@@ -750,7 +754,7 @@ contains
 
 
    module subroutine bsa_setSpatialSymmetry(isym)
-      integer(bsa_int_t), intent(in) :: isym
+      integer(bsa_int_t), value :: isym
 
       select case (isym)
          case (BSA_SPATIAL_SYM_NONE)
@@ -777,7 +781,7 @@ contains
 
 
    module subroutine bsa_setPremeshType(itype)
-      integer(bsa_int_t), intent(in) :: itype
+      integer(bsa_int_t), value :: itype
 
       select case (itype)
          case (BSA_PREMESH_TYPE_DIAG_CREST_YES)
@@ -794,7 +798,7 @@ contains
 
 
    module subroutine bsa_setPremeshMode(imode)
-      integer(bsa_int_t), intent(in) :: imode
+      integer(bsa_int_t), value :: imode
 
       select case (imode)
          case (BSA_PREMESH_MODE_BASE)
@@ -827,7 +831,7 @@ contains
 
 
    module subroutine bsa_setValidateDeltasPolicy(id)
-      integer, intent(in) :: id
+      integer(bsa_int_t), value :: id
 
       select case (id)
       case (BSA_VALIDATE_DELTAS_POLICY_NONE)
@@ -856,7 +860,7 @@ contains
 
 
    module subroutine bsa_setValidateDeltasValues(ibkg, ires)
-      integer, intent(in) :: ibkg, ires
+      integer(bsa_int_t), value :: ibkg, ires
 
       I_BKG_PEAK_DELTAF_BFM_REFMT_FCT_ = ibkg
       I_RES_PEAK_DELTAF_BFM_REFMT_FCT_ = ires
@@ -870,14 +874,14 @@ contains
 
 
    module subroutine bsa_setExportFileFormat(iform)
-      integer(bsa_int_t), intent(in) :: iform
+      integer(bsa_int_t), value :: iform
 
       call io_setExportFileFormat(iform)
    end subroutine
 
 
    module subroutine bsa_setExportAppendMode(imode)
-      integer(bsa_int_t), intent(in) :: imode
+      integer(bsa_int_t), value :: imode
 
       call io_setExportAppendMode(imode)
    end subroutine
@@ -904,35 +908,35 @@ contains
 
 
    module subroutine bsa_setSubanType(isuban)
-      integer(bsa_int_t), intent(in) :: isuban
+      integer(bsa_int_t), value :: isuban
 
       call settings%SetSubanType(isuban)
    end subroutine
 
 
    module subroutine bsa_setClassicMode(i_mode)
-      integer(bsa_int_t), intent(in) :: i_mode
+      integer(bsa_int_t), value :: i_mode
 
       settings%i_scalar_vers_ = i_mode
    end subroutine
 
 
    module subroutine bsa_setVersion(ivers)
-      integer(bsa_int_t), intent(in) :: ivers
+      integer(bsa_int_t), value :: ivers
 
       call settings%SetVersion(ivers)
    end subroutine
 
 
    module subroutine bsa_setScalingConv(iconv)
-      integer(bsa_int_t), intent(in) :: iconv
+      integer(bsa_int_t), value :: iconv
 
       call settings%SetScalingType(iconv)
    end subroutine
 
 
    module subroutine bsa_setSpectraComputation(ipsd, ibisp)
-      integer(bsa_int_t), intent(in), optional :: ipsd, ibisp
+      integer(bsa_int_t), value, optional :: ipsd, ibisp
 
       call settings%ActivateSpectraComputation(ipsd, ibisp)
    end subroutine
@@ -940,35 +944,35 @@ contains
 
 
    module subroutine bsa_setSpectraExtension(ionlydiag)
-      integer(bsa_int_t), intent(in) :: ionlydiag
+      integer(bsa_int_t), value :: ionlydiag
 
       call settings%SetExtension(ionlydiag)
    end subroutine
 
    module subroutine bsa_setTestMode(itest)
-      integer(bsa_int_t), intent(in) :: itest
+      integer(bsa_int_t), value :: itest
 
       call settings%TestMode(itest)
    end subroutine
 
 
    module subroutine bsa_setSymmetries(ibispsym, i3dsym)
-      integer(bsa_int_t), intent(in) :: ibispsym, i3dsym
+      integer(bsa_int_t), value :: ibispsym, i3dsym
 
       call settings%setSymmetries(ibispsym, i3dsym)
    end subroutine
 
 
    module subroutine bsa_setupClassic(nfreqs, df)
-      integer(bsa_int_t), intent(in) :: nfreqs
-      real(bsa_real_t), intent(in)  :: df
+      integer(bsa_int_t), value :: nfreqs
+      real(bsa_real_t),   value :: df
 
       call settings%setClsSettings(nfreqs, df)
    end subroutine
 
    module subroutine bsa_setupMesher(isvd, bkgrfmt, bkgaext, genpaext, maxaext, ifcov, idumpmod)
-      integer(bsa_int_t), intent(in) :: isvd, bkgrfmt, maxaext
-      integer(bsa_int_t), intent(in) :: bkgaext, genpaext, ifcov, idumpmod
+      integer(bsa_int_t), value :: isvd, bkgrfmt, maxaext
+      integer(bsa_int_t), value :: bkgaext, genpaext, ifcov, idumpmod
 
       call settings%SetMshrSetts(isvd, bkgrfmt, bkgaext, genpaext, maxaext, ifcov, idumpmod)
    end subroutine
@@ -984,7 +988,7 @@ contains
 
    module subroutine bsa_setWindDirections(dirs, ndirs)
       integer(bsa_int_t), intent(in) :: dirs(:)
-      integer(bsa_int_t), intent(in), optional :: ndirs
+      integer(bsa_int_t), value, optional :: ndirs
 
       call wd%setWindDirections(dirs, ndirs)
    end subroutine
@@ -992,7 +996,7 @@ contains
 
    module subroutine bsa_setWindTurbComps(tc, ntc)
       integer(bsa_int_t), intent(in) :: tc(:)
-      integer(bsa_int_t), intent(in), optional :: ntc
+      integer(bsa_int_t), value, optional :: ntc
 
       call wd%setTurbComps(tc, ntc)
    end subroutine
@@ -1000,20 +1004,20 @@ contains
 
 
    module subroutine bsa_setWindVertProf(iwprof)
-      integer(bsa_int_t), intent(in) :: iwprof
+      integer(bsa_int_t), value :: iwprof
       call wd%SetWindvertProf(iwprof)
    end subroutine
 
 
    module subroutine bsa_setPSDType(ipsd)
-      integer(bsa_int_t), intent(in) :: ipsd
+      integer(bsa_int_t), value :: ipsd
 
       call wd%SetPSDType(ipsd)
    end subroutine
 
 
    module subroutine bsa_setWindAltDir(ivert)
-      integer(bsa_int_t), intent(in) :: ivert
+      integer(bsa_int_t), value :: ivert
 
       call wd%SetMainVertDir(ivert)
    end subroutine
@@ -1033,7 +1037,7 @@ contains
 
 
    module subroutine bsa_setAirDensity(aird)
-      real(bsa_real_t), intent(in) :: aird
+      real(bsa_real_t), value :: aird
 
       call wd%SetAirDensity(aird)
    end subroutine
@@ -1154,7 +1158,7 @@ contains
    !=====================================
 
    module subroutine bsa_setNodalCoords(nn, coords)
-      integer(bsa_int_t), intent(in)  :: nn
+      integer(bsa_int_t), value :: nn
       real(bsa_real_t), target, allocatable :: coords(:, :)
 
       call struct_data%SetNodalCoords(nn, coords)
@@ -1162,16 +1166,25 @@ contains
 
 
 
-   module subroutine bsa_setNodalNOfDOFs(nlibs)
-      integer(bsa_int_t), intent(in) :: nlibs
+   module subroutine bsa_setTotalNumOfDOFs(ndofs)
+      integer(bsa_int_t), value :: ndofs
 
-      call struct_data%SetNOfNodalDOFs(nlibs)
+      struct_data%ndofs_ = ndofs
+   end subroutine
+
+
+
+
+   module subroutine bsa_setNumOfNodalDOFs(nndofs)
+      integer(bsa_int_t), value :: nndofs
+
+      call struct_data%SetNOfNodalDOFs(nndofs)
    end subroutine
 
 
 
    module subroutine bsa_setTotalNOfNodes(nn)
-      integer(bsa_int_t), intent(in) :: nn
+      integer(bsa_int_t), value :: nn
 
       call struct_data%SetTotalNOfNodes(nn)
    end subroutine
@@ -1180,7 +1193,7 @@ contains
 
    module subroutine bsa_setLoadedNodalDOFs(libs_l, nlibs_l)
       integer(bsa_int_t), intent(in), target, allocatable :: libs_l(:)
-      integer(bsa_int_t), intent(in), optional :: nlibs_l
+      integer(bsa_int_t), value, optional :: nlibs_l
       integer(bsa_int_t) :: siz
 
       if (.not. allocated(libs_l)) return
@@ -1200,7 +1213,7 @@ contains
 
    module subroutine bsa_setLoadedNodes(nodes_l, nn_l)
       integer(bsa_int_t), intent(in), target, allocatable :: nodes_l(:)
-      integer(bsa_int_t), intent(in), optional :: nn_l
+      integer(bsa_int_t), value, optional :: nn_l
       integer(bsa_int_t) :: siz
 
       if (.not. allocated(nodes_l)) return
@@ -1229,7 +1242,7 @@ contains
    !=====================================
 
    module subroutine bsa_setModalInfo(ndofs, nm, Phi, natf)
-      integer(bsa_int_t), intent(in) :: ndofs, nm
+      integer(bsa_int_t), value :: ndofs, nm
       real(bsa_real_t), intent(in), target :: Phi(ndofs, nm), natf(nm)
 
       call struct_data%SetModalInfo(ndofs, nm, Phi, natf)
@@ -1238,7 +1251,7 @@ contains
 
 
    module subroutine bsa_setModalMatrices(nm, Mgen, Kgen, Cgen)
-      integer(bsa_int_t), intent(in) :: nm
+      integer(bsa_int_t), value :: nm
       real(bsa_real_t), intent(in), target, dimension(nm) :: Mgen, Kgen
       real(bsa_real_t), intent(in), target :: Cgen(nm, nm)
 
@@ -1607,7 +1620,7 @@ contains
 
    module subroutine bsa_exportSkewness_compute_(fname, dim, m2, m3)
       character(len = *), intent(in) :: fname
-      integer(bsa_int_t), intent(in) :: dim
+      integer(bsa_int_t), value      :: dim
       real(bsa_real_t), intent(in)   :: m2(:), m3(:)
       real(bsa_real_t), allocatable  :: sk(:)
 
@@ -1901,7 +1914,7 @@ contains
 
 
    module subroutine bsa_setBRMExportDefaultMode(imode)
-      integer(int32), intent(in) :: imode
+      integer(int32), value :: imode
 
       select case (imode)
 

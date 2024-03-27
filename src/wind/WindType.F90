@@ -230,7 +230,7 @@ module BsaLib_WindData
    interface
 
       module subroutine SetAirDensity(aird)
-         real(bsa_real_t), intent(in) :: aird
+         real(bsa_real_t), value :: aird
       end subroutine
 
 
@@ -239,21 +239,21 @@ module BsaLib_WindData
       end subroutine
 
 
-      module subroutine SetWindVertProf(this, ivaru)
+      module subroutine SetWindVertProf(this, iwprof)
          class(WindData_t), intent(inout) :: this
-         integer(bsa_int_t), intent(in)   :: ivaru
+         integer(bsa_int_t), value        :: iwprof
       end subroutine
 
 
       module subroutine SetPSDType(this, ipsd)
          class(WindData_t), intent(inout) :: this
-         integer(bsa_int_t), value :: ipsd
+         integer(bsa_int_t), value        :: ipsd
       end subroutine
 
 
       module subroutine SetMainvertDir(this, ivert)
          class(WindData_t), intent(inout) :: this
-         integer(bsa_int_t), intent(in) :: ivert
+         integer(bsa_int_t), value        :: ivert
       end subroutine
 
 
@@ -318,14 +318,14 @@ module BsaLib_WindData
       module subroutine setWindDirections(this, dirs, ndirs)
          class(WindData_t) :: this
          integer(bsa_int_t), intent(in) :: dirs(:)
-         integer(bsa_int_t), intent(in), optional :: ndirs
+         integer(bsa_int_t), value, optional :: ndirs
       end subroutine
 
 
       module subroutine setTurbComps(this, tc, ntc)
          class(WindData_t) :: this
-         integer(bsa_int_t), intent(in) :: tc(:)
-         integer(bsa_int_t), intent(in), optional :: ntc
+         integer(bsa_int_t), intent(in)      :: tc(:)
+         integer(bsa_int_t), value, optional :: ntc
       end subroutine
 
 
@@ -360,8 +360,8 @@ module BsaLib_WindData
 
 
       module subroutine getFull2DNodCorrMat(this, nn, nodcorr2d)
-         class(WindData_t), intent(in)  :: this
-         integer(bsa_int_t), intent(in) :: nn
+         class(WindData_t), intent(in) :: this
+         integer(bsa_int_t), value     :: nn
          real(bsa_real_t), allocatable, intent(inout) :: nodcorr2d(:, :)
       end subroutine
 

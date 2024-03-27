@@ -572,7 +572,7 @@ contains ! utility procedures
 
       ! NODAL
       call bsa_setTotalNOfNodes(i_nnodes)
-      call bsa_setNodalNOfDOFs(i_nlibs)
+      call bsa_setNumOfNodalDOFs(i_nlibs)
       call bsa_setLoadedNodes(nodesl)
       call bsa_setLoadedNodalDOFs(libsl)
       call bsa_setNodalCoords(i_nnodes, nod_cords)
