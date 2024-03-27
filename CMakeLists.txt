@@ -110,6 +110,9 @@ if (WIN32)
       $<$<COMPILE_LANGUAGE:Fortran>:-warn:all>
       $<$<COMPILE_LANGUAGE:Fortran>:-stand:f18>
    )
+   if ( enable-openmp )
+      add_compile_options( $<$<COMPILE_LANGUAGE:Fortran>:-Qopenmp> )
+   endif()
 else()
    if (intel-compiler)
       add_compile_options(
@@ -125,6 +128,9 @@ else()
          $<$<COMPILE_LANGUAGE:Fortran>:-std=f2018>
       )
    endif()
+   if ( enable-openmp )
+      add_compile_options( $<$<COMPILE_LANGUAGE:Fortran>:-fopenmp> )
+   endif()
 endif()
 
 
@@ -137,7 +143,9 @@ if (enable-heap-arrays)
          add_compile_options( "$<$<COMPILE_LANGUAGE:Fortran>:-heap-arrays;0>" )
       endif()
    else()
-      add_compile_options( $<$<COMPILE_LANGUAGE:Fortran>:-fmax-stack-var-size=0> )
+      if (NOT enable-openmp)
+         add_compile_options( $<$<COMPILE_LANGUAGE:Fortran>:-fmax-stack-var-size=0> )
+      endif()
    endif()
 endif()
 
