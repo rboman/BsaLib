@@ -823,11 +823,11 @@ contains ! utility procedures
 
 
       if (l_formmode) then
-         read(IUN_EXTDATA, *) i_nm
          read(IUN_EXTDATA, *) i_ndofs
+         read(IUN_EXTDATA, *) i_nm
       else
-         read(IUN_EXTDATA) i_nm
          read(IUN_EXTDATA) i_ndofs
+         read(IUN_EXTDATA) i_nm
       endif
       allocate(r_natf(i_nm), stat=istat, errmsg=emsg)
       if (istat /= 0) call errAllocVarMsg_('r_natf', istat, emsg)
@@ -934,77 +934,6 @@ contains ! utility procedures
 
       bsa_data_read_ = .true.
    end subroutine
-
-
-
-   ! subroutine getLoadedNodesFromString(label)
-   !    !! BUG: for the moment, supports only 1 line (1 range)
-   !    character(len = *), intent(in) :: label
-   !    character(len = *), parameter  :: col = ':'
-   !    integer :: ilen, ibl = 1, i, icount = 0, iini = 1
-   !    integer :: vals(3), istat, ival
-   !    character(len = 132) :: emsg
-
-   !    do while (label(ibl:ibl) == ' ')
-   !       ibl = ibl + 1
-   !    enddo
-
-   !    ilen = len_trim(label)
-   !    i    = ibl
-
-   !    if ( label(i : ilen) == 'all' ) then
-
-   !       i_nnodesl = i_nnodes
-   !       nodesl    = [1 : i_nnodesl]
-   !       goto 100
-   !    end if
-
-   !    do while (i <= ilen)
-   !       if (label(i:i) == col) then ! read left-side value
-   !          icount = icount + 1
-   !          read(label(iini : i-1), fmt='(i)') vals(icount)
-   !          iini = i + 1
-   !       endif
-   !       i = i + 1
-   !    enddo
-   !    ! treat last value!
-   !    icount = icount + 1
-   !    read(label(iini : ilen), fmt='(i)') vals(icount)
-
-
-   !    if (icount == 1) then ! only one node loaded
-
-   !       i_nnodesl = 1
-   !       if (vals(1) > i_nnodes) vals(1) = i_nnodes
-   !       nodesl = vals(1:1)
-
-   !    elseif (icount == 2) then ! linspace
-
-   !       if (vals(1) > i_nnodes) vals(1) = i_nnodes
-   !       if (vals(2) > i_nnodes) vals(2) = i_nnodes
-
-   !       i_nnodesl = vals(2) - vals(1) + 1
-   !       allocate(nodesl(i_nnodesl), stat=istat, errmsg=emsg)
-   !       if (istat /= 0) call errAllocVarMsg_('nodesl', istat, emsg)
-   !       ival = vals(1) - 1
-   !       do i = 1, i_nnodesl
-   !          nodesl(i) = ival + i
-   !       enddo
-
-   !    else ! ==3, range
-
-   !       ! TODO: implement
-   !       error stop ERRMSG // ' IMPLEMENT ICOUNT=3'
-   !    endif
-
-   !    100 print '(1x, 2a)', &
-   !       INFOMSG, 'List of loaded nodes'
-   !    print '( 10( "  ", i6) )', &
-   !       nodesl
-   ! end subroutine
-
-
-
 
 
 
