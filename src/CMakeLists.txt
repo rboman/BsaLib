@@ -172,7 +172,7 @@ if (enable-gpu-code)
    if (enable-cuda)
       target_compile_definitions( ${project} PRIVATE BSA_USE_CUDA )
    endif()
-   target_link_libraries( ${project} BsaCL_Fortran )
+   target_link_libraries( ${project} PRIVATE BsaCL_Fortran )
 endif()
 
 
