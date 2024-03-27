@@ -114,7 +114,7 @@ else()
    if (NOT LAPACK_FOUND )
       message( SEND_ERROR "Could not find LAPACK." )
    endif()
-   target_link_libraries( ${project} ${LAPACK_LIBRARIES} )
+   target_link_libraries( ${project} INTERFACE ${LAPACK_LIBRARIES} )
 endif()
 
 if (enable-openmp)
