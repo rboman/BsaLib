@@ -86,6 +86,7 @@ if (enable-sequential-code)
    set( enable-gpu-code OFF )
 endif()
 
+
 # check if intel compiler or not
 message( STATUS "NOTE: Compiler ID:  ${CMAKE_Fortran_COMPILER_ID}")
 if (CMAKE_Fortran_COMPILER_ID MATCHES "^Intel")
@@ -94,6 +95,13 @@ if (CMAKE_Fortran_COMPILER_ID MATCHES "^Intel")
 else()
    set(intel-compiler OFF)
 endif()
+
+
+if ( NOT intel-compiler )
+   set( enable-mkl OFF )
+endif()
+
+
 
 
 # Flags common to all configurations
