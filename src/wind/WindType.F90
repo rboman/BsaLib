@@ -54,8 +54,8 @@ module BsaLib_WindData
 
 
    ! ----- private variables
-   real(bsa_real_t)              :: air_dens_ = 1.225_bsa_real_t
-   real(bsa_real_t), allocatable :: rot_W2G_(:, :)  ! rotation from GRS to WRS (global)
+   real(bsa_real_t), public              :: air_dens_ = 1.225_bsa_real_t
+   real(bsa_real_t), public, allocatable :: rot_W2G_(:, :)  ! rotation from GRS to WRS (global)
 
 
    type, public :: psd_t
