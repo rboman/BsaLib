@@ -160,17 +160,18 @@ contains
       real(bsa_real_t), allocatable :: rtmp1(:, :)
       integer(int32) :: i
 
-      L(1, :) = wd%turb_scales_wz_(itc, idir, wd%wz_node_(1 : innl))
 
       ! NOTE: how was programmed in FINELG
       ! BUG: check.
-      if (idir == 1) then
+      if (itc == 1) then
+
+         L(1, :) = wd%turb_scales_wz_(1, idir, wd%wz_node_(nnl))
 
          ! L/U
-         rtmp1 = L / reshape(wd%u_node_(1 : innl), [1, innl])
+         rtmp1 = L / reshape(wd%u_node_(nnl), [1, innl])
          PSD   = matmul(reshape(abs(freqs), [nf, 1]), rtmp1)
          PSD   = PSD * PSD ! square
-         rtmp1 = rtmp1 * reshape(wd%sigmaUVW_wz_(itc, wd%wz_node_(1 : innl))**2, [1, innl])
+         rtmp1 = rtmp1 * reshape(wd%sigmaUVW_wz_(itc, wd%wz_node_(nnl))**2, [1, innl])
          PSD   = (1 + 70.7_bsa_real_t * PSD)**(5._bsa_real_t/6._bsa_real_t)
 
 
@@ -186,25 +187,36 @@ contains
             PSD(:, i) = 4._bsa_real_t * rtmp1(1, i) / PSD(:, i)
          enddo
 
-      else ! WARNING: should not pass from here
+      else
 
          block
             real(bsa_real_t) :: dnlsu(nf, innl), rtmp2(nf, innl), rtmp3(nf, innl)
 
             dnlsu = 2._bsa_real_t * &
                matmul(reshape(freqs, [nf, 1]), &
-               reshape(wd%turb_scales_wz_(1, idir, wd%wz_node_(nnl)), [1, innl]) / &
-               reshape(wd%u_node_(1 : innl), [1, innl]))
+                  reshape(wd%turb_scales_wz_(itc, idir, wd%wz_node_(nnl)), [1, innl]) / &
+                  reshape(wd%u_node_(nnl), [1, innl]) &
+               )
 
             dnlsu = dnlsu*dnlsu
 
             rtmp1 = 1._bsa_real_t + 70.7_bsa_real_t * dnlsu
             rtmp2 = rtmp1 ** (11._bsa_real_t / 6._bsa_real_t)
-            rtmp2 = rtmp2 * reshape(wd%u_node_(1 : innl), [1, innl])
-            rtmp3 = reshape(wd%turb_scales_wz_(itc, idir, wd%wz_node_(nnl)), [1, innl]) * &
-               (1._bsa_real_t + 188.4_bsa_real_t * dnlsu) / &
-               rtmp2 * reshape(wd%sigmaUVW_wz_(itc, wd%wz_node_(nnl))**2, [1, innl])
-
+#ifdef __use_concurrent_loops__
+# ifdef __GFORTRAN__
+         do concurrent (i = 1 : innl)
+# else
+         do concurrent (i = 1 : innl) &
+            shared(innl, rtmp2, rtmp3, wd, nnl, itc, idir, dnlsu)
+# endif
+#else
+            do i = 1, innl
+#endif
+               rtmp2(:, i) = rtmp2(:, i) * wd%u_node_(nnl(i))
+               rtmp3(:, i) = wd%turb_scales_wz_(itc, idir, wd%wz_node_(nnl(i))) * &
+                  (1._bsa_real_t + 188.4_bsa_real_t * dnlsu(:, i)) / &
+                  rtmp2(:, i) * wd%sigmaUVW_wz_(itc, wd%wz_node_(nnl(i)))**2
+            enddo
             rtmp1 = rtmp3 + rtmp3
             PSD   = rtmp1 + rtmp1
          end block
