@@ -237,7 +237,7 @@ contains
                , form=IO_FORM_UNFORMATTED    &
                , access=IO_ACCESS_STREAM     &
                , status=IO_STATUS_REPLACE    &
-               , action=IO_ACTION_WRITE)
+               , action=IO_ACTION_READWRITE)
          endif
       endif
    end subroutine
