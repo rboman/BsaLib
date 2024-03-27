@@ -103,7 +103,8 @@ module BsaLib
 
 
 
-      module subroutine bsa_generateBSAInputFiles()
+      module subroutine bsa_generateBSAInputFiles(run)
+         logical, value :: run
       end subroutine
 
 
@@ -593,6 +594,9 @@ module BsaLib
          real(bsa_real_t), intent(in), target, optional :: coords(:, :)
       end subroutine
 
+
+      module subroutine bsa_exportModalData()
+      end subroutine
 
 
       module subroutine bsa_exportPeakOrExtremesToFile(fname, rvar)

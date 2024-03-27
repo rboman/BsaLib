@@ -66,10 +66,17 @@ module BsaLib_Data
    !> If true, in Run, only generates compatible files for BSA executable
    logical :: do_gen_bsa_input_files_ = .false.
 
+   !> If false, does not run BsaLib.
+   logical :: do_run_bsalib_ = .true.
+
 
 ! **********************************************************************
-!   Spectra exporting control data
+!   Exporting control data
 ! **********************************************************************
+
+   !> If true, generates the "modal.txt" formatted file
+   !> containing modal data
+   logical :: do_export_modal_data_ = .false.
 
    ! BUG: unused!
    ! TODO: if visual for modal bisp, we don't need to compute the full set.

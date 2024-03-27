@@ -32,25 +32,25 @@ module BsaLib_Structure
       !> List of "usable" structural vibration modes.
       !> They might be less than the actual computed, 
       !> since some of them might refer to torsional
-      !> modes, etc..
+      !> modes, etc..  (NM_EFF)
       integer(bsa_int_t), allocatable :: modes_(:)
 
-      !> structural natural frequencies
+      !> structural natural frequencies (NM)
       real(bsa_real_t), dimension(:), pointer    :: nat_freqs_;
 
-      !> generalised modal matrix
+      !> generalised modal matrix (NDOFs, NM)
       real(bsa_real_t), dimension(:, :), pointer :: phi_;
 
-      !> modal damping ratios
+      !> modal damping ratios (NM)
       real(bsa_real_t), dimension(:), pointer :: xsi_;
 
-      !> generalised mass matrix
+      !> generalised mass matrix (NM)
       real(bsa_real_t), dimension(:), pointer :: Mm_;
 
-      !> generalised damping matrix (Rayleigh)
+      !> generalised damping matrix (Rayleigh) (NM)
       real(bsa_real_t), dimension(:, :), pointer :: Cm_;
 
-      !> generalised stiffness matrix
+      !> generalised stiffness matrix (NM, NM)
       real(bsa_real_t), dimension(:), pointer :: Km_;
    end type StructureModalData_t
 

@@ -126,8 +126,10 @@ contains
 
 
 
-   module subroutine bsa_generateBSAInputFiles()
+   module subroutine bsa_generateBSAInputFiles(run)
+      logical, value :: run
 
+      do_run_bsalib_ = run
       do_gen_bsa_input_files_ = .true.
    end subroutine
 
@@ -162,6 +164,13 @@ contains
       real(bsa_real_t), target, allocatable, dimension(:) :: &
          m2mf_cls, m2mr_cls, m2o2mr_cls, m3mf_msh, m3mr_msh, m3mf_cls, m3mr_cls
 
+      ! Generate BSA compatible files
+      if (do_gen_bsa_input_files_) then
+         print '(/ 1x, 2a)', INFOMSG, "Generating BSA-compatible input files."
+         call generateBSAInputFiles_()
+      endif
+
+      if (.not. do_run_bsalib_) return
 
       if (settings%i_compute_psd_ == 0 .and. settings%i_compute_bisp_ == 0) then
          ! user asked for nothing ??
@@ -170,15 +179,8 @@ contains
          return
       endif
 
+
       if (.not. header_called_) call bsa_printBSAHeader()
-
-      if (do_gen_bsa_input_files_) then
-         print '(/ 1x, 2a)', INFOMSG, "Generating BSA-compatible input files."
-         call generateBSAInputFiles_()
-         goto 998
-      endif
-
-
       call io_setExportSpecifiers()
 
 
@@ -261,6 +263,7 @@ contains
          call setBsaFunctionLocalVars()   ! NOTE: reset internal state, if something has been changed
          call io_printUserData()
 
+         if (do_export_modal_data_) call exportModalData_()
 
 
 ! BUG: force GPU usage for the moment. Testing only
@@ -1965,6 +1968,11 @@ contains
 
 
 
+   module subroutine bsa_exportModalData()
+      do_export_modal_data_ = .true.
+   end subroutine
+
+
 
 
 
@@ -2032,6 +2040,22 @@ contains
    end subroutine
 
 
+
+
+
+   subroutine exportModalData_()
+      integer(bsa_int_t) :: i, j
+
+      open(newunit=i, file="modal.txt", form="formatted", action="write")
+      write(i, *) struct_data%nn_
+      write(i, *) struct_data%nlibs_
+      write(i, *) struct_data%modal_%nm_
+      do j = 1, struct_data%modal_%nm_
+         write(i, "(1x, g20.10)"), struct_data%modal_%nat_freqs_(j)
+         write(i, "(1x, g20.10)"), struct_data%modal_%phi_(:, j)
+      enddo
+      close(i)
+   end subroutine
 
 
 
