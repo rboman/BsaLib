@@ -80,8 +80,15 @@ target_include_directories( ${project} AFTER PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
 # target_compile_definitions( ${project} PRIVATE BSA_USE_POST_MESH_OMP )
 
 
+
 if (intel-compiler)
    add_compile_options( -fpp )
+   if ( WIN32 )
+      target_compile_options( ${project} PUBLIC /libs:static )
+      target_compile_options( ${project} PUBLIC $<$<CONFIG:Release>:/MT> )
+      target_compile_options( ${project} PUBLIC $<$<CONFIG:Debug>:/MTd> )
+   else()
+   endif()
 else()
    add_compile_options( -cpp )
 endif()
