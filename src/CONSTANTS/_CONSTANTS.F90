@@ -68,9 +68,9 @@
 
    character(len = *), parameter :: BSA_OUT_DIRNAME_DEFAULT          = '.\bsaresults\'
    character(len = *), parameter :: BSA_OUT_FILENAME_PREFIX_DEFAULT_ = 'bsaout_def'
-   character(len = *), parameter :: BSA_STRUCT_DATA_DUMPFILE         = 'dumpstruct'
-   character(len = *), parameter :: BSA_SETTS_DATA_DUMPFILE          = 'dumpsetts'
-   character(len = *), parameter :: BSA_WIND_DATA_DUMPFILE           = 'dumpwind'
+   ! character(len = *), parameter :: BSA_STRUCT_DATA_DUMPFILE         = 'dumpstruct'
+   ! character(len = *), parameter :: BSA_SETTS_DATA_DUMPFILE          = 'dumpsetts'
+   ! character(len = *), parameter :: BSA_WIND_DATA_DUMPFILE           = 'dumpwind'
 
    character(len = *), parameter :: BSA_DATA_FNAME = "bsa.bsadata"
    character(len = *), parameter :: EXT_DATA_FNAME = "bsa.extdata"
@@ -178,7 +178,8 @@
 !   NUMERICs
 !**************************************************************************************
 
-   !> TO AVOID CRASHING BECAUSE OF MACHINE FLOATING PRECISION ERRORS
+   !> To avoid assertion errors in Mesher due to `sin()`/`cos()` intrinsic functions 
+   !>  rounding errors.
    real(RK), parameter :: MACHINE_PRECISION = 1e-12_RK
 
    real(RK), parameter :: CST_PIGREC = 4.0_RK * atan(1.0_RK)
