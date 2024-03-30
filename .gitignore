@@ -41,7 +41,9 @@
 **/*.pdb
 **/*BuildLog*
 **/*.manifest
-
+*.sln
+*.vfproj*
+*.vcxproj*
 
 # CUSTOM
 .vscode/
@@ -60,4 +62,9 @@ build*/
 .fortls*
 images/
 My *
-app/
+app/**
+!app/*.[fF]90
+!app/CMakeLists.txt
+compile_flags.txt
+resources/cmake/
+tests/

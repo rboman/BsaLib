@@ -1,0 +1,6 @@
+!.vscode/settings.json
+build/
+tests/
+src/old_cl/
+src/x64/
+**/*.bc
