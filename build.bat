@@ -4,7 +4,7 @@ setlocal
 if not exist "build_cmake" mkdir "build_cmake"
 
 set "cleanfirst=--clean-first"
-set "cleanfirst="
+REM set "cleanfirst="
 
 rem -D CMAKE_BUILD_TYPE=Debug ^
 

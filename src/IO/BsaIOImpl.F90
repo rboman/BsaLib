@@ -49,7 +49,7 @@ contains
       write(unit_debug_, fmt) 'TESTING MODE       = ',  settings%i_test_mode_
       write(unit_debug_, fmt) 'DUMP MODAL INFO    = ',  settings%i_dump_modal_
       write(unit_debug_, fmt) 'USE BISP      SYM  = ',  settings%i_bisp_sym_
-      write(unit_debug_, fmt) 'USE 3D MATRIX SYM  = ',  settings%i_3d_sym_
+      write(unit_debug_, fmt) 'USE 3D MATRIX SYM  = ',  settings%i_spctr_sym_
       write(unit_debug_, fmt) 'N. OF FREQUENCIES  = ',  settings%nfreqs_
       write(unit_debug_, '("    - ", a, g10.5)') 'DELTA FREQ         = ',  settings%df_
       write(unit_debug_, fmt) 'USE "SVD" DECOMP   = ',  settings%i_use_svd_

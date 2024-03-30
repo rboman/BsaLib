@@ -1,12 +1,12 @@
-!! This file is part of BSA Library.
-!! Copyright (C) 2023  Michele Esposito Marzino 
+!! This file is part of BsaLib.
+!! Copyright (C) 2024  Michele Esposito Marzino 
 !!
-!! BSA Library is free software: you can redistribute it and/or modify
+!! BsaLib is free software: you can redistribute it and/or modify
 !! it under the terms of the GNU General Public License as published by
 !! the Free Software Foundation, either version 3 of the License, or
 !! (at your option) any later version.
 !!
-!! BSA Library is distributed in the hope that it will be useful,
+!! BsaLib is distributed in the hope that it will be useful,
 !! but WITHOUT ANY WARRANTY; without even the implied warranty of
 !! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 !! GNU General Public License for more details.
@@ -63,9 +63,6 @@ contains
       character(len = 256) :: emsg
 
 
-      ! if (.not. allocated(out_dir_)) out_dir_ = BSA_OUT_DIRNAME_DEFAULT
-      ! istat = util_createDirIfNotExist(out_dir_)
-
       call bsa_openFileHandles_()
 
       if (.not. allocated(settings)) then
@@ -101,11 +98,11 @@ contains
 
 
    module subroutine bsa_setPODTruncationThreshold(rval)
-      real(real64), value :: rval
+      real(bsa_real_t), value :: rval
 
-      if (rval > 0.0_real64) then
-         do_trunc_POD_ = .true.
-         POD_trunc_lim_ = rval / 100.0_real64
+      if (rval > 0.0_bsa_real_t) then
+         do_trunc_POD_  = .true.
+         POD_trunc_lim_ = rval / 100.0_bsa_real_t
       endif
    end subroutine
 
@@ -135,24 +132,18 @@ contains
 
 
 
-   module subroutine bsa_setVisualModeModalIndexes(modes)
-      integer(bsa_int_t), intent(in) :: modes(3)
+   module subroutine bsa_setVisualIndexes(indexes, modal)
+      integer(bsa_int_t), intent(in) :: indexes(3)
+      logical, value :: modal
 
-      visual_indexes_ = modes
-   end subroutine
-
-
-   module subroutine bsa_setVisualModeNodalIndexes(node, dof)
-      integer(bsa_int_t), value :: node, dof
-
-      is_brn_export_ = .true.
-      visual_indexes_(1) = node
-      visual_indexes_(2) = dof
+      visual_indexes_ = indexes
+      is_brn_export_  = .not. modal
    end subroutine
 
 
 
-   module subroutine bsa_setOnlyPremesh()
+
+   module subroutine bsa_enableOnlyPremesh()
       is_only_premesh_ = .true.
    end subroutine
 
@@ -484,13 +475,14 @@ contains
       end associate
 
       if (do_trunc_POD_) then
-         if (POD_trunc_lim_ == 0.0_real64 .or. POD_trunc_lim_ == 1.0_real64)   do_trunc_POD_  = .false.
+         if (POD_trunc_lim_ == 0.0_real64 .or. POD_trunc_lim_ == 1.0_real64) do_trunc_POD_ = .false.
       endif
       if (nPODmodes_set_) then
-         if (nmodes_POD_ <= 0_int32 .or. nmodes_POD_ >= struct_data%nn_load_) nPODmodes_set_ = .false.
+         if (nmodes_POD_ <= 0_bsa_int_t .or. nmodes_POD_ >= struct_data%nn_load_) nPODmodes_set_ = .false.
          if (nPODmodes_set_) &
             print '(/ 1x, 2a, i0, a /)', INFOMSG, 'Using  ', nmodes_POD_, '  POD modes.'
       endif
+
       if (I_BKG_PEAK_DELTAF_BFM_REFMT_FCT_ <= 0) I_BKG_PEAK_DELTAF_BFM_REFMT_FCT_ = 2
       if (I_BKG_PEAK_DELTAF_BFM_REFMT_FCT_ <= 0) I_BKG_PEAK_DELTAF_BFM_REFMT_FCT_ = 3
 
@@ -507,10 +499,10 @@ contains
          ! BUG: we need to set to 1 if NONE, multiplies moments
          if (ibispsym == BSA_SPATIAL_SYM_NONE) ibispsym = 1
 
-         if (ibispsym == BSA_SPATIAL_SYM_FOUR .and. settings%i_3d_sym_ == 1) then
+         if (ibispsym == BSA_SPATIAL_SYM_FOUR .and. settings%i_spctr_sym_ == 1) then
             print '(1x, 2a)', WARNMSG, 'Cannot use 3D matrix symmetry if computing only 1/4 in space.'
             print '(1x, 2a)', MSGCONT, 'Disabling it..'
-            settings%i_3d_sym_ = 0
+            settings%i_spctr_sym_ = 0
          endif
       end associate
 
@@ -776,6 +768,25 @@ contains
    end subroutine
 
 
+
+   module subroutine bsa_setSpectraSymmetries(ispctrsym)
+      integer(bsa_int_t), value :: ispctrsym
+
+      select case (ispctrsym)
+      case (0,1)
+         settings%i_spctr_sym_ = ispctrsym
+      case default
+         print '(1x, 2a, i0, a)', &
+            WARNMSG, 'Invalid   ', ispctrsym, '  Spectra symmetry value.'
+         print '(1x, 2a)', &
+            MSGCONT, 'Setting default (NONE).'
+         settings%i_spctr_sym_ = 0
+      end select
+   end subroutine
+
+
+
+
    module subroutine bsa_setBfmMLR(bool)
       logical, intent(in) :: bool
 
@@ -783,7 +794,7 @@ contains
    end subroutine
 
 
-   module subroutine bsa_setPremeshType(itype)
+   module subroutine bsa_setPremeshScheme(itype)
       integer(bsa_int_t), value :: itype
 
       select case (itype)
@@ -826,14 +837,15 @@ contains
 
 
 
-   ! module subroutine bsa_doValidateZoneDeltas(bool)
-   !    logical, intent(in) :: bool
+   module subroutine bsa_doValidateZoneDeltas(bool)
+      logical, intent(in) :: bool
 
-   !    do_validate_deltas_ = bool
-   ! end subroutine
+      do_validate_deltas_ = bool
+   end subroutine
 
 
-   module subroutine bsa_setValidateDeltasPolicy(id)
+
+   module subroutine bsa_setDeltasValidationPolicy(id)
       integer(bsa_int_t), value :: id
 
       select case (id)
@@ -910,7 +922,7 @@ contains
    end function
 
 
-   module subroutine bsa_setSubanType(isuban)
+   module subroutine bsa_setAnalysisType(isuban)
       integer(bsa_int_t), value :: isuban
 
       call settings%SetSubanType(isuban)
@@ -939,7 +951,7 @@ contains
 
 
    module subroutine bsa_setSpectraComputation(ipsd, ibisp)
-      integer(bsa_int_t), value, optional :: ipsd, ibisp
+      integer(bsa_int_t), value :: ipsd, ibisp
 
       call settings%ActivateSpectraComputation(ipsd, ibisp)
    end subroutine
@@ -958,12 +970,6 @@ contains
       call settings%TestMode(itest)
    end subroutine
 
-
-   module subroutine bsa_setSymmetries(ibispsym, i3dsym)
-      integer(bsa_int_t), value :: ibispsym, i3dsym
-
-      call settings%setSymmetries(ibispsym, i3dsym)
-   end subroutine
 
 
    module subroutine bsa_setupClassic(nfreqs, df)
@@ -1741,7 +1747,7 @@ contains
 
 
 
-   module subroutine bsa_exportPeakOrExtremesToFile(fname, rvar)
+   module subroutine bsa_exportExtremeValuesToFile(fname, rvar)
       character(len = *), intent(in) :: fname
       real(bsa_real_t), intent(in)   :: rvar(:)
       integer(int32) :: ndofs, iun, i
@@ -2051,8 +2057,8 @@ contains
       write(i, *) struct_data%nlibs_
       write(i, *) struct_data%modal_%nm_
       do j = 1, struct_data%modal_%nm_
-         write(i, "(1x, g20.10)"), struct_data%modal_%nat_freqs_(j)
-         write(i, "(1x, g20.10)"), struct_data%modal_%phi_(:, j)
+         write(i, "(1x, g20.10)") struct_data%modal_%nat_freqs_(j)
+         write(i, "(1x, g20.10)") struct_data%modal_%phi_(:, j)
       enddo
       close(i)
    end subroutine
@@ -2078,7 +2084,7 @@ contains
       write(iun, '(i4)') settings%i_compute_bisp_
       write(iun, '(i4)') settings%i_only_diag_
       write(iun, '(i4)') settings%i_bisp_sym_
-      write(iun, '(i4)') settings%i_3d_sym_
+      write(iun, '(i4)') settings%i_spctr_sym_
       write(iun, '(i4)') settings%i_test_mode_
       write(iun, '(a)') "-CLASSIC:"
       write(iun, '(i4)') settings%i_scalar_vers_

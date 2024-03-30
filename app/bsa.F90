@@ -1,12 +1,12 @@
-!! This file is part of BSA Library.
-!! Copyright (C) 2023  Michele Esposito Marzino 
+!! This file is part of BsaLib.
+!! Copyright (C) 2024  Michele Esposito Marzino 
 !!
-!! BSA Library is free software: you can redistribute it and/or modify
+!! BsaLib is free software: you can redistribute it and/or modify
 !! it under the terms of the GNU General Public License as published by
 !! the Free Software Foundation, either version 3 of the License, or
 !! (at your option) any later version.
 !!
-!! BSA Library is distributed in the hope that it will be useful,
+!! BsaLib is distributed in the hope that it will be useful,
 !! but WITHOUT ANY WARRANTY; without even the implied warranty of
 !! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 !! GNU General Public License for more details.
@@ -184,74 +184,74 @@ program bsa
             if (i_onlyd == 0) then
                if (allocated(peak_pos_r_diag_g))  then
                   fname = exp_prfx // 'peak_pos_r_' // cmb_sffx // 'D' // '_g' // exp_fext
-                  call bsa_exportPeakOrExtremesToFile(fname, peak_pos_r_diag_g)
+                  call bsa_exportExtremeValuesToFile(fname, peak_pos_r_diag_g)
                   extr_pos_r_diag_g = peak_pos_r_diag_g  * sqrt(m2_r_diag)
                   fname = exp_prfx // 'extr_pos_r_' // cmb_sffx // 'D' // '_g' // exp_fext
-                  call bsa_exportPeakOrExtremesToFile(fname, extr_pos_r_diag_g)
+                  call bsa_exportExtremeValuesToFile(fname, extr_pos_r_diag_g)
                endif
 
                if (allocated(peak_pos_r_diag_ng)) then
                   fname = exp_prfx // 'peak_pos_r_' // cmb_sffx // 'D' // '_ng' // exp_fext
-                  call bsa_exportPeakOrExtremesToFile(fname, peak_pos_r_diag_ng)
+                  call bsa_exportExtremeValuesToFile(fname, peak_pos_r_diag_ng)
                   extr_pos_r_diag_ng = peak_pos_r_diag_ng * sqrt(m2_r_diag)
                   fname = exp_prfx // 'extr_pos_r_' // cmb_sffx // 'D' // '_ng' // exp_fext
-                  call bsa_exportPeakOrExtremesToFile(fname, extr_pos_r_diag_ng)
+                  call bsa_exportExtremeValuesToFile(fname, extr_pos_r_diag_ng)
                endif
                if (allocated(peak_neg_r_diag_ng)) then
                   fname = exp_prfx // 'peak_neg_r_' // cmb_sffx // 'D' // '_ng' // exp_fext
-                  call bsa_exportPeakOrExtremesToFile(fname, peak_neg_r_diag_ng)
+                  call bsa_exportExtremeValuesToFile(fname, peak_neg_r_diag_ng)
                   extr_neg_r_diag_ng = peak_neg_r_diag_ng * sqrt(m2_r_diag)
                   fname = exp_prfx // 'extr_neg_r_' // cmb_sffx // 'D' // '_ng' // exp_fext
-                  call bsa_exportPeakOrExtremesToFile(fname, extr_neg_r_diag_ng)
+                  call bsa_exportExtremeValuesToFile(fname, extr_neg_r_diag_ng)
                endif
 
                if (allocated(peak_pos_r_full_g))  then
                   fname = exp_prfx // 'peak_pos_r_' // cmb_sffx // 'F' // '_g' // exp_fext
-                  call bsa_exportPeakOrExtremesToFile(fname, peak_pos_r_full_g)
+                  call bsa_exportExtremeValuesToFile(fname, peak_pos_r_full_g)
                   extr_pos_r_full_g  = peak_pos_r_full_g  * sqrt(m2_r_full)
                   fname = exp_prfx // 'extr_pos_r_' // cmb_sffx // 'F' // '_g' // exp_fext
-                  call bsa_exportPeakOrExtremesToFile(fname, extr_pos_r_full_g)
+                  call bsa_exportExtremeValuesToFile(fname, extr_pos_r_full_g)
                endif
 
                if (allocated(peak_pos_r_full_ng)) then
                   fname = exp_prfx // 'peak_pos_r_' // cmb_sffx // 'F' // '_ng' // exp_fext
-                  call bsa_exportPeakOrExtremesToFile(fname, peak_pos_r_full_ng)
+                  call bsa_exportExtremeValuesToFile(fname, peak_pos_r_full_ng)
                   extr_pos_r_full_ng = peak_pos_r_full_ng * sqrt(m2_r_full)
                   fname = exp_prfx // 'extr_pos_r_' // cmb_sffx // 'F' // '_ng' // exp_fext
-                  call bsa_exportPeakOrExtremesToFile(fname, extr_pos_r_full_ng)
+                  call bsa_exportExtremeValuesToFile(fname, extr_pos_r_full_ng)
                endif
                if (allocated(peak_neg_r_full_ng)) then
                   fname = exp_prfx // 'peak_neg_r_' // cmb_sffx // 'F' // '_ng' // exp_fext
-                  call bsa_exportPeakOrExtremesToFile(fname, peak_neg_r_full_ng)
+                  call bsa_exportExtremeValuesToFile(fname, peak_neg_r_full_ng)
                   extr_neg_r_full_ng = peak_neg_r_full_ng * sqrt(m2_r_full)
                   fname = exp_prfx // 'extr_neg_r_' // cmb_sffx // 'F' // '_ng' // exp_fext
-                  call bsa_exportPeakOrExtremesToFile(fname, extr_neg_r_full_ng)
+                  call bsa_exportExtremeValuesToFile(fname, extr_neg_r_full_ng)
                endif
 
             else
 
                if (allocated(peak_pos_r_diag_g))  then
                   fname = exp_prfx // 'peak_pos_r_' // cmb_sffx // '_g' // exp_fext
-                  call bsa_exportPeakOrExtremesToFile(fname, peak_pos_r_diag_g)
+                  call bsa_exportExtremeValuesToFile(fname, peak_pos_r_diag_g)
                   extr_pos_r_diag_g  = peak_pos_r_diag_g  * sqrt(m2_r_diag)
                   fname = exp_prfx // 'extr_pos_r_' // cmb_sffx // '_g' // exp_fext
-                  call bsa_exportPeakOrExtremesToFile(fname, extr_pos_r_diag_g)
+                  call bsa_exportExtremeValuesToFile(fname, extr_pos_r_diag_g)
                endif
 
 
                if (allocated(peak_pos_r_diag_ng)) then
                   fname = exp_prfx // 'peak_pos_r_' // cmb_sffx // '_ng' // exp_fext
-                  call bsa_exportPeakOrExtremesToFile(fname, peak_pos_r_diag_ng)
+                  call bsa_exportExtremeValuesToFile(fname, peak_pos_r_diag_ng)
                   extr_pos_r_diag_ng = peak_pos_r_diag_ng * sqrt(m2_r_diag)
                   fname = exp_prfx // 'extr_pos_r_' // cmb_sffx // '_ng' // exp_fext
-                  call bsa_exportPeakOrExtremesToFile(fname, extr_pos_r_diag_ng)
+                  call bsa_exportExtremeValuesToFile(fname, extr_pos_r_diag_ng)
                endif
                if (allocated(peak_neg_r_diag_ng)) then
                   fname = exp_prfx // 'peak_neg_r_' // cmb_sffx // '_ng' // exp_fext
-                  call bsa_exportPeakOrExtremesToFile(fname, peak_neg_r_diag_ng)
+                  call bsa_exportExtremeValuesToFile(fname, peak_neg_r_diag_ng)
                   extr_neg_r_diag_ng = peak_neg_r_diag_ng * sqrt(m2_r_diag)
                   fname = exp_prfx // 'extr_neg_r_' // cmb_sffx // '_ng' // exp_fext
-                  call bsa_exportPeakOrExtremesToFile(fname, extr_neg_r_diag_ng)
+                  call bsa_exportExtremeValuesToFile(fname, extr_neg_r_diag_ng)
                endif
             endif
 
@@ -480,13 +480,10 @@ contains ! utility procedures
       if (list(1) == 0) goto 98
       if (is_visual_nodal_) then
          if (list(2) == 0) goto 98
-         call bsa_setVisualModeNodalIndexes(list(1), list(2))
       else
-         if (list(2) == 0 .or. list(3) == 0) then
-            list = list(1)
-         endif
-         call bsa_setVisualModeModalIndexes(list)
+         if (list(2) == 0 .or. list(3) == 0) list = list(1)
       endif
+      call bsa_setVisualIndexes(list, .not. is_visual_nodal_)
       goto 10
 
       98 continue
@@ -544,7 +541,7 @@ contains ! utility procedures
       endif
 
       call bsa_setBfmMLR(.false.)
-      call bsa_setValidateDeltasPolicy(BSA_VALIDATE_DELTAS_POLICY_NONE)
+      call bsa_setDeltasValidationPolicy(BSA_VALIDATE_DELTAS_POLICY_NONE)
 
       call bsa_forceBsaClsExecution(.true.)
 
@@ -556,12 +553,13 @@ contains ! utility procedures
       call bsa_Init()  ! This initialises all necessary instances.
 
       ! SETTINGS
-      if (i_suban /= 0) call bsa_setSubanType(i_suban)
+      if (i_suban /= 0) call bsa_setAnalysisType(i_suban)
       if (i_vers  /= 0) call bsa_setVersion(i_vers)
       if (i_defsc /= 0) call bsa_setScalingConv(i_defsc)
-      call bsa_setSpectraComputation(ipsd=i_psd, ibisp=i_bisp)
+      call bsa_setSpectraComputation(i_psd, i_bisp)
       call bsa_setSpectraExtension(i_onlyd)
-      call bsa_setSymmetries(i_bispsym, i_3dsym)
+      call bsa_setSpatialSymmetry(i_bispsym)
+      call bsa_setSpectraSymmetries(i_3dsym)
       call bsa_setTestMode(i_test)
       call bsa_setupClassic(i_nfreqs, real(r_df, kind=bsa_real_t))
       call bsa_setClassicMode(i_scalar)

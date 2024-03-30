@@ -1,12 +1,12 @@
-!! This file is part of BSA Library.
-!! Copyright (C) 2023  Michele Esposito Marzino 
+!! This file is part of BsaLib.
+!! Copyright (C) 2024  Michele Esposito Marzino 
 !!
-!! BSA Library is free software: you can redistribute it and/or modify
+!! BsaLib is free software: you can redistribute it and/or modify
 !! it under the terms of the GNU General Public License as published by
 !! the Free Software Foundation, either version 3 of the License, or
 !! (at your option) any later version.
 !!
-!! BSA Library is distributed in the hope that it will be useful,
+!! BsaLib is distributed in the hope that it will be useful,
 !! but WITHOUT ANY WARRANTY; without even the implied warranty of
 !! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 !! GNU General Public License for more details.
@@ -17,8 +17,7 @@ submodule(BsaLib_Settings) BsaLib_SettingsImpl
 
    use BsaLib_IO,        only:  unit_debug_
    use BsaLib_Data,      only:  bsa_Abort
-   use BsaLib_CONSTANTS, only:  INFOMSG, WARNMSG, ERRMSG, MSGCONT, DBGMSG &
-                              , BSA_SETTS_DATA_DUMPFILE, BSA_SPATIAL_SYM_NONE
+   use BsaLib_CONSTANTS, only:  INFOMSG, WARNMSG, ERRMSG, MSGCONT, DBGMSG, BSA_SPATIAL_SYM_NONE
    implicit none (type, external)
 
 contains
@@ -54,18 +53,20 @@ contains
 
    module subroutine ActivateSpectraComputation(this, ipsd, ibisp)
       class(settings_t), intent(inout) :: this
-      integer(bsa_int_t), intent(in), optional :: ipsd, ibisp
+      integer(bsa_int_t), value :: ipsd, ibisp
 
-      if (present(ipsd)) then
-         if (ipsd < 0 .or. ipsd > 1) call bsa_Abort('Invalid "ipsd" value.')
-         this%i_compute_psd_ = ipsd
+      if (ipsd < 0 .or. ipsd > 1) then
+         print '(1x, 2a)', WARNMSG, "Invalid  ipsd  value. Set to DEFAULT (1)"
+         ipsd = 1
       endif
+      this%i_compute_psd_ = ipsd
 
-      if (present(ibisp)) then
-         if (ibisp < 0 .or. ibisp > 1) call bsa_Abort('Invalid "ibisp" value.')
-         this%i_compute_bisp_ = ibisp
+      if (ibisp < 0 .or. ibisp > 1) then
+         print '(1x, 2a)', WARNMSG, "Invalid  ibisp  value. Set to DEFAULT (1)"
+         ibisp = 1
       endif
-   end subroutine ActivateSpectraComputation
+      this%i_compute_bisp_ = ibisp
+   end subroutine
 
 
 
@@ -86,17 +87,6 @@ contains
       if (itest < 0 .or. itest > 1) call bsa_Abort('Invalid "itest" value.')
       this%i_test_mode_ = itest
    end subroutine TestMode
-
-
-   module subroutine setSymmetries(this, ibispsym, i3dsym)
-      class(settings_t), intent(inout) :: this
-      integer(bsa_int_t), intent(in)   :: ibispsym, i3dsym
-
-      this%i_bisp_sym_ = ibispsym
-
-      if (i3dsym < 0 .or. i3dsym > 1) call bsa_Abort('Invalid "i3dsym" value.')
-      this%i_3d_sym_ = i3dsym
-   end subroutine
 
 
 

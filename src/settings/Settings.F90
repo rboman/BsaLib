@@ -1,12 +1,12 @@
-!! This file is part of BSA Library.
-!! Copyright (C) 2023  Michele Esposito Marzino 
+!! This file is part of BsaLib.
+!! Copyright (C) 2024  Michele Esposito Marzino 
 !!
-!! BSA Library is free software: you can redistribute it and/or modify
+!! BsaLib is free software: you can redistribute it and/or modify
 !! it under the terms of the GNU General Public License as published by
 !! the Free Software Foundation, either version 3 of the License, or
 !! (at your option) any later version.
 !!
-!! BSA Library is distributed in the hope that it will be useful,
+!! BsaLib is distributed in the hope that it will be useful,
 !! but WITHOUT ANY WARRANTY; without even the implied warranty of
 !! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 !! GNU General Public License for more details.
@@ -81,7 +81,7 @@ module BsaLib_Settings
       !> 0 = no
       !> 1 = yes
       !> NOTE: if i_bisp_sym_==4, automatically 0
-      integer(bsa_int_t) :: i_3d_sym_ = 0
+      integer(bsa_int_t) :: i_spctr_sym_ = 0
 
 
 
@@ -123,7 +123,6 @@ module BsaLib_Settings
       procedure, public, pass :: ActivateSpectraComputation
       procedure, public, pass :: SetExtension
       procedure, public, pass :: TestMode
-      procedure, public, pass :: setSymmetries
       procedure, public, pass :: setClsSettings
       procedure, public, pass :: SetMshrSetts
    end type settings_t
@@ -157,7 +156,7 @@ module BsaLib_Settings
       !> Pass 0 to deactivate.
       module subroutine ActivateSpectraComputation(this, ipsd, ibisp)
          class(settings_t), intent(inout) :: this
-         integer(bsa_int_t), intent(in), optional :: ipsd, ibisp
+         integer(bsa_int_t), value :: ipsd, ibisp
       end subroutine
 
 
@@ -175,11 +174,6 @@ module BsaLib_Settings
          integer(bsa_int_t), intent(in)   :: itest
       end subroutine
 
-
-      module subroutine setSymmetries(this, ibispsym, i3dsym)
-         class(settings_t), intent(inout) :: this
-         integer(bsa_int_t), intent(in)   :: ibispsym, i3dsym
-      end subroutine
 
 
       !> Sets main Classic suban settings.

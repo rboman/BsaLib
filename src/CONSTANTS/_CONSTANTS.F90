@@ -1,12 +1,12 @@
-!! This file is part of BSA Library.
-!! Copyright (C) 2023  Michele Esposito Marzino 
+!! This file is part of BsaLib.
+!! Copyright (C) 2024  Michele Esposito Marzino 
 !!
-!! BSA Library is free software: you can redistribute it and/or modify
+!! BsaLib is free software: you can redistribute it and/or modify
 !! it under the terms of the GNU General Public License as published by
 !! the Free Software Foundation, either version 3 of the License, or
 !! (at your option) any later version.
 !!
-!! BSA Library is distributed in the hope that it will be useful,
+!! BsaLib is distributed in the hope that it will be useful,
 !! but WITHOUT ANY WARRANTY; without even the implied warranty of
 !! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 !! GNU General Public License for more details.
@@ -45,11 +45,11 @@
    integer(IK), parameter :: BSA_SPATIAL_SYM_HALF = 2_IK
    integer(IK), parameter :: BSA_SPATIAL_SYM_FOUR = 4_IK
 
-   integer(IK), parameter :: BSA_PREMESH_MODE_BASE         = 0_IK
-   integer(IK), parameter :: BSA_PREMESH_MODE_ZONE_REFINED = 1_IK
-
    integer(IK), parameter :: BSA_PREMESH_TYPE_DIAG_CREST_NO  = 0_IK
    integer(IK), parameter :: BSA_PREMESH_TYPE_DIAG_CREST_YES = 1_IK
+
+   integer(IK), parameter :: BSA_PREMESH_MODE_BASE         = 0_IK
+   integer(IK), parameter :: BSA_PREMESH_MODE_ZONE_REFINED = 1_IK
 
    integer(IK), parameter :: BSA_VALIDATE_DELTAS_POLICY_NONE    = 0_IK
    integer(IK), parameter :: BSA_VALIDATE_DELTAS_POLICY_DEFAULT = 1_IK
@@ -58,9 +58,11 @@
    integer(IK), parameter :: BSA_VALIDATE_DELTAS_POLICY_HIGH    = 4_IK
    integer(IK), parameter :: BSA_VALIDATE_DELTAS_POLICY_STRICT  = 5_IK
 
-   integer(IK), parameter :: BSA_CLASSIC_MODE_VECTOR  = 0_IK
-   integer(IK), parameter :: BSA_CLASSIC_MODE_SCALAR  = 1_IK
+   integer(IK), parameter :: BSA_CLASSIC_MODE_VECTOR = 0_IK
+   integer(IK), parameter :: BSA_CLASSIC_MODE_SCALAR = 1_IK
 
+   integer(IK), parameter :: BSA_PSD_CONVENTION_FREQ = 0_IK
+   integer(IK), parameter :: BSA_PSD_CONVENTION_PULS = 1_IK
 
 !**************************************************************************************
 !   BSA  I/O  DEFAULTS
@@ -85,6 +87,19 @@
    character(len = 0), parameter :: BSA_FILE_NAME_CL_SUFFIX = ''
 #endif
 
+
+
+!**************************************************************************************
+!   WIND
+!**************************************************************************************
+
+   integer(IK), parameter :: BSA_WIND_VERT_PROFILE_POWER = 1_IK
+   integer(IK), parameter :: BSA_WIND_VERT_PROFILE_LOG   = 2_IK
+
+   integer(IK), parameter :: BSA_WIND_PSD_VONKARMAN = 1_IK
+   integer(IK), parameter :: BSA_WIND_PSD_KAIMAL    = 2_IK
+   integer(IK), parameter :: BSA_WIND_PSD_DAVENPORT = 5_IK
+   ! integer(IK), parameter :: BSA_WIND_PSD_DAVENPORT_FIXED = 3_IK
 
 
 !**************************************************************************************
@@ -166,8 +181,16 @@
    abstract interface
       subroutine exportInterf_vect_(f1, f2, brm, pdata)
          import :: bsa_real_t
-         real(bsa_real_t), intent(in)  :: f1(:), f2(:), brm(:, :)
+         real(bsa_real_t), intent(in)  :: f1(:)
+            !! Array of frequencies along the X-axis
+         real(bsa_real_t), intent(in)  :: f2(:)
+            !! Array of frequencies along the Y-axis
+         real(bsa_real_t), intent(in)  :: brm(:, :)
+            !! Data of bispectra
          class(*), pointer, intent(in) :: pdata
+            !! Unlimited polymorphic object allowinf the user to pass any kind of 
+            !! object, holding the necessary data to be used when backfiring the 
+            !! provided callback function when exporting bispectra information.
       end subroutine
    end interface
 
@@ -178,7 +201,7 @@
 !   NUMERICs
 !**************************************************************************************
 
-   !> To avoid assertion errors in Mesher due to `sin()`/`cos()` intrinsic functions 
+   !> @note To avoid assertion errors in Mesher due to `sin()`/`cos()` intrinsic functions 
    !>  rounding errors.
    real(RK), parameter :: MACHINE_PRECISION = 1e-12_RK
 

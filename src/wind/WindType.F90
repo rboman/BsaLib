@@ -1,12 +1,12 @@
-!! This file is part of BSA Library.
-!! Copyright (C) 2023  Michele Esposito Marzino 
+!! This file is part of BsaLib.
+!! Copyright (C) 2024  Michele Esposito Marzino 
 !!
-!! BSA Library is free software: you can redistribute it and/or modify
+!! BsaLib is free software: you can redistribute it and/or modify
 !! it under the terms of the GNU General Public License as published by
 !! the Free Software Foundation, either version 3 of the License, or
 !! (at your option) any later version.
 !!
-!! BSA Library is distributed in the hope that it will be useful,
+!! BsaLib is distributed in the hope that it will be useful,
 !! but WITHOUT ANY WARRANTY; without even the implied warranty of
 !! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 !! GNU General Public License for more details.
@@ -16,7 +16,7 @@
 module BsaLib_WindData
 
    use BsaLib_CONSTANTS, only: bsa_int_t, bsa_real_t, real64, int32       &
-                              , INFOMSG, WARNMSG, ERRMSG, MSGCONT, DBGMSG, BSA_WIND_DATA_DUMPFILE
+                              , INFOMSG, WARNMSG, ERRMSG, MSGCONT, DBGMSG
    use BsaLib_Settings
    use BsaLib_IO
    implicit none (type, external)
