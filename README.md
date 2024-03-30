@@ -1,20 +1,24 @@
 <!-- ![BSA logo](./resources/images/BSA_logo_extended.PNG "BSA logo") -->
 
-# BsaLib - Bispectral Stochastic Analysis Library
+# BsaLib - Bispectral Stochastic Analysis LIBrary
 
-**BsaLib** is library/framework for the Bispectral Stochastic Analysis (BSA) of linear systems, 
+**BsaLib** is library for the Bispectral Stochastic Analysis (BSA) of linear systems, 
 under non-Gaussian stationary random excitations.
 
-**NOTE**: currently, only wind action is included within, but other phenomena (waves for instance) 
+**NOTE**: currently, only wind action is included in the library, but other phenomena (waves for instance) 
 can be easily integrated. See [further developments](#what's-missing?-further-developments).
 
 
 
 # Code structure
 
-There are two parts in this repository: (i) `BsaLib` (library) and (ii) `BSA` (executable).
+There are two parts in this repository: 
 
-## `BsaLib` - core library
+1. [`BsaLib`](#`bsalib`:-core-library), the core library;
+2. [`BSA`](#`bsa`:-executable-program), the built-in executable program.
+
+
+## `BsaLib`: core library
 
 `BsaLib` is the main core of this repository (in `./src/`). 
 It consists of the main library and its API to which anyone could link to and interact with.
@@ -51,7 +55,7 @@ and [`bsa.extdata` section](./readme_files/extdata.md).
 
 
 
-## `BSA` - executable program
+## `BSA`: executable program
 
 As a side project package, a single-source executable file is provided under `./app/`. 
 It emulates what one would normally do when using `BsaLib` as a *plug-in* for its own 
