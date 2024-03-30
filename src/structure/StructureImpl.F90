@@ -12,7 +12,7 @@
 !! GNU General Public License for more details.
 !!
 !! You should have received a copy of the GNU General Public License
-!! along with BSA Library.  If not, see <https://www.gnu.org/licenses/>.
+!! along with BsaLib.  If not, see <https://www.gnu.org/licenses/>.
 submodule(BsaLib_Structure) BsaLib_StructDataImpl
 
    use BsaLib_IO,        only: unit_debug_, allocKOMsg, deallocKOMsg

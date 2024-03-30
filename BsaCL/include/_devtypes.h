@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BSA Library.  If not, see <https://www.gnu.org/licenses/>.
+ * along with BsaLib.  If not, see <https://www.gnu.org/licenses/>.
  * */
 #ifndef BSACL_DEVTYPES_H_
 #define BSACL_DEVTYPES_H_

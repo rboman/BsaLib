@@ -12,7 +12,7 @@
 !! GNU General Public License for more details.
 !!
 !! You should have received a copy of the GNU General Public License
-!! along with BSA Library.  If not, see <https://www.gnu.org/licenses/>.
+!! along with BsaLib.  If not, see <https://www.gnu.org/licenses/>.
 
 #ifdef __triang_zone__
 # define __sub_name_compute compute_TZ_iso_
