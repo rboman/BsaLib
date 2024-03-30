@@ -26,8 +26,8 @@ contains
 
    module subroutine SetNodalCoords(this, nn, coords)
       class(StructureData_t), intent(inout) :: this
-      integer(bsa_int_t), intent(in)  :: nn
-      real(bsa_real_t), target, allocatable :: coords(:, :)
+      integer(bsa_int_t), intent(in)        :: nn
+      real(bsa_real_t), target, contiguous  :: coords(:, :)
 
       if (this%nn_ == 0) then
          this%nn_ = nn
@@ -36,8 +36,8 @@ contains
             call bsa_Abort('Nodal info does not match in setting nodal coordinates. Check again.')
       endif
 
-      if (allocated(coords)) this%coords_ => coords
-   end subroutine SetNodalCoords
+      this%coords_ => coords
+   end subroutine
 
 
 

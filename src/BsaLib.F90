@@ -403,7 +403,7 @@ module BsaLib
 
       module subroutine bsa_setNodalCoords(nn, coords)
          integer(bsa_int_t), value :: nn
-         real(bsa_real_t), target, allocatable :: coords(:, :)
+         real(bsa_real_t), target, contiguous :: coords(:, :)
       end subroutine
 
 

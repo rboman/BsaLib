@@ -1162,7 +1162,7 @@ contains
 
    module subroutine bsa_setNodalCoords(nn, coords)
       integer(bsa_int_t), value :: nn
-      real(bsa_real_t), target, allocatable :: coords(:, :)
+      real(bsa_real_t), target, contiguous :: coords(:, :)
 
       call struct_data%SetNodalCoords(nn, coords)
    end subroutine
