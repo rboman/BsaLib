@@ -566,7 +566,10 @@ contains
          !$omp parallel do &
          !$omp   default(firstprivate),        &
          !$omp   private(idir, zone_title),    &
-         !$omp   shared(DIRS_LABELS, ROTATIONS, NLimsP1, COORDS_DIR_CH, LIM_SIGN_DIRS &
+         !$omp   shared(NLimsP1  &
+#ifndef __GFORTRAN__
+         !$omp          , DIRS_LABELS, ROTATIONS, COORDS_DIR_CH, LIM_SIGN_DIRS  &
+#endif
          !$omp          , policies, limits, df_I_ref, df_J_ref, msh_ZoneLimsInterestModes &
          !$omp          , refmts, deltas, inter_modes_, basePts, base_i, bases_i_ &
          !$omp          , struct_data, wd, settings &
@@ -773,12 +776,15 @@ contains
 #ifdef _OPENMP
                !$omp parallel do &
                !$omp   default(firstprivate), &
-               !$omp   shared(ROTATIONS, LIM_SIGN_DIRS, main_refs_, bases_ch, inter_modes_ &
-               !$omp          , basePts, policies, deltas, LEFT_RZ_SIGNS, DIRS_DIAG_LABELS &
-               !$omp          , struct_data, wd, settings, limits       &
-               !$omp          , NFREQS, NNODES, NNODESL, NLIBS, NLIBSL  &
-               !$omp          , NMODES, NMODES_EFF, MODES &
-               !$omp          , NPSDEL, NTCOMPS, NDIRS, TCOMPS, DIRS &
+               !$omp   shared(main_refs_, bases_ch, inter_modes_ &
+#ifndef __GFORTRAN__
+               !$omp          , ROTATIONS, LIM_SIGN_DIRS, LEFT_RZ_SIGNS, DIRS_DIAG_LABELS  &
+#endif
+               !$omp          , basePts, policies, deltas                     &
+               !$omp          , struct_data, wd, settings, limits             &
+               !$omp          , NFREQS, NNODES, NNODESL, NLIBS, NLIBSL        &
+               !$omp          , NMODES, NMODES_EFF, MODES                     &
+               !$omp          , NPSDEL, NTCOMPS, NDIRS, TCOMPS, DIRS          &
                !$omp          , MSHR_SVD_INFO, MSHR_SVD_LWORK, MSHR_SVD_WORK  &
                !$omp          , msh_NZones, msh_bfmpts_pre_, msh_max_zone_NPts, m3mf_msh_ptr_), &
                !$omp   num_threads(n_dirs_)
@@ -938,8 +944,10 @@ contains
             !$omp parallel do &
             !$omp   default(firstprivate), &
             !$omp   private(zone_title),   &
-            !$omp   shared(ROTATIONS, LIM_SIGN_DIRS         &
-            !$omp          , maxF, basePts, df_I, df_J, pol &
+            !$omp   shared(maxF, basePts, df_I, df_J, pol   &
+#ifndef __GFORTRAN__
+            !$omp          , ROTATIONS, LIM_SIGN_DIRS       &
+#endif
             !$omp          , struct_data, wd, settings               &
             !$omp          , NFREQS, NNODES, NNODESL, NLIBS, NLIBSL  &
             !$omp          , NMODES, NMODES_EFF, MODES &
@@ -1017,15 +1025,17 @@ contains
                !$omp parallel do &
                !$omp   default(firstprivate), &
                !$omp   private(zone_title),   &
-               !$omp   shared(ROTATIONS, LIM_SIGN_DIRS, DIRS_DIAG_LABELS &
-               !$omp          , msh_ZoneLimsInterestModes, bkgz, deltaI_S2_2 &
-               !$omp          , maxF, basePts, tmprots, ipre_mesh_mode &
-               !$omp          , NLimsP1, limits, refmts, policies, deltas &
-               !$omp          , base_i, id_im_last, NLims &
-               !$omp          , struct_data, wd, settings &
-               !$omp          , NMODES, NMODES_EFF, MODES &
-               !$omp          , NFREQS, NNODES, NNODESL, NLIBS, NLIBSL &
-               !$omp          , NPSDEL, NTCOMPS, NDIRS, TCOMPS, DIRS &
+               !$omp   shared(msh_ZoneLimsInterestModes, bkgz, deltaI_S2_2 &
+#ifndef __GFORTRAN__
+               !$omp          , ROTATIONS, LIM_SIGN_DIRS, DIRS_DIAG_LABELS &
+#endif
+               !$omp          , maxF, basePts, tmprots, ipre_mesh_mode     &
+               !$omp          , NLimsP1, limits, refmts, policies, deltas  &
+               !$omp          , base_i, id_im_last, NLims               &
+               !$omp          , struct_data, wd, settings               &
+               !$omp          , NMODES, NMODES_EFF, MODES               &
+               !$omp          , NFREQS, NNODES, NNODESL, NLIBS, NLIBSL  &
+               !$omp          , NPSDEL, NTCOMPS, NDIRS, TCOMPS, DIRS    &
                !$omp          , MSHR_SVD_INFO, MSHR_SVD_LWORK, MSHR_SVD_WORK  &
                !$omp          , msh_NZones, msh_bfmpts_pre_, msh_max_zone_NPts, m3mf_msh_ptr_), &
                !$omp   num_threads(N_THREADS_MIN_)
@@ -1312,9 +1322,11 @@ contains
             !$omp parallel do  &
             !$omp   default(firstprivate),   &
             !$omp   private(zone_title),     &
-            !$omp   shared(DIRS_LABELS, df_I, df_J, basePts, ROTATIONS  &
-            !$omp          , struct_data, wd, settings                              &
-            !$omp          , LIM_SIGN_DIRS, LEFT_RZ_SIGNS, max_ext, maxext_sym_     &
+            !$omp   shared(df_I, df_J, basePts  &
+#ifndef __GFORTRAN__
+            !$omp          , DIRS_LABELS, ROTATIONS, LIM_SIGN_DIRS, LEFT_RZ_SIGNS   &
+#endif
+            !$omp          , struct_data, wd, settings, max_ext, maxext_sym_        &
             !$omp          , NFREQS, NNODES, NNODESL, NLIBS, NLIBSL, NMODES, DIRS   &
             !$omp          , NMODES_EFF, MODES, NPSDEL, NTCOMPS, NDIRS, TCOMPS      &
             !$omp          , MSHR_SVD_INFO, MSHR_SVD_LWORK, MSHR_SVD_WORK           &
