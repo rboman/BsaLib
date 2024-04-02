@@ -445,7 +445,9 @@ contains
          endif
       end block
 
+#if (defined(BSA_USE_GPU)) || (defined(_BSA_CHECK_NOD_COH_SVD))
       998 continue
+#endif
 
 #ifdef BSA_USE_GPU
       if (is_gpu_enabled_) then
@@ -1317,6 +1319,7 @@ contains
 
          block
             integer(int32) :: istat
+
             allocate(bkg(nm), stat=istat)
             if (istat /= 0) then
                print '(1x, 2a)', &
@@ -1333,8 +1336,9 @@ contains
 
          block
             integer   :: idim2, ipsd, ibisp, dimPSD, dimBSP, id
-            integer   :: iun, idxi, idxe, itc_, idir_
-            real(bsa_real_t) :: fnat, SFm_fnat, rtmp(1), Km_loc2_
+            integer   :: idxi, idxe, itc_, idir_
+            real(bsa_real_t) :: fnat, SFm_fnat, Km_loc2_
+            ! real(bsa_real_t) :: rtmp(1)
             real(bsa_real_t), allocatable :: S_uvw(:, :), S_pad(:)
 
             ! NOTE: backup this data, for later reset to right values
@@ -1658,10 +1662,12 @@ contains
 
       block
          integer(int32) :: szm2, szm3
-         integer(int32) :: pm3, pm2
-         integer(int32) ::  k,  j,  i, l
+         integer(int32) :: pm3
+         integer(int32) ::  k, j, i
+#ifdef BSA_DEBUG
+         integer(int32) ::  l
+#endif
          integer(int32) :: ik, ij, ii
-         integer(int32) :: s2
 
          real(bsa_real_t), allocatable :: sigm(:)
          real(bsa_real_t) :: denK, denJ
@@ -1669,10 +1675,13 @@ contains
          szm2 = size(m2, 1)
          szm3 = size(m3, 1)
 
+         allocate(sigm(szm2))
+         do concurrent (k = 1 : szm2)
+            sigm(k) = sqrt(m2(k))  ! std
+         enddo
+
          allocate(sk(szm3))
          sk = 0._bsa_real_t
-
-         sigm = sqrt(m2)  ! std
 
          pm3 = 1
          ik  = 1
@@ -1708,7 +1717,9 @@ contains
             ik = k * dim + k + 1
          enddo ! dim k
 
+#ifdef BSA_DEBUG
          99 continue
+#endif
       end block
    end function computeSkewness_
 
@@ -1953,8 +1964,9 @@ contains
       endif
 
       ! TODO: adapt to output in BSA folder
-      open(unit=iun, file=fname, form='formatted', action='write', status='replace', &
-         iostat=istat)
+      open(newunit=iun, file=fname&
+         , form='formatted', action='write', status='replace' &
+         , iostat=istat)
       if (istat /= 0) return
 
       if (present(coords)) then

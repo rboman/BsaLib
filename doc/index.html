@@ -73,16 +73,118 @@
 <ul>
 <li><a href="#brief-description">Brief Description</a></li>
 <li><a href="#license">License</a></li>
+<li><a href="#code-structure">Code structure</a><ul>
+<li><a href="#bsalib-core-library">BsaLib: core library</a></li>
+<li><a href="#bsa-executable-program">BSA: executable program</a></li>
+</ul>
+</li>
+<li><a href="#whats-missing-further-developments">What's missing? Further developments</a></li>
+<li><a href="#known-issues">Known Issues</a></li>
 <li><a href="#related-scientific-publications">Related Scientific Publications</a></li>
 </ul>
 </div>
-<h2 id="brief-description">Brief Description</h2>
+<!-- ![BSA logo](./resources/images/BSA_logo_extended.PNG "BSA logo") -->
+
+<h1 id="brief-description">Brief Description</h1>
+<hr>
 <p><code>BsaLib</code>, a Modern Fortran Library for the Bispectral Stochastic Analysis 
 of structures under non-Gaussian stationary random actions.</p>
-<h2 id="license">License</h2>
-<p><code>BsaLib</code> is release under the <strong>GNU General Public License</strong>.
+<blockquote>
+<p>NOTE: currently, only wind action is included in the library, but other phenomena (waves for instance) can be easily integrated. 
+See <a href="#what's-missing?-further-developments">further developments</a>.</p>
+</blockquote>
+<h1 id="license">License</h1>
+<hr>
+<p><code>BsaLib</code> is release under the <strong>GNU Lesser General Public License v3.0</strong>.
 Visit the <a href="https://www.gnu.org/licenses/gpl-3.0.html">GPL official website</a> for more information.</p>
-<h2 id="related-scientific-publications">Related Scientific Publications</h2>
+<h1 id="code-structure">Code structure</h1>
+<p>There are two parts in this repository: </p>
+<ol>
+<li><a href="#bsalib:-core-library"><code>BsaLib</code></a>, the core library;</li>
+<li><a href="#bsa:-executable-program"><code>BSA</code></a>, the built-in executable program.</li>
+</ol>
+<h2 id="bsalib-core-library"><code>BsaLib</code>: core library</h2>
+<p><code>BsaLib</code> is the main core of this repository. 
+It consists of the main library and its API to which anyone could link to and interact with.
+To use <code>BsaLib</code>, simply import the main <code>BsaLib</code> API module:</p>
+<div class="codehilite"><pre><span></span><code><span class="k">program </span><span class="n">test</span>
+<span class="w">    </span><span class="k">use</span><span class="p">,</span><span class="w"> </span><span class="k">non_intrinsic</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">BsaLib</span>
+<span class="w">    </span><span class="k">implicit none</span><span class="w"> </span><span class="p">(</span><span class="k">type</span><span class="p">,</span><span class="w"> </span><span class="k">external</span><span class="p">)</span>
+<span class="w">    </span><span class="c">! your declarations here</span>
+
+<span class="w">    </span><span class="c">! your logic here</span>
+
+<span class="w">    </span><span class="c">! initialise BsaLib</span>
+<span class="w">    </span><span class="k">call </span><span class="n">bsa_Init</span><span class="p">()</span>
+
+<span class="w">    </span><span class="c">! set BsaLib internal state through its API procedures</span>
+
+<span class="w">    </span><span class="c">! once done, run BsaLib</span>
+<span class="w">    </span><span class="k">call </span><span class="n">bsa_Run</span><span class="p">(</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="n">args</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">)</span>
+
+<span class="w">    </span><span class="c">! finally, release BSA memory</span>
+<span class="w">    </span><span class="k">call </span><span class="n">bsa_Finalise</span><span class="p">()</span>
+<span class="k">end program</span>
+</code></pre></div>
+
+<p>Being designed as a <em>plug-in</em> library, it needs the hosting program/library 
+to provide some data needed by <code>BsaLib</code> in order to function properly.</p>
+<h2 id="bsa-executable-program"><code>BSA</code>: executable program</h2>
+<p>As a side project package, a single-source executable file is provided under <code>./app/</code>. 
+It emulates what one would normally do when using <code>BsaLib</code> as a <em>plug-in</em> for its own 
+library/program. 
+On the other hand, this program is thought and provided for all those interested in using 
+<code>BsaLib</code> but not having any hosting library/program. 
+Nonetheless, even if this program is provided, the user would yet need to provide the data 
+for <code>BsaLib</code> to function properly. If any of this data is not provided, the <code>BsaLib</code> runtime check 
+would detect it and abort correct logic flow.</p>
+<p>For that, the provided executable program relies on reading two input files:</p>
+<ol>
+<li><code>BsaLib</code> related settings (formatted file, named <code>bsa.bsadata</code>). 
+For details, read the <a href="./readme_files/bsadata.md">dedicated section</a>.</li>
+<li>External data file (named <code>bsa.extdata</code>), in binary format, containing 8-byte floating point records 
+(<code>real64</code> of the <code>iso_fortran_env</code> compiler intrinsic module). 
+For full details, read the <a href="./readme_files/extdata.md">external data section</a>.</li>
+</ol>
+<h1 id="whats-missing-further-developments">What's missing? Further developments</h1>
+<hr>
+<ul>
+<li>[ ] Adapt (very easy to do) Classic approach to dump BFM info as in Mesher</li>
+<li>[ ] Integrate models for other non-Gaussian actions (waves, for instance)</li>
+<li>[ ] Provide a general API for user defined models integration</li>
+<li>[ ] Complete full support for spatial (in-plane) symmetries of a real-valued bispectrum</li>
+<li>[ ] Compute nodal correlation internally (don't require it as user data)</li>
+<li>[ ] Add support for Mesher zones' interest modes</li>
+<li>[ ] Add functionality to generate spectra from time series</li>
+<li>[ ] Add a local caching system</li>
+<li>[ ] Add <code>MPI</code> support (for running <code>BsaLib</code> on multi-node clusters)</li>
+<li>[ ] Add ability to export using formats of most common Visualisation (Paraview, for instance). 
+Better, in a more sustainable way, add the possibility to let the user provide its own desired 
+exporting function, so that <code>BsaLib</code> is not tight to any specific 
+exporting format.</li>
+<li>[ ] Integrate a built-in ad-hoc bispectrum post-processing Visualiser (using <a href="https://www.vulkan.org/">Vulkan</a>, for optimal performances)</li>
+</ul>
+<h1 id="known-issues">Known Issues</h1>
+<hr>
+<p>There is one main known issue in the current version. </p>
+<blockquote>
+<p>Using <code>OpenMP</code> parallelisation in the second Post-meshing phase, 
+execution time is higher compared to serialised version. 
+This is due to the necessary synchronisation between threads when accessing 
+shared file I/O when reading each zone's dumped data, causing the <code>critical</code> 
+section to be the main bottleneck in this part.
+For a proper use of <code>OpenMP</code> parallelisation in Post-meshing phase, a fundamental
+rethinking of the algorithmic structure needs to be done.
+A first, temporary, possible solution, could be the usage of thread-level private
+I/O with dedicated units, avoiding the need to synchronise when reading back 
+information in post-meshing phase. However, this might soon become inelegant solution 
+when the number of threads would start increasing considerably.
+For this, as a temporary solution, a conditional compilation flag 
+(<code>BSA_USE_POST_MESH_OMP</code>) can be used to control effective use of 
+<code>OpenMP</code> parallelisation in Post-meshing phase, <strong>disabled by default</strong>.</p>
+</blockquote>
+<h1 id="related-scientific-publications">Related Scientific Publications</h1>
+<hr>
 <ol>
 <li><a href="https://www.sciencedirect.com/science/article/abs/pii/S0167610523002799?via%3Dihub">Non-Gaussian buffeting analysis of large structures by means of a Proper Orthogonal Decomposition</a></li>
 <li><a href="https://www.sciencedirect.com/science/article/abs/pii/S0167610522003786?via%3Dihub">A multiple timescale approach of bispectral correlation</a></li>
@@ -148,7 +250,7 @@ Visit the <a href="https://www.gnu.org/licenses/gpl-3.0.html">GPL official websi
             <p class="text-end">
               Documentation generated by
               <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
- on 2024-03-30 08:07              </p>
+ on 2024-04-02 10:20              </p>
           </div>
         </div>
         <br>

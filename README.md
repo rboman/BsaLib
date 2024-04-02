@@ -1,13 +1,20 @@
 <!-- ![BSA logo](./resources/images/BSA_logo_extended.PNG "BSA logo") -->
 
-# BsaLib - Bispectral Stochastic Analysis LIBrary
+# Brief Description
+-------------------
 
-**BsaLib** is library for the Bispectral Stochastic Analysis (BSA) of linear systems, 
-under non-Gaussian stationary random excitations.
+`BsaLib`, a Modern Fortran Library for the Bispectral Stochastic Analysis 
+of structures under non-Gaussian stationary random actions.
 
-**NOTE**: currently, only wind action is included in the library, but other phenomena (waves for instance) 
-can be easily integrated. See [further developments](#what's-missing?-further-developments).
+> NOTE: currently, only wind action is included in the library, but other phenomena (waves for instance) can be easily integrated. 
+> See [further developments](#what's-missing?-further-developments).
 
+
+# License
+---------
+
+`BsaLib` is release under the **GNU Lesser General Public License v3.0**.
+Visit the [GPL official website](https://www.gnu.org/licenses/gpl-3.0.html) for more information.
 
 
 # Code structure
@@ -20,9 +27,9 @@ There are two parts in this repository:
 
 ## `BsaLib`: core library
 
-`BsaLib` is the main core of this repository (in `./src/`). 
+`BsaLib` is the main core of this repository. 
 It consists of the main library and its API to which anyone could link to and interact with.
-To use `BsaLib`, simply import the [main API module](./src/BsaLib.f90):
+To use `BsaLib`, simply import the main `BsaLib` API module:
 
 ```Fortran
 program test
@@ -47,12 +54,6 @@ end program
 
 Being designed as a *plug-in* library, it needs the hosting program/library 
 to provide some data needed by `BsaLib` in order to function properly.
-For example, currently, all structural modal data is required to be given, 
-such as Mass, Damping and Stiffness matrices ($M^*, C^*, K^*$), as well as modal damping ratios ($\xi$).
-However, this is usually data that almost all Finite Element Software are capable of computing.
-For details about all data required by `BsaLib`, please refer to [next section](#`bsa`---executable-program) 
-and [`bsa.extdata` section](./readme_files/extdata.md).
-
 
 
 ## `BSA`: executable program
@@ -74,19 +75,27 @@ For details, read the [dedicated section](./readme_files/bsadata.md).
 (`real64` of the `iso_fortran_env` compiler intrinsic module). 
 For full details, read the [external data section](./readme_files/extdata.md).
 
+# What's missing? Further developments
+--------------------------------------
 
-
-
-# Related published works
-
-This work includes some novel work, on a mathematical and numerical level.
-Please refer to following paper(s) for detailed information:
-
-- [Non-Gaussian buffeting analysis of large structures by means of a Proper Orthogonal Decomposition](https://doi.org/10.1016/j.jweia.2023.105576)
-
+- [ ] Adapt (very easy to do) Classic approach to dump BFM info as in Mesher
+- [ ] Integrate models for other non-Gaussian actions (waves, for instance)
+- [ ] Provide a general API for user defined models integration
+- [ ] Complete full support for spatial (in-plane) symmetries of a real-valued bispectrum
+- [ ] Compute nodal correlation internally (don't require it as user data)
+- [ ] Add support for Mesher zones' interest modes
+- [ ] Add functionality to generate spectra from time series
+- [ ] Add a local caching system
+- [ ] Add `MPI` support (for running `BsaLib` on multi-node clusters)
+- [ ] Add ability to export using formats of most common Visualisation (Paraview, for instance). 
+Better, in a more sustainable way, add the possibility to let the user provide its own desired 
+exporting function, so that `BsaLib` is not tight to any specific 
+exporting format.
+- [ ] Integrate a built-in ad-hoc bispectrum post-processing Visualiser (using [Vulkan](https://www.vulkan.org/), for optimal performances)
 
 
 # Known Issues
+--------------
 
 There is one main known issue in the current version. 
 
@@ -107,19 +116,13 @@ There is one main known issue in the current version.
 
 
 
-# What's missing? Further developments
 
-- [ ] Adapt (very easy to do) Classic approach to dump BFM info as in Mesher
-- [ ] Integrate models for other non-Gaussian actions (waves, for instance)
-- [ ] Complete full support for spatial (in-plane) symmetries of a real-valued bispectrum
-- [ ] Compute nodal correlation internally (don't require it as user data)
-- [ ] Add support for $\mathtt{Mesher}$ zones' interest modes
-- [ ] Add functionality to generate spectra from time series
-- [ ] Add a local caching system
-- [ ] Add `MPI` support (for running `BsaLib` on multi-node clusters)
-- [ ] Add ability to export using formats of most common Visualisation (Paraview, for instance). 
-Better, in a more sustainable way, add the possibility to let the user provide its own desired 
-exporting function, so that `BsaLib` is not tight to any specific 
-exporting format.
-- [ ] Integrate a built-in ad-hoc bispectrum post-processing Visualiser (using [Vulkan](https://www.vulkan.org/), for optimal performances)
+# Related Scientific Publications
+-------------------------------
+
+1. [Non-Gaussian buffeting analysis of large structures by means of a Proper Orthogonal Decomposition](https://www.sciencedirect.com/science/article/abs/pii/S0167610523002799?via%3Dihub)
+2. [A multiple timescale approach of bispectral correlation](https://www.sciencedirect.com/science/article/abs/pii/S0167610522003786?via%3Dihub)
+3. [On the background and biresonant components of the random response of single degree-of-freedom systems under non-Gaussian random loading](https://www.sciencedirect.com/science/article/abs/pii/S0141029611001507)
+
+
 
