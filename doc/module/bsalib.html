@@ -77,7 +77,7 @@
             <li class="list-inline-item" id="statements"><i class="fa fa-list-ol"></i>
               <a data-bs-toggle="tooltip"
                  data-bs-placement="bottom" data-html="true"
-                 title="100.0% of total for modules and submodules.">414 statements</a>
+                 title="100.0% of total for modules and submodules.">409 statements</a>
             </li>
 
             <li class="list-inline-item" id="source-file">
@@ -152,12 +152,6 @@
             <a class="list-group-item" href="../module/bsalib.html#variable-bsa_spatial_sym_four">BSA_SPATIAL_SYM_FOUR</a>
             <a class="list-group-item" href="../module/bsalib.html#variable-bsa_spatial_sym_half">BSA_SPATIAL_SYM_HALF</a>
             <a class="list-group-item" href="../module/bsalib.html#variable-bsa_spatial_sym_none">BSA_SPATIAL_SYM_NONE</a>
-            <a class="list-group-item" href="../module/bsalib.html#variable-bsa_validate_deltas_policy_default">BSA_VALIDATE_DELTAS_POLICY_DEFAULT</a>
-            <a class="list-group-item" href="../module/bsalib.html#variable-bsa_validate_deltas_policy_high">BSA_VALIDATE_DELTAS_POLICY_HIGH</a>
-            <a class="list-group-item" href="../module/bsalib.html#variable-bsa_validate_deltas_policy_light">BSA_VALIDATE_DELTAS_POLICY_LIGHT</a>
-            <a class="list-group-item" href="../module/bsalib.html#variable-bsa_validate_deltas_policy_medium">BSA_VALIDATE_DELTAS_POLICY_MEDIUM</a>
-            <a class="list-group-item" href="../module/bsalib.html#variable-bsa_validate_deltas_policy_none">BSA_VALIDATE_DELTAS_POLICY_NONE</a>
-            <a class="list-group-item" href="../module/bsalib.html#variable-bsa_validate_deltas_policy_strict">BSA_VALIDATE_DELTAS_POLICY_STRICT</a>
             <a class="list-group-item" href="../module/bsalib.html#variable-bsa_wind_psd_davenport">BSA_WIND_PSD_DAVENPORT</a>
             <a class="list-group-item" href="../module/bsalib.html#variable-bsa_wind_psd_kaimal">BSA_WIND_PSD_KAIMAL</a>
             <a class="list-group-item" href="../module/bsalib.html#variable-bsa_wind_psd_vonkarman">BSA_WIND_PSD_VONKARMAN</a>
@@ -251,7 +245,6 @@
             <a class="list-group-item" href="../module/bsalib.html#interface-bsa_setbfmmlr">bsa_setBfmMLR</a>
             <a class="list-group-item" href="../module/bsalib.html#interface-bsa_setbispexportcallback">bsa_setBispExportCallback</a>
             <a class="list-group-item" href="../module/bsalib.html#interface-bsa_setclassicmode">bsa_setClassicMode</a>
-            <a class="list-group-item" href="../module/bsalib.html#interface-bsa_setdeltasvalidationpolicy">bsa_setDeltasValidationPolicy</a>
             <a class="list-group-item" href="../module/bsalib.html#interface-bsa_setexportappendmode">bsa_setExportAppendMode</a>
             <a class="list-group-item" href="../module/bsalib.html#interface-bsa_setexportdirectory">bsa_setExportDirectory</a>
             <a class="list-group-item" href="../module/bsalib.html#interface-bsa_setexportfileformat">bsa_setExportFileFormat</a>
@@ -276,6 +269,7 @@
             <a class="list-group-item" href="../module/bsalib.html#interface-bsa_setpodtruncationthreshold">bsa_setPODTruncationThreshold</a>
             <a class="list-group-item" href="../module/bsalib.html#interface-bsa_setpsdtype">bsa_setPSDType</a>
             <a class="list-group-item" href="../module/bsalib.html#interface-bsa_setphitimesc">bsa_setPhitimesC</a>
+            <a class="list-group-item" href="../module/bsalib.html#interface-bsa_setpolicyidvalidationvalues">bsa_setPolicyIDValidationValues</a>
             <a class="list-group-item" href="../module/bsalib.html#interface-bsa_setpremeshmode">bsa_setPremeshMode</a>
             <a class="list-group-item" href="../module/bsalib.html#interface-bsa_setpremeshscheme">bsa_setPremeshScheme</a>
             <a class="list-group-item" href="../module/bsalib.html#interface-bsa_setscalingconv">bsa_setScalingConv</a>
@@ -290,7 +284,6 @@
             <a class="list-group-item" href="../module/bsalib.html#interface-bsa_settotalnumofdofs">bsa_setTotalNumOfDOFs</a>
             <a class="list-group-item" href="../module/bsalib.html#interface-bsa_setturbwindsdt">bsa_setTurbWindSDT</a>
             <a class="list-group-item" href="../module/bsalib.html#interface-bsa_setturbwindscales">bsa_setTurbWindScales</a>
-            <a class="list-group-item" href="../module/bsalib.html#interface-bsa_setvalidatedeltasvalues">bsa_setValidateDeltasValues</a>
             <a class="list-group-item" href="../module/bsalib.html#interface-bsa_setversion">bsa_setVersion</a>
             <a class="list-group-item" href="../module/bsalib.html#interface-bsa_setvisualindexes">bsa_setVisualIndexes</a>
             <a class="list-group-item" href="../module/bsalib.html#interface-bsa_setwzmeanwindvel">bsa_setWZMeanWindVel</a>
@@ -988,108 +981,6 @@ parameter
             <td><strong>BSA_SPATIAL_SYM_NONE</strong></td>
 <td> =</td>
                 <td>0_IK</td>
-            <td>
-                
-            </td>
-        </tr>
-        <tr>
-            <td>
-              <span class="anchor" id="variable-bsa_validate_deltas_policy_default"></span>
-              integer(kind=IK),
-            </td>
-              <td>public,</td>
-            <td>
-parameter               
-            </td>
-            <td>::</td>
-            <td><strong>BSA_VALIDATE_DELTAS_POLICY_DEFAULT</strong></td>
-<td> =</td>
-                <td>1_IK</td>
-            <td>
-                
-            </td>
-        </tr>
-        <tr>
-            <td>
-              <span class="anchor" id="variable-bsa_validate_deltas_policy_high"></span>
-              integer(kind=IK),
-            </td>
-              <td>public,</td>
-            <td>
-parameter               
-            </td>
-            <td>::</td>
-            <td><strong>BSA_VALIDATE_DELTAS_POLICY_HIGH</strong></td>
-<td> =</td>
-                <td>4_IK</td>
-            <td>
-                
-            </td>
-        </tr>
-        <tr>
-            <td>
-              <span class="anchor" id="variable-bsa_validate_deltas_policy_light"></span>
-              integer(kind=IK),
-            </td>
-              <td>public,</td>
-            <td>
-parameter               
-            </td>
-            <td>::</td>
-            <td><strong>BSA_VALIDATE_DELTAS_POLICY_LIGHT</strong></td>
-<td> =</td>
-                <td>2_IK</td>
-            <td>
-                
-            </td>
-        </tr>
-        <tr>
-            <td>
-              <span class="anchor" id="variable-bsa_validate_deltas_policy_medium"></span>
-              integer(kind=IK),
-            </td>
-              <td>public,</td>
-            <td>
-parameter               
-            </td>
-            <td>::</td>
-            <td><strong>BSA_VALIDATE_DELTAS_POLICY_MEDIUM</strong></td>
-<td> =</td>
-                <td>3_IK</td>
-            <td>
-                
-            </td>
-        </tr>
-        <tr>
-            <td>
-              <span class="anchor" id="variable-bsa_validate_deltas_policy_none"></span>
-              integer(kind=IK),
-            </td>
-              <td>public,</td>
-            <td>
-parameter               
-            </td>
-            <td>::</td>
-            <td><strong>BSA_VALIDATE_DELTAS_POLICY_NONE</strong></td>
-<td> =</td>
-                <td>0_IK</td>
-            <td>
-                
-            </td>
-        </tr>
-        <tr>
-            <td>
-              <span class="anchor" id="variable-bsa_validate_deltas_policy_strict"></span>
-              integer(kind=IK),
-            </td>
-              <td>public,</td>
-            <td>
-parameter               
-            </td>
-            <td>::</td>
-            <td><strong>BSA_VALIDATE_DELTAS_POLICY_STRICT</strong></td>
-<td> =</td>
-                <td>5_IK</td>
             <td>
                 
             </td>
@@ -1905,7 +1796,7 @@ parameter
     public module subroutine bsa_Init()  
 
     </h3>
-  <p>Initialises <code>BsaLib</code> runtime internals.</p>
+  <p>Initialises <code>BsaLib</code> runtime internals</p>
 
   <h4>Arguments</h4>
     <em>None</em>
@@ -2347,7 +2238,7 @@ Formulations are taken from CITE!.</p>
     <tbody>
         <tr>
             <td>
-              <span class="anchor" id="variable-bool~2"></span>
+              <span class="anchor" id="variable-bool"></span>
               logical,
             </td>
 <td>intent(in)</td>
@@ -2396,8 +2287,7 @@ A fix is certainly needed to remove this limitation.
 
     </h3>
   <p><span style="white-space: pre-line">
-If <code>.true.</code> is passed, enables zone's deltas validation.
-Validation policy can be set with the <code><a href="..\interface\bsa_setdeltasvalidationpolicy.html">bsa_setDeltasValidationPolicy</a></code> API call.
+If <code>.true.</code> is given, enables zone's deltas validation.
 </span></p>
 
   <h4>Arguments</h4>
@@ -2413,7 +2303,7 @@ Validation policy can be set with the <code><a href="..\interface\bsa_setdeltasv
     <tbody>
         <tr>
             <td>
-              <span class="anchor" id="variable-bool~3"></span>
+              <span class="anchor" id="variable-bool~2"></span>
               logical,
             </td>
 <td>intent(in)</td>
@@ -3341,10 +3231,10 @@ That is, in the case of the <script type="math/tex">\mathtt{Mesher}</script> app
 
     </h3>
   <p><span style="white-space: pre-line">
- Set BFM MLR (Multi-Level-Refinement) <code>ON/OFF</code>.
- If <code>.true. (ON)</code>, exact BFM points are added in the Post-Meshing phase, before actual interpolation steps.
- If <code>.false. (OFF)</code>, no other points than those coming from the Pre-Meshing phase are used.
- </span></p>
+Set BFM MLR (Multi-Level-Refinement) <code>ON/OFF</code>.
+If <code>.true. (ON)</code>, exact BFM points are added in the Post-Meshing phase, before actual interpolation steps
+If <code>.false. (OFF)</code>, no other points than those coming from the Pre-Meshing phase are used.
+</span></p>
 
   <h4>Arguments</h4>
       <table class="table table-striped varlist">
@@ -3359,7 +3249,7 @@ That is, in the case of the <script type="math/tex">\mathtt{Mesher}</script> app
     <tbody>
         <tr>
             <td>
-              <span class="anchor" id="variable-bool"></span>
+              <span class="anchor" id="variable-bool~3"></span>
               logical,
             </td>
 <td>intent(in)</td>
@@ -3491,76 +3381,6 @@ Valid options:</p>
             <td><strong>i_mode</strong></td>
             <td>
                 
-            </td>
-        </tr>
-    </tbody>
-  </table>
-
-
-        </li>
-    </ul>
-  </div>
-
-              <div class="card">
-    <div class="card-header bg-light codesum">
-      <span class="anchor" id="interface-bsa_setdeltasvalidationpolicy"></span>
-      <h3>        interface
-      </h3>
-    </div>
-    <ul class="list-group">
-        <li class="list-group-item">
-              <h3>
-    public module subroutine bsa_setDeltasValidationPolicy(id)  
-
-    </h3>
-  <p><span style="white-space: pre-line">
- Set the desired policy when validating local <script type="math/tex">i-</script> and <script type="math/tex">j-</script>direction deltas
- (<script type="math/tex">\Delta \omega_i</script> and <script type="math/tex">\Delta \omega_j</script>) within a <script type="math/tex">\mathtt{Mesher}</script> zone.</p>
-<div class="alert alert-info">
-<p class="alert-title h4">Note</p>
-<p>This API call has effects only if <code><a href="..\interface\bsa_dovalidatezonedeltas.html">bsa_doValidateZoneDeltas</a></code></p>
-</div>
-<p>Valid options are (in ascending order of <i>allowance</i>):</p>
-<ul type="0">
-  <li><code>BSA_VALIDATE_DELTAS_POLICY_NONE</code></li>
-  <li><code>BSA_VALIDATE_DELTAS_POLICY_DEFAULT</code></li>
-  <li><code>BSA_VALIDATE_DELTAS_POLICY_LIGHT</code></li>
-  <li><code>BSA_VALIDATE_DELTAS_POLICY_MEDIUM</code></li>
-  <li><code>BSA_VALIDATE_DELTAS_POLICY_HIGH</code></li>
-  <li><code>BSA_VALIDATE_DELTAS_POLICY_STRICT</code></li>
-</ul>
-
-<div class="alert alert-warning">
-<p class="alert-title h4">Warning</p>
-<p>Currently, this API call is supported if using the <script type="math/tex">\mathtt{Mesher}</script> approach.
-In a future release, support might be extended to <script type="math/tex">\mathtt{Classic}</script> approach as well.
-</span></p>
-</div>
-
-  <h4>Arguments</h4>
-      <table class="table table-striped varlist">
-    <thead>
-      <tr>
-        <th scope="col">Type</th>
-<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
-        <th scope="col"></th>
-        <th scope="col">Name</th>
-        <th scope="col"></th>
-    </thead>
-    <tbody>
-        <tr>
-            <td>
-              <span class="anchor" id="variable-id"></span>
-              integer(kind=bsa_int_t),
-            </td>
-<td></td>
-              <td></td>            <td>
-              value
-            </td>
-            <td>::</td>
-            <td><strong>id</strong></td>
-            <td>
-                <p>Deltas validation policy id</p>
             </td>
         </tr>
     </tbody>
@@ -5011,6 +4831,122 @@ Valid options:</p>
 
               <div class="card">
     <div class="card-header bg-light codesum">
+      <span class="anchor" id="interface-bsa_setpolicyidvalidationvalues"></span>
+      <h3>        interface
+      </h3>
+    </div>
+    <ul class="list-group">
+        <li class="list-group-item">
+              <h3>
+    public module subroutine bsa_setPolicyIDValidationValues(id, i_bfm, j_bfm, i_brm, j_brm)  
+
+    </h3>
+  <p><span style="white-space: pre-line">
+Allows to set custom delta validation values for a given built-in Policy ID.</p>
+<div class="alert alert-info">
+<p class="alert-title h4">Note</p>
+<p>This API call has effect if delta validation is set to ON via the
+<code><a href="..\interface\bsa_dovalidatezonedeltas.html">bsa_doValidateZoneDeltas</a></code> API call.
+endnote
+</span></p>
+</div>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-id"></span>
+              integer(kind=int32),
+            </td>
+<td></td>
+              <td></td>            <td>
+              value
+            </td>
+            <td>::</td>
+            <td><strong>id</strong></td>
+            <td>
+                <p>Built-in POlicy ID</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-i_bfm"></span>
+              integer(kind=int32),
+            </td>
+<td></td>
+              <td></td>            <td>
+              value
+            </td>
+            <td>::</td>
+            <td><strong>i_bfm</strong></td>
+            <td>
+                <p>BFM i-direction validation factor</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-j_bfm"></span>
+              integer(kind=int32),
+            </td>
+<td></td>
+              <td></td>            <td>
+              value
+            </td>
+            <td>::</td>
+            <td><strong>j_bfm</strong></td>
+            <td>
+                <p>BFM j-direction validation factor</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-i_brm"></span>
+              integer(kind=int32),
+            </td>
+<td></td>
+              <td></td>            <td>
+              value
+            </td>
+            <td>::</td>
+            <td><strong>i_brm</strong></td>
+            <td>
+                <p>BRM i-direction validation factor</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-j_brm"></span>
+              integer(kind=int32),
+            </td>
+<td></td>
+              <td></td>            <td>
+              value
+            </td>
+            <td>::</td>
+            <td><strong>j_brm</strong></td>
+            <td>
+                <p>BRM j-direction validation factor</p>
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+        </li>
+    </ul>
+  </div>
+
+              <div class="card">
+    <div class="card-header bg-light codesum">
       <span class="anchor" id="interface-bsa_setpremeshmode"></span>
       <h3>        interface
       </h3>
@@ -5807,79 +5743,6 @@ for each wind zone.
             </td>
             <td>::</td>
             <td><strong>L</strong>(3,3,*)</td>
-            <td>
-                
-            </td>
-        </tr>
-    </tbody>
-  </table>
-
-
-        </li>
-    </ul>
-  </div>
-
-              <div class="card">
-    <div class="card-header bg-light codesum">
-      <span class="anchor" id="interface-bsa_setvalidatedeltasvalues"></span>
-      <h3>        interface
-      </h3>
-    </div>
-    <ul class="list-group">
-        <li class="list-group-item">
-              <h3>
-    public module subroutine bsa_setValidateDeltasValues(ibkg, ires)  
-
-    </h3>
-  <p><span style="white-space: pre-line">
-If zone's deltas validation is ON (by calling the <code><a href="..\interface\bsa_dovalidatezonedeltas.html">bsa_doValidateZoneDeltas</a></code> API procedure)
-gives the possibility to set refinement policies to custom values,
-instead of being bound to predefined ones (see list  of supported values in
-<code><a href="..\interface\bsa_setdeltasvalidationpolicy.html">bsa_setDeltasValidationPolicy</a></code>).</p>
-<div class="alert alert-warning">
-<p class="alert-title h4">Warning</p>
-<p>If <code><a href="..\interface\bsa_setdeltasvalidationpolicy.html">bsa_setDeltasValidationPolicy</a></code> is called after this API call, overrides the specified values.
-Make sure to either use this API call, or <code><a href="..\interface\bsa_setdeltasvalidationpolicy.html">bsa_setDeltasValidationPolicy</a></code>, not both.
-</span></p>
-</div>
-
-  <h4>Arguments</h4>
-      <table class="table table-striped varlist">
-    <thead>
-      <tr>
-        <th scope="col">Type</th>
-<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
-        <th scope="col"></th>
-        <th scope="col">Name</th>
-        <th scope="col"></th>
-    </thead>
-    <tbody>
-        <tr>
-            <td>
-              <span class="anchor" id="variable-ibkg"></span>
-              integer(kind=bsa_int_t),
-            </td>
-<td></td>
-              <td></td>            <td>
-              value
-            </td>
-            <td>::</td>
-            <td><strong>ibkg</strong></td>
-            <td>
-                
-            </td>
-        </tr>
-        <tr>
-            <td>
-              <span class="anchor" id="variable-ires"></span>
-              integer(kind=bsa_int_t),
-            </td>
-<td></td>
-              <td></td>            <td>
-              value
-            </td>
-            <td>::</td>
-            <td><strong>ires</strong></td>
             <td>
                 
             </td>
@@ -7026,7 +6889,7 @@ provided callback function when exporting bispectra information.</p>
             <p class="text-end">
               Documentation generated by
               <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
- on 2024-04-02 11:53              </p>
+ on 2024-04-02 14:35              </p>
           </div>
         </div>
         <br>

@@ -103,16 +103,6 @@ module BsaLib
 
 
 
-      module subroutine bsa_setBfmMLR(bool)
-         !# <span style="white-space: pre-line">
-         !  Set BFM MLR (Multi-Level-Refinement) <code>ON/OFF</code>.
-         !  If <code>.true. (ON)</code>, exact BFM points are added in the Post-Meshing phase, before actual interpolation steps.
-         !  If <code>.false. (OFF)</code>, no other points than those coming from the Pre-Meshing phase are used.
-         !  </span>
-
-         logical, intent(in) :: bool
-      end subroutine
-
 
       module subroutine bsa_setPremeshScheme(itype)
          !# <span style="white-space: pre-line">
@@ -257,60 +247,54 @@ module BsaLib
 
       module subroutine bsa_doValidateZoneDeltas(bool)
          !# <span style="white-space: pre-line">
-         ! If <code>.true.</code> is passed, enables zone's deltas validation.
-         ! Validation policy can be set with the <code>[[bsalib(module):bsa_setdeltasvalidationpolicy(interface)]]</code> API call.
+         ! If <code>.true.</code> is given, enables zone's deltas validation.
          ! </span>
          logical, intent(in) :: bool
       end subroutine
 
 
 
-      module subroutine bsa_setDeltasValidationPolicy(id)
+      module subroutine bsa_setPolicyIDValidationValues(id, i_bfm, j_bfm, i_brm, j_brm)
          !# <span style="white-space: pre-line">
-         !  Set the desired policy when validating local \(i-\) and \(j-\)direction deltas 
-         !  (\(\Delta \omega_i\) and \(\Delta \omega_j\)) within a \(\mathtt{Mesher}\) zone.
+         ! Allows to set custom delta validation values for a given built-in Policy ID.
          !
          ! @note
-         ! This API call has effects only if <code>[[bsalib(module):bsa_dovalidatezonedeltas(interface)]]</code>
-         !
-         !  Valid options are (in ascending order of <i>allowance</i>):
-         ! <ul type="0">
-         !   <li><code>BSA_VALIDATE_DELTAS_POLICY_NONE</code></li>
-         !   <li><code>BSA_VALIDATE_DELTAS_POLICY_DEFAULT</code></li>
-         !   <li><code>BSA_VALIDATE_DELTAS_POLICY_LIGHT</code></li>
-         !   <li><code>BSA_VALIDATE_DELTAS_POLICY_MEDIUM</code></li>
-         !   <li><code>BSA_VALIDATE_DELTAS_POLICY_HIGH</code></li>
-         !   <li><code>BSA_VALIDATE_DELTAS_POLICY_STRICT</code></li>
-         ! </ul>
-         !
-         ! @warning
-         ! Currently, this API call is supported if using the \(\mathtt{Mesher}\) approach.
-         ! In a future release, support might be extended to \(\mathtt{Classic}\) approach as well.
+         ! This API call has effect if delta validation is set to ON via the 
+         ! <code>[[bsalib(module):bsa_dovalidatezonedeltas(interface)]]</code> API call.
+         ! endnote
          ! </span>
-         integer(bsa_int_t), value :: id
-            !! Deltas validation policy id
+
+         integer(int32), value :: id
+            !! Built-in POlicy ID
+         integer(int32), value :: i_bfm
+            !! BFM i-direction validation factor
+         integer(int32), value :: j_bfm
+            !! BFM j-direction validation factor
+         integer(int32), value :: i_brm
+            !! BRM i-direction validation factor
+         integer(int32), value :: j_brm
+            !! BRM j-direction validation factor
       end subroutine
 
 
-      module subroutine bsa_setValidateDeltasValues(ibkg, ires)
+
+      module subroutine bsa_setBfmMLR(bool)
          !# <span style="white-space: pre-line">
-         ! If zone's deltas validation is ON (by calling the <code>[[bsalib(module):bsa_dovalidatezonedeltas(interface)]]</code> API procedure)
-         ! gives the possibility to set refinement policies to custom values, 
-         ! instead of being bound to predefined ones (see list  of supported values in
-         ! <code>[[bsalib(module):bsa_setdeltasvalidationpolicy(interface)]]</code>).
-         !
-         ! @warning
-         ! If <code>[[bsalib(module):bsa_setdeltasvalidationpolicy(interface)]]</code> is called after this API call, overrides the specified values.
-         ! Make sure to either use this API call, or <code>[[bsalib(module):bsa_setdeltasvalidationpolicy(interface)]]</code>, not both.
-         ! @endwarning
+         ! Set BFM MLR (Multi-Level-Refinement) <code>ON/OFF</code>.
+         ! If <code>.true. (ON)</code>, exact BFM points are added in the Post-Meshing phase, before actual interpolation steps 
+         ! If <code>.false. (OFF)</code>, no other points than those coming from the Pre-Meshing phase are used.
          ! </span>
-         integer(bsa_int_t), value :: ibkg, ires
+
+         logical, intent(in) :: bool
       end subroutine
+
+
 
 
       module subroutine bsa_Init()
-         !! Initialises `BsaLib` runtime internals.
+         !! Initialises `BsaLib` runtime internals
       end subroutine
+
 
 
       module subroutine bsa_forceBsaClsExecution(bool)

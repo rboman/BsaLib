@@ -80,6 +80,7 @@ For full details, read the [external data section](https://github.com/miEsMar/Bs
 
 - [ ] Adapt (very easy to do) Classic approach to dump BFM info as in Mesher
 - [ ] Integrate models for other non-Gaussian actions (waves, for instance)
+- [ ] Improve internal policy mechanism and integration
 - [ ] Provide a general API for user defined models integration
 - [ ] Complete full support for spatial (in-plane) symmetries of a real-valued bispectrum
 - [ ] Compute nodal correlation internally (don't require it as user data)
@@ -87,6 +88,7 @@ For full details, read the [external data section](https://github.com/miEsMar/Bs
 - [ ] Add functionality to generate spectra from time series
 - [ ] Add a local caching system
 - [ ] Add `MPI` support (for running `BsaLib` on multi-node clusters)
+- [ ] Improve and extend GPU offloading
 - [ ] Add ability to export using formats of most common Visualisation (Paraview, for instance). 
 Better, in a more sustainable way, add the possibility to let the user provide its own desired 
 exporting function, so that `BsaLib` is not tight to any specific 
