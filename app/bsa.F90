@@ -540,8 +540,8 @@ contains ! utility procedures
          call bsa_setBRMExportDefaultMode(BSA_EXPORT_BRM_MODE_NONE)
       endif
 
+      call bsa_doValidateZoneDeltas(.false.)
       call bsa_setBfmMLR(.false.)
-      call bsa_setDeltasValidationPolicy(BSA_VALIDATE_DELTAS_POLICY_NONE)
 
       call bsa_forceBsaClsExecution(.true.)
 

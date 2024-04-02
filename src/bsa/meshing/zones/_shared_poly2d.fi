@@ -484,14 +484,11 @@ end subroutine __sub_name_compute
          , BsaExportBaseData_t, do_export_brm_, is_visual_  &
 #ifndef __triang_zone__
          , do_validate_deltas_, msh_ZoneLimsInterestModes, peak_exts_ &
-         , I_BKG_PEAK_DELTAF_BFM_REFMT_FCT_, I_RES_PEAK_DELTAF_BFM_REFMT_FCT_ &
          , CODE_PRE_PEAK_OK, CODE_PRE_PEAK_KO &
          , bkg_peakw_ &
 #endif
          , write_brm_fptr_
-#ifndef __triang_zone__
       use BsaLib_MPolicy, only: MPolicy_t
-#endif
       !
       class(__this_type), intent(inout) :: this
 #ifndef BSA_USE_POD_DATA_CACHING
@@ -501,11 +498,11 @@ end subroutine __sub_name_compute
 
       class(*), pointer :: pdata_ptr => null()
 
+      type(MPolicy_t) :: pol
 #ifdef __triang_zone__
       integer(int32)  :: ipos, interp_fact
       integer(int32)  :: njOld, njNew_piprev, njNew_picurr, njNew_tmp, njtmp
 #else
-      type(MPolicy_t) :: pol
       integer(int32)  :: n_im_, im_idx_
 #endif
       integer(int32)  :: ni, nj, ni_bfm_ref_, nj_bfm_ref_
@@ -531,7 +528,7 @@ end subroutine __sub_name_compute
 
 #else
       real(RK)        :: dwI, dwJ
-      integer(int32)  :: i_ftc
+      integer(int32)  :: i_fct, j_fct
 
       integer(int32), allocatable :: inter_modes_(:) ! interest modes
 
@@ -602,13 +599,26 @@ end subroutine __sub_name_compute
       real(RK)              :: intg(dimM_bisp_)
 
 
+
+      pol = this%policy() ! get zone's policy
+
+      ! get n. of BFM refinement segments (between two old ones)
+      n_segs_bfm_ref_i_ = 1 ! original
+      n_segs_bfm_ref_j_ = 1
+      if (.not. is_visual_) then
+         do i = 1, pol%n_interp_bfm_lvs_
+            n_segs_bfm_ref_i_ = n_segs_bfm_ref_i_ * pol%bfm_pol_%i_fct_
+            n_segs_bfm_ref_j_ = n_segs_bfm_ref_j_ * pol%bfm_pol_%j_fct_
+         enddo
+      endif
+
 #ifdef __triang_zone__
 
       ! BUG: for the moment, we take the max
       !      such to ensure having the SAME n. of points
       !      along both sides.
       !      Later, consider supporting more general approach.
-      interp_fact = max(this%policy_%interp_brm_I_fct_, this%policy_%interp_brm_J_fct_)
+      interp_fact = max(pol%brm_pol_%i_fct_, pol%brm_pol_%j_fct_)
 
       ! get unary delta freqs increments in I and J directions
       ! (old BFM values, to be interpolated)
@@ -627,17 +637,10 @@ end subroutine __sub_name_compute
       dfI_bfm_lv0_ = df_cst
       dfJ_bfm_lv0_ = df_cst
 
-      ! get n. of BFM refinement segments (between two old ones)
-      n_segs_bfm_ref_i_ = 1 ! original
-      n_segs_bfm_ref_j_ = 1
-      if (.not. is_visual_) then
-         do i = 1, this%policy_%n_interp_bfm_lvs_
-            n_segs_bfm_ref_i_ = n_segs_bfm_ref_i_ * this%policy_%interp_bfm_I_fct_
-            n_segs_bfm_ref_j_ = n_segs_bfm_ref_j_ * this%policy_%interp_bfm_J_fct_
-         enddo
-      endif
+
       n_pts_bfm_ref_i_ = n_segs_bfm_ref_i_ - 1
       n_pts_bfm_ref_j_ = n_segs_bfm_ref_j_ - 1
+
 
       ! get refined (BFM) deltas (GRS)
       dfIi_bfm_ref_ = dfIi_bfm_lv0_ / n_segs_bfm_ref_i_
@@ -710,7 +713,6 @@ end subroutine __sub_name_compute
 #else  ! is a RECT zone
 
 
-      pol = this%policy() ! get zone's policy
 
       ! get original (pre-meshing) deltas (LEVEL 0)
       ! NOTE: keep them in memory unchanged since they might serve later on.
@@ -721,15 +723,6 @@ end subroutine __sub_name_compute
       dfJj_bfm_lv0_ = dfJj_bfm_lv0_ * this%deltaf_J_
 
 
-      ! get n. of BFM refinement segments (between two old ones)
-      n_segs_bfm_ref_i_ = 1 ! original
-      n_segs_bfm_ref_j_ = 1
-      if (.not. is_visual_) then
-         do i = 1, pol%n_interp_bfm_lvs_
-            n_segs_bfm_ref_i_ = n_segs_bfm_ref_i_ * pol%interp_bfm_I_fct_
-            n_segs_bfm_ref_j_ = n_segs_bfm_ref_j_ * pol%interp_bfm_J_fct_
-         enddo
-      endif
       dfI_bfm_lv0_ = this%deltaf_I_
       dfI_bfm_ref_ = dfI_bfm_lv0_ / n_segs_bfm_ref_i_
       dfJ_bfm_lv0_ = this%deltaf_J_
@@ -754,44 +747,47 @@ end subroutine __sub_name_compute
          if (im_idx_ == 0) im_idx_ = 1
          n_im_   = msh_ZoneLimsInterestModes(im_idx_)
 
+         i_fct = pol%bfm_pol_%i_fct_
+         j_fct = pol%bfm_pol_%j_fct_
+
          ! NOTE: this is allowed since in Pre-Mesh we have already +1 incremented pointer index
          !       for all pre-peak zones. So, only negative index is possible for very first 
          !       pre-peak zone right after BKG, for which we had set pointer index to 0!
          if (n_im_ == CODE_PRE_PEAK_OK) then
-            i_ftc = I_BKG_PEAK_DELTAF_BFM_REFMT_FCT_
             dwI   = bkg_peakw_
+            dwJ   = bkg_peakw_
          else
             if (n_im_ < 0) then
                im_idx_ = im_idx_ + 1
                n_im_   = msh_ZoneLimsInterestModes(im_idx_)
             endif
 
-            i_ftc        = I_RES_PEAK_DELTAF_BFM_REFMT_FCT_
             inter_modes_ = msh_ZoneLimsInterestModes(im_idx_ + 1 : im_idx_ + n_im_)
 
             ! BUG: introduce I and J peak widths!
             dwI = minval(peak_exts_(inter_modes_))  ! base MIN deltaf
+            dwJ = dwI
          endif
 
-         if (dfI_bfm_ref_ > dwI / i_ftc) then
-            do while (dfI_bfm_ref_ > dwI / i_ftc)
+         if (dfI_bfm_ref_ > dwI / i_fct) then
+            do while (dfI_bfm_ref_ > dwI / i_fct)
                n_segs_bfm_ref_i_ = n_segs_bfm_ref_i_ + 1
                dfI_bfm_ref_      = dfI_bfm_lv0_ / n_segs_bfm_ref_i_
             enddo
          else
-            do while (dfI_bfm_ref_ < dwI / i_ftc .and. n_segs_bfm_ref_i_ > 1)
+            do while (dfI_bfm_ref_ < dwI / i_fct .and. n_segs_bfm_ref_i_ > 1)
                n_segs_bfm_ref_i_ = n_segs_bfm_ref_i_ - 1
                dfI_bfm_ref_      = dfI_bfm_lv0_ / n_segs_bfm_ref_i_
             enddo
          endif
 
-         if (dfJ_bfm_ref_ > dwI / i_ftc) then
-            do while (dfJ_bfm_ref_ > dwI / i_ftc)
+         if (dfJ_bfm_ref_ > dwJ / j_fct) then
+            do while (dfJ_bfm_ref_ > dwJ / j_fct)
                n_segs_bfm_ref_j_ = n_segs_bfm_ref_j_ + 1
                dfJ_bfm_ref_      = dfJ_bfm_lv0_ / n_segs_bfm_ref_j_
             enddo
          else
-            do while (dfJ_bfm_ref_ < dwI / i_ftc .and. n_segs_bfm_ref_j_ > 1)
+            do while (dfJ_bfm_ref_ < dwJ / j_fct .and. n_segs_bfm_ref_j_ > 1)
                n_segs_bfm_ref_j_ = n_segs_bfm_ref_j_ - 1
                dfJ_bfm_ref_      = dfJ_bfm_lv0_ / n_segs_bfm_ref_j_
             enddo
@@ -809,14 +805,14 @@ end subroutine __sub_name_compute
       dfJj_bfm_ref_ = dfJj_bfm_lv0_ / n_segs_bfm_ref_j_
 
       ! get BRM interpolated deltas (GRS) (taken from refined BFM deltas this time)
-      dfIi_brm_interp = dfIi_bfm_ref_ / pol%interp_brm_I_fct_
-      dfIj_brm_interp = dfIj_bfm_ref_ / pol%interp_brm_I_fct_
-      dfJi_brm_interp = dfJi_bfm_ref_ / pol%interp_brm_J_fct_
-      dfJj_brm_interp = dfJj_bfm_ref_ / pol%interp_brm_J_fct_
+      dfIi_brm_interp = dfIi_bfm_ref_ / pol%brm_pol_%i_fct_
+      dfIj_brm_interp = dfIj_bfm_ref_ / pol%brm_pol_%i_fct_
+      dfJi_brm_interp = dfJi_bfm_ref_ / pol%brm_pol_%j_fct_
+      dfJj_brm_interp = dfJj_bfm_ref_ / pol%brm_pol_%j_fct_
 
       ! get absolute deltas (in LRS), along I and J directions
-      dfI_brm_interp_ = dfI_bfm_ref_ / pol%interp_brm_I_fct_
-      dfJ_brm_interp_ = dfJ_bfm_ref_ / pol%interp_brm_J_fct_
+      dfI_brm_interp_ = dfI_bfm_ref_ / pol%brm_pol_%i_fct_
+      dfJ_brm_interp_ = dfJ_bfm_ref_ / pol%brm_pol_%j_fct_
 
 
 # ifdef __update_m3mf__
@@ -838,15 +834,15 @@ end subroutine __sub_name_compute
       ! get actualised BFM-refined and BRM-interp  refinements (along borders)
       ni_bfm_ref_ = (this%ni_ - 1)
       nj_bfm_ref_ = (this%nj_ - 1)
-      ni          = ni_bfm_ref_ * (n_segs_bfm_ref_i_ * pol%interp_brm_I_fct_) + 1
-      nj          = nj_bfm_ref_ * (n_segs_bfm_ref_j_ * pol%interp_brm_J_fct_) + 1
+      ni          = ni_bfm_ref_ * (n_segs_bfm_ref_i_ * pol%brm_pol_%i_fct_) + 1
+      nj          = nj_bfm_ref_ * (n_segs_bfm_ref_j_ * pol%brm_pol_%j_fct_) + 1
       ni_bfm_ref_ = ni_bfm_ref_ * n_segs_bfm_ref_i_ + 1
       nj_bfm_ref_ = nj_bfm_ref_ * n_segs_bfm_ref_j_ + 1
 
       ! number of BRM points to interpolate (insert)
       ! between two know BFM (refined) points' direction lines.
-      nipI = pol%interp_brm_I_fct_ - 1
-      nipJ = pol%interp_brm_J_fct_ - 1
+      nipI = pol%brm_pol_%i_fct_ - 1
+      nipJ = pol%brm_pol_%j_fct_ - 1
       i_brm_offsetJ = nipI * nj
 
       nPtsPost = ni * nj
@@ -2079,8 +2075,8 @@ end subroutine __sub_name_compute
 #ifdef __zone_layout_validation__
       if (i_brm /= nPtsPost) then
 # ifndef __triang_zone__
-         print *, ' policy BFM-MLV factors      =  ', pol%interp_bfm_I_fct_, pol%interp_bfm_J_fct_
-         print *, ' policy   BRM   factors      =  ', pol%interp_brm_I_fct_, pol%interp_brm_J_fct_
+         print *, ' policy BFM-MLV factors      =  ', pol%bfm_pol_%i_fct_, pol%bfm_pol_%j_fct_
+         print *, ' policy   BRM   factors      =  ', pol%brm_pol_%i_fct_, pol%brm_pol_%j_fct_
 # endif
          print *, ' ibrm, nPtsPost  = ', i_brm, nPtsPost
          call bsa_Abort('"i_brm" does not equal rect zone''s n. of (interpolated) points.')

@@ -43,15 +43,19 @@ module BsaLib_MPolicy
    integer(int32), public, parameter :: MPolicy_PAD_ZONE_EXTERN = 9
 
 
+   type, public :: MPolicy_Validator_t
+      integer(int32) :: i_fct_ = 1
+      integer(int32) :: j_fct_ = 1
+   end type
+
+
    type, public :: MPolicy_t
 
       integer(int32) :: delta_fI_fct_     = 0
       integer(int32) :: delta_fJ_fct_     = 0
-      integer(int32) :: interp_bfm_I_fct_ = 0
-      integer(int32) :: interp_bfm_J_fct_ = 0
-      integer(int32) :: interp_brm_I_fct_     = 0
-      integer(int32) :: interp_brm_J_fct_     = 0
       integer(int32) :: n_interp_bfm_lvs_ = 0
+      type(MPolicy_Validator_t) :: bfm_pol_ = MPolicy_Validator_t()
+      type(MPolicy_Validator_t) :: brm_pol_ = MPolicy_Validator_t()
 
       integer(int32), private :: id_pol_ = 0
    contains
@@ -65,19 +69,34 @@ module BsaLib_MPolicy
    end type MPolicy_t
 
 
+   !> Array of built-in policies.
+   type(MPolicy_t), dimension(MPolicy_NULL:MPolicy_PAD_ZONE_EXTERN), public :: builtin_policies_ = [ &
+      MPolicy_t(MPolicy_NULL),            &
+      MPolicy_t(MPolicy_DEF),             &
+      MPolicy_t(MPolicy_CONST),           &
+      MPolicy_t(MPolicy_PRE_PEAK_1),      &
+      MPolicy_t(MPolicy_PRE_PEAK_2),      &
+      MPolicy_t(MPolicy_PEAK),            &
+      MPolicy_t(MPolicy_CREST),           &
+      MPolicy_t(MPolicy_BASIN),           &
+      MPolicy_t(MPolicy_PAD_ZONE_INTERN), &
+      MPolicy_t(MPolicy_PAD_ZONE_EXTERN)  &
+   ]
+
+
+
    interface MPolicy_t
       module procedure MPolicy_constructor_integer
       module procedure MPolicy_fromID
    end interface
 
 
-   ! NOTE: COMMENT THESE INTERFACES OUT IF USING 
-   !       TYPE-BOUND PROCEDURES.
    interface assignment(=)
       module procedure MPolicy_fromPol_sub
       module procedure MPolicy_fromID_sub
    end interface assignment(=)
    public :: assignment(=)
+
 
    interface operator(==)
       module procedure MPolicy_isID_order1
@@ -86,7 +105,9 @@ module BsaLib_MPolicy
    public :: operator(==)
 
 
+
 contains
+
 
 
    elemental pure function MPolicy_constructor_integer(&
@@ -94,14 +115,14 @@ contains
       integer, intent(in) :: dfi, dfj, interp_bfm_i, interp_bfm_j, interp_brm_i, interp_brm_j, nlevs, id
       type(MPolicy_t) :: pol
 
-      pol%delta_fI_fct_     = int(dfi,          kind=int32)
-      pol%delta_fJ_fct_     = int(dfj,          kind=int32)
-      pol%interp_bfm_I_fct_ = int(interp_bfm_i, kind=int32)
-      pol%interp_bfm_J_fct_ = int(interp_bfm_j, kind=int32)
-      pol%interp_brm_I_fct_ = int(interp_brm_i, kind=int32)
-      pol%interp_brm_J_fct_ = int(interp_brm_j, kind=int32)
-      pol%n_interp_bfm_lvs_ = int(nlevs,        kind=int32)
-      pol%id_pol_           = int(id,           kind=int32)
+      pol%delta_fI_fct_     = int(dfi,           kind=int32)
+      pol%delta_fJ_fct_     = int(dfj,           kind=int32)
+      pol%bfm_pol_%i_fct_   = int(interp_bfm_i,  kind=int32)
+      pol%bfm_pol_%j_fct_   = int(interp_bfm_j,  kind=int32)
+      pol%brm_pol_%i_fct_   = int(interp_brm_i,  kind=int32)
+      pol%brm_pol_%j_fct_   = int(interp_brm_j,  kind=int32)
+      pol%n_interp_bfm_lvs_ = int(nlevs,         kind=int32)
+      pol%id_pol_           = int(id,            kind=int32)
    end function
 
 
@@ -154,11 +175,11 @@ contains
 
       lhs%delta_fI_fct_     = rhs_pol%delta_fI_fct_
       lhs%delta_fJ_fct_     = rhs_pol%delta_fJ_fct_
-      lhs%interp_bfm_I_fct_ = rhs_pol%interp_bfm_I_fct_
-      lhs%interp_bfm_J_fct_ = rhs_pol%interp_bfm_J_fct_
-      lhs%interp_brm_I_fct_ = rhs_pol%interp_brm_I_fct_
-      lhs%interp_brm_J_fct_ = rhs_pol%interp_brm_J_fct_
       lhs%n_interp_bfm_lvs_ = rhs_pol%n_interp_bfm_lvs_
+      lhs%bfm_pol_%i_fct_   = rhs_pol%bfm_pol_%i_fct_
+      lhs%bfm_pol_%j_fct_   = rhs_pol%bfm_pol_%j_fct_
+      lhs%brm_pol_%i_fct_   = rhs_pol%brm_pol_%i_fct_
+      lhs%brm_pol_%j_fct_   = rhs_pol%brm_pol_%j_fct_
       lhs%id_pol_           = rhs_pol%id_pol_
    end subroutine MPolicy_fromPol_sub
 
@@ -166,7 +187,7 @@ contains
 
    elemental pure subroutine MPolicy_fromID_sub(lhs, rhs_id)
       type(MPolicy_t), intent(out) :: lhs
-      integer, intent(in) :: rhs_id
+      integer(int32),  intent(in)  :: rhs_id
 
       lhs = MPolicy_t(rhs_id)
    end subroutine MPolicy_fromID_sub
@@ -179,7 +200,6 @@ contains
 
       id = this%id_pol_
    end function getID
-
 
 
 

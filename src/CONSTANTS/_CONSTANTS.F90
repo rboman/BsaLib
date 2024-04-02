@@ -51,12 +51,12 @@
    integer(IK), parameter :: BSA_PREMESH_MODE_BASE         = 0_IK
    integer(IK), parameter :: BSA_PREMESH_MODE_ZONE_REFINED = 1_IK
 
-   integer(IK), parameter :: BSA_VALIDATE_DELTAS_POLICY_NONE    = 0_IK
-   integer(IK), parameter :: BSA_VALIDATE_DELTAS_POLICY_DEFAULT = 1_IK
-   integer(IK), parameter :: BSA_VALIDATE_DELTAS_POLICY_LIGHT   = 2_IK
-   integer(IK), parameter :: BSA_VALIDATE_DELTAS_POLICY_MEDIUM  = 3_IK
-   integer(IK), parameter :: BSA_VALIDATE_DELTAS_POLICY_HIGH    = 4_IK
-   integer(IK), parameter :: BSA_VALIDATE_DELTAS_POLICY_STRICT  = 5_IK
+   ! integer(IK), parameter :: BSA_VALIDATE_DELTAS_POLICY_NONE    = 0_IK
+   ! integer(IK), parameter :: BSA_VALIDATE_DELTAS_POLICY_DEFAULT = 1_IK
+   ! integer(IK), parameter :: BSA_VALIDATE_DELTAS_POLICY_LIGHT   = 2_IK
+   ! integer(IK), parameter :: BSA_VALIDATE_DELTAS_POLICY_MEDIUM  = 3_IK
+   ! integer(IK), parameter :: BSA_VALIDATE_DELTAS_POLICY_HIGH    = 4_IK
+   ! integer(IK), parameter :: BSA_VALIDATE_DELTAS_POLICY_STRICT  = 5_IK
 
    integer(IK), parameter :: BSA_CLASSIC_MODE_VECTOR = 0_IK
    integer(IK), parameter :: BSA_CLASSIC_MODE_SCALAR = 1_IK

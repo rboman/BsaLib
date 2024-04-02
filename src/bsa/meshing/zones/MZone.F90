@@ -261,8 +261,8 @@ contains
       class(MZone_t), intent(inout) :: z
 
       z%policy_%n_interp_bfm_lvs_ = 0
-      z%policy_%interp_bfm_I_fct_ = 1
-      z%policy_%interp_bfm_J_fct_ = 1
+      z%policy_%bfm_pol_%i_fct_   = 1
+      z%policy_%bfm_pol_%j_fct_   = 1
    end subroutine
 
 

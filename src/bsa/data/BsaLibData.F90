@@ -238,9 +238,6 @@ module BsaLib_Data
    !> Array of resonant peak extensions (widths)
    real(bsa_real_t), allocatable :: peak_exts_(:)
 
-   integer(bsa_int_t), public :: I_BKG_PEAK_DELTAF_BFM_REFMT_FCT_ = 2
-   integer(bsa_int_t), public :: I_RES_PEAK_DELTAF_BFM_REFMT_FCT_ = 3
-
    ! Total pre-mesh/post-mesh phase points
    integer(bsa_int_t), public :: msh_bfmpts_pre_
    integer(bsa_int_t), public :: msh_bfmpts_post_

@@ -485,9 +485,6 @@ contains
             print '(/ 1x, 2a, i0, a /)', INFOMSG, 'Using  ', nmodes_POD_, '  POD modes.'
       endif
 
-      if (I_BKG_PEAK_DELTAF_BFM_REFMT_FCT_ <= 0) I_BKG_PEAK_DELTAF_BFM_REFMT_FCT_ = 2
-      if (I_BKG_PEAK_DELTAF_BFM_REFMT_FCT_ <= 0) I_BKG_PEAK_DELTAF_BFM_REFMT_FCT_ = 3
-
       associate(ibispsym => settings%i_bisp_sym_)
          if (.not. ( ibispsym == BSA_SPATIAL_SYM_NONE .or. &
                      ibispsym == BSA_SPATIAL_SYM_HALF .or. &
@@ -847,41 +844,26 @@ contains
 
 
 
-   module subroutine bsa_setDeltasValidationPolicy(id)
-      integer(bsa_int_t), value :: id
+   module subroutine bsa_setPolicyIDValidationValues(id, i_bfm, j_bfm, i_brm, j_brm)
+      use BsaLib_MPolicy, only: builtin_policies_, MPolicy_NULL, MPolicy_PAD_ZONE_EXTERN
+      integer(int32), value :: id
+      integer(int32), value :: i_bfm
+      integer(int32), value :: j_bfm
+      integer(int32), value :: i_brm
+      integer(int32), value :: j_brm
 
-      select case (id)
-      case (BSA_VALIDATE_DELTAS_POLICY_NONE)
-         do_validate_deltas_ = .false.
+      if (id < MPolicy_NULL .or. id > MPolicy_PAD_ZONE_EXTERN) then
+         print '(1x, 2a, i0)', &
+            WARNMSG, "Invalid policy ID  ", id
          return
-      case (BSA_VALIDATE_DELTAS_POLICY_LIGHT)
-         I_BKG_PEAK_DELTAF_BFM_REFMT_FCT_ = 2
-         I_BKG_PEAK_DELTAF_BFM_REFMT_FCT_ = 2
-      case (BSA_VALIDATE_DELTAS_POLICY_MEDIUM)
-         I_BKG_PEAK_DELTAF_BFM_REFMT_FCT_ = 3
-         I_BKG_PEAK_DELTAF_BFM_REFMT_FCT_ = 3
-      case (BSA_VALIDATE_DELTAS_POLICY_HIGH)
-         I_BKG_PEAK_DELTAF_BFM_REFMT_FCT_ = 4
-         I_BKG_PEAK_DELTAF_BFM_REFMT_FCT_ = 4
-      case (BSA_VALIDATE_DELTAS_POLICY_STRICT)
-         I_BKG_PEAK_DELTAF_BFM_REFMT_FCT_ = 5
-         I_BKG_PEAK_DELTAF_BFM_REFMT_FCT_ = 5
-      case default
-         I_BKG_PEAK_DELTAF_BFM_REFMT_FCT_ = 2
-         I_BKG_PEAK_DELTAF_BFM_REFMT_FCT_ = 3
-      end select
+      endif
 
-      if (.not.do_validate_deltas_) &
-         do_validate_deltas_ = .true.
+      builtin_policies_(id)%bfm_pol_%i_fct_ = i_bfm
+      builtin_policies_(id)%bfm_pol_%j_fct_ = j_bfm
+      builtin_policies_(id)%brm_pol_%i_fct_ = i_brm
+      builtin_policies_(id)%brm_pol_%j_fct_ = j_brm
    end subroutine
 
-
-   module subroutine bsa_setValidateDeltasValues(ibkg, ires)
-      integer(bsa_int_t), value :: ibkg, ires
-
-      I_BKG_PEAK_DELTAF_BFM_REFMT_FCT_ = ibkg
-      I_RES_PEAK_DELTAF_BFM_REFMT_FCT_ = ires
-   end subroutine
 
 
    module subroutine bsa_closeUnitsAtEnd()
