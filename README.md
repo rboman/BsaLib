@@ -70,10 +70,10 @@ would detect it and abort correct logic flow.
 For that, the provided executable program relies on reading two input files:
 
 1. `BsaLib` related settings (formatted file, named `bsa.bsadata`). 
-For details, read the [dedicated section](./readme_files/bsadata.md).
+For details, read the [dedicated section](https://github.com/miEsMar/BsaLib/blob/main/readme_files/bsadata.md).
 2. External data file (named `bsa.extdata`), in binary format, containing 8-byte floating point records 
 (`real64` of the `iso_fortran_env` compiler intrinsic module). 
-For full details, read the [external data section](./readme_files/extdata.md).
+For full details, read the [external data section](https://github.com/miEsMar/BsaLib/blob/main/readme_files/extdata.md).
 
 # What's missing? Further developments
 --------------------------------------

@@ -18,7 +18,7 @@ graph: false
 coloured_edges: true
 search: true
 sort: alpha
-license: gfdl
+license: LGPL v3
 print_creation_date: true
 creation_date: %Y-%m-%d %H:%M %z
 dbg: true
