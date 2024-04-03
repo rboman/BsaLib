@@ -78,22 +78,28 @@ For full details, read the [external data section](https://github.com/miEsMar/Bs
 # What's missing? Further developments
 --------------------------------------
 
-- [ ] Adapt (very easy to do) Classic approach to dump BFM info as in Mesher
+Mathematical:
+
 - [ ] Integrate models for other non-Gaussian actions (waves, for instance)
-- [ ] Improve internal policy mechanism and integration
+- [ ] Extend to non-diagonal modal Frequency Response Function (FRF) models
+- [ ] Extend to frequency-dependent modal matrices (e.g. aeroelastic phenomena in Wind Engineering)
+- [ ] Add library core to generate spectra (PSDs and Bispectra) from time series
+
+Numerical:
+
+- [ ] Adapt Classic approach to dump BFM info as in Mesher (easy)
+- [ ] Improve internal policy mechanism and integration (WIP)
 - [ ] Provide a general API for user defined models integration
 - [ ] Complete full support for spatial (in-plane) symmetries of a real-valued bispectrum
 - [ ] Compute nodal correlation internally (don't require it as user data)
 - [ ] Add support for Mesher zones' interest modes
-- [ ] Add functionality to generate spectra from time series
 - [ ] Add a local caching system
 - [ ] Add `MPI` support (for running `BsaLib` on multi-node clusters)
-- [ ] Improve and extend GPU offloading
-- [ ] Add ability to export using formats of most common Visualisation (Paraview, for instance). 
-Better, in a more sustainable way, add the possibility to let the user provide its own desired 
-exporting function, so that `BsaLib` is not tight to any specific 
-exporting format.
-- [ ] Integrate a built-in ad-hoc bispectrum post-processing Visualiser (using [Vulkan](https://www.vulkan.org/), for optimal performances)
+- [ ] Improve and extend GPU offloading capabilities
+- [ ] Provide automation service to convert user-level model function into GPU-kernel code
+- [ ] Enhance the mechanism that lets the user provide its own desired exporting function, 
+so that `BsaLib` is not tight to any specific exporting format.
+- [ ] Integrate a built-in bispectrum post-processing Visualiser (using [Vulkan](https://www.vulkan.org/), for optimal performances)
 
 
 # Known Issues
