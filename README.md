@@ -10,6 +10,12 @@ of structures under non-Gaussian stationary random actions.
 > See [further developments](#what's-missing?-further-developments).
 
 
+# Documentation
+
+[`BsaLib` documentation](https://html-preview.github.io/?url=https://github.com/miEsMar/BsaLib/blob/main/doc/index.html) 
+is generated using [FORD](https://forddocs.readthedocs.io/en/latest/).
+
+
 # License
 
 `BsaLib` is release under the **GNU Lesser General Public License v3.0**.
