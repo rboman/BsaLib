@@ -10,6 +10,11 @@ of structures under non-Gaussian stationary random actions.
 > See [further developments](#what's-missing?-further-developments).
 
 
+# Build system
+
+`BsaLib` uses [CMake](https://cmake.org/) as a build system generator.
+
+
 # Documentation
 
 [`BsaLib` documentation](https://html-preview.github.io/?url=https://github.com/miEsMar/BsaLib/blob/main/doc/index.html) 

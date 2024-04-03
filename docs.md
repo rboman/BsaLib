@@ -1,6 +1,7 @@
 ---
 project: BsaLib
-Summary: BsaLib, a Modern Fortran Library for the Bispectral Stochastic Analysis.
+summary: BsaLib, a Modern Fortran Library for the Bispectral Stochastic Analysis.
+project_github: https://github.com/miEsMar/BsaLib
 author: Michele Esposito Marzino
 email: michele.espositomarzino@gmail.com
 source: false
