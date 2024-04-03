@@ -11,7 +11,6 @@ of structures under non-Gaussian stationary random actions.
 
 
 # License
----------
 
 `BsaLib` is release under the **GNU Lesser General Public License v3.0**.
 Visit the [GPL official website](https://www.gnu.org/licenses/gpl-3.0.html) for more information.
@@ -75,8 +74,27 @@ For details, read the [dedicated section](https://github.com/miEsMar/BsaLib/blob
 (`real64` of the `iso_fortran_env` compiler intrinsic module). 
 For full details, read the [external data section](https://github.com/miEsMar/BsaLib/blob/main/readme_files/extdata.md).
 
+
+# Cross-platform support
+
+`BsaLib` strives to be as cross-platform as possible, so that any user can use it regardless of 
+its tooling availability.
+Currently, the code has been compiled and tested under three different OS-compiler configurations:
+
+1. `Windows OS Build 10.0.19045` - Intel Fortran Compilers (`ifort 2021.7.1-20221019_000000`, `ifx 2022.2.1-20221101`)
+2. `MacOS` - GFortran 13.2
+3. `Linux Centos Fedora 8.7` - Intel Fortran Compilers (`ifort 2021.10.0-20230609`, `ifx 2023.2.0-20230721`)
+
+
+For the Proper Orthogonal Decomposition (POD) problem, two approaches have been tested, for configurations
+1 and 3:
+
+- Linkage to proprietary `Intel MKL` (Math Kernel Libraries)
+- Linkage to [LAPACK](https://www.netlib.org/lapack/) native implementation 
+(**NOTE**: from direct source build in configuration 1)
+
+
 # What's missing? Further developments
---------------------------------------
 
 Mathematical:
 
@@ -103,7 +121,6 @@ so that `BsaLib` is not tight to any specific exporting format.
 
 
 # Known Issues
---------------
 
 There is one main known issue in the current version. 
 
