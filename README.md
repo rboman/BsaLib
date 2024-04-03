@@ -47,7 +47,7 @@ program test
     ! once done, run BsaLib
     call bsa_Run( ... args ... )
 
-    ! finally, release BSA memory
+    ! finally, release BsaLib memory
     call bsa_Finalise()
 end program
 ```
