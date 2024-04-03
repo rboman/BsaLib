@@ -17,7 +17,7 @@ of structures under non-Gaussian stationary random actions.
 
 # Documentation
 
-[`BsaLib` documentation](https://html-preview.github.io/?url=https://github.com/miEsMar/BsaLib/blob/main/doc/index.html) 
+`BsaLib` [documentation](https://html-preview.github.io/?url=https://github.com/miEsMar/BsaLib/blob/main/doc/index.html) 
 is generated using [FORD](https://forddocs.readthedocs.io/en/latest/).
 
 
