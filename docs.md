@@ -19,7 +19,7 @@ coloured_edges: true
 search: true
 sort: alpha
 license: LGPL v3
-print_creation_date: true
+print_creation_date: false
 creation_date: %Y-%m-%d %H:%M %z
 dbg: true
 extra_mods: iso_fortran_env:https://fortranwiki.org/fortran/show/iso_fortran_env
