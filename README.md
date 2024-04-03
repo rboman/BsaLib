@@ -78,7 +78,7 @@ For full details, read the [external data section](https://github.com/miEsMar/Bs
 # Cross-platform support
 
 `BsaLib` strives to be as cross-platform as possible, so that any user can use it regardless of 
-its tooling availability.
+the tooling availability.
 Currently, the code has been compiled and tested under three different OS-compiler configurations:
 
 1. `Windows OS Build 10.0.19045` - Intel Fortran Compilers (`ifort 2021.7.1-20221019_000000`, `ifx 2022.2.1-20221101`)
