@@ -128,7 +128,8 @@ To use <code>BsaLib</code>, simply import the main <code>BsaLib</code> API modul
 </code></pre></div>
 
 <p>Being designed as a <em>plug-in</em> library, it needs the hosting program/library 
-to provide some data needed by <code>BsaLib</code> in order to function properly.</p>
+to provide some data needed by <code>BsaLib</code> in order to function properly.
+For more details on the public API, visit the <a href="https://html-preview.github.io/?url=https://github.com/miEsMar/BsaLib/blob/main/doc/index.html">main documentation page</a>.</p>
 <h2 id="bsa-executable-program"><code>BSA</code>: executable program</h2>
 <p>As a side project package, a single-source executable file is provided under <code>./app/</code>. 
 It emulates what one would normally do when using <code>BsaLib</code> as a <em>plug-in</em> for its own 
@@ -141,10 +142,11 @@ would detect it and abort correct logic flow.</p>
 <p>For that, the provided executable program relies on reading two input files:</p>
 <ol>
 <li><code>BsaLib</code> related settings (formatted file, named <code>bsa.bsadata</code>). 
-For details, read the <a href="https://github.com/miEsMar/BsaLib/blob/main/readme_files/bsadata.md">dedicated section</a>.</li>
+For details, read the <a href="https://html-preview.github.io/?url=https://github.com/miEsMar/BsaLib/blob/main/readme_files/bsadata.md">dedicated section</a>.</li>
 <li>External data file (named <code>bsa.extdata</code>), in binary format, containing 8-byte floating point records 
 (<code>real64</code> of the <code>iso_fortran_env</code> compiler intrinsic module). 
-For full details, read the <a href="https://github.com/miEsMar/BsaLib/blob/main/readme_files/extdata.md">external data section</a>.</li>
+For full details, 
+read the <a href="https://html-preview.github.io/?url=https://github.com/miEsMar/BsaLib/blob/main/readme_files/exstdata.md">external data section</a>.</li>
 </ol>
 <h1 id="cross-platform-support">Cross-platform support</h1>
 <p><code>BsaLib</code> strives to be as cross-platform as possible, so that any user can use it regardless of 
