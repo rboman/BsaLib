@@ -608,15 +608,15 @@ module BsaLib
             !!
             !! @note
             !! Several other zones' discretisation depend on this value.
-         integer(bsa_int_t), value :: bkgaext
+         real(bsa_real_t), value :: bkgaext
             !! Defines the factor by which the background zone is extended.
             !! This is done to allow the user extending this zone, avoiding cutting
             !! the zone's extensions where gradients are still important.
             !! Acts as a safety factor.
-         integer(bsa_int_t), value :: genpaext
+         real(bsa_real_t), value :: genpaext
             !! Defines the factor by which the any peak zone is extended.
             !! Same reasons as for the background zone.
-         integer(bsa_int_t), value :: maxaext
+         real(bsa_real_t), value :: maxaext
             !! Defines the factor by which the total covered area \(f_{max}\) is extended.
             !! In this case, this is done to avoid loosing information coming from the 
             !! secondary peaks, which are usually placed at extensions up to \(2\cdot f_i\),

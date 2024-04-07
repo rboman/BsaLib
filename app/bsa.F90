@@ -27,7 +27,8 @@ module data
    integer(int32) :: i_suban, i_vers, i_defsc, i_psd, i_bisp, i_onlyd, i_test
    integer(int32) :: i_bispsym, i_3dsym, i_scalar, i_nfreqs
    real(real64)   :: r_df
-   integer(int32) :: i_svd, i_bkgrfmt, i_bkgaext, i_genpaext, i_maxaext, i_fcov, i_dumpmod
+   integer(int32) :: i_svd, i_bkgrfmt, i_fcov, i_dumpmod
+   real(real64)   :: i_bkgaext, i_genpaext, i_maxaext
 
    integer(int32) :: i_ntc, i_ndirs, tc(3), dirs(3)
 
@@ -905,9 +906,9 @@ contains ! utility procedures
       read(IUN_BSADATA, fmt_a) label
       read(IUN_BSADATA, fmt_i) i_svd
       read(IUN_BSADATA, fmt_i) i_bkgrfmt
-      read(IUN_BSADATA, fmt_i) i_bkgaext
-      read(IUN_BSADATA, fmt_i) i_genpaext
-      read(IUN_BSADATA, fmt_i) i_maxaext
+      read(IUN_BSADATA,     *) i_bkgaext
+      read(IUN_BSADATA,     *) i_genpaext
+      read(IUN_BSADATA,     *) i_maxaext
       read(IUN_BSADATA, fmt_i) i_fcov
       read(IUN_BSADATA, fmt_i) i_dumpmod
 
@@ -924,11 +925,6 @@ contains ! utility procedures
       do i = 1, i_ntc
          read(IUN_BSADATA, fmt_i) tc(i)
       enddo
-
-      ! ! nodes loaded
-      ! read(IUN_BSADATA, fmt_a)   label
-      ! read(IUN_BSADATA, fmt_a)   label
-      ! call getLoadedNodesFromString(label)
 
       bsa_data_read_ = .true.
    end subroutine

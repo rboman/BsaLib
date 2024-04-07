@@ -283,10 +283,7 @@ contains
 #endif
 
 
-      ! NOTE: iost =  0.
-      !       Write it twice to make space for info that
-      !       will be OVERRIDEN once we have it
-      !       namely "dimM_bisp_" and "MAX ZONE n. of points" 
+      ! NOTE: Reserve space for info that will be OVERRIDEN once we have it
       write(unit_dump_bfm_) iost
       write(unit_dump_bfm_) iost
       write(unit_dump_bfm_) iost
@@ -307,7 +304,7 @@ contains
       else
          bkg_peakw_ = maxval(struct_data%bkg_peak_width_(:, :))
       endif
-      base_i = bkg_peakw_ * settings%bkg_area_extension_
+      base_i = bkg_peakw_ * settings%bkg_area_ext_
       base_j = base_i
 
       deltaI_S2_2   = base_i * cst_sqrt2d2
@@ -1630,7 +1627,7 @@ contains
       real(bsa_real_t) :: max_ext
 
       max_ext = maxval(struct_data%modal_%nat_freqs_)
-      max_ext = max_ext * settings%max_area_extension_
+      max_ext = max_ext * settings%max_area_ext_
    end function getMaxSpaceExtension_
 
 
@@ -1873,7 +1870,7 @@ contains
       integer(int32)   :: im, nmode
       integer(int32), parameter :: I_PEAK_EXT_DIV_ = 1
 
-      cst = real(settings%gen_peak_area_extension_ / I_PEAK_EXT_DIV_, kind=bsa_real_t)
+      cst = settings%peak_area_ext_ / I_PEAK_EXT_DIV_
 
       allocate(peak_exts_(NM__))
       peak_exts_ = -1.

@@ -53,12 +53,11 @@ contains
       write(unit_debug_, fmt) 'N. OF FREQUENCIES  = ',  settings%nfreqs_
       write(unit_debug_, '("    - ", a, g10.5)') 'DELTA FREQ         = ',  settings%df_
       write(unit_debug_, fmt) 'USE "SVD" DECOMP   = ',  settings%i_use_svd_
-      write(unit_debug_, fmt) 'BKG_AERA_EXT       = ',  settings%bkg_area_extension_
       write(unit_debug_, fmt) 'BKG_BASE_RFMT      = ',  settings%bkg_base_rfmnt_
-      write(unit_debug_, fmt) 'GEN_PEAK_AREA_EXT  = ',  settings%gen_peak_area_extension_
-      write(unit_debug_, fmt) 'MAX AREA EXTENSION = ',  settings%max_area_extension_
+      write(unit_debug_, '("    - ", a, g10.5)') 'BKG_AERA_EXT       = ',  settings%bkg_area_ext_
+      write(unit_debug_, '("    - ", a, g10.5)') 'GEN_PEAK_AREA_EXT  = ',  settings%peak_area_ext_
+      write(unit_debug_, '("    - ", a, g10.5)') 'MAX AREA EXTENSION = ',  settings%max_area_ext_
       write(unit_debug_, fmt) 'DO FULL COVERAGE   = ',  settings%i_full_coverage_
-      ! write(unit_debug_, fmt) 'ROUNDING PRECISION = ',  settings%i_round_prec_
 
 
       write(unit_debug_, *) '### structure:'

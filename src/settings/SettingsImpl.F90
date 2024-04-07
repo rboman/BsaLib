@@ -30,7 +30,7 @@ contains
 
       if (isuban < 0 .or. isuban > 3) call bsa_Abort('Invalid "sub-an" value.')
       this%i_suban_type_ = isuban
-   end subroutine SetSubanType
+   end subroutine
 
 
    module subroutine SetVersion(this, ivers)
@@ -39,7 +39,7 @@ contains
 
       if (ivers < 0 .or. ivers > 2) call bsa_Abort('Invalid "ivers" value.')
       this%i_vers_ = ivers
-   end subroutine SetVersion
+   end subroutine
 
 
    module subroutine SetScalingType(this, idefsc)
@@ -48,7 +48,7 @@ contains
 
       if (idefsc < 0 .or. idefsc > 2) call bsa_Abort('Invalid "idefsc" value.')
       this%i_def_scaling_ = idefsc
-   end subroutine SetScalingType
+   end subroutine
 
 
    module subroutine ActivateSpectraComputation(this, ipsd, ibisp)
@@ -76,7 +76,7 @@ contains
 
       if (ionlydiag < 0 .or. ionlydiag > 1) call bsa_Abort('Invalid "ionlydiag" value.')
       this%i_only_diag_ = ionlydiag
-   end subroutine SetExtension
+   end subroutine
 
 
 
@@ -86,7 +86,7 @@ contains
 
       if (itest < 0 .or. itest > 1) call bsa_Abort('Invalid "itest" value.')
       this%i_test_mode_ = itest
-   end subroutine TestMode
+   end subroutine
 
 
 
@@ -100,25 +100,23 @@ contains
 
       if (df <= 0._bsa_real_t) call bsa_Abort('Invalid "df" value.')
       this%df_ = df
-
-   end subroutine setClsSettings
-
-
+   end subroutine
 
 
 
    module subroutine SetMshrSetts(this, isvd, bkgrfmt, bkgaext, genpaext, maxaext, ifcov, idumpmod)
       class(settings_t), intent(inout) :: this
-      integer(bsa_int_t), intent(in)   :: isvd, bkgrfmt, bkgaext, genpaext, maxaext, ifcov, idumpmod
+      integer(bsa_int_t), value :: isvd, bkgrfmt, ifcov, idumpmod
+      real(bsa_real_t),   value :: bkgaext, genpaext, maxaext
 
-      this%i_use_svd_               = isvd
-      this%bkg_base_rfmnt_          = bkgrfmt
-      this%bkg_area_extension_      = bkgaext
-      this%gen_peak_area_extension_ = genpaext
-      this%max_area_extension_      = maxaext
-      this%i_full_coverage_         = ifcov
-      this%i_dump_modal_            = idumpmod
+      this%i_use_svd_       = isvd
+      this%bkg_base_rfmnt_  = bkgrfmt
+      this%bkg_area_ext_    = bkgaext
+      this%peak_area_ext_   = genpaext
+      this%max_area_ext_    = maxaext
+      this%i_full_coverage_ = ifcov
+      this%i_dump_modal_    = idumpmod
+   end subroutine
 
-   end subroutine SetMshrSetts
 
 end submodule

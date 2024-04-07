@@ -97,13 +97,13 @@ module BsaLib_Settings
       integer(bsa_int_t) :: bkg_base_rfmnt_ = 20
 
       !> 
-      integer(bsa_int_t) :: max_area_extension_ = 2
+      real(bsa_real_t) :: max_area_ext_ = 2._bsa_real_t
 
       !> How much to extend BKG peak area influence.
-      integer(bsa_int_t) :: bkg_area_extension_ = 2
+      real(bsa_real_t) :: bkg_area_ext_ = 2._bsa_real_t
 
       !> How much to extend general peak area influence.
-      integer(bsa_int_t) :: gen_peak_area_extension_ = 3
+      real(bsa_real_t) :: peak_area_ext_ = 2._bsa_real_t
 
       !> If true, we get up to 2*max_freq.
       integer(bsa_int_t) :: i_full_coverage_ = 1
@@ -187,7 +187,8 @@ module BsaLib_Settings
       !> Sets main Mesher suban settings.
       module subroutine SetMshrSetts(this, isvd, bkgrfmt, bkgaext, genpaext, maxaext, ifcov, idumpmod)
          class(settings_t), intent(inout) :: this
-         integer(bsa_int_t), intent(in)   :: isvd, bkgrfmt, bkgaext, genpaext, maxaext, ifcov, idumpmod
+         integer(bsa_int_t), value :: isvd, bkgrfmt, ifcov, idumpmod
+         real(bsa_real_t),   value :: bkgaext, genpaext, maxaext
       end subroutine
 
    end interface

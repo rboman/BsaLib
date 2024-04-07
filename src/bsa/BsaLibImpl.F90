@@ -964,8 +964,9 @@ contains
    end subroutine
 
    module subroutine bsa_setupMesher(isvd, bkgrfmt, bkgaext, genpaext, maxaext, ifcov, idumpmod)
-      integer(bsa_int_t), value :: isvd, bkgrfmt, maxaext
-      integer(bsa_int_t), value :: bkgaext, genpaext, ifcov, idumpmod
+      integer(bsa_int_t), value :: isvd, bkgrfmt
+      real(bsa_real_t),   value :: bkgaext, genpaext, maxaext
+      integer(bsa_int_t), value :: ifcov, idumpmod
 
       call settings%SetMshrSetts(isvd, bkgrfmt, bkgaext, genpaext, maxaext, ifcov, idumpmod)
    end subroutine
@@ -2087,9 +2088,9 @@ contains
       write(iun, '(a)') "-MESHER:"
       write(iun, '(i4)') settings%i_use_svd_
       write(iun, '(i4)') settings%bkg_base_rfmnt_
-      write(iun, '(i4)') settings%bkg_area_extension_
-      write(iun, '(i4)') settings%gen_peak_area_extension_
-      write(iun, '(i4)') settings%max_area_extension_
+      write(iun, '(f9.7)') settings%bkg_area_ext_
+      write(iun, '(f9.7)') settings%peak_area_ext_
+      write(iun, '(f9.7)') settings%max_area_ext_
       write(iun, '(i4)') settings%i_full_coverage_
       write(iun, '(i4)') settings%i_dump_modal_
       write(iun, '(a)') "-DIRECTIONS:"
