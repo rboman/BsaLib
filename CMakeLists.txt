@@ -106,12 +106,19 @@ endif()
 
 # Flags common to all configurations
 if (WIN32)
-   add_compile_options(
-      $<$<COMPILE_LANGUAGE:Fortran>:-warn:all>
-      $<$<COMPILE_LANGUAGE:Fortran>:-stand:f18>
-   )
+   if (intel-compiler)
+      add_compile_options(
+         $<$<COMPILE_LANGUAGE:Fortran>:-warn:all>
+         $<$<COMPILE_LANGUAGE:Fortran>:-stand:f18>
+      )
+   endif()
    if ( enable-openmp )
-      add_compile_options( $<$<COMPILE_LANGUAGE:Fortran>:-Qopenmp> )
+      if (intel-compiler)
+         add_compile_options( $<$<COMPILE_LANGUAGE:Fortran>:-Qopenmp> )
+      else()
+         add_compile_options( $<$<COMPILE_LANGUAGE:Fortran>:-fopenmp> )
+         add_link_options( $<$<COMPILE_LANGUAGE:Fortran>:-fopenmp> )
+      endif()
    endif()
 else()
    if (intel-compiler)
