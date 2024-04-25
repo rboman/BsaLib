@@ -70,18 +70,18 @@ module BsaLib_MPolicy
 
 
    !> Array of built-in policies.
-   type(MPolicy_t), dimension(MPolicy_NULL:MPolicy_PAD_ZONE_EXTERN), public :: builtin_policies_ = [ &
-      MPolicy_t(MPolicy_NULL),            &
-      MPolicy_t(MPolicy_DEF),             &
-      MPolicy_t(MPolicy_CONST),           &
-      MPolicy_t(MPolicy_PRE_PEAK_1),      &
-      MPolicy_t(MPolicy_PRE_PEAK_2),      &
-      MPolicy_t(MPolicy_PEAK),            &
-      MPolicy_t(MPolicy_CREST),           &
-      MPolicy_t(MPolicy_BASIN),           &
-      MPolicy_t(MPolicy_PAD_ZONE_INTERN), &
-      MPolicy_t(MPolicy_PAD_ZONE_EXTERN)  &
-   ]
+   ! type(MPolicy_t), dimension(MPolicy_NULL:MPolicy_PAD_ZONE_EXTERN), public :: builtin_policies_ = [ &
+   !    MPolicy_t(MPolicy_NULL),            &
+   !    MPolicy_t(MPolicy_DEF),             &
+   !    MPolicy_t(MPolicy_CONST),           &
+   !    MPolicy_t(MPolicy_PRE_PEAK_1),      &
+   !    MPolicy_t(MPolicy_PRE_PEAK_2),      &
+   !    MPolicy_t(MPolicy_PEAK),            &
+   !    MPolicy_t(MPolicy_CREST),           &
+   !    MPolicy_t(MPolicy_BASIN),           &
+   !    MPolicy_t(MPolicy_PAD_ZONE_INTERN), &
+   !    MPolicy_t(MPolicy_PAD_ZONE_EXTERN)  &
+   ! ]
 
 
 

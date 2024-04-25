@@ -845,23 +845,23 @@ contains
 
 
    module subroutine bsa_setPolicyIDValidationValues(id, i_bfm, j_bfm, i_brm, j_brm)
-      use BsaLib_MPolicy, only: builtin_policies_, MPolicy_NULL, MPolicy_PAD_ZONE_EXTERN
+      ! use BsaLib_MPolicy, only: builtin_policies_, MPolicy_NULL, MPolicy_PAD_ZONE_EXTERN
       integer(int32), value :: id
       integer(int32), value :: i_bfm
       integer(int32), value :: j_bfm
       integer(int32), value :: i_brm
       integer(int32), value :: j_brm
 
-      if (id < MPolicy_NULL .or. id > MPolicy_PAD_ZONE_EXTERN) then
-         print '(1x, 2a, i0)', &
-            WARNMSG, "Invalid policy ID  ", id
-         return
-      endif
+      ! if (id < MPolicy_NULL .or. id > MPolicy_PAD_ZONE_EXTERN) then
+      !    print '(1x, 2a, i0)', &
+      !       WARNMSG, "Invalid policy ID  ", id
+      !    return
+      ! endif
 
-      builtin_policies_(id)%bfm_pol_%i_fct_ = i_bfm
-      builtin_policies_(id)%bfm_pol_%j_fct_ = j_bfm
-      builtin_policies_(id)%brm_pol_%i_fct_ = i_brm
-      builtin_policies_(id)%brm_pol_%j_fct_ = j_brm
+      ! builtin_policies_(id)%bfm_pol_%i_fct_ = i_bfm
+      ! builtin_policies_(id)%bfm_pol_%j_fct_ = j_bfm
+      ! builtin_policies_(id)%brm_pol_%i_fct_ = i_brm
+      ! builtin_policies_(id)%brm_pol_%j_fct_ = j_brm
    end subroutine
 
 
